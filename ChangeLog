@@ -1,0 +1,500 @@
+Version history for Mauve releases
+
+ Version 1.3.0 (2006-05-22)
+
+  New features:
+
+  - Rearrangement history analysis by generalized transposition/block interchange, code courtesy of Mike Tsai.
+    Use the green/blue/black toolbar button to perform an analysis.  
+    For details on the inference algorithm see Yancopoulos, S., Attie, O and Friedberg, R. 
+    "Efficient sorting of genomic permutations by translocation, inversion and block interchange"
+    *Bioinformatics* 2005 21(16):3340-3346    
+
+  - Rearrangement history through the GRIMM/MGR server now supported, use the red/yellow/black toolbar button.
+
+  - No more limit on the number of input sequences.  This feature comes at the cost of increased memory consumption.
+    Just because the limit has been removed doesn't mean that the alignment algorithm will do a good job handling
+    a large number of sequences.
+
+  - The mauveAligner command-line tool has the new option --lcb-match-input to extract matches from an existing
+    alignment and use them as anchors when computing a new alignment.
+
+  - MUSCLE has been upgraded to version 3.6.
+
+  Bugs fixed:
+
+  - MUSCLE on Windows now runs faster and uses less memory.
+
+  - On unix, Mauve will search $PATH for mauveAligner.
+ 
+ Version 1.2.3 (2005-10-20)
+
+  New features:
+
+  - Display each component of multi-part features (e.g. a multiple exon gene) as a linked series of boxes
+
+  - Display repeat_region annotations from GenBank files
+
+  - Improved load time for previously viewed alignments using a disk-based alignment cache
+
+  - Added a help menu item that will clear the on-disk alignment cache
+
+  - Colorized the similarity plots, grey was starting to depress our entire lab.
+
+  - Support for highlighting arbitrary regions of the sequence by holding the shift key
+    while clicking and dragging on the display
+
+  - Faster nucleotide display when zoomed in closely
+
+  Bug fixes:
+
+  - Fixed GUI interface for setting the minimum seed size (Thanks to Bill Bruno and Todd Treangen)
+
+  - Fixed mouseover, highlighting, and display alignment in the LCB display 
+    mode (used when the 'Full Alignment' option is disabled)
+
+ 
+ Version 1.2.2 (2005-06-11)
+
+  New features:
+
+  - Ability to set the reference genome
+
+  - Displays gene name or locus tag for annotated features
+
+  Bug fixes:
+
+  - Uses less memory for MUSCLE alignments by restricting the size of segments aligned 
+    by MUSCLE
+
+  - Alignment editor shows original sequence coordinates when an aligned character is
+    clicked
+
+  - Handles GenBank files with a large number of sequence entries (e.g. C. hominis)
+
+ Version 1.2.1 (2005-05-05)
+  
+  New features:
+
+   - Experimental support for alignment editing using Cinema-MX
+     Right click on an LCB to trigger the edit menu
+
+   - Annotated features are shown in both forward and reverse complement orientation
+
+   - When clicking an annotated feature, a database xref popup menu shows options for
+     viewing the feature in known databases.  Currently supported databases are Entrez
+     Protein and ASAPdb.  Please contact us about support for other databases.
+
+   - Choice of either MUSCLE or Clustal in the GUI or on the command line with 
+     the --gapped-aligner switch
+
+  Bug fixes:
+
+   - Database xref speed improvement
+
+   - Features not shown when viewing large regions to improve speed
+
+   - Fixed an off-by-one bug that crashed the viewer when loading Salmonella alignments
+
+   - Eliminated extraneous MUSCLE warning messages on the Mac OS X console.
+
+  Known issues:
+
+   - In some cases MUSCLE on Windows can consume lots of system resources.  If 
+     you are experiencing problems we suggest using Clustal for the time being.
+
+ Version 1.2.0 (2005-04-20)
+
+  New features:
+
+   - **Image export**.  Mauve can export the current display view in JPEG, TIF, and 
+     PNG formats at a user-defined resolution.
+
+   - **MUSCLE Alignment**.  Mauve now calculates gapped alignments using the 
+     "MUSCLE":http://www.drive5.com/muscle/ DNA alignment method.  Previously 
+     Clustal-W was used to calculate gapped alignments.  MUSCLE provides 
+     significantly improved speed and accuracy over Clustal-W
+
+   - **Collinear genomes**.  When it is known that the genomes being aligned 
+     have no rearrangements, select the 'Assume collinear genomes' option in the
+     "Align sequences" window to tell Mauve that it should find the single best LCB.
+     On the command line, this behavior can be invoked with the '--collinear' switch.
+
+  Bug fixes:
+
+   - Fixed a memory leak in LCB extension that could quickly consume all system memory.
+
+   - The 1.1.0 Windows release used a large amount of memory because it was compiled 
+     for use with 160 sequences instead of the usual 16.
+
+   - Fixed a bug parsing GenBank sequences which had extra newlines in them
+
+  Known issues:
+
+   - On Mac OS X the muscle aligner generates lots of warning messages about not being
+     able to open /proc/meminfo.  These messages can be ignored and will be eliminated
+     in future releases.
+
+ Version 1.1.0 (2005-03-30)
+
+  New features:
+
+  - Mauve can launch a web browser to show a web database entry for annotated 
+    features that have a /db_xref qualifier in their GenBank entry.  Currently
+    ASAPdb and NCBI's PubGene databases are supported.  Other databases
+    may be added upon request.
+
+  - Mauve bundles a text console display for informational and error messages.
+    It can be viewed by selecting 'Show console' from the 'Help' menu.
+
+  - Alignment generation has been multithreaded so that alignments can be
+    generated while another alignment is being viewed.
+
+  - A Print Preview and Page Layout dialog boxes provide greater control over
+    printing.
+
+  Bug fixes:
+
+  - A bug in mauveAligner which resulting in a "bad alignment" error message has
+    been fixed.
+
+  - Printing has been fixed to provide accurate high resolution images.  Output is
+    vectorized so images printed to PDF documents (e.g. using Acrobat or PDF995)
+    can be easily embedded in publications and have a high quality look.
+
+  - Screen space is used more economically when viewing a large number of sequences,
+    allowing at least six genomes to display on a 1024x768 screen.  Previously only
+    three genomes would fit on a screen of that size.
+
+  - additional fixed bugs can be found in the Mantis tracker
+
+ Version 1.0.1 (2005-03-08)
+
+  Bug fixes:
+
+  - Unable to align genomes on Mac OS X 10.3 (due to a missing library)
+
+  - Unable to run Mauve under Linux (Mauve was not set as executable)
+
+  - Unable to load genome annotations after constructing an alignment
+    when the source GenBank files reside in a different directory than
+    the alignment output
+
+  - Lower memory profile.  Mauve now uses less memory when reading alignments,
+    making the large Drosophila alignments available on the web site
+    viewable on computers with over 1GB RAM. 
+
+
+ Version 1.0 (2005-03-01)
+
+  New features:
+
+  - Display of annotated features such as CDS, rRNA, tRNA and misc_features
+    from GenBank format files
+
+  - Full support for Mac OS X
+
+  - Display of chromosomal boundaries and contigs of incomplete genomes
+
+  - Display of contig/chromosome name and sequence coordinates
+
+  - Source code released under the GNU General Public License.  Mauve is now free 
+    software and can be modified and redistributed freely (in accordance with the GPL). 
+
+ 2004-12-16
+
+  Bug fixes:
+
+  - Inter-LCB islands were (still) incorrect and are now fixed.  This bug was originally
+    reported by Val Burland in Dec. 2003 but didn't get completely fixed until now.
+
+  - Vertical only display resize fixed
+
+  - Fixed a bug in the LCB info display when the LCB slider had been adjusted
+
+  New Features:
+
+  - Sequence similarity browsing in the display
+
+  - More sensitive alignments by using inexact seeds.  This means Mauve can be used on
+    more taxa simultaneously and also on more divergent taxa.
+
+  - Display alignment in the similarity browser can be accomplished with a single mouse click
+
+ 2004-07-08
+
+  Bug fixes:
+
+  - Brought PDF documentation up-to-date
+
+ 2004-06-30
+
+  Bug fixes:
+
+  - Fixed several missing icon bugs in linux and windows releases
+
+  - Mauve now requires Java 1.4 to function correctly, a warning message
+    is displayed if Mauve detects an older version of Java
+
+  New features:
+
+  - Automatic checking for new releases, and on Windows, downloading the
+    new release and starting the installer
+
+  - Releases now include a User Guide in PDF format and a link to the online guide
+  
+ 2004-05-18
+
+  Bug fixes:
+
+  - Fixed a bug that would result in unreasonably large print jobs
+
+  New features:
+
+  - Implemented interactive LCB weight adjustment.  This feature allows dynamic adjustment of
+    the LCB weight within Mauve using a slider control.  As the minimum LCB weight is changed the
+    display updates with the corresponding set of LCBs.
+ 
+  - Added toolbar buttons for basic navigational controls such as scrolling and zooming the
+    display.  Also added a color mode selector.
+ 
+  - Added keyboard shortcuts for open (ctrl+o), close (ctrl+w), print (ctrl+p), and quit 
+    (ctrl+q).
+  
+  Important changes:
+
+  - The up and down arrows no longer zoom in and out, instead use ctrl+up and ctrl+down
+
+
+ 2004-04-26
+
+  Bug fixes:
+
+  - Fixed a bug that allowed users to zoom in too far
+
+  - Fixed a bug that kept the screen from clearing after selecting 'close' from the File menu
+
+  - Fixed a bug that would cause the display to become 'unaligned' after using the context
+    menu to align the display and subsequently zooming out.
+
+  - Fixed a bug that raised an exception when no matching regions were found among the
+    sequences being aligned
+
+  - Changed the .txt file extension to default to FastA file format instead of raw sequence data
+
+  - Fixed a subtle bug that would occasionally cause a "horrible error" to be reported
+
+  New features:
+
+  - Improved the 'Align sequences' dialog interface to give the user an easy set of default
+    values with optional control over the alignment parameters.  Also added an interface to 
+    set the backbone parameters.
+
+  - Added the ability to change ordering of genomes in the display using drag and drop.  To
+    enter and leave reordering mode press the 'h' key.  When in reordering mode genomes can
+    be dragged and dropped into the desired order.
+
+ 2004-02-19
+
+  Bug fixes:
+
+  - Fixed a bug in the island coordinate output that caused the end positions of inverted
+    regions to be huge (wrong) numbers.  Removed obsolete -d and --stats command line options.
+    Added a --id-matrix or -t command line option to print out an identity matrix.  Mauve
+    now creates an identity matrix by default.
+
+ 2003-12-09
+
+  Bug fixes:
+
+  - Fixed another bug in the LCB extension code that occasionally resulted in incorrect
+    alignments.
+
+ 2003-12-06
+
+  Bug fixes:
+
+  - Fixed a serious bug that caused the first sequence to be misaligned in regions with
+    numerous gaps.
+
+ 2003-11-04
+
+  Bug fixes:
+
+  - Fixed a minor file format problem with XMFA (eXtended Multi-FastA) output.  Fixed a bug 
+    with reverse complement backbone determination.
+
+ 2003-10-17
+
+  Bug fixes:
+
+  - Updated the GUI interface to match new command line options for the aligner.  The
+    GUI was behaving badly in the 2003-10-08 release.  Full alignment is now selected
+    by default, if no LCB weight is specified one will be chosen automatically.
+
+ 2003-10-08
+
+  Bug fixes:
+
+  - Final aligner debugging completed using thousands of test cases.  Numerous bugs
+    were squashed.  The aligner should be (but isn't) rock solid now.  Removed file 
+    I/O from the ClustalW code, resulting in vast speedups during recursive alignment.
+    One more bug to kill.
+
+ 2003-09-13
+
+  Bug fixes:
+
+  - Debugged the LCB extension code, hopefully eliminating strange crashes from the previous
+    release.
+
+ 2003-09-08
+
+  New Features:
+
+  - Added LCB extension code, allows Mauve to search for additional MUM anchors off the ends 
+    of LCBs.  Increased the minimum anchor size to 5 b.p. to reduce spurious anchoring.
+
+ 2003-08-15
+
+  New Features:
+
+  - Added print menu item to the File menu
+  - Clean-ups for Linux
+  - Mauve for Linux is ready!
+
+ 2003-08-13
+
+  Bug fixes:
+
+  - Additional bugfixes for the recursive anchoring and alignment process.  Will this
+    software ever be bug free?
+
+ 2003-08-02
+
+  Bug fixes:
+
+  - Fixed some serious bugs in the production of gapped alignments from Mauve style MUM 
+    alignments.  This bug affected island predictions and backbone predictions of
+    previous releases.
+
+  New features:
+
+  - Implemented Multi-FastA sequence input.  If a single sequence file is given Mauve
+    assumes it is a Multi-FastA file where each sequence entry corresponds to a sequence
+    to align.
+
+ 2003-07-31
+
+  New features:
+
+   - Implemented backbone identification -- backbone is any region of sequence conserved among
+     all genomes under study.  Mauve's definition of backbone is any region longer than x base
+     pairs that does not contain any gaps longer than x base pairs.  x is specified as the
+     island size in the "Align Sequences..." window.
+
+ 2003-07-30
+
+  Bug fixes:
+
+  - Fixed a segfault in SML binary search
+
+  New features:
+
+  - Added end-gap penalties to clustal alignments
+
+ 2003-07-28
+
+  Bug fixes:
+
+  - Fixed a few problems with Clustal Alignment -- more to come
+
+ 2003-07-25
+
+  Bug fixes:
+
+  - Changed the default maximum Clustal alignment size to 9000
+  - Fixed numerous bugs related to recursive alignment and ClustalW alignment
+
+  New features:
+
+  - Now outputs alignments in Extended Multi-FastA (xmfa) format
+
+
+ 2003-06-12
+
+  Bug fixes:
+
+  - Don't write a gapped alignment unless the user requests a 'Full alignment'
+
+ 2003-05-08
+
+  Bug fixes:
+
+  - bugfixes for displaying large ( > 2 G.B.) sequences
+
+  New features:
+
+  - new ruler label style for easier reading
+
+ 2003-05-05
+
+  Bug fixes:
+
+  - Fixed DragNDrop for align sequences window
+
+ 2003-04-28
+
+  Bug fixes:
+
+  - Fixed Align sequences window 'disappearance'
+
+  New features:
+
+  - Added clustalW format alignment output (command line mauveAligner only)
+
+ 2003-04-26
+
+  Bug fixes:
+
+  - Fixed printing (broken in previous release)
+
+  New features:
+
+  - Supports drag and drop of alignments to the alignment window and 
+    of sequence files to the sequences list
+
+ 2003-04-21
+
+  Bug fixes:
+
+  - Fix mouse click accuracy problem when zoomed in
+
+  - don't clear alignment window after alignment
+
+  New features:
+
+  - mauveAligner finds interLCB islands
+
+  - copy the File chooser view to new alignment windows
+
+ 2003-04-04
+
+  New features:
+
+  - Have mauveAligner output islands, tree, and alignment
+
+  - Implement high-resolution printing hack
+
+ 2003-04-03
+
+  New features:
+
+  - Add LCB color lines to link LCBs
+
+ 2003-02-21
+
+  New features:
+
+  - Initial Release
+  - Packaged into an installer for windows

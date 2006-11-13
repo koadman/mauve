@@ -1,0 +1,64 @@
+When approaching the set of classes that comprise Mauve, my first advice is: Don't Panic.  Whilst there are a large number of classes and collaborations, each one can be understood,  especially when the "big picture" is kept in mind.  The purpose of this document is to explain the big picture.
+
+I.  Models.
+
+The viewer displays models, which are loaded from alignment files.  There is a hierarchy of models, corresponding to the layering on of features in progressively later versions of Mauve.  These are BaseViewerModel, LcbViewerModel and XmfaViewerModel.  
+
+BaseViewerModel contains, mostly, a lot of stuff that is common to all three models.  
+
+
+
+-A.  Some concepts
+	View ordering vs. Source ordering.
+	Reordering madness
+		When sequences are reordered, what happens, and when.
+		
+		BaseViewerModel.reorderSequences(int[]) calls, in turn, startReorder(int[]), finishReorder() and fireReorderGenomeEvent().  If the concrete class is BaseViewerModel, all of the action occurs in startReorder(int[]), as finishReorder() is just a hook for subclasses.  BaseViewerModel.startReorder(int[]) permutes the array of genomes, thereby making sure that the viewing order and storage order are the same.  The viewingIndex of each genome is also updated in this process.  Note that this effectively means that there is only one true viewing order for a model.  This is a design flaw.
+		
+	
+		LcbViewerModel overrides startReorder(int[]).  First, the BaseViewerModel.startReorder(int[]) is called to permute the array of genomes.  Next, reorderLCBs(int[]) is called, which invokes lcb.reorder(int[]) on each LCB in the model.  The callback LcbViewModel.finishReorder() is then invoked, which causes the reapplication of the minimum weight through an invocation of updateLCBweight(), which smells like a very iffy bug patch.  Note that this causes the firing of a weightChange event.   Finally,   fireReorderGenomeEvent() is again called.
+		
+		XmfaViewerModel.startReorder first invokes LcbViewerModel.startReorder(int[]).  This causes.  First, the BaseViewerModel.startReorder(int[]) is called to permute the array of genomes.  Next, reorderLCBs(int[]) is called, which invokes lcb.reorder(int[]) on each LCB in the model.  Then XMFAAlignment.reorder(int[]) is called, which causes the reordering of the seq_length list, each LCB, and the GISTree array.  The callback LcbViewModel.finishReorder() is then invoked, which causes the reapplication of the minimum weight through an invocation of updateLCBweight(), which smells like a very iffy bug patch.  Note that this causes the firing of a weightChange event.   Finally,   fireReorderGenomeEvent() is again called. 
+		
+A.  Source-related stuff
+	BaseViewerModel(File)
+	getSrc()
+	setSourceURL(URL)
+	getSourceURL()
+	
+B.  Genome containment
+	setSequenceCount(int sequenceCount)
+	getSequenceCount()
+	getViewingOrder()
+	getGenome(int)
+	setGenome(int, Genome)
+
+C.  Match containment
+	getMatchCount()
+	getMatch(int)
+	sortedMatches(Comparator)
+	addMatch(Match)
+
+D.  Color scheme
+	setColorScheme(ColorScheme)
+	getColorScheme()
+	
+E.  Event firing
+	addModelListener(ModelListener)
+	removeModelListener(ModelListener)
+	addHighlightListener(HighlightListener)
+	removeHighlightListener(HighlightListener)
+	fireXXXevent
+
+F.  Modality
+	setMode(ViewerMode)
+	getMode()
+
+G.  Genome reordering
+	reorderSequences(int[])
+	startReorder(int[])
+	finishReorder()
+	correctReversals()
+	
+
+	
