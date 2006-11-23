@@ -71,8 +71,12 @@ public class BackboneListBuilder {
 			bb.setLeftColumn(left_col);
 			bb.setLength(length);
 			bb.setSeqs(seqs);
-			long lends[] = xmfa.getColumnCoordinates(model,lcb_id,left_col);
-			long rends[] = xmfa.getColumnCoordinates(model,lcb_id,left_col+length-1);
+			long lends[] = new long[seqs.length];
+			boolean lend_gaps[] = new boolean[seqs.length];
+			xmfa.getColumnCoordinates(model,lcb_id,left_col, lends, lend_gaps);
+			long rends[] = new long[seqs.length];
+			boolean rend_gaps[] = new boolean[seqs.length];
+			xmfa.getColumnCoordinates(model,lcb_id,left_col+length-1, rends, rend_gaps);
 			for( int sI = 0; sI < seqs.length; ++sI )
 			{
 				if(!seqs[sI])

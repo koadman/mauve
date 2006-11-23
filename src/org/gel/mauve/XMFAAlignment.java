@@ -833,18 +833,20 @@ public class XMFAAlignment implements Serializable
     /**
      * Returns the sequence coordinates aligned in a given column, ordered according
      * to source index.
+     * @param seq_offsets	The sequence coordinates (output)
+     * @param gap	True whenever a given sequence has a gap in the query column
      */
-    public long[] getColumnCoordinates(XmfaViewerModel model, int lcb, long column)
+    public void getColumnCoordinates(XmfaViewerModel model, int lcb, long column, long[] seq_offsets, boolean[] gap)
     {
-        long[] seq_offsets = new long[seq_count];
         for (int seqI = 0; seqI < seq_count; seqI++)
         {
             Genome g = model.getGenomeBySourceIndex(seqI);
             
             seq_offsets[seqI] = gis_tree[lcb][g.getSourceIndex()].columnToSeqPos(column);
+            gap[seqI] = column != gis_tree[lcb][g.getSourceIndex()].seqPosToColumn(seq_offsets[seqI]);
             seq_offsets[seqI] = LCBToGlobal(seq_offsets[seqI], g, lcb);
+            
         }
-        return seq_offsets;
     }
 
     /**

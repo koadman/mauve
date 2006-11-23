@@ -66,6 +66,10 @@ public class HighlightPanel extends AbstractSequencePanel implements MouseMotion
         }
     }
 
+    protected static Color trans_cursor_color = new Color( 0, 0, 0, 50);
+    protected static Color cursor_color = new Color( 0, 0, 0 );
+    protected int half = 7;
+    protected int full = 14;
     /**
      * paint the sequence display. copies a pre-computed similarity display and
      * adds any highlighting
@@ -87,11 +91,22 @@ public class HighlightPanel extends AbstractSequencePanel implements MouseMotion
     	if (highlightCoord != Match.NO_MATCH)
     	{
             Graphics2D g = (Graphics2D) graphics;
-            g.setColor(Color.black);
-            if (highlightCoord >= getGenome().getViewStart() && highlightCoord <= getGenome().getViewStart() + getGenome().getViewLength())
+            long absHighlightCoord = Math.abs(highlightCoord);
+            if (absHighlightCoord >= getGenome().getViewStart() && absHighlightCoord <= getGenome().getViewStart() + getGenome().getViewLength())
             {
-                int pixel = sequenceCoordinateToCenterPixel(highlightCoord);
+                int pixel = sequenceCoordinateToCenterPixel(absHighlightCoord);
+                if( highlightCoord > 0 )
+                    g.setColor(trans_cursor_color);
+                else
+                    g.setColor(cursor_color);
+
                 g.drawLine(pixel, 0, pixel, getHeight());
+                if( highlightCoord > 0 )
+                {
+                    g.setColor(cursor_color);
+                	g.drawRect(pixel-half, 0, full, getHeight()-1);
+                }
+                
             }
     	}
     }

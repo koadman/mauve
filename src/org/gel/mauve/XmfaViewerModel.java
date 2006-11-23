@@ -259,9 +259,9 @@ public class XmfaViewerModel extends LcbViewerModel
      * @param column
      * @return
      */
-    public long[] getColumnCoordinates(int lcb, long column)
+    public void getColumnCoordinates(int lcb, long column, long[] seq_coords, boolean[] gap)
     {
-        return xmfa.getColumnCoordinates(this, lcb, column);
+        xmfa.getColumnCoordinates(this, lcb, column, seq_coords, gap);
     }
     
     public void updateHighlight(Genome g, long coordinate)
@@ -276,7 +276,15 @@ public class XmfaViewerModel extends LcbViewerModel
         if (highlights == null)
         {
             long[] iv_col = getLCBAndColumn(getHighlightGenome(), getHighlightCoordinate());
-            highlights = getColumnCoordinates((int) iv_col[0], iv_col[1]);
+            boolean[] gap = new boolean[this.getSequenceCount()];;
+            highlights = new long[this.getSequenceCount()];
+            getColumnCoordinates((int) iv_col[0], iv_col[1], highlights, gap);
+            for( int i = 0; i < highlights.length; ++i )
+            {
+            	highlights[i] = Math.abs(highlights[i]);
+            	if(gap[i])
+            		highlights[i] *= -1;
+            }
         }
         return highlights[g.getSourceIndex()];
     }
@@ -298,7 +306,9 @@ public class XmfaViewerModel extends LcbViewerModel
             // User clicked outside of bounds of sequence, so do nothing.
             return;
         }
-        long[] coords = getColumnCoordinates((int) iv_col[0], iv_col[1]);
+        long[] coords = new long[this.getSequenceCount()];;
+        boolean[] gap = new boolean[this.getSequenceCount()];;
+        getColumnCoordinates((int) iv_col[0], iv_col[1], coords, gap);
         alignView(coords, g);
     }
 
