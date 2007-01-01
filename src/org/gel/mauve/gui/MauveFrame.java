@@ -252,7 +252,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuGoTo.setEnabled(false);
         
         jMenuGoToSeqPos.setToolTipText("Go To Numerical Sequence Position");
-        jMenuGoToSeqPos.setVisible(true);;
+        jMenuGoToSeqPos.setVisible(true);
         jMenuGoToSeqPos.setText("Sequence Position");
         jMenuGoToSeqPos.setMnemonic('e');
         
