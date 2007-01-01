@@ -83,6 +83,7 @@ public class AlignFrame extends java.awt.Frame
 
     public void initComponents()
     {
+        setIconImage(MauveFrame.mauve_icon.getImage());
         // the following code sets the frame's initial state
         parameterPanel.setSize(new java.awt.Dimension(350, 150));
         parameterPanel.setLocation(new java.awt.Point(0, 210));
