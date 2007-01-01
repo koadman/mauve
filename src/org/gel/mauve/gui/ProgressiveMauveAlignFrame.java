@@ -1,12 +1,20 @@
 package org.gel.mauve.gui;
 
 import java.awt.Dimension;
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.FilterWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Vector;
 
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
@@ -30,6 +38,29 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
     JLabel conservationWeightScaleLabel = new JLabel();
     JTextField conservationWeightScaleText = new JTextField(5);
 
+    
+    JPanel musclePanel = new JPanel();
+    JComboBox matrixChoice = new JComboBox(new String[] {"HOXD (default)", "Custom"});
+    JLabel matrixChoiceLabel = new JLabel();
+    JTextField[][] scoreText = new JTextField[4][4];
+    JLabel[] scoreLabelRow = new JLabel[4];
+    JLabel[] scoreLabelCol = new JLabel[4];
+    String[] scoreLabels = {"A", "C", "G", "T"};
+    String[][] hoxd_matrix = {
+    		{"91",   "-114", "-31",  "-123"},
+    		{"-114", "100",  "-125", "-31" },
+    		{"-31",  "-125", "100",  "-114"},
+    		{"-123", "-31",  "-114", "91"  }
+    };
+    String hoxd_go = "-400";
+    String hoxd_ge = "-30";
+    JTextField gapOpenText = new JTextField();
+    JLabel gapOpenLabel = new JLabel();
+    JTextField gapExtendText = new JTextField();
+    JLabel gapExtendLabel = new JLabel();
+    JTextField muscleParamsText = new JTextField();
+    JLabel muscleParamsLabel = new JLabel();
+    
     public ProgressiveMauveAlignFrame(Mauve mauve)
     {
     	super(mauve);
@@ -50,6 +81,120 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         minLcbWeightLabel.setLocation(new java.awt.Point(265 - d.width, 90));
         minLcbWeightText.setLocation(new java.awt.Point(270, 90));
         alignButton.setLocation(new java.awt.Point(250, 320));
+
+        //
+        // add a panel to define MUSCLE behavior
+        //
+        musclePanel.setSize(new java.awt.Dimension(350, 150));
+        musclePanel.setLocation(new java.awt.Point(0, 210));
+        musclePanel.setVisible(true);
+        musclePanel.setLayout(null);
+
+        d = matrixChoice.getPreferredSize();
+        matrixChoice.setSize(d);
+        matrixChoice.setLocation(new java.awt.Point(100, 10));
+        matrixChoice.setVisible(true);
+    	musclePanel.add(matrixChoice);
+        matrixChoiceLabel.getPreferredSize();
+        matrixChoiceLabel.setText("Scoring matrix:");
+        matrixChoiceLabel.setSize(new Dimension(100, 15));
+        matrixChoiceLabel.setLocation(10, 15);
+        matrixChoiceLabel.setVisible(true);
+    	musclePanel.add(matrixChoiceLabel);
+        
+        // layout substitution scoring matrix
+        int score_matrix_left = 15;
+        int score_matrix_top = 35;
+        int score_left = score_matrix_left + 25;
+        int score_top = score_matrix_top + 25;
+        int score_w_offset = 40;
+        int score_w = score_w_offset - 5;
+        int score_h_offset = 25;
+        int score_h = score_h_offset - 5;
+
+        int t = score_top;
+    	for( int sI = 0; sI < 4; sI++ )
+        {
+        	int l = score_left;
+        	for( int sJ = 0; sJ < 4; sJ++ )
+        	{
+        		scoreText[sI][sJ] = new JTextField();
+                scoreText[sI][sJ].setVisible(true);
+                scoreText[sI][sJ].setSize(new java.awt.Dimension(score_w, score_h));
+                scoreText[sI][sJ].setLocation(new java.awt.Point(l, t));
+                scoreText[sI][sJ].setHorizontalAlignment(JTextField.RIGHT);
+                scoreText[sI][sJ].addActionListener(new java.awt.event.ActionListener()
+                        {
+                            public void actionPerformed(java.awt.event.ActionEvent e)
+                            {
+                                scoreTextActionPerformed(e);
+                            }
+                        });
+            	musclePanel.add(scoreText[sI][sJ]);
+                l += score_w_offset;
+        	}
+        	t += score_h_offset;
+        }
+    	setScoreEditable(false);
+    	setMatrixValues(hoxd_matrix);
+        int score_label_top = score_matrix_top;
+        int score_label_left = score_matrix_left;
+        t = score_label_top;
+        int l = score_label_left;
+        for( int sI = 0; sI < 4; sI++ )
+        {
+        	t += score_h_offset;
+        	l += score_w_offset;
+        	scoreLabelRow[sI] = new JLabel();
+        	scoreLabelRow[sI].setSize(new java.awt.Dimension(20, 20));
+        	scoreLabelRow[sI].setLocation(new java.awt.Point(l, score_label_top + 5));
+        	scoreLabelRow[sI].setVisible(true);
+        	scoreLabelRow[sI].setText(scoreLabels[sI]);
+        	musclePanel.add(scoreLabelRow[sI]);
+        	scoreLabelCol[sI] = new JLabel();
+        	scoreLabelCol[sI].setSize(new java.awt.Dimension(20, 20));
+        	scoreLabelCol[sI].setLocation(new java.awt.Point(score_label_left + 10, t));
+        	scoreLabelCol[sI].setVisible(true);
+        	scoreLabelCol[sI].setText(scoreLabels[sI]);
+        	musclePanel.add(scoreLabelCol[sI]);
+        }
+
+        gapOpenText.setVisible(true);
+        gapOpenText.setSize(new java.awt.Dimension(50, 20));
+        gapOpenText.setLocation(new java.awt.Point(130, 160));
+        gapOpenText.setText(hoxd_go);
+        gapOpenText.setHorizontalAlignment(JTextField.RIGHT);
+    	musclePanel.add(gapOpenText);
+    	gapOpenLabel.setSize(new java.awt.Dimension(200, 20));
+        gapOpenLabel.setLocation(new java.awt.Point(15, 160));
+    	gapOpenLabel.setVisible(true);
+    	gapOpenLabel.setText("Gap open score:");
+    	musclePanel.add(gapOpenLabel);
+
+        gapExtendText.setVisible(true);
+        gapExtendText.setSize(new java.awt.Dimension(50, 20));
+        gapExtendText.setLocation(new java.awt.Point(130, 185));
+        gapExtendText.setText(hoxd_ge);
+        gapExtendText.setHorizontalAlignment(JTextField.RIGHT);
+    	musclePanel.add(gapExtendText);
+    	gapExtendLabel.setSize(new java.awt.Dimension(200, 20));
+        gapExtendLabel.setLocation(new java.awt.Point(15, 185));
+    	gapExtendLabel.setVisible(true);
+    	gapExtendLabel.setText("Gap extend score:");
+    	musclePanel.add(gapExtendLabel);
+
+    	muscleParamsLabel.setSize(new java.awt.Dimension(200, 20));
+    	muscleParamsLabel.setLocation(new java.awt.Point(15, 210));
+    	muscleParamsLabel.setVisible(true);
+    	muscleParamsLabel.setText("Extra MUSCLE parameters:");
+    	musclePanel.add(muscleParamsLabel);
+    	muscleParamsText.setVisible(true);
+        muscleParamsText.setSize(new java.awt.Dimension(310, 50));
+        muscleParamsText.setLocation(new java.awt.Point(15, 230));
+        muscleParamsText.setText("-maxmb 900");
+    	musclePanel.add(muscleParamsText);
+        
+        alignmentOptionPane.addTab("MUSCLE", musclePanel);
 
         // initialize progressiveMauve-specific configuration options
         refineCheckBox.setVisible(true);
@@ -173,6 +318,13 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
                     	collinearCheckBoxActionPerformed(e);
                     }
                 });
+        matrixChoice.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent e)
+            {
+                matrixChoiceActionPerformed(e);
+            }
+        });
     }
 
     File getDefaultFile() throws IOException
@@ -262,7 +414,7 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
             }
             if(!getSumOfPairs())
             {
-            	cmd_vec.addElement("--ancestral-scoring");
+            	cmd_vec.addElement("--scoring-scheme=ancestral");
             }
 
             if( getCollinear() )
@@ -286,6 +438,63 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
             cur_cmd = "--mums";
             cmd_vec.addElement(cur_cmd);
         }
+        
+        if(!getScoreMatrixName().contains("default"))
+        {
+        	File mat_file = null;
+        	String[][] mat = getScoreMatrix();
+        	// create a score matrix file
+        	try{
+        		mat_file = File.createTempFile("scoremat", ".txt");
+        		FileWriter outtie = new FileWriter(mat_file);
+//        		FileOutputStream mat_fos = new FileOutputStream(mat_file);
+//        		BufferedWriter outtie = new BufferedWriter(new OutputStreamWriter(mat_fos));
+        		outtie.write("# user-defined scoring matrix\n");
+        		for(int i = 0; i < 4; i++)
+        		{
+					outtie.write("     ");
+					outtie.write(scoreLabels[i]);
+        		}
+				outtie.write("     N");
+        		outtie.write("\n");
+        		for(int i = 0; i < 4; i++)
+        		{
+        			for(int j = 0; j < 4; j++)
+        			{
+        				if(j == 0)
+        					outtie.write(scoreLabels[i]);
+
+        				// space pad the score value
+        				String space_str = new String();
+        				for( int sI = 0; sI < 6 - mat[i][j].length(); ++sI)
+        					space_str += " ";
+    					outtie.write(space_str);
+        				
+    					// write the score value
+        				outtie.write(mat[i][j]);
+        			}
+        			outtie.write("     0");	// for the N column
+        			outtie.write("\n");
+        		}
+        		outtie.write("N     0     0     0     0     0");
+        		outtie.flush();
+        		outtie.close();
+        	}catch(IOException ioe)
+        	{
+        		System.err.println("Error creating score matrix file");
+        	}
+        	if(mat_file != null)
+        	{
+        		cmd_vec.addElement("--substitution-matrix=" + mat_file.getAbsolutePath());
+        		cmd_vec.addElement("--gap-open=" + getGapOpen());
+        		cmd_vec.addElement("--gap-extend=" + getGapExtend());
+        	}
+        }
+        String musc_params = getMuscleParameters();
+        if(musc_params.length() > 0)
+        {
+        	cmd_vec.addElement("--muscle-args=" + musc_params);
+        }
 
         String[] sequences = getSequences();
         for (int seqI = 0; seqI < sequences.length; seqI++)
@@ -295,7 +504,7 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
 
         String[] mauve_cmd = new String[cmd_vec.size()];
         mauve_cmd = (String[]) (cmd_vec.toArray(mauve_cmd));
-
+        
         return mauve_cmd;
     }
 
@@ -348,6 +557,39 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
     {
     	updateEnabledStates();
     }
+    public void setMatrixValues(String[][] mat)
+    {
+    	for(int i = 0; i < 4; i++)
+    		for(int j = 0; j < 4; j++)
+    			scoreText[i][j].setText(mat[i][j]);
+    }
+    public void setScoreEditable(boolean edit)
+    {
+    	gapOpenText.setEditable(edit);
+    	gapExtendText.setEditable(edit);
+		for(int i = 0; i < 4; i++)
+			for(int j = 0; j < 4; j++)
+				scoreText[i][j].setEditable(edit);
+    }
+    public void matrixChoiceActionPerformed(java.awt.event.ActionEvent e)
+    {
+    	if(matrixChoice.getSelectedIndex() == 0)
+    	{
+    		setMatrixValues(hoxd_matrix);
+    		gapOpenText.setText(hoxd_go);
+    		gapExtendText.setText(hoxd_ge);
+    		setScoreEditable(false);
+    	}
+    	if(matrixChoice.getSelectedIndex() == matrixChoice.getItemCount()-1)
+    	{
+    		// last item is custom matrix
+    		setScoreEditable(true);
+    	}
+    }
+    public void scoreTextActionPerformed(java.awt.event.ActionEvent e)
+    {
+    	matrixChoice.setSelectedIndex(matrixChoice.getItemCount()-1);
+    }
 
     public boolean getRefine()
     {
@@ -373,5 +615,29 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         {
             return -1;
         }
+    }
+    public String getScoreMatrixName()
+    {
+    	return matrixChoice.getSelectedItem().toString();
+    }
+    public String[][] getScoreMatrix()
+    {
+    	String[][] mat = new String[4][4];
+    	for(int i = 0; i < 4; i++)
+    		for(int j = 0; j < 4; j++)
+    			mat[i][j] = scoreText[i][j].getText();
+    	return mat;
+    }
+    public String getGapOpen()
+    {
+    	return gapOpenText.getText();
+    }
+    public String getGapExtend()
+    {
+    	return gapExtendText.getText();
+    }
+    public String getMuscleParameters()
+    {
+    	return muscleParamsText.getText();
     }
 }
