@@ -99,6 +99,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
 
     public void mouseClicked(MouseEvent e)
     {
+    	model.highlightRange (null, 0, 0);
         if (e.isPopupTrigger())
         {
             MatchPopupMenu new_popup = getPopup(e);
@@ -160,6 +161,33 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
             }
         }
     }
+    
+    /**
+     * centers view on selected coordinate of the genome associated with
+     * this MatchPanel and aligns other genomes
+     * 
+     * @param coordinate  The position to go to
+     * @return
+     */
+    public int goTo (long coordinate) {
+    	model.zoomAndCenter(getGenome (), 100, coordinate);
+    	if (model instanceof LcbViewerModel) {
+    		((LcbViewerModel) model).alignView(getGenome (), coordinate);
+    	}
+    	else
+    		System.out.println ("BaseViewerModel -- not moving to align");
+    	return 1;
+    }
+    
+    /**
+     * isForGenome returns true if this RRSequencePanel is associated
+     * with the specified genome, and false otherwise
+     * 
+     * @param comparator - the genome in question
+     */
+    public boolean isForGenome (Genome comparator) {
+    	return getGenome ().equals (comparator);
+    }
 
     MatchPopupMenu getPopup(MouseEvent evt)
     {
@@ -219,6 +247,9 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
                 // This happens when there is no LCB to edit.  Ignored.
             }
         }
+        /*MenuItem features = new MenuItem ("Filter Features");
+        features.addActionListener (FeatureFilterer.getFilterer (model));
+        pop_menu.add (features);*/
         
         return pop_menu;
     }

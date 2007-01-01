@@ -36,6 +36,25 @@ public class RRSequencePanel extends JLayeredPane implements ModelListener
         model.addModelListener(this);
     }
     
+    /**
+     * goTo - scrolls viewer to particular coordinate of genome
+     * 
+     * @param position The position in the sequence to view
+     */
+    public int goTo (long position) {
+    	return matchPanel.goTo (position);
+    }
+    
+    /**
+     * isForGenome returns true if this RRSequencePanel is associated
+     * with the specified genome, and false otherwise
+     * 
+     * @param genome - the genome in question
+     */
+    public boolean isForGenome (Genome genome) {
+    	return matchPanel.isForGenome (genome);
+    }
+    
     public void setBackground(Color bg)
     {
     	super.setBackground(bg);

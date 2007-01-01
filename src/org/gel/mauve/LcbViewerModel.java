@@ -415,6 +415,10 @@ public class LcbViewerModel extends BaseViewerModel
         alignView(coords, g);
     }
 
+    public void alignView (Genome g, long coord) {
+    	alignView (g, coord - 1, coord + 1);
+    }
+
     public void updateLCBweight(int min_weight, boolean temporary)
     {
         setMinLCBWeight(min_weight);

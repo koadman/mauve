@@ -73,6 +73,11 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     JMenuItem jMenuHelpDocumentation = new JMenuItem();
     JMenuItem jMenuHelpClearCache = new JMenuItem();
     	
+    JMenu jMenuGoTo = new JMenu ();
+    JMenuItem jMenuGoToSeqPos = new JMenuItem ();
+    JMenuItem jMenuGoToFeatName = new JMenuItem ();
+    JMenuItem jMenuGoToSearchFeatures = new JMenuItem ();
+    
     JFileChooser fc;
     RearrangementPanel rrpanel;
     JToolBar toolbar;
@@ -81,6 +86,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     AlignFrame alignFrame;
     AlignFrame progressiveAlignFrame;
     JScrollPane scrollPane;
+    SequenceNavigator navigator;
     
     private int progressSequenceCount;
 
@@ -93,7 +99,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     static ImageIcon zoom_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/Zoom16.gif"));
     static ImageIcon hand_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/Hand16.gif"));
     static ImageIcon dark_hand_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/DarkHand16.gif"));
-    static ImageIcon mauve_icon = new ImageIcon(MauveFrame.class.getResource("/images/mauve_icon.gif"));
+    public static ImageIcon mauve_icon = new ImageIcon(MauveFrame.class.getResource("/images/mauve_icon.gif"));
     static ImageIcon fist_icon = new ImageIcon(MauveFrame.class.getResource("/images/fist_icon.gif"));
     static ImageIcon hand_icon = new ImageIcon(MauveFrame.class.getResource("/images/hand_icon.gif"));
     static ImageIcon dcj_icon = new ImageIcon(MauveFrame.class.getResource("/images/Dcj16.gif"));
@@ -201,6 +207,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         
         jMenuFileClose.setToolTipText("Close this alignment...");
         jMenuFileClose.setVisible(true);
+        jMenuFileClose.setEnabled(false);
         jMenuFileClose.setText("Close");
         jMenuFileClose.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, ActionEvent.CTRL_MASK));
         jMenuFileClose.setMnemonic('C');
@@ -238,6 +245,29 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuHelpClearCache.setText("Clear alignment cache");
         jMenuHelpClearCache.setMnemonic('r');
 
+        jMenuGoTo.setToolTipText("Go to specific location in genome");
+        jMenuGoTo.setVisible(true);
+        jMenuGoTo.setText("Go To");
+        jMenuGoTo.setMnemonic('T');
+        jMenuGoTo.setEnabled(false);
+        
+        jMenuGoToSeqPos.setToolTipText("Go To Numerical Sequence Position");
+        jMenuGoToSeqPos.setVisible(true);;
+        jMenuGoToSeqPos.setText("Sequence Position");
+        jMenuGoToSeqPos.setMnemonic('e');
+        
+        jMenuGoToFeatName.setToolTipText("Find a feature by exact name");
+        jMenuGoToFeatName.setVisible(true);
+        jMenuGoToFeatName.setText("Feature Named. . .");
+        jMenuGoToFeatName.setMnemonic('N');
+        
+        jMenuGoToSearchFeatures.setToolTipText("Find features with specified constraints");
+        jMenuGoToSearchFeatures.setVisible(true);
+        jMenuGoToSearchFeatures.setText("Find Features. . .");
+        jMenuGoToSearchFeatures.setMnemonic('i');
+        jMenuGoToSearchFeatures.setAccelerator(KeyStroke.getKeyStroke(
+        		KeyEvent.VK_I, ActionEvent.CTRL_MASK));
+
         setJMenuBar(jMenuBar1);
 
         jMenuBar1.add(jMenuFile);
@@ -252,6 +282,11 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFile.add(jMenuFileSeparator1);
         jMenuFile.add(jMenuFileQuit);
 
+        jMenuBar1.add (jMenuGoTo);
+        jMenuGoTo.add (jMenuGoToSeqPos);
+        jMenuGoTo.add (jMenuGoToFeatName);
+        jMenuGoTo.add (jMenuGoToSearchFeatures);
+        
         jMenuBar1.add(jMenuHelp);
         jMenuHelp.add(jMenuHelpAbout);
         jMenuHelp.add(jMenuHelpDocumentation);
@@ -273,12 +308,17 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuHelpDocumentation.addActionListener(this);
         jMenuHelpConsole.addActionListener(this);
         jMenuHelpClearCache.addActionListener(this);
+        jMenuGoToSeqPos.addActionListener (this);
+        jMenuGoToFeatName.addActionListener (this);
+        jMenuGoToSearchFeatures.addActionListener (this);
         
         // set up key bindings
         jMenuFilePrint.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl P"), "Print");
         jMenuFileOpen.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl O"), "Open");
         jMenuFileClose.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl W"), "Close");
         jMenuFileQuit.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl Q"), "Quit");
+        jMenuGoToSearchFeatures.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+        		KeyStroke.getKeyStroke("ctrl I"), jMenuGoToSearchFeatures.getText ());
         jMenuFilePrint.getActionMap().put("Print", new GenericAction(this, "Print"));
         jMenuFilePageSetup.getActionMap().put("PageSetup", new GenericAction(this, "PageSetup"));
         jMenuFilePrintPreview.getActionMap().put("PrintPreview", new GenericAction(this, "PrintPreview"));
@@ -290,6 +330,12 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuHelpDocumentation.getActionMap().put("Documentation", new GenericAction(this, "About"));
         jMenuHelpClearCache.getActionMap().put("ClearCache", new GenericAction(this, "ClearCache"));
         jMenuHelpConsole.getActionMap().put("Console", new GenericAction(this, "Console"));
+        jMenuGoToSeqPos.getActionMap().put(jMenuGoToSeqPos.getText (), new GenericAction(
+        		this, jMenuGoToSeqPos.getText ()));
+        jMenuGoToFeatName.getActionMap().put(jMenuGoToFeatName.getText (), new GenericAction(
+        		this, jMenuGoToFeatName.getText ()));
+        jMenuGoToSearchFeatures.getActionMap().put(jMenuGoToSearchFeatures.getText (), 
+        		new GenericAction(this, jMenuGoToSearchFeatures.getText ()));
     }
 
     class GenericAction extends AbstractAction
@@ -387,6 +433,18 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             		bse.printStackTrace();
             	}
             }
+            if (source == jMenuGoToSearchFeatures || ae.getActionCommand().equals(
+            		jMenuGoToSearchFeatures.getText ())) {
+            	navigator.showNavigator ();
+            }
+            if (source == jMenuGoToSeqPos || ae.getActionCommand().equals(
+            		jMenuGoToSeqPos.getText ())) {
+            	navigator.goToSeqPos ();
+            }
+            if (source == jMenuGoToFeatName || ae.getActionCommand().equals(
+            		jMenuGoToFeatName.getText ())) {
+            	navigator.goToFeatureByName ();
+            }
         }
     }
 
@@ -414,6 +472,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     void thisWindowClosing(java.awt.event.WindowEvent e)
     {
         mauve.closeFrame(this);
+        navigator.dispose ();
     }
     
     /**
@@ -433,6 +492,8 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFilePageSetup.setEnabled(false);
         jMenuFilePrintPreview.setEnabled(false);
         jMenuFileExport.setEnabled(false);
+        jMenuGoTo.setEnabled(false);
+        jMenuFileClose.setEnabled(false);
         model.removeHighlightListener(status_bar);
         model = null;
         status_bar.clear();
@@ -485,7 +546,9 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             jMenuFilePageSetup.setEnabled(true);
             jMenuFilePrintPreview.setEnabled(true);
             jMenuFileExport.setEnabled(true);
-            
+            jMenuFileClose.setEnabled(true);
+            jMenuGoTo.setEnabled(true);
+            navigator = new SequenceNavigator (this);
             toFront();
         }
     }
@@ -557,4 +620,5 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     {
         status_bar.setHint("Done");
     }
+
 }
