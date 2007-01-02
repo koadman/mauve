@@ -82,7 +82,6 @@ Delete "$SMPROGRAMS\Mauve\Mauve.lnk"
 CreateShortCut "$SMPROGRAMS\Mauve.lnk" "$1\bin\javaw" "-jar -Xmx1000m Mauve.jar" "$INSTDIR\mauve.ico"
 CreateShortCut "$SMPROGRAMS\Mauve\Mauve ChangeLog.lnk" "notepad.exe" "ChangeLog" "$INSTDIR\ChangeLog" 0
 CreateShortCut "$SMPROGRAMS\Mauve\Mauve License.lnk" "notepad.exe" "COPYING" "$INSTDIR\COPYING" 0
-CreateShortCut "$SMPROGRAMS\Mauve\Mauve User Guide.lnk" "$INSTDIR\mauve_docs.pdf" "" "$INSTDIR\mauve_docs.pdf" 0
 CreateShortCut "$SMPROGRAMS\Mauve\Mauve Online Documentation.lnk" "$INSTDIR\Mauve Online Documentation.url" "" "$INSTDIR\Mauve Online Documentation.url" 0
 
 
@@ -95,9 +94,9 @@ JavaMessage:
 
 InstallJava:
   SetOutPath $TEMP
-  File "jre-1_5_0_06-windows-i586-p-iftw.exe"
-  ExecWait "$TEMP\jre-1_5_0_06-windows-i586-p-iftw.exe"
-  Delete /REBOOTOK "$TEMP\jre-1_5_0_06-windows-i586-p-iftw.exe"
+  File "win32\jre-6-windows-i586-iftw.exe"
+  ExecWait "$TEMP\jre-6-windows-i586-iftw.exe"
+  Delete /REBOOTOK "$TEMP\jre-6-windows-i586-iftw.exe"
   Goto FindJava
 
 
@@ -120,9 +119,8 @@ pop $0
   File "win32\progressiveMauve.exe"
   File "win32\muscle_aed.exe"
   File "Mauve.jar"
-  File "mauve.ico"
-  File "mauve_docs.pdf"
-  File "Mauve Online Documentation.url"
+  File "win32\mauve.ico"
+  File "win32\Mauve Online Documentation.url"
 
   ; external dependencies
   SetOutPath "$INSTDIR\ext"
