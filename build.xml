@@ -5,7 +5,7 @@
 	</description>
 	
 	<!-- set the release version -->
-	<property name="release.version" value="2.0_beta"/>
+	<property name="release.version" value="2.0_beta2r5"/>
 
 	<!-- deployment locations for production ASAP integration -->
 <!--
@@ -175,9 +175,10 @@
 		<mkdir dir="${dist}" />
 		
 		<!-- Get the latest documentation PDF and ChangeLog from the docserver -->
+<!--
 		<get src="http://gel.ahabs.wisc.edu/docserver/mauve/mauve_docs.pdf" dest="mauve_docs.pdf" usetimestamp="true"/>
+-->	
 		<get src="http://gel.ahabs.wisc.edu/docserver/mauve/version_history.stx/document_src" dest="ChangeLog" usetimestamp="true"/>
-		
 		<!-- Set the tarball OS name based on the build host OS -->
 		<condition property="OSNAME" value="linux">
 			<os name="Linux"/>
@@ -196,11 +197,10 @@
 				<include name="ChangeLog" />
 				<include name="mauve_docs.pdf" />
 			</tarfileset>
-			<tarfileset dir="." prefix="/mauve" mode="755">
-				<include name="Mauve" />
-			</tarfileset>
 			<tarfileset dir="linux-x86" prefix="/mauve" mode="755">
+				<include name="Mauve" />
 				<include name="mauveAligner" />
+				<include name="progressiveMauve" />
 				<include name="muscle_aed" />
 			</tarfileset>
 			<tarfileset dir="${ext}" prefix="/mauve/ext" includes="*.jar" />
@@ -216,18 +216,18 @@
 		<!-- Get the latest documentation PDF and ChangeLog from the docserver -->
 <!--
 		<get src="http://gel.ahabs.wisc.edu/docserver/mauve/mauve_docs.pdf" dest="mauve_docs.pdf" usetimestamp="true"/>
-		<get src="http://gel.ahabs.wisc.edu/docserver/mauve/version_history.stx/document_src" dest="ChangeLog" usetimestamp="true"/>
 -->
+		<get src="http://gel.ahabs.wisc.edu/docserver/mauve/version_history.stx/document_src" dest="ChangeLog" usetimestamp="true"/>
 			<!-- Use jarbundler to create an OS X app bundle -->
 		<jarbundler dir="${dist}"
 			verbose="true"
 			name="Mauve"
 			mainclass="org.gel.mauve.gui.Mauve"
 			version="${release.version}"
-			infostring="Mauve ${release.version}, (c) 2003-2006  http://gel.ahabs.wisc.edu/mauve"
-			stubfile="osx/JavaApplicationStub"
+			infostring="Mauve ${release.version}, (c) 2003-2007  http://gel.ahabs.wisc.edu/mauve"
+			stubfile="JavaApplicationStub"
 			aboutmenuname="Mauve"
-			icon="osx/mauve.icns"
+			icon="mauve.icns"
 			jvmversion="1.3+"
 			bundleid="org.gel.mauve.MauveBundle"
 			vmoptions="-Xmx500m"
@@ -301,7 +301,9 @@
 
 	<target name="nsicompile" depends="jar" description="make windows installer" >
 		<!-- Get the latest documentation PDF and ChangeLog from the docserver -->
+<!--
 		<get src="http://gel.ahabs.wisc.edu/docserver/mauve/mauve_docs.pdf" dest="mauve_docs.pdf" usetimestamp="true"/>
+-->
 		<get src="http://gel.ahabs.wisc.edu/docserver/mauve/version_history.stx/document_src" dest="ChangeLog" usetimestamp="true"/>
 		
 		<!-- create output directory -->
@@ -311,7 +313,7 @@
 		<property environment="env" />
 		<echo message="Program files: ${env.ProgramFiles}"/>
 		<exec executable="C:\Program Files\NSIS\makensis.exe" dir=".">
-			<arg line="/V2 mauve.nsi" />
+			<arg line="/V2 /NOCD win32\mauve.nsi" />
 			<env key="release_version" value="${release.version}" />
 			<env key="datestamp" value="${datestamp}" />
 		</exec>
