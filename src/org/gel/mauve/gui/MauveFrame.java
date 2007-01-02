@@ -53,7 +53,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
 {
     BaseViewerModel model;
     
-    String documentation_url = "http://gel.ahabs.wisc.edu/docserver/mauve";
+    String documentation_url = "http://gel.ahabs.wisc.edu/mauve/mauve-user-guide";
     
     // member declarations
     JMenuBar jMenuBar1 = new JMenuBar();
