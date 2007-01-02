@@ -41,7 +41,7 @@ import org.gel.mauve.gui.SequenceNavigator;
  *
  */
 public class SearchResultPanel extends JPanel implements TreeModel, TreeCellRenderer,
-		Comparator, TreeSelectionListener, NavigationConstants {
+		TreeSelectionListener, NavigationConstants {
 
 	/**
 	 * necessary GUI components
@@ -218,8 +218,7 @@ public class SearchResultPanel extends JPanel implements TreeModel, TreeCellRend
 			Object key = new_data.remove(0);
 			LinkedList old = (LinkedList) genome_data.get (key);
 			old.addAll(new_data);
-			Collections.sort(old, this);
-			removeLocationDuplicates (old);
+			SeqFeatureData.removeLocationDuplicates (old);
 		}
 	}
 	
@@ -244,29 +243,7 @@ public class SearchResultPanel extends JPanel implements TreeModel, TreeCellRend
 		return data;
 	}
 	
-	/**
-	 * Removes multiple features with the same location, so only one
-	 * is displayed in the tree
-	 * 
-	 * @param feats			The list of features that might contain duplicates
-	 */
-	public void removeLocationDuplicates (LinkedList feats) {
-		if (feats.size() > 1) {
-			Collections.sort(feats, this);
-			Object first = feats.get(0);
-			Object compare = null;
-			int index = 1;
-			do {
-				compare = feats.get(index);
-				if (compare (first, compare) == 0)
-					feats.remove(index);
-				else {
-					first = compare;
-					index++;
-				}
-			} while (index < feats.size ());
-		}
-	}
+
 	
 	/**
 	 * When the selection in the tree changes, recenters mauve frame gui
@@ -281,18 +258,7 @@ public class SearchResultPanel extends JPanel implements TreeModel, TreeCellRend
 		}
 	}
 	
-	/**
-	 * A comparator for features.  Returns -1 if Feature a is first in the 
-	 * sequence, 1 if b is first, and 0 if they are at the same place
-	 * 
-	 * @param a		The first object to compare
-	 * @param a		The second object to compare
-	 */
-	public int compare(Object a, Object b) {
-		int one = ((Feature) a).getLocation ().getMin ();
-		int two = ((Feature) b).getLocation ().getMin ();
-		return (one == two) ?  0 : (one < two) ? -1 : 1;
-	}
+
 	
 	/**
 	 * facilitates painting of tree- converts feature to its name

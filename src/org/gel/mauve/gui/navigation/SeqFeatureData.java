@@ -1,5 +1,7 @@
 package org.gel.mauve.gui.navigation;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -9,7 +11,9 @@ import java.util.StringTokenizer;
 
 import org.biojava.bio.Annotation;
 import org.biojava.bio.seq.Feature;
+import org.biojava.bio.seq.FeatureFilter;
 import org.biojava.bio.seq.FeatureHolder;
+import org.biojava.bio.seq.OptimizableFilter;
 import org.biojava.bio.symbol.Location;
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.Genome;
@@ -22,16 +26,7 @@ import org.gel.mauve.Genome;
  */
 public class SeqFeatureData implements NavigationConstants {
 	
-	/**
-	 * The viewer model associated with these sequences
-	 */
-	protected BaseViewerModel model;
-
-	/**
-	 * maps each genome to set of keys present in at least one
-	 * feature of the genome
-	 */
-	protected Hashtable genome_keys;
+	public static FeatureComparator feature_comp = new FeatureComparator ();
 	
 	/**
 	 * Constructs a new wrapper for Genomes viewed by this mauve frame
@@ -39,187 +34,104 @@ public class SeqFeatureData implements NavigationConstants {
 	 * 
 	 * @param mod			The BaseViewerModel to associate this with
 	 */
-	public SeqFeatureData (BaseViewerModel mod) {
-		model = mod;
-		genome_keys = new Hashtable ();
-		for (int i = 0; i < model.getSequenceCount (); i++) {
-			Genome genome = model.getGenomeBySourceIndex(i);
-			FeatureHolder holder = genome.getAnnotationSequence ();
-			HashSet set = new HashSet ();
-			fillKeys (holder, set);
-			genome_keys.put(genome, set);
-		}
+	private SeqFeatureData () {
 	}
 	
-	/**
-	 * puts all keys in feature holder into hashset
-	 * 
-	 * @param holder
-	 * @param set
-	 */
-	protected void fillKeys (FeatureHolder holder, HashSet set) {
-		if (holder instanceof Feature) {
-			Feature feature = (Feature) holder;
-			if (feature.getAnnotation () != null)
-				set.addAll(feature.getAnnotation().keys());
-		}
-		Iterator itty = holder.features ();
-		while (itty.hasNext ()) {
-			fillKeys ((Feature) itty.next (), set);
-		}
+	public static FeatureFilter getFilter (String [][] data) {
+		FeatureFilter and = null;
+		for (int i = 0; i < data.length; i++) {
+			StringTokenizer toke = SeqFeatureData.separateFields (SeqFeatureData.readToActual (
+					data[i][NavigationPanel.FIELD]));
+			FeatureFilter or = null;
+			while (toke.hasMoreTokens()) {
+				FeatureFilter cur = null;
+				cur = new AnnotationContainsFilter (toke.nextToken(),
+						data [i][NavigationPanel.VALUE].toLowerCase(),
+						Boolean.valueOf (data [i][NavigationPanel.EXACT]).booleanValue ());
+				if (or != null) {
+					or = new FeatureFilter.Or (or, cur);
 	}
-	
-	
-	/**
-	 * Finds features matching specified constraints
-	 * 
-	 * @param data			Data representing the constraints to apply
-	 * @param genome		Which genome to get the features out of
-	 * @return				A list of all features matching the given constraints
-	 */
-	public LinkedList findFeatures (String [] data, Genome genome) {
-		StringTokenizer fields = separateFields ( readToActual (
-				data [FIELD]));
-		LinkedList list = new LinkedList ();
-		HashSet keys = (HashSet) genome_keys.get(genome);
-		while (fields.hasMoreTokens ()) {
-			String field = fields.nextToken();
-			if (keys.contains(field)) {
-				findFeatures (list, field, data [NavigationPanel.VALUE], 
-						Boolean.valueOf(data [NavigationPanel.EXACT]).booleanValue(), genome);
-			}
-		}
-		return list;
-	}
-	
-	
-	/**
-	 * finds features matching specific constraints
-	 * 
-	 * @param features	list results will be added to
-	 * @param field		The field (qualifier) to search by
-	 * @param val		The value the field should have
-	 * @param exact		Whether the value is exact or should contain the desired string
-	 * @param genome	The genome to find the gene in
-	 */
-	public static LinkedList findFeatures (LinkedList features, String field, String val,
-			boolean exact, Genome genome) {
-		return findFeatures (genome.getAnnotationSequence(), field, val.toLowerCase(),
-				exact, features);
-	}
-	
-	/**
-	 * finds features matching specific constraints
-	 * 
-	 * @param field			The field (qualifier) to search by
-	 * @param val			The exact value the field should have
-	 * @param genome		The genome to find the gene inS
-	 */
-	public static LinkedList findFeatures (String field, String val, Genome genome) {
-		LinkedList list = new LinkedList ();
-		return findFeatures (list, field, val, true, genome);
-	}
-	
-	/**
-	 * finds features matching specific constraints
-	 * 
-	 * @param holder	The feature holder containing all features to search
-	 * @param field		The field (qualifier) to search by
-	 * @param value		The value the field should have
-	 * @param exact		Whether the value is exact or should contain the desired string
-	 * @param results	The LinkedList in which results will be stored
-	 */
-	private static LinkedList findFeatures (FeatureHolder holder, String field, 
-			String value, boolean exact, LinkedList results) {
-		if (holder instanceof Feature && matchesConstraint ((Feature) holder,
-				field, value, exact)) {
-			results.add (holder);
-		}
-		Iterator itty = holder.features ();
-		while (itty.hasNext ())
-			findFeatures ((Feature) itty.next (), value, field, exact, results);
-		return results;
-	}
-	
-	/**
-	 * Determines if the given feature matches the given constraints
-	 * 
-	 * @param feature		The feature in question
-	 * @param fields		A list of fields, one of which should contain the desired value
-	 * @param value			The value to be found in one of the fields
-	 * @param exact			Whether the field is an exact match, or should contain the value
-	 * @return				True if the value matches, false otherwise
-	 */
-	public static boolean matchesConstraints (Feature feature, StringTokenizer fields, 
-			String value, boolean exact) {
-		while (fields.hasMoreTokens()) {
-			if (matchesConstraint (feature, fields.nextToken(), value, exact))
-				return true;
-		}
-		return false;
-	}
-	
-	/**
-	 * Determines if the given feature matches the given constraints
-	 * 
-	 * @param feature		The feature in question
-	 * @param field			The field (qualifier) in question
-	 * @param value			The value to be found in the field
-	 * @param exact			Whether the field is an exact match, or should contain the value
-	 * @return				True if the value matches, false otherwise
-	 */
-	public static boolean matchesConstraint (Feature feature, String field, 
-			String value, boolean exact) {
-		Annotation notes = feature.getAnnotation ();
-		boolean match = false;
-		if (notes != null) {
-			if (notes.keys ().contains (field)) {
-				Object val = notes.getProperty (field);
-				if (val instanceof String)
-					match = containsOrEquals (((String) val).toLowerCase(), value, exact);					
-				else if (val instanceof List) {
-					Iterator itty = ((List) val).iterator ();
-					while (itty.hasNext() && !match)
-						match = containsOrEquals (((String) itty.next ()).toLowerCase(),
-								value, exact);
-				}
-				else if (val instanceof Boolean) {
-					match = val.equals (new Boolean (value));
-				}
 				else
-					System.out.println ("unsearchable field: " + field +
-							" value type: " + val.getClass());
+					or = cur;
 			}
+			if (and != null)
+				and = new FeatureFilter.And (and, or);
+			else
+				and = or;
 		}
-		return match;
+		and = new FeatureFilter.And (new OptimizableFilter (){
+			public boolean accept (Feature f) {
+				return f.getAnnotation() != null;
 	}
 	
-	/**
-	 * tests if a string contains or equals a given value
-	 * 
-	 * @param field		The string in question
-	 * @param value		The value the string should contain
-	 * @param exact		Whether the match should be exact or contains
-	 * @return			True if the field contains the value, false otherwise
-	 */
-	public static boolean containsOrEquals (String field, String value, boolean exact) {
-		if ((exact && field.equals (value)) || (!exact && 
-				field.indexOf (value) != -1))
-			return true;
-		else
-			return false;
+			public boolean isDisjoint(FeatureFilter filt) {
+				return false;
 	}
 	
-	/**
-	 * Returns all the fields present in a given genome
-	 * 
-	 * @param genome		The genome in question
-	 * @return				The list of qualifier names present in the genome
-	 */
-	public HashSet getGenomeKeys (Genome genome) {
-		return (HashSet) genome_keys.get (genome);
+			public boolean isProperSubset(FeatureFilter sup) {
+				return this.equals(sup);
 	}
+	
+		}, and);
+		return and;
+	}
+	
+	public static LinkedList [] findFeatures (Genome [] nomes, String [][] data) {
+		LinkedList [] nome_data = new LinkedList [nomes.length];
+		FeatureFilter filter = SeqFeatureData.getFilter (data);
+		for (int i = 0; i < nomes.length; i++) {
+			FeatureHolder hold = nomes [i].getAnnotationSequence ();
+			hold = hold.filter(filter, true);
+			LinkedList list = new LinkedList ();
+			list.add (nomes [i]);
+			Iterator itty = hold.features ();
+			while (itty.hasNext ())
+				list.add (itty.next ());
+			nome_data [i] = list;
+		}
+		return nome_data;
+	}
+	
 
+	/**
+	 * Removes multiple features with the same location, so only one
+	 * is displayed in the tree
+	 * 
+	 * @param feats			The list of features that might contain duplicates
+	 */
+	public static void removeLocationDuplicates (LinkedList feats) {
+		if (feats.size() > 1) {
+			Collections.sort(feats, feature_comp);
+			Object first = feats.get(0);
+			Object compare = null;
+			int index = 1;
+			do {
+				compare = feats.get(index);
+				if (feature_comp.compare (first, compare) == 0)
+					feats.remove(index);
+				else {
+					first = compare;
+					index++;
+			}
+			} while (index < feats.size ());
+		}
+	}
+	
+	
+	static class FeatureComparator implements Comparator { 
+	/**
+		 * A comparator for features.  Returns -1 if Feature a is first in the 
+		 * sequence, 1 if b is first, and 0 if they are at the same place
+	 * 
+		 * @param a		The first object to compare
+		 * @param b		The second object to compare
+	 */
+		public int compare (Object a, Object b) {
+			int one = ((Feature) a).getLocation ().getMin ();
+			int two = ((Feature) b).getLocation ().getMin ();
+			return (one == two) ?  0 : (one < two) ? -1 : 1;
+		}
+	}
 	
 	/**
 	 * returns a tokenizer with string separated at '/'

@@ -473,6 +473,8 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     {
         mauve.closeFrame(this);
         navigator.dispose ();
+        navigator = null;
+        System.gc ();
     }
     
     /**

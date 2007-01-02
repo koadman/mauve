@@ -1,5 +1,6 @@
 package org.gel.mauve.gui.navigation;
 
+import java.util.HashSet;
 import java.util.Hashtable;
 
 public interface NavigationConstants {
@@ -23,6 +24,11 @@ public interface NavigationConstants {
 	public static final String ID = "ID Number";
 	
 	public static final Hashtable READ_TO_ACTUAL = new Hashtable ();
+	/**
+	 * maps each genome to set of keys present in at least one
+	 * feature of the genome
+	 */
+	public static final HashSet GENOME_KEYS = new HashSet ();
 	
 	/**
 	 * ints representing indexes of data in data array used to

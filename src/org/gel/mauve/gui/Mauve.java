@@ -305,8 +305,8 @@ public class Mauve
         if (frames.size() > 1 || frame.rrpanel == null)
         {
             frame.setVisible(false);
-            frame.dispose();
             frames.remove(frame);
+            frame.dispose();
             
             if (frames.size() == 0)
             {

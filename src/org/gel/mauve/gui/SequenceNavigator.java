@@ -10,11 +10,10 @@ import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowStateListener;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import javax.swing.BoxLayout;
@@ -33,6 +32,7 @@ import javax.swing.JViewport;
 
 import org.gel.mauve.Genome;
 import org.gel.mauve.BaseViewerModel;
+import org.gel.mauve.gui.navigation.AnnotationContainsFilter;
 import org.gel.mauve.gui.navigation.NavigationConstants;
 import org.gel.mauve.gui.navigation.NavigationPanel;
 import org.gel.mauve.gui.navigation.SearchResultPanel;
@@ -40,7 +40,11 @@ import org.gel.mauve.gui.navigation.SeqFeatureData;
 import org.gel.mauve.gui.sequence.RRSequencePanel;
 import org.gel.mauve.gui.sequence.SeqPanel;
 
+import org.biojava.bio.AnnotationType;
 import org.biojava.bio.seq.Feature;
+import org.biojava.bio.seq.FeatureFilter;
+import org.biojava.bio.seq.FeatureHolder;
+import org.biojava.bio.seq.OptimizableFilter;
 
 
 /**
@@ -70,11 +74,9 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	protected JScrollPane result_scroller;
 	protected JScrollPane nav_scroll;
 	protected LinkedList window_listeners;
+	protected WindowAdapter adapt;
 	
-	/**
-	 * contains general data about what sequences this navigator operates on
-	 */
-	protected SeqFeatureData seq_data;
+	protected LinkedList threads = new LinkedList ();
 	
 	/**
 	 * availabe genome sequences to search
@@ -89,13 +91,31 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	
 	
 	/**
-	 * initializes hashtable inherited from NavigationConstants
+	 * initializes hashtable and hashset inherited from NavigationConstants
 	 */
 	static {
 		READ_TO_ACTUAL.put(NAME, LOC_NAME);
 		READ_TO_ACTUAL.put(PRODUCT, PRODUCT_NAME);
 		READ_TO_ACTUAL.put(ID, ID_NUMBER);
 		READ_TO_ACTUAL.put(GO, GO_FEATS);
+		GENOME_KEYS.add ("biovar");
+		GENOME_KEYS.add ("codon_start");
+		GENOME_KEYS.add ("db_xref");
+		GENOME_KEYS.add ("function");
+		GENOME_KEYS.add ("gene");
+		GENOME_KEYS.add ("insertion_seq");
+		GENOME_KEYS.add ("internal_data");
+		GENOME_KEYS.add ("locus_tag");
+		GENOME_KEYS.add ("mol_type");
+		GENOME_KEYS.add ("note");
+		GENOME_KEYS.add ("organism");
+		GENOME_KEYS.add ("product");
+		GENOME_KEYS.add ("protein_id");
+		GENOME_KEYS.add ("pseudo");
+		GENOME_KEYS.add ("strain");
+		GENOME_KEYS.add ("transl_except");
+		GENOME_KEYS.add ("transl_table");
+		GENOME_KEYS.add ("translation");
 	}
 	
 	/**
@@ -172,11 +192,17 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 		frame.setIconImage(MauveFrame.mauve_icon.getImage());
 		((JPanel) frame.getContentPane ()).setBorder (
 				BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		mauve_frame.addWindowListener(new WindowAdapter () {
+		adapt = new WindowAdapter () {
 			public void windowClosing (WindowEvent e) {
 				frame.setVisible (false);
 			}
-		});
+		};
+		mauve_frame.addWindowListener(adapt);
+		/*mauve_frame.addWindowListener(new WindowAdapter () {
+			public void windowClosing (WindowEvent e) {
+				frame.setVisible (false);
+			}
+		});*/
 	}
 	
 	/**
@@ -245,7 +271,6 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 */
 	public void loadGenomeList () {
 		BaseViewerModel model = mauve_frame.getModel ();
-		seq_data = new SeqFeatureData (model);
 		genome_choices = new Vector ();
 		genome_choices.add ("All Sequences");
 		for (int i = 0; i < model.getSequenceCount(); i++)
@@ -318,7 +343,7 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 */
 	public void actionPerformed (final ActionEvent e) {
 		if (e.getSource () == search) {
-			new Thread () {
+			Thread t = new Thread () {
 				public void run () {
 					synchronized (current_search) {
 						if (current_search == Boolean.FALSE) {
@@ -334,7 +359,9 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 					}
 					current_search = Boolean.FALSE;
 				}
-			}.start ();
+			};
+			//threads.add(t);
+			t.start ();
 		}
 		if (current_search == Boolean.FALSE) {
 			if (e.getSource () == add)
@@ -485,31 +512,30 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 			String input = JOptionPane.showInputDialog (mauve_frame, 
 			"Enter name of desired feature. . .");
 			if (input != null) {
-				frame.setVisible(true);
-				String [] data = new String [3];
-				data [FIELD] = LOC_NAME;
-				data [VALUE] = input;
-				data [EXACT] = Boolean.toString(false);
-				LinkedList [] tree_data = new LinkedList [chosen.length];
+				String [][] data = new String [1][3];
+				data [0][FIELD] = LOC_NAME;
+				data [0][VALUE] = input;
+				data [0][EXACT] = Boolean.toString(false);
 				int count = 0;
 				LinkedList first = null;
+				LinkedList [] tree_data = SeqFeatureData.findFeatures (chosen, data);
 				for (int i = 0; i < chosen.length; i++) {
-					tree_data [i] = seq_data.findFeatures(data, chosen [i]);
+					Object genome = tree_data [i].removeFirst ();
+					SeqFeatureData.removeLocationDuplicates (tree_data [i]);
 					count += tree_data [i].size();
-					tree_data [i].addFirst(chosen [i]);
+					tree_data [i].addFirst (genome);
 					if (count == 1) {
 						first = tree_data [i];
 					}
 				}
-				if (count == 1) {
-					goToPosition (SeqFeatureData.centerOfFeature((Feature) first.get(1)), 
-							(Genome) first.getFirst());
-				}
+				if (count == 1)
+					displayFeature ((Feature) first.get(1),	(Genome) first.getFirst());
 				else if (count == 0) {
 					JOptionPane.showMessageDialog(mauve_frame, 
 							"No Features were found with specified name.");
 				}
 				else {
+					frame.setVisible(true);
 					result_pane.displayFeatures(tree_data);
 				}
 			}
@@ -588,28 +614,7 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 * 						search by
 	 */
 	public void showResultTree (Genome [] nomes, String [][] data) {
-		Genome genome = null;
-		LinkedList [] nome_data = new LinkedList [nomes.length];
-		for (int i = 0; i < nomes.length; i++) {
-			genome = nomes [i];
-			LinkedList results = seq_data.findFeatures (data [0], genome);
-			Iterator itty = results.iterator ();
-			while (itty.hasNext ()) {
-				Feature feat = (Feature) itty.next();
-				for (int j = 1; j < data.length; j++) {
-					if (!SeqFeatureData.matchesConstraints (feat, SeqFeatureData.separateFields (
-							SeqFeatureData.readToActual (data[j][NavigationPanel.FIELD])),
-								data [j][NavigationPanel.VALUE], Boolean.valueOf(
-								data [j][NavigationPanel.EXACT]).booleanValue())) {
-						itty.remove();
-						break;
-					}
-				}
-			}
-			results.addFirst (nomes [i]);
-			nome_data [i] = results;
-		}
-		result_pane.displayFeatures (nome_data);
+		result_pane.displayFeatures (SeqFeatureData.findFeatures (nomes, data));
 	}
 		
 	/**
@@ -699,11 +704,8 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 * 				all the currently viewed sequences
 	 */
 	public Vector getGenomeKeys () {
-		HashSet set = new HashSet ();
-		for (int i = 1; i < genome_choices.size (); i++)
-			set.addAll(seq_data.getGenomeKeys ((Genome) genome_choices.get(i)));
 		Vector readable = new Vector ();
-		Iterator itty = set.iterator();
+		Iterator itty = GENOME_KEYS.iterator();
 		while (itty.hasNext())
 			readable.add(((String) itty.next ()).replace ('_', ' '));
 		Collections.sort (readable);
@@ -711,8 +713,8 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	}
 	
 	public void dispose () {
+		mauve_frame.removeWindowListener (adapt);
 		frame.dispose ();
-		System.gc ();
 	}
 	
 }

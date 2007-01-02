@@ -95,20 +95,25 @@ public abstract class GenbankEmblFormat extends BaseFormat
             Feature f2 = (Feature) fh.features().next();
             Annotation a = f2.getAnnotation();
             String name = "";
+            String add = null;
             if (a.containsProperty("organism"))
             {
                 name += a.getProperty("organism") + " ";
             }
             if (a.containsProperty("serovar"))
             {
-                name += a.getProperty("serovar") + " ";
+            	add = a.getProperty("serovar").toString ();
+            	if (name.indexOf(add) == -1)
+            		name += add + " ";
             }
             if (a.containsProperty("strain"))
             {
-                name += a.getProperty("strain") + " ";
+            	add = a.getProperty("strain").toString ();
+            	if (name.indexOf(add) == -1)
+            		name += add + " ";
             }
             if(name != "")
-            	return name;
+            	return name.trim ();
         }
         // if a source feature didn't exist
         // try getting the source from the headers
