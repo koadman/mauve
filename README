@@ -1,3 +1,6 @@
+THIS FILE IS OUT OF DATE
+The current user guide resides online at http://gel.ahabs.wisc.edu/mauve/mauve-user-guide
+
 Mauve Overview
 ==============
 Mauve is a program for performing comaparative analyses of genomes.  To generate a new genome alignment with Mauve, select 'Align' from the File menu.  To open an existing genome alignment, select 'Open' from the file menu.
