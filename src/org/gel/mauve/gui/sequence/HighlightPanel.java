@@ -66,7 +66,6 @@ public class HighlightPanel extends AbstractSequencePanel implements MouseMotion
         }
     }
 
-    protected static Color trans_cursor_color = new Color( 0, 0, 0, 50);
     protected static Color cursor_color = new Color( 0, 0, 0 );
     protected int half = 7;
     protected int full = 14;
@@ -95,15 +94,11 @@ public class HighlightPanel extends AbstractSequencePanel implements MouseMotion
             if (absHighlightCoord >= getGenome().getViewStart() && absHighlightCoord <= getGenome().getViewStart() + getGenome().getViewLength())
             {
                 int pixel = sequenceCoordinateToCenterPixel(absHighlightCoord);
-                if( highlightCoord > 0 )
-                    g.setColor(trans_cursor_color);
-                else
-                    g.setColor(cursor_color);
+                g.setColor(cursor_color);
 
                 g.drawLine(pixel, 0, pixel, getHeight());
                 if( highlightCoord > 0 )
                 {
-                    g.setColor(cursor_color);
                 	g.drawRect(pixel-half, 0, full, getHeight()-1);
                 }
                 

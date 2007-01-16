@@ -71,9 +71,6 @@ class LcbLinePanel extends JComponent implements ModelListener
         Graphics2D g2d = (Graphics2D) g1d;
         g2d.setColor(Color.black);
         Rectangle bounds = getBounds();
-        Stroke base_stroke = g2d.getStroke();
-        Color trans_color = new Color(255,255,255,80);
-        Stroke trans_stroke = new java.awt.BasicStroke(3);
         
         int[] boxTops = new int[model.getSequenceCount()];
         int[] boxHeights = new int[model.getSequenceCount()];
@@ -143,7 +140,6 @@ class LcbLinePanel extends JComponent implements ModelListener
                 	base_color = lcb.color;
                 }
                 g2d.setColor(base_color);
-
                 int upperMidpoint = upperPanel.sequenceCoordinateToCenterPixel(lcb.midpoint(upperGenome));
                 int lowerMidpoint = lowerPanel.sequenceCoordinateToCenterPixel(lcb.midpoint(lowerGenome));
 
@@ -182,11 +178,6 @@ class LcbLinePanel extends JComponent implements ModelListener
                             g2d.drawLine(lowerMidpoint, lowerBounds.y + lowerBoxTop, lowerMidpoint, lowerBounds.y + lowerBoxTop + lowerBoxHeight / 2);
                         }
                     }
-                    g2d.setStroke(trans_stroke);
-                    g2d.setColor(trans_color);
-                    g2d.drawLine(upperMidpoint, upperBounds.y + upperBoxTop + upperBoxHeight, lowerMidpoint, lowerBounds.y + lowerBoxTop);
-                    g2d.setStroke(base_stroke);
-                    g2d.setColor(base_color);
                     g2d.drawLine(upperMidpoint, upperBounds.y + upperBoxTop + upperBoxHeight, lowerMidpoint, lowerBounds.y + lowerBoxTop);
                 }
             }
