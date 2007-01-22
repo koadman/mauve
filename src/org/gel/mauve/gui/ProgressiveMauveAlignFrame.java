@@ -439,7 +439,7 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
             cmd_vec.addElement(cur_cmd);
         }
         
-        if(!getScoreMatrixName().contains("default"))
+        if(!(getScoreMatrixName().indexOf("default") > 0))
         {
         	File mat_file = null;
         	String[][] mat = getScoreMatrix();
