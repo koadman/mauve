@@ -158,6 +158,6 @@ public class Genome
     
     public String toString()
     {
-        return getDisplayName() + " " + viewIndex + " " + sourceIndex;
+        return getDisplayName();
     }
 }
