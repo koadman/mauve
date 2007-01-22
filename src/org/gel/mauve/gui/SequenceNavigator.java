@@ -17,11 +17,13 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JFrame;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JLabel;
 import javax.swing.JButton;
@@ -32,11 +34,11 @@ import javax.swing.JViewport;
 
 import org.gel.mauve.Genome;
 import org.gel.mauve.BaseViewerModel;
+import org.gel.mauve.MauveConstants;
+import org.gel.mauve.SeqFeatureData;
 import org.gel.mauve.gui.navigation.AnnotationContainsFilter;
-import org.gel.mauve.gui.navigation.NavigationConstants;
 import org.gel.mauve.gui.navigation.NavigationPanel;
 import org.gel.mauve.gui.navigation.SearchResultPanel;
-import org.gel.mauve.gui.navigation.SeqFeatureData;
 import org.gel.mauve.gui.sequence.RRSequencePanel;
 import org.gel.mauve.gui.sequence.SeqPanel;
 
@@ -55,7 +57,7 @@ import org.biojava.bio.seq.OptimizableFilter;
  *
  */
 public class SequenceNavigator extends JSplitPane implements ActionListener, 
-		KeyListener, NavigationConstants {
+		KeyListener, MauveConstants {
 
 	/**
 	 * gui components needed throughout the class
@@ -70,7 +72,7 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	protected JButton reset;
 	protected JPanel nav_panel_holder;
 	protected SearchResultPanel result_pane;
-	protected JRadioButton clear;
+	protected JCheckBox clear;
 	protected JScrollPane result_scroller;
 	protected JScrollPane nav_scroll;
 	protected LinkedList window_listeners;
@@ -98,24 +100,24 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 		READ_TO_ACTUAL.put(PRODUCT, PRODUCT_NAME);
 		READ_TO_ACTUAL.put(ID, ID_NUMBER);
 		READ_TO_ACTUAL.put(GO, GO_FEATS);
-		GENOME_KEYS.add ("biovar");
-		GENOME_KEYS.add ("codon_start");
-		GENOME_KEYS.add ("db_xref");
-		GENOME_KEYS.add ("function");
-		GENOME_KEYS.add ("gene");
-		GENOME_KEYS.add ("insertion_seq");
-		GENOME_KEYS.add ("internal_data");
-		GENOME_KEYS.add ("locus_tag");
-		GENOME_KEYS.add ("mol_type");
-		GENOME_KEYS.add ("note");
-		GENOME_KEYS.add ("organism");
-		GENOME_KEYS.add ("product");
-		GENOME_KEYS.add ("protein_id");
-		GENOME_KEYS.add ("pseudo");
-		GENOME_KEYS.add ("strain");
-		GENOME_KEYS.add ("transl_except");
-		GENOME_KEYS.add ("transl_table");
-		GENOME_KEYS.add ("translation");
+		ANNOTATION_KEYS.add ("biovar");
+		ANNOTATION_KEYS.add ("codon_start");
+		ANNOTATION_KEYS.add ("db_xref");
+		ANNOTATION_KEYS.add ("function");
+		ANNOTATION_KEYS.add ("gene");
+		ANNOTATION_KEYS.add ("insertion_seq");
+		ANNOTATION_KEYS.add ("internal_data");
+		ANNOTATION_KEYS.add ("locus_tag");
+		ANNOTATION_KEYS.add ("mol_type");
+		ANNOTATION_KEYS.add ("note");
+		ANNOTATION_KEYS.add ("organism");
+		ANNOTATION_KEYS.add ("product");
+		ANNOTATION_KEYS.add ("protein_id");
+		ANNOTATION_KEYS.add ("pseudo");
+		ANNOTATION_KEYS.add ("strain");
+		ANNOTATION_KEYS.add ("transl_except");
+		ANNOTATION_KEYS.add ("transl_table");
+		ANNOTATION_KEYS.add ("translation");
 	}
 	
 	/**
@@ -161,7 +163,7 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 						BorderFactory.createEmptyBorder(BORDER, BORDER, 0, BORDER)), 
 						"Find features with the following qualifying information:"));
 		nav_panel_holder.setLayout (new BoxLayout (nav_panel_holder, BoxLayout.Y_AXIS));
-		result_scroller = new JScrollPane (result_pane);
+		result_scroller = result_pane.getScrollPane ();
 		nav_scroll = new JScrollPane (nav_panel_holder);
 		new NavigationPanel (this);
 		middle.add (nav_scroll, BorderLayout.CENTER);
@@ -216,7 +218,7 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 		add = new JButton ("Add Constraint");
 		reset = new JButton ("Reset Constraints");
 		JPanel all = new JPanel (new BorderLayout ());
-		clear = new JRadioButton ("Clear previous results when adding new");
+		clear = new JCheckBox ("Clear previous results when adding new");
 		clear.setSelected(true);
 		JPanel bottom = new JPanel ();
 		bottom.add(add);
@@ -271,14 +273,11 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 */
 	public void loadGenomeList () {
 		BaseViewerModel model = mauve_frame.getModel ();
-		genome_choices = new Vector ();
-		genome_choices.add ("All Sequences");
-		for (int i = 0; i < model.getSequenceCount(); i++)
-			genome_choices.add (i + 1, model.getGenomeByViewingIndex (i));
+		genome_choices = SeqFeatureData.userSelectableGenomes (model, true, true);
+		genomes.setRenderer (GenomeCellRenderer.getListCellRenderer ());
 		genomes.setModel (new DefaultComboBoxModel (genome_choices));
-		Vector choices = (Vector) genome_choices.clone();
-		choices.remove (0);
-		result_pane = new SearchResultPanel (choices, this);
+		result_pane = new SearchResultPanel (SeqFeatureData.userSelectableGenomes (
+				model, false, false), this);
 	}
 	
 	/**
@@ -477,8 +476,9 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 * navigation
 	 *
 	 */
-	public void goToSeqPos () {
-		Genome [] chosen = userSelectedGenome (false);
+	public static void goToSeqPos (MauveFrame mauve_frame) {
+		Genome [] chosen = SeqFeatureData.userSelectedGenomes (mauve_frame, 
+				mauve_frame.getModel (), false, false);
 		if (chosen != null) {
 			long pos = -1;
 			do {
@@ -495,7 +495,7 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 				}
 			} while (pos == -1);
 			if (pos != -1)
-				goToPosition (pos, chosen [0]);
+				goToPosition (pos, chosen [0], mauve_frame);
 		}
 	}
 	
@@ -507,7 +507,8 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 *
 	 */
 	public void goToFeatureByName () {
-		Genome [] chosen = userSelectedGenome (true);
+		Genome [] chosen = SeqFeatureData.userSelectedGenomes (
+				mauve_frame, mauve_frame.getModel (), true, true);
 		if (chosen != null) {
 			String input = JOptionPane.showInputDialog (mauve_frame, 
 			"Enter name of desired feature. . .");
@@ -544,25 +545,6 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	}
 	
 	/**
-	 * Pops up a dialog box that allows a user to choose a specific (or all) genome/s
-	 * 
-	 * @param	all_ok	True if user should have the option to choose "All Genomes".
-	 * @return	An array of genomes that contains all genomes the user picked.
-	 */
-	public Genome [] userSelectedGenome (boolean all_ok) {
-		Vector choices = (Vector) genome_choices.clone();
-		if (!all_ok)
-			choices.remove(0);
-		Object chosen = JOptionPane.showInputDialog(mauve_frame, "Choose Sequence to Navigate", 
-				"Go To. . .", JOptionPane.QUESTION_MESSAGE,
-				null, choices.toArray(), genomes.getItemAt (0));
-		if (chosen == null)
-			return null;
-		else
-			return convertIndexToSequence (genome_choices.indexOf(chosen));
-	}
-	
-	/**
 	 * converts user input to features to display
 	 * and centers view on first matching feature
 	 *
@@ -576,34 +558,11 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 			for (int i = 0; i < criteria.length; i++)
 				criteria [i] = ((NavigationPanel) nav_panels.get(
 						nav_panels.size() - 1 - i)).getSearchCriteria ();
-			showResultTree (convertIndexToSequence (index), criteria);
+			showResultTree (SeqFeatureData.convertIndexToSequence (
+					genome_choices, index), criteria);
 		}
 	}
 	
-
-	/**
-	 * returns an array representing the user selected genomes
-	 * 
-	 * @param index			The index selected in the sequence chooser
-	 * 						combo box
-	 * @return				An array of 1 containing the selected sequence unless
-	 * 						the user chose all sequences, in which case the array
-	 * 						will return all of them
-	 */
-	protected Genome [] convertIndexToSequence (int index) {
-		Genome [] nomes = null;
-		if (index == 0) {
-			int max = genomes.getItemCount();
-			nomes = new Genome [max - 1];
-			for (int i = 1; i < max; i++)
-				nomes [i - 1] = (Genome) genomes.getItemAt(i);
-		}
-		else {
-			nomes = new Genome [1];
-			nomes [0] = (Genome) genome_choices.get (index);
-		}
-		return nomes;
-	}
 	
 	/**
 	 * Performs the final narrowing down of features to those that match the
@@ -616,7 +575,7 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	public void showResultTree (Genome [] nomes, String [][] data) {
 		result_pane.displayFeatures (SeqFeatureData.findFeatures (nomes, data));
 	}
-		
+
 	/**
 	 * Centers the view on a specific feature of a genome
 	 * 
@@ -705,7 +664,7 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 */
 	public Vector getGenomeKeys () {
 		Vector readable = new Vector ();
-		Iterator itty = GENOME_KEYS.iterator();
+		Iterator itty = ANNOTATION_KEYS.iterator();
 		while (itty.hasNext())
 			readable.add(((String) itty.next ()).replace ('_', ' '));
 		Collections.sort (readable);

@@ -2,6 +2,7 @@ package org.gel.mauve.gui.navigation;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,6 +15,8 @@ import java.util.Vector;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.UIManager;
 import javax.swing.event.TreeModelListener;
@@ -32,6 +35,8 @@ import org.biojava.bio.Annotation;
 import org.biojava.bio.seq.Feature;
 import org.biojava.bio.symbol.Location;
 import org.gel.mauve.Genome;
+import org.gel.mauve.MauveConstants;
+import org.gel.mauve.SeqFeatureData;
 import org.gel.mauve.gui.SequenceNavigator;
 
 /**
@@ -41,7 +46,7 @@ import org.gel.mauve.gui.SequenceNavigator;
  *
  */
 public class SearchResultPanel extends JPanel implements TreeModel, TreeCellRenderer,
-		TreeSelectionListener, NavigationConstants {
+		TreeSelectionListener, MauveConstants {
 
 	/**
 	 * necessary GUI components
@@ -51,6 +56,7 @@ public class SearchResultPanel extends JPanel implements TreeModel, TreeCellRend
 	protected DefaultTreeCellRenderer renderer;
 	protected SequenceNavigator navigator;
 	protected DefaultMutableTreeNode root;
+	protected JScrollPane scroller;
 	
 	/**
 	 * represents display state - if there are no results, value is 0,
@@ -71,7 +77,7 @@ public class SearchResultPanel extends JPanel implements TreeModel, TreeCellRend
 	/**
 	 * represents genome with no found features
 	 */
-	public static final String FEATURELESS = "No features found.";
+	public static final String MATCHLESS = "No features found. . .";
 	
 	/**
 	 * represents dummy root node of tree
@@ -107,10 +113,12 @@ public class SearchResultPanel extends JPanel implements TreeModel, TreeCellRend
 	 * @param nav		The SequenceNavigator it belongs to
 	 */
 	public SearchResultPanel (Vector genomes, SequenceNavigator nav) {
+		super (new FlowLayout (FlowLayout.LEFT));
+		System.out.println (getLayout ());
 		navigator = nav;
 		genome_data = new Hashtable ();
 		genome_indexes = new Object [genomes.size()];
-		for (int i = 0; i < genomes.size (); i++) {;
+		for (int i = 0; i < genomes.size (); i++) {
 			genome_data.put(genomes.get(i), new LinkedList ());
 			genome_indexes [i] = genomes.get(i);
 		}
@@ -137,8 +145,19 @@ public class SearchResultPanel extends JPanel implements TreeModel, TreeCellRend
 		tree.setModel(this);
 		tree.setEditable(false);
 		tree.addTreeSelectionListener(this);
+		tree.setToggleClickCount(1);
 		root = new DefaultMutableTreeNode (ROOT);
 		add (tree);
+		scroller = new JScrollPane (this);
+		scroller.getVerticalScrollBar().setUnitIncrement(renderer.getPreferredSize().height);
+	}
+	
+	/**
+	 * returns a reference to the ScrollPane that contains this result_panel
+	 * @return
+	 */
+	public JScrollPane getScrollPane () {
+		return scroller;
 	}
 	
 	/**
@@ -252,9 +271,8 @@ public class SearchResultPanel extends JPanel implements TreeModel, TreeCellRend
 	public void valueChanged (TreeSelectionEvent event) {
 		if (event.getNewLeadSelectionPath() != null) {
 			Object [] path = event.getNewLeadSelectionPath().getPath();
-			if (path != null && path.length == 3 && path [2] != FEATURELESS) {
-				navigator.displayFeature((Feature) path [2], (Genome) path [1]); 
-			}
+			if (path != null && path.length == 3 && path [2] != MATCHLESS)
+				navigator.displayFeature((Feature) path [2], (Genome) path [1]);
 		}
 	}
 	
@@ -300,8 +318,7 @@ public class SearchResultPanel extends JPanel implements TreeModel, TreeCellRend
 			try {
 				return children.get (index);
 			} catch (IndexOutOfBoundsException e) {
-				
-				return FEATURELESS;
+				return MATCHLESS;
 			}
 		}
 		else
@@ -363,7 +380,7 @@ public class SearchResultPanel extends JPanel implements TreeModel, TreeCellRend
 				}
 			}
 		}
-		else if (child == FEATURELESS)
+		else if (child == MATCHLESS)
 			return 0;
 		else if (genome_data.contains(parent)){
 			LinkedList kids = (LinkedList) genome_data.get (parent);

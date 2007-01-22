@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import org.gel.mauve.MauveConstants;
 import org.gel.mauve.gui.SequenceNavigator;
 
 
@@ -25,7 +26,7 @@ import org.gel.mauve.gui.SequenceNavigator;
  * @author rissman
  *
  */
-public class NavigationPanel extends JPanel implements ActionListener, NavigationConstants {
+public class NavigationPanel extends JPanel implements ActionListener, MauveConstants {
 
 	/**
 	 * gui fields needed by class

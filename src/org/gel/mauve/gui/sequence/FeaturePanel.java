@@ -113,23 +113,27 @@ public class FeaturePanel extends AbstractSequencePanel
             trans.addSequenceViewerListener(new ClickListener());
 
             MultiLineRenderer multi = new MultiLineRenderer();
-
             FilterCacheSpec[] specs = getGenome().getAnnotationFormat().getFilterCacheSpecs();
+            //FeatureFilterer filterer = FeatureFilterer.getFilterer (model);
+            MySymbolSequenceRenderer my_symbol = new MySymbolSequenceRenderer();
+            //filterer.addMultiRenderer (multi, my_symbol);
             
             for (int i = 0; i < specs.length; i++)
             {
                 FilterCacheSpec spec = specs[i];
-                
                 if (spec.getFeatureRenderer() != null)
                 {
                     FeatureBlockSequenceRenderer fbr = new FeatureBlockSequenceRenderer();
                     fbr.setFeatureRenderer(spec.getFeatureRenderer());
                     fbr.setCollapsing(false);
-                    multi.addRenderer(new OverlayRendererWrapper(new FilteringRenderer(fbr, spec.getFilter(), true)));
+                    OverlayRendererWrapper over = new OverlayRendererWrapper(
+                    		new FilteringRenderer(fbr, spec.getFilter(), true));
+                    //filterer.addOverlayRenderer (multi, over);
+                    multi.addRenderer(over);
                 }
             }
             
-            multi.addRenderer(new MySymbolSequenceRenderer());
+            multi.addRenderer(my_symbol);
             trans.setRenderer(multi);
             
             // set the size of this element

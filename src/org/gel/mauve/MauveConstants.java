@@ -1,9 +1,9 @@
-package org.gel.mauve.gui.navigation;
+package org.gel.mauve;
 
 import java.util.HashSet;
 import java.util.Hashtable;
 
-public interface NavigationConstants {
+public interface MauveConstants {
 	
 	/**
 	 * Strings representing choices for ways to navigate
@@ -23,12 +23,23 @@ public interface NavigationConstants {
 	public static final String GO = "Go Features";
 	public static final String ID = "ID Number";
 	
-	public static final Hashtable READ_TO_ACTUAL = new Hashtable ();
 	/**
-	 * maps each genome to set of keys present in at least one
-	 * feature of the genome
+	 * dummy string representing all genomes rather than one specific sequence
 	 */
-	public static final HashSet GENOME_KEYS = new HashSet ();
+	public static final String ALL_SEQUENCES = "All Sequences";
+	
+	/**
+	 * Represents a feature type corresponding to any feature;
+	 * used for FeatureFilter.ByType or FeatureFilter.ByAnnotationType
+	 */
+	public static final String ANY_FEATURE = "any";
+	
+	public static final Hashtable READ_TO_ACTUAL = new Hashtable ();
+	
+	/**
+	 * contains default annotation keys to use for filters, etc.
+	 */
+	public static final HashSet ANNOTATION_KEYS = new HashSet ();
 	
 	/**
 	 * ints representing indexes of data in data array used to

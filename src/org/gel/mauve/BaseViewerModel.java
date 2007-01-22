@@ -155,6 +155,18 @@ public class BaseViewerModel
     }
     
     /**
+     * Returns an Vector containing all the Genomes in this BaseViewerModel
+     * 
+     * @return		Vector of genomes
+     */
+    public Vector getGenomes () {
+    	Vector ret = new Vector ();
+    	for (int i = 0; i < genomes.length; i++)
+    		ret.add (genomes [i]);
+    	return ret;
+    }
+    
+    /**
      * Set the genome at viewing position viewIndex to g.  This will update
      * the viewing index stored in the genome, as well.  This also has the
      * side-effect of resetting the view length for all genomes.
