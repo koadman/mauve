@@ -24,25 +24,16 @@ abstract class BaseFormat implements SupportedFormat
 
     public Sequence readInnerSequence(File source, int index)
     {
-        SequenceIterator iterator = readFile(source);
-        try
+    	try
         {
-            for (int i = 0; i < index; i++)
-            {
-                iterator.nextSequence();
-            }
-            return iterator.nextSequence();
+        	return SequenceIteratorCache.getSequence (
+        			this, source, index);
         }
         catch (NoSuchElementException e)
         {
             // This will only happen when we try to create a Delegating sequence
             // with a too-large index.
             throw new RuntimeException("Unexpected exception.", e);
-        }
-        catch (BioException e)
-        {
-            // TODO: Figure out how this should be handled elegantly.
-            throw new Error("Unexpected exception.", e);
         }
     }
 

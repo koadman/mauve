@@ -599,7 +599,8 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 */
 	public void adjustZoom (Feature feat) {
 		int length = feat.getLocation().getMax () - feat.getLocation ().getMin();
-		long vis_length = ((Genome) genomes.getItemAt(1)).getViewLength ();
+		long vis_length = ((Genome) genomes.getItemAt(
+				genomes.getItemCount() == 1 ? 0 : 1)).getViewLength ();
 		double percent = 0;
 		double new_vis = 0;
 		int count = 0;
