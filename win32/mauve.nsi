@@ -1,5 +1,5 @@
 ;Pomo NSIS Script For Mauve
-;(c)2k4-6 Aaron Darling
+;(c)2k4-7 Aaron Darling
 ;
 
 ;--------------------------------
@@ -18,10 +18,12 @@
   OutFile "dist\mauve_installer_$%release_version%.exe"
 
   ;The Default Installation Directory
-  InstallDir "$PROGRAMFILES\Mauve"
+  InstallDir "$PROGRAMFILES\Mauve $%release_version%"
   
-  ;Get installation folder from registry if available
-  InstallDirRegKey HKCU "Software\Mauve" ""
+
+  ;Get previous installation folder from registry if available
+  InstallDirRegKey HKLM "Software\Mauve" "$%release_version%"
+  InstallDirRegKey HKCU "Software\Mauve" "$%release_version%"
 
 ;--------------------------------
 ;Interface Settings
@@ -44,10 +46,77 @@
  
   !insertmacro MUI_LANGUAGE "English"
 
+
+;--------------------------------
+; Look for a previous installation and prompt for uninstall
+;
+Function .onInit
+
+	; call userInfo plugin to get user info.  The plugin puts the result in the stack
+	userInfo::getAccountType
+	pop $8
+	strCmp $8 "Admin" AdminInst UserInst
+
+	AdminInst:
+
+	StrCpy $0 0
+	loop1:
+	  ClearErrors
+	  EnumRegValue $1 HKLM Software\Mauve $0
+;	  MessageBox MB_YESNO|MB_ICONQUESTION " (key $0, version $1, dir $2)" IDNO cont IDYES cont
+;	cont:
+	  IfErrors done1
+	  IntOp $0 $0 + 1
+	  ReadRegStr $3 HKLM Software\Mauve $1
+	  StrCmp $3 "" loop1
+	  StrCmp $1 "" versUnknown1 vOk1
+	versUnknown1:
+	  StrCpy $1 "unknown"
+	vOk1:
+	  IfErrors done1
+	  MessageBox MB_YESNO|MB_ICONQUESTION " A previous installation of Mauve (version $1, dir $3) was detected.$\n We strongly recommend uninstalling it.$\n Would you like to uninstall it?" IDNO done1
+	  ExecWait "$3\Uninstall.exe"
+	  Goto loop1
+	done1:
+   
+	UserInst:
+
+	StrCpy $0 0
+	loop2:
+	  ClearErrors
+	  EnumRegValue $1 HKCU Software\Mauve $0
+;	  MessageBox MB_YESNO|MB_ICONQUESTION " (key $0, version $1, dir $2)" IDNO cont IDYES cont
+;	cont:
+	  IfErrors done2
+	  IntOp $0 $0 + 1
+	  ReadRegStr $3 HKCU Software\Mauve $1
+	  StrCmp $3 "" loop2
+	  StrCmp $1 "" versUnknown2 vOk2
+	versUnknown2:
+	  StrCpy $1 "unknown"
+	vOk2:
+	  IfErrors done2
+	  MessageBox MB_YESNO|MB_ICONQUESTION " A previous installation of Mauve (version $1, dir $3) was detected.$\n We strongly recommend uninstalling it.$\n Would you like to uninstall it?" IDNO done2
+	  ExecWait "$3\Uninstall.exe"
+	  Goto loop2
+	done2:
+
+FunctionEnd
+
+
 ;--------------------------------
 ;Installer Sections
 
 Section "mauve" SecMauve
+
+; call userInfo plugin to get user info.  The plugin puts the result in the stack
+    userInfo::getAccountType
+    pop $8
+    strCmp $8 "Admin" AdminInst2 UserInst2
+
+AdminInst2:
+  SetShellVarContext all   
+UserInst2:
 
 ; Look for Java Runtime Environment
 push $0
@@ -77,12 +146,12 @@ JavaOk:
 SetOutPath $INSTDIR
 Delete "$SMPROGRAMS\Mauve.lnk"
 CreateShortCut "$SMPROGRAMS\Mauve.lnk" "$1\bin\javaw" "-jar -Xmx1000m Mauve.jar" "$INSTDIR\mauve.ico"
-CreateDirectory "$SMPROGRAMS\Mauve"
-Delete "$SMPROGRAMS\Mauve\Mauve.lnk"
-CreateShortCut "$SMPROGRAMS\Mauve.lnk" "$1\bin\javaw" "-jar -Xmx1000m Mauve.jar" "$INSTDIR\mauve.ico"
-CreateShortCut "$SMPROGRAMS\Mauve\Mauve ChangeLog.lnk" "notepad.exe" "ChangeLog" "$INSTDIR\ChangeLog" 0
-CreateShortCut "$SMPROGRAMS\Mauve\Mauve License.lnk" "notepad.exe" "COPYING" "$INSTDIR\COPYING" 0
-CreateShortCut "$SMPROGRAMS\Mauve\Mauve Online Documentation.lnk" "$INSTDIR\Mauve Online Documentation.url" "" "$INSTDIR\Mauve Online Documentation.url" 0
+CreateDirectory "$SMPROGRAMS\Mauve $%release_version%"
+Delete "$SMPROGRAMS\Mauve $%release_version%\Mauve.lnk"
+CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve.lnk" "$1\bin\javaw" "-jar -Xmx1000m Mauve.jar" "$INSTDIR\mauve.ico"
+CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve ChangeLog.lnk" "notepad.exe" "ChangeLog" "$INSTDIR\ChangeLog" 0
+CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve License.lnk" "notepad.exe" "COPYING" "$INSTDIR\COPYING" 0
+CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve Online Documentation.lnk" "$INSTDIR\Mauve Online Documentation.url" "" "$INSTDIR\Mauve Online Documentation.url" 0
 
 
 DetailPrint "Creating Mauve shortcut for java version $0 in directory $1"
@@ -98,6 +167,7 @@ InstallJava:
   ExecWait "$TEMP\jre-6-windows-i586-iftw.exe"
   Delete /REBOOTOK "$TEMP\jre-6-windows-i586-iftw.exe"
   Goto FindJava
+
 
 
 JavaDone:
@@ -127,14 +197,33 @@ pop $0
   File "ext\*.jar"
 
   ;Store installation folder
-  WriteRegStr HKCU "Software\Mauve" "" $INSTDIR
+  strCmp $8 "Admin" AdminInstKey UserInstKey
+
+  AdminInstKey:
+    WriteRegStr HKLM "Software\Mauve" "$%release_version%" $INSTDIR
+    Goto InstKeyDone
+  UserInstKey:
+    WriteRegStr HKCU "Software\Mauve" "$%release_version%" $INSTDIR
+  InstKeyDone:
 
 SectionEnd
 
 Section "Uninstaller"
+; compare the result with the string "Admin" to see if the user is admin. If match, jump 3 lines down.
+    strCmp $8 "Admin" AdminUnInst UserUnInst
+
+  AdminUnInst:
 	; Write the uninstall keys for Windows
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\mauve" "DisplayName" "Mauve $%release_version%"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\mauve" "UninstallString" "$INSTDIR\Uninstall.exe"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Mauve $%release_version%" "DisplayName" "Mauve $%release_version%"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Mauve $%release_version%" "UninstallString" "$INSTDIR\Uninstall.exe"
+	Goto UninstEnd
+   
+  UserUnInst:
+	; Write the uninstall keys for Windows
+	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Mauve $%release_version%" "DisplayName" "Mauve $%release_version%"
+	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Mauve $%release_version%" "UninstallString" "$INSTDIR\Uninstall.exe"
+
+  UninstEnd:
 	WriteUninstaller "Uninstall.exe"
 SectionEnd
 
@@ -154,6 +243,10 @@ SectionEnd
 
 Section "Uninstall"
 	
+	; call userInfo plugin to get user info.  The plugin puts the result in the stack
+	userInfo::getAccountType
+	pop $8
+
 	;Delete Files
 	; Top level directory files
 	
@@ -173,21 +266,34 @@ Section "Uninstall"
 	Delete /REBOOTOK "$INSTDIR\ext\*.jar"
 	RMDir "$INSTDIR\ext"
 	
+	strCmp $8 "Admin" AdminContext UserContext
+	AdminContext:
+	SetShellVarContext all
+	UserContext:
+
 	; Delete shortcuts
 	Delete /REBOOTOK "$SMPROGRAMS\Mauve.lnk"
-	Delete /REBOOTOK "$SMPROGRAMS\Mauve\Mauve.lnk"
-	Delete /REBOOTOK "$SMPROGRAMS\Mauve\Mauve License.lnk"
-	Delete /REBOOTOK "$SMPROGRAMS\Mauve\Mauve ChangeLog.lnk"
-	Delete /REBOOTOK "$SMPROGRAMS\Mauve\Mauve User Guide.lnk"
-	RMDir "$SMPROGRAMS\Mauve"
+	Delete /REBOOTOK "$SMPROGRAMS\Mauve $%release_version%\Mauve.lnk"
+	Delete /REBOOTOK "$SMPROGRAMS\Mauve $%release_version%\Mauve License.lnk"
+	Delete /REBOOTOK "$SMPROGRAMS\Mauve $%release_version%\Mauve ChangeLog.lnk"
+	Delete /REBOOTOK "$SMPROGRAMS\Mauve $%release_version%\Mauve User Guide.lnk"
+	RMDir "$SMPROGRAMS\Mauve $%release_version%"
 	
 	;Delete Uninstaller And Unistall Registry Entries
+	strCmp $8 "Admin" AdminRemove UserRemove
+	AdminRemove:
+	DeleteRegValue HKLM "SOFTWARE\Mauve" $%release_version%
+	DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Mauve $%release_version%"
+	DeleteRegKey /ifempty HKLM "Software\Mauve"
+	Goto RemoveDone
+	UserRemove:
+	DeleteRegValue HKCU "SOFTWARE\Mauve" $%release_version%
+	DeleteRegKey HKCU "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Mauve $%release_version%"
+	DeleteRegKey /ifempty HKCU "Software\Mauve"
+	RemoveDone:
 	Delete "$INSTDIR\Uninstall.exe"
-	DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Mauve"
-	DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Mauve"
 	RMDir "$INSTDIR"
 	
-	DeleteRegKey /ifempty HKCU "Software\Mauve"
 
 SectionEnd
 
