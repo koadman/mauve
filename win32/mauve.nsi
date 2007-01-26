@@ -183,7 +183,8 @@ Delete "$SMPROGRAMS\Mauve $%release_version%\Mauve.lnk"
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve.lnk" "$1\bin\javaw" "-jar -Xmx1000m Mauve.jar" "$INSTDIR\mauve.ico"
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve ChangeLog.lnk" "$INSTDIR\ChangeLog.html"
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve License.lnk" "notepad.exe" "COPYING" "$INSTDIR\COPYING" 0
-CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve Online Documentation.lnk" "$INSTDIR\Mauve Online Documentation.url" "" "$INSTDIR\Mauve Online CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Uninstall Mauve.lnk" "$INSTDIR\Uninstall.exe"
+CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve Online Documentation.lnk" "$INSTDIR\Mauve Online Documentation.url" "" "$INSTDIR\Mauve Online Documentation.url" 0
+CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Uninstall Mauve.lnk" "$INSTDIR\Uninstall.exe"
 
 
 DetailPrint "Creating Mauve shortcut for java version $0 in directory $1"
