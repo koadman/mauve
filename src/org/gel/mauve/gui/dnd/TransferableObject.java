@@ -54,7 +54,7 @@ package org.gel.mauve.gui.dnd;
  * </ul>
  * </p>
  * <p>
- * <em>Copyright © 2001 Robert Harder</em>
+ * <em>Copyright (c) 2001 Robert Harder</em>
  * </p>
  * 
  * @author Robert.Harder
