@@ -9,18 +9,23 @@
 
 	<!-- deployment locations for production ASAP integration -->
 <!--
-	<property name="asap.dir" value="\\192.168.26.120\darling\productionasap\htdocs\mauve" />
+	<property name="deploy.asapdir" value="/srv/asap/htdocs/mauve" />
 	<property name="asap.codebase" value="http://asap.ahabs.wisc.edu/asap/mauve/" />
 -->
 	<!-- deployment locations for devel ASAP integration -->
-	<property name="asap.dir" value="\\192.168.26.120\darling\develasap\htdocs\mauve" />
+	<property name="deploy.asapdir" value="/srv/asap-devel/htdocs/mauve" />
 	<property name="asap.codebase" value="http://asap.ahabs.wisc.edu/asap-devel/mauve/" />
 	<!-- deployment locations for standalone releases -->
+<!--
 	<property name="deploy.dir" value="\\192.168.26.120\darling\productionmauve\" />
+	-->
 	<property name="deploy.address" value="koadman@gel.ahabs.wisc.edu" />
-	<property name="deploy.serverdir" value="/srv/www/vhosts/gel/mauve/downloads\" />
+	<property name="deploy.bareaddress" value="gel.ahabs.wisc.edu" />
+	<property name="deploy.username" value="koadman" />
+	<property name="deploy.win32.keyfile" value="C:\Documents and Settings\koadman\My Documents\Sourceforge-Shell.ppk" />
+	<property name="deploy.serverdir" value="/srv/www/vhosts/gel/mauve/downloads/" />
 	<property name="key.alias" value="mauve" />
-	<property name="key.keystore" value="C:\development\mauve\keystore" />
+	<property name="key.keystore" value="C:\Documents and Settings\koadman\My Documents\mauve-keystore" />
 	
 	<!-- set global properties for this build -->
 	<property name="src" location="src"/>
@@ -55,7 +60,9 @@
 			<pathelement path="${support}/osxant.jar"/>
 		</classpath>
 	</taskdef>
-      
+	<!-- maverick-ant.jar supports secure FTP for deployment -->
+    <taskdef name="ssh" classname="com.sshtools.ant.Ssh" classpath="${support}/maverick-ant.jar"/>
+	
 	<target name="init">
 		<!-- Create the time stamp -->
 		<tstamp/>
@@ -345,43 +352,64 @@
 		<echo message="Deploying mauve ASAP stuff to directory ${asap.dir}" />
 		<echo message="Using codebase of ${asap.codebase}" />
 		
-		<!-- copy unmodified files -->
-		<copy todir="${asap.dir}" overwrite="yes">
-			<fileset dir=".">
-				<include name="Mauve.jar" />
-				<include name="mauveApplet.jar" />
-			</fileset>
-			<fileset dir="./ext" includes="*.jar">
-				<modified/>
-			</fileset>
-			<fileset dir="./src/images">
-				<include name="mauve_icon.gif" />
-				<include name="mauve_logo.png" />
-			</fileset>
-		</copy>
-		
-		<!-- update and copy mauve.jnlp -->
-		<copy file="./jws/mauve.jnlp.template" tofile="${asap.dir}/mauve.jnlp" overwrite="yes">
+		<!-- update and copy mauve.jnlp to dist-->
+		<copy file="./jws/mauve.jnlp.template" tofile="${dist}/mauve.jnlp" overwrite="yes">
 			<filterset>
 				<filter token="CODEBASE" value="${asap.codebase}"/>
 				<filter token="RESOURCES" value="${asap.resources}"/>
 				<filter token="ARGUMENTS" value=""/>
 			</filterset>
 		</copy>
+
+		<!-- copy unmodified files to the server -->
+		<ssh host="${deploy.bareaddress}"
+			username="${deploy.username}"
+			version="2"
+			keyfile="${deploy.win32.keyfile}">
+			<sftp action="put" remotedir="${deploy.asapdir}" verbose="true" newer="true">
+				<fileset dir=".">
+					<include name="Mauve.jar" />
+					<include name="mauveApplet.jar" />
+				</fileset>
+				<fileset dir="./ext">
+					<include name="*.jar"/>
+				</fileset>
+				<fileset dir="./src/images">
+					<include name="mauve_icon.gif" />
+					<include name="mauve_logo.png" />
+				</fileset>
+				<fileset dir="${dist}">
+					<include name="mauve.jnlp"/>
+				</fileset>
+			</sftp>
+			<!-- set the permissions so others in the group can modify them -->
+			<exec cmd="chgrp annotation ${deploy.asapdir}/*"/>
+			<exec cmd="chmod 664 ${deploy.asapdir}/*"/>
+			<!-- jar files should have the execute bit set -->
+			<exec cmd="chmod 775 ${deploy.asapdir}/*.jar"/>
+		</ssh>
 	</target>
 	
-	<!-- assumes that ${deploy.dir} is the deployment directory on the web server -->
+	<!-- assumes that an ssh key has been registered with the web server -->
 	<target name="deployWin32" depends="nsicompile">
-		<copy todir="${deploy.dir}downloads">
-			<fileset dir="${dist}">
-				<include name="mauve_installer_${release.version}.exe" />
-			</fileset>
-		</copy>
-		<copy file="${dist}/mauve_installer_${release.version}.exe" 
-			tofile="${deploy.dir}downloads/mauve_installer_${datestamp}.exe"/>
-		<echo file="${deploy.dir}downloads/latest" message="${datestamp}"/>
-		<echo file="${deploy.dir}downloads/latest.windows" message="${datestamp}"/>
+		<echo file="${dist}\latest" message="${datestamp}"/>
+		<echo file="${dist}\latest.windows" message="${datestamp}"/>
+		<ssh host="${deploy.bareaddress}"
+			username="${deploy.username}"
+			version="2"
+			keyfile="${deploy.win32.keyfile}">
+
+			<sftp action="put" remotedir="${deploy.serverdir}" verbose="true">
+				<fileset dir="${dist}">
+					<include name="mauve_installer_${release.version}.exe"/>
+					<include name="${dist}\latest"/>
+					<include name="${dist}\latest.windows"/>
+				</fileset>
+			</sftp>
+			<exec cmd="cp ${deploy.serverdir}/mauve_installer_${release.version}.exe ${deploy.serverdir}/mauve_installer_${datestamp}.exe"/>
+		</ssh>
 	</target>
+
 	<!-- assumes that passwordless ssh authentication has been configured to the web server -->
 	<target name="deployMacOSX" depends="macdist">
 		<exec executable="scp">
@@ -394,6 +422,7 @@
 			<arg value="${deploy.address}:${deploy.serverdir}" />
 		</exec>
 	</target>
+
 	<!-- assumes that passwordless ssh authentication has been configured to the web server -->
 	<target name="deployLinux" depends="dist">
 		<exec executable="scp">
