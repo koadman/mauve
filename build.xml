@@ -309,6 +309,7 @@
 			<prop name="page" value="0"/>
 			<prop name="Itemid" value="60"/>
 		</post>
+		<copyfile dest="ChangeLog" src="ChangeLog.html"/>
 	</target>
 
 	<target name="nsicompile" depends="jar,getChangeLog" description="make windows installer" >
