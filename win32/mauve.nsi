@@ -74,7 +74,7 @@ Function .onInit
 	  StrCpy $1 "unknown"
 	vOk1:
 	  IfErrors done1
-	  MessageBox MB_YESNO|MB_ICONQUESTION " A previous installation of Mauve (version $1, dir $3) was detected.$\n We strongly recommend uninstalling it.$\n Would you like to uninstall it?" IDNO done1
+	  MessageBox MB_YESNO|MB_ICONQUESTION " A previous installation of Mauve (version $1, dir $3) was detected.$\n We strongly recommend uninstalling it.$\n Would you like to uninstall it?" IDNO loop1
 	  ExecWait "$3\Uninstall.exe"
 	  Goto loop1
 	done1:
@@ -96,7 +96,7 @@ Function .onInit
 	  StrCpy $1 "unknown"
 	vOk2:
 	  IfErrors done2
-	  MessageBox MB_YESNO|MB_ICONQUESTION " A previous installation of Mauve (version $1, dir $3) was detected.$\n We strongly recommend uninstalling it.$\n Would you like to uninstall it?" IDNO done2
+	  MessageBox MB_YESNO|MB_ICONQUESTION " A previous installation of Mauve (version $1, dir $3) was detected.$\n We strongly recommend uninstalling it.$\n Would you like to uninstall it?" IDNO loop2
 	  ExecWait "$3\Uninstall.exe"
 	  Goto loop2
 	done2:
@@ -149,7 +149,7 @@ CreateShortCut "$SMPROGRAMS\Mauve.lnk" "$1\bin\javaw" "-jar -Xmx1000m Mauve.jar"
 CreateDirectory "$SMPROGRAMS\Mauve $%release_version%"
 Delete "$SMPROGRAMS\Mauve $%release_version%\Mauve.lnk"
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve.lnk" "$1\bin\javaw" "-jar -Xmx1000m Mauve.jar" "$INSTDIR\mauve.ico"
-CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve ChangeLog.lnk" "notepad.exe" "ChangeLog" "$INSTDIR\ChangeLog" 0
+CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve ChangeLog.lnk" "$INSTDIR\ChangeLog.html"
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve License.lnk" "notepad.exe" "COPYING" "$INSTDIR\COPYING" 0
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve Online Documentation.lnk" "$INSTDIR\Mauve Online Documentation.url" "" "$INSTDIR\Mauve Online Documentation.url" 0
 
@@ -182,7 +182,7 @@ pop $0
   SetOverwrite IfNewer
 
   ; Top level directory files
-  File "ChangeLog"
+  File "ChangeLog.html"
   File "COPYING"
   File "README"
   File "win32\mauveAligner.exe"
@@ -250,7 +250,7 @@ Section "Uninstall"
 	;Delete Files
 	; Top level directory files
 	
-	Delete /REBOOTOK "$INSTDIR\ChangeLog"
+	Delete /REBOOTOK "$INSTDIR\ChangeLog.html"
 	Delete /REBOOTOK "$INSTDIR\COPYING"
 	Delete /REBOOTOK "$INSTDIR\README"
 	Delete /REBOOTOK "$INSTDIR\mauveAligner.exe"
