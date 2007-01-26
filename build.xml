@@ -197,20 +197,20 @@
 		<!-- Make the tarball -->
 		<tar destfile="${dist}/mauve_${OSNAME}_${release.version}.tar.gz" compression="gzip">
 			<!-- Copy various support files into the dist directory-->
-			<tarfileset dir="." prefix="/mauve">
+			<tarfileset dir="." prefix="/mauve_${release.version}">
 				<include name="Mauve.jar" />
 				<include name="COPYING" />
 				<include name="README" />
 				<include name="ChangeLog.html" />
 				<include name="mauve_docs.pdf" />
 			</tarfileset>
-			<tarfileset dir="linux-x86" prefix="/mauve" mode="755">
+			<tarfileset dir="linux-x86" prefix="/mauve_${release.version}" mode="755">
 				<include name="Mauve" />
 				<include name="mauveAligner" />
 				<include name="progressiveMauve" />
 				<include name="muscle_aed" />
 			</tarfileset>
-			<tarfileset dir="${ext}" prefix="/mauve/ext" includes="*.jar" />
+			<tarfileset dir="${ext}" prefix="/mauve_${release.version}/ext" includes="*.jar" />
 		</tar>
 	</target>
 
