@@ -7,4 +7,4 @@
 # (c) 2003 Aaron Darling
 
 JAVA_CMD=java
-$JAVA_CMD -Xms500M -Xmx1500M -jar Mauve.jar
+$JAVA_CMD -Xms200M -Xmx1500M -jar Mauve.jar
