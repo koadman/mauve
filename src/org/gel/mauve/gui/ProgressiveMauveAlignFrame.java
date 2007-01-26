@@ -286,7 +286,8 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         parameterPanel.add(sumOfPairsCheckBox);
         parameterPanel.add(islandScoreLabel);
         parameterPanel.add(islandScoreText);
-
+// this stuff isn't working yet:
+/*
         parameterPanel.add(breakpointWeightScaleLabel);
         parameterPanel.add(breakpointWeightScaleSlider);
         parameterPanel.add(breakpointWeightScaleText);
@@ -294,7 +295,7 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         parameterPanel.add(conservationWeightScaleLabel);
         parameterPanel.add(conservationWeightScaleSlider);
         parameterPanel.add(conservationWeightScaleText);
-
+*/
         // event handling
         determineLCBsCheckBox.addActionListener(new java.awt.event.ActionListener()
         {
