@@ -18,25 +18,28 @@
   OutFile "dist\mauve_installer_$%release_version%.exe"
 
   ;The Default Installation Directory
-  InstallDir "$PROGRAMFILES\Mauve $%release_version%"
+;  InstallDir "$PROGRAMFILES\Mauve $%release_version%"
   
 
   ;Get previous installation folder from registry if available
-  InstallDirRegKey HKLM "Software\Mauve" "$%release_version%"
-  InstallDirRegKey HKCU "Software\Mauve" "$%release_version%"
+;  InstallDirRegKey HKLM "Software\Mauve" "$%release_version%"
+;  InstallDirRegKey HKCU "Software\Mauve" "$%release_version%"
 
 ;--------------------------------
 ;Interface Settings
 
   !define MUI_ABORTWARNING
+  !define MUI_FINISHPAGE_TEXT "Mauve has been successfully installed.\r\nYou may launch Mauve from the Start Menu."
 
 ;--------------------------------
 ;Pages
 
   !insertmacro MUI_PAGE_LICENSE "COPYING"
+  !define MUI_PAGE_CUSTOMFUNCTION_SHOW .checkPreviousVersions
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
+  !insertmacro MUI_PAGE_FINISH
   
   !insertmacro MUI_UNPAGE_CONFIRM
   !insertmacro MUI_UNPAGE_INSTFILES
@@ -50,7 +53,10 @@
 ;--------------------------------
 ; Look for a previous installation and prompt for uninstall
 ;
-Function .onInit
+Function .checkPreviousVersions
+
+	; first set the default install path
+	StrCpy $INSTDIR "$PROGRAMFILES\Mauve $%release_version%"
 
 	; call userInfo plugin to get user info.  The plugin puts the result in the stack
 	userInfo::getAccountType
@@ -58,6 +64,13 @@ Function .onInit
 	strCmp $8 "Admin" AdminInst UserInst
 
 	AdminInst:
+	; get the admin install dir, if available
+	ReadRegStr $9 HKLM Software\Mauve "$%release_version%"
+	IfErrors uninstLoop1
+	StrCpy $INSTDIR $9
+	uninstLoop1:
+
+	; look for previous versions to uninstall
 
 	StrCpy $0 0
 	loop1:
@@ -80,6 +93,21 @@ Function .onInit
 	done1:
    
 	UserInst:
+	; if there was no admin install dir, get the user install dir if available
+	StrCmp $9 "" userRegInstDir uninstLoop2
+	userRegInstDir:
+	ReadRegStr $9 HKCU Software\Mauve "$%release_version%"
+	IfErrors userDefaultInstdir
+	StrCpy $INSTDIR $9
+	userDefaultInstDir:
+	StrCmp $9 "" userDefaultInstDir2 uninstLoop2
+	userDefaultInstDir2:
+	strCmp $8 "Admin" uninstLoop2 UserDefaultInstDir3
+	UserDefaultInstDir3:
+	StrCpy $9 "$PROFILE\Mauve $%release_version%"
+	uninstLoop2:
+
+	; look for previous versions to uninstall
 
 	StrCpy $0 0
 	loop2:
@@ -100,6 +128,10 @@ Function .onInit
 	  ExecWait "$3\Uninstall.exe"
 	  Goto loop2
 	done2:
+
+	StrCmp $9 "" noSpecialInstDir
+	StrCpy $INSTDIR $9
+	noSpecialInstDir:
 
 FunctionEnd
 
@@ -151,7 +183,7 @@ Delete "$SMPROGRAMS\Mauve $%release_version%\Mauve.lnk"
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve.lnk" "$1\bin\javaw" "-jar -Xmx1000m Mauve.jar" "$INSTDIR\mauve.ico"
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve ChangeLog.lnk" "$INSTDIR\ChangeLog.html"
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve License.lnk" "notepad.exe" "COPYING" "$INSTDIR\COPYING" 0
-CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve Online Documentation.lnk" "$INSTDIR\Mauve Online Documentation.url" "" "$INSTDIR\Mauve Online Documentation.url" 0
+CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve Online Documentation.lnk" "$INSTDIR\Mauve Online Documentation.url" "" "$INSTDIR\Mauve Online CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Uninstall Mauve.lnk" "$INSTDIR\Uninstall.exe"
 
 
 DetailPrint "Creating Mauve shortcut for java version $0 in directory $1"
@@ -277,6 +309,8 @@ Section "Uninstall"
 	Delete /REBOOTOK "$SMPROGRAMS\Mauve $%release_version%\Mauve License.lnk"
 	Delete /REBOOTOK "$SMPROGRAMS\Mauve $%release_version%\Mauve ChangeLog.lnk"
 	Delete /REBOOTOK "$SMPROGRAMS\Mauve $%release_version%\Mauve User Guide.lnk"
+	Delete /REBOOTOK "$SMPROGRAMS\Mauve $%release_version%\Mauve Online Documentation.lnk"
+	Delete /REBOOTOK "$SMPROGRAMS\Mauve $%release_version%\Uninstall Mauve.lnk"
 	RMDir "$SMPROGRAMS\Mauve $%release_version%"
 	
 	;Delete Uninstaller And Unistall Registry Entries
@@ -284,12 +318,12 @@ Section "Uninstall"
 	AdminRemove:
 	DeleteRegValue HKLM "SOFTWARE\Mauve" $%release_version%
 	DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Mauve $%release_version%"
-	DeleteRegKey /ifempty HKLM "Software\Mauve"
+;	DeleteRegKey /ifempty HKLM "Software\Mauve"
 	Goto RemoveDone
 	UserRemove:
 	DeleteRegValue HKCU "SOFTWARE\Mauve" $%release_version%
 	DeleteRegKey HKCU "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Mauve $%release_version%"
-	DeleteRegKey /ifempty HKCU "Software\Mauve"
+;	DeleteRegKey /ifempty HKCU "Software\Mauve"
 	RemoveDone:
 	Delete "$INSTDIR\Uninstall.exe"
 	RMDir "$INSTDIR"
