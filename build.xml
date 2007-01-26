@@ -5,7 +5,7 @@
 	</description>
 	
 	<!-- set the release version -->
-	<property name="release.version" value="2.0_beta2r5"/>
+	<property name="release.version" value="2.0.0"/>
 
 	<!-- deployment locations for production ASAP integration -->
 <!--
@@ -303,8 +303,8 @@
 		<!-- Get the latest documentation PDF and ChangeLog from the docserver -->
 <!--
 		<get src="http://gel.ahabs.wisc.edu/docserver/mauve/mauve_docs.pdf" dest="mauve_docs.pdf" usetimestamp="true"/>
--->
 		<get src="http://gel.ahabs.wisc.edu/docserver/mauve/version_history.stx/document_src" dest="ChangeLog" usetimestamp="true"/>
+-->
 		
 		<!-- create output directory -->
 		<mkdir dir="${dist}" />
