@@ -306,6 +306,9 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuHelp.add(jMenuHelpClearCache);
         jMenuHelp.add(jMenuHelpConsole);
 
+        jMenuFile.setMinimumSize(jMenuFile.getSize());
+        jMenuGoTo.setMinimumSize(jMenuGoTo.getSize());
+        jMenuHelp.setMinimumSize(jMenuHelp.getSize());
         jMenuBar1.setVisible(true);
 
         jMenuFileOpen.addActionListener(this);
