@@ -104,7 +104,7 @@ public class SequenceIteratorCache {
 				if (!((SequenceIterator) ((Object []) cache.get(key))
 						[ITERATOR_INDEX]).hasNext()) {
 					keys.remove();
-					System.out.println ("removed! " + cache.get(key));
+//					System.out.println ("removed! " + cache.get(key));
 				}
 			}
 		}
