@@ -76,8 +76,10 @@ public class LCBlist
                 lcbI--; // need to decrement when there is only a single LCB
 
             // set first and last lcb adjacencies to ENDPOINT
-            lcb_list[first].setLeftAdjacency(g, ENDPOINT);
-            lcb_list[last-1].setRightAdjacency(g, ENDPOINT);
+            if(first < lcb_list.length)
+            	lcb_list[first].setLeftAdjacency(g, ENDPOINT);
+            if(last > 0)
+            	lcb_list[last-1].setRightAdjacency(g, ENDPOINT);
             if (first < last-1)
             {
                 lcb_list[first].setRightAdjacency(g, lcb_list[first+1].id);
