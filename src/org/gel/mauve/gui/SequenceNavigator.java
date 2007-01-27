@@ -484,7 +484,7 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 			do {
 				try {
 					String input = JOptionPane.showInputDialog (mauve_frame, 
-					"Enter sequence number to navigate to. . .");
+					"Enter sequence coordinate to jump to...");
 					if (input != null)
 						pos = Long.parseLong (input);
 					else
