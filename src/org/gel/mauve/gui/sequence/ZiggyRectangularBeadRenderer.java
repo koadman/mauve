@@ -64,7 +64,7 @@ public class ZiggyRectangularBeadRenderer extends AbstractBeadRenderer
      */
     public static final ChangeType HEIGHTSCALING =
 	new ChangeType("The height scaling policy of the features has changed",
-		       "org.gel.mauve.gui.sequence.ZiggyRectangularBeadRenderer",
+		       ZiggyRectangularBeadRenderer.class,
 		       "HEIGHTSCALING", SequenceRenderContext.LAYOUT);
 
     protected Rectangle2D rect;
