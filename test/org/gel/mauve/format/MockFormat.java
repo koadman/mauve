@@ -113,4 +113,6 @@ public class MockFormat implements SupportedFormat
     {
         return new FilterCacheSpec[0];
     }
+    
+    public boolean isRich(){ return false; }
 }
