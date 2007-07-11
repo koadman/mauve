@@ -37,9 +37,11 @@ import javax.swing.KeyStroke;
 import javax.swing.Scrollable;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.EventListenerList;
 
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.ColorScheme;
+import org.gel.mauve.HighlightListener;
 import org.gel.mauve.LcbViewerModel;
 import org.gel.mauve.ModelEvent;
 import org.gel.mauve.ModelListener;
@@ -138,18 +140,20 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     // A weird hack to change cursor for zooming.
     private CtrlKeyDetector ctrlDetector = new CtrlKeyDetector();
     
+    /** a list of objects listening for hint messages */
+    private EventListenerList hintMessageListeners = new EventListenerList();
+    
     /**
      * Does basic initialization for a RearrangementPanel. Call
      * readRearrangementData() to load and display data.
      * 
-     * @param mauveFrame
-     *            The parent frame which contains this RearrangementPanel
+     * @param toolbar
+     *            A toolbar which can be manipulated by this panel
      */
-    public RearrangementPanel(MauveFrame mauveFrame)
+    public RearrangementPanel(JToolBar toolbar)
     {
         setLayout(new FillLayout());
-        this.mauveFrame = mauveFrame;
-        this.toolbar = mauveFrame.toolbar;
+        this.toolbar = toolbar;
     }
 
     /**
@@ -176,12 +180,12 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         newPanels = v;
     }
 
-    SeqPanel getNewPanel(int i)
+    public SeqPanel getNewPanel(int i)
     {
         return (SeqPanel) newPanels.elementAt(i);
     }
 
-    RRSequencePanel getSequencePanel(int i)
+    public RRSequencePanel getSequencePanel(int i)
     {
         return getNewPanel(i).getSequencePanel();
     }
@@ -261,6 +265,8 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     private void addKeyMapping(String stroke, String actionName)
     {
         getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(stroke), actionName);
+        getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(stroke), actionName);
+        getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(stroke), actionName);
         getActionMap().put(actionName, new GenericAction(this, actionName));
     }
     
@@ -355,6 +361,17 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         zoom_button.setActionCommand("Zoom");
         zoom_button.addActionListener(this);
         toolbar.add(zoom_button);
+
+        final RearrangementPanel thisrrpanel = this;
+        JButton findFeatureButton = new JButton();
+        findFeatureButton.setAction( new AbstractAction(){
+        	public void actionPerformed(ActionEvent ae){
+        		new SequenceNavigator(thisrrpanel, thisrrpanel, getModel()).showNavigator();
+        	}
+        });
+        findFeatureButton.setToolTipText("Find an annotated feature... (Ctrl+I)");
+        findFeatureButton.setIcon(MauveFrame.find_feature_icon);
+        toolbar.add(findFeatureButton);
 
         // When clicked, the zoom out button zooms the display 50% (doubles the
         // displayed area)
@@ -476,9 +493,40 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
 
         // tell the user how many LCBs there are
         String status_text = "There are " + lm.getVisibleLcbCount() + " LCBs with minimum weight " + lm.getMinLCBWeight();
-        mauveFrame.status_bar.setHint(status_text);
+        fireHintMessageEvent(status_text);
     }
 
+    /**
+     * Add a HintMessageListener to the list of listeners for the model.
+     * 
+     * @param l listener to add
+     */
+    public void addHintMessageListener(HintMessageListener l) {
+    	hintMessageListeners.add(HintMessageListener.class, l);
+    }
+
+    /**
+     * Remove a HintMessageListener from the list of listeners for this model.
+     * 
+     * @param l listener to remove
+     */
+    public void removeHintMessageListenerListener(HintMessageListener l) {
+    	hintMessageListeners.remove(HintMessageListener.class, l);
+    }
+    
+    /**
+     * Invoke {@link HintMessageListener.messageChanged(ModelEvent)} on
+     * this model's collection of HintMessageListener.
+     */
+    protected void fireHintMessageEvent(String message) {
+        Object[] listeners = hintMessageListeners.getListenerList();
+        for (int i = 0; i < listeners.length; i++) {
+            if (listeners[i]==HintMessageListener.class) {
+                ((HintMessageListener)listeners[i+1]).messageChanged(new HintMessageEvent(this,message));
+            }
+        }
+    }
+    
     // CHANGE LISTENER METHODS
 
     public void stateChanged(ChangeEvent e)
@@ -530,7 +578,7 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
             if (weight_slider.getValueIsAdjusting())
             {
                 String status_text = "There are " + model.getVisibleLcbCount() + " LCBs with minimum weight " + min_weight;
-                mauveFrame.status_bar.setHint(status_text);
+                fireHintMessageEvent(status_text);
             }
         }
     }
@@ -835,7 +883,7 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         {
             hand_button.setSelected(false);
             zoom_button.setSelected(false);
-            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            setCursor(null);
             KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(ctrlDetector);
         }
         else if (model.getMode() == ViewerMode.HAND)
