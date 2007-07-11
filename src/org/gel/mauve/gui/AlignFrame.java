@@ -54,6 +54,7 @@ public class AlignFrame extends java.awt.Frame
     JCheckBox collinearCheckBox = new JCheckBox();
 
     public JButton alignButton = new JButton();
+    public JButton cancelButton = new JButton();
 
     JPanel sequencesPanel = new JPanel();
     JButton addButton = new JButton();
@@ -74,6 +75,7 @@ public class AlignFrame extends java.awt.Frame
     Dimension d;
 
     Mauve mauve;
+    AlignWorker worker;
     
     public AlignFrame(Mauve mauve)
     {
@@ -146,6 +148,11 @@ public class AlignFrame extends java.awt.Frame
         alignButton.setSize(new java.awt.Dimension(80, 30));
         alignButton.setText("Align...");
         alignButton.setLocation(new java.awt.Point(250, 320));
+        cancelButton.setVisible(true);
+        cancelButton.setEnabled(false);
+        cancelButton.setSize(new java.awt.Dimension(135, 30));
+        cancelButton.setText("Cancel alignment");
+        cancelButton.setLocation(new java.awt.Point(110, 320));
         sequencesPanel.setSize(new java.awt.Dimension(350, 210));
         sequencesPanel.setLocation(new java.awt.Point(0, 0));
         sequencesPanel.setVisible(true);
@@ -218,6 +225,7 @@ public class AlignFrame extends java.awt.Frame
 
         parentPanel.add(alignmentOptionPane);
         parentPanel.add(alignButton);
+        parentPanel.add(cancelButton);
 
         add(parentPanel);
 
@@ -303,6 +311,13 @@ public class AlignFrame extends java.awt.Frame
                 alignButtonActionPerformed(e);
             }
         });
+        cancelButton.addActionListener(new java.awt.event.ActionListener()
+                {
+                    public void actionPerformed(java.awt.event.ActionEvent e)
+                    {
+                        cancelButtonActionPerformed(e);
+                    }
+                });
     }
     
     File getDefaultFile() throws IOException
@@ -331,23 +346,38 @@ public class AlignFrame extends java.awt.Frame
         MyConsole.showConsole();
         printCommand(mauve_cmd);
         
-        AlignWorker worker = new AlignWorker(this, mauve_cmd);
+        worker = new AlignWorker(this, mauve_cmd);
         worker.start();
+        cancelButton.setEnabled(true);
     }
     
     public void completeAlignment(int retcode)
     {
         alignButton.setEnabled(true);
-
+        cancelButton.setEnabled(false);
+        
         if (retcode == 0)
         {
+            File readFile = new File(read_filename);
+            if(!readFile.exists() || readFile.length() == 0)
+            {
+                JOptionPane.showMessageDialog(null, "The aligner failed to produce an alignment.  The sequences may not contain any homologous regions.", "An error occurred", JOptionPane.ERROR_MESSAGE);
+            }
+
             mauve.loadFile(new File(read_filename));
             setVisible(false);
         }
-        else
+        else if(!worker.getKilled())
         {
             JOptionPane.showMessageDialog(null, "mauveAligner exited with an error code.  Check the log window for details", "An error occurred", JOptionPane.ERROR_MESSAGE);
         }
+        worker = null;
+    }
+    public void cancelButtonActionPerformed(java.awt.event.ActionEvent evt)
+    {
+    	worker.interrupt();
+    	alignButton.setEnabled(true);
+    	cancelButton.setEnabled(false);
     }
     
     protected String[] makeAlignerCommand()

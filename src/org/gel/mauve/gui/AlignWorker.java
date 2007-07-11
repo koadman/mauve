@@ -13,6 +13,8 @@ public class AlignWorker extends SwingWorker
     String[] mauve_cmd;
     AlignFrame align_frame;
     int retcode = -1;
+    private Process align_proc = null;
+    private boolean killed = false;
     
     public AlignWorker (AlignFrame align_frame, String[] mauve_cmd)
     {
@@ -24,7 +26,7 @@ public class AlignWorker extends SwingWorker
     {
         try
         {
-            Process align_proc = Runtime.getRuntime().exec(mauve_cmd);
+            align_proc = Runtime.getRuntime().exec(mauve_cmd);
 
             OutStreamPrinter outP = new OutStreamPrinter(align_proc.getInputStream());
             ErrStreamPrinter errP = new ErrStreamPrinter(align_proc.getErrorStream());
@@ -38,22 +40,29 @@ public class AlignWorker extends SwingWorker
             }
             catch (InterruptedException e)
             {
-                MyConsole.err().println("Interrupted.");
+            	if(!killed)
+            		MyConsole.err().println("Interrupted.");
             }
 
-            if (retcode == 0)
-            {
-                MyConsole.out().println("Completed without error.");
-            }
-            else
-            {
-                MyConsole.err().println("Exited with error code: " + retcode);
-            }
+        	if(!killed)
+        	{
+	            if (retcode == 0)
+	            {
+	                MyConsole.out().println("Completed without error.");
+	            }
+	            else
+	            {
+	                MyConsole.err().println("Exited with error code: " + retcode);
+	            }
+        	}
         }
         catch (IOException e)
         {
-            MyConsole.err().println("Error running aligner.");
-            e.printStackTrace(MyConsole.err());
+        	if(!killed)
+        	{
+	            MyConsole.err().println("Error running aligner.");
+	            e.printStackTrace(MyConsole.err());
+        	}
         }
         return new Integer(retcode);
     }
@@ -61,6 +70,16 @@ public class AlignWorker extends SwingWorker
     public void finished()
     {
         align_frame.completeAlignment(retcode);
+    }
+    public void interrupt() {
+    	killed = true;
+    	align_proc.destroy();
+    	align_proc = null;
+    	super.interrupt();
+    }
+    public boolean getKilled()
+    {
+    	return killed;
     }
 }
 
