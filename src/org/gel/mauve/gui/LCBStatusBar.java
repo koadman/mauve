@@ -24,7 +24,7 @@ import org.gel.mauve.XmfaViewerModel;
 /**
  * This class displays statistics about LCBs in a status bar
  */
-public class LCBStatusBar extends JPanel implements HighlightListener
+public class LCBStatusBar extends JPanel implements HighlightListener, HintMessageListener
 {
     JLabel hint_bar = new JLabel(" ");
     JLabel LCB_length_status = new JLabel(" ");
@@ -118,6 +118,11 @@ public class LCBStatusBar extends JPanel implements HighlightListener
     {
         segment_name.setText(" ");
         segment_loc.setText(" ");
+    }
+
+    public void messageChanged(HintMessageEvent hme)
+    {
+    	hint_bar.setText(hme.getMessage());
     }
 
     public void setHint(String hint)
