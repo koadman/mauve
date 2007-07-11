@@ -13,6 +13,7 @@ import org.biojava.bio.seq.StrandedFeature;
 import org.biojava.bio.seq.io.SimpleAssemblyBuilder;
 import org.biojava.bio.symbol.RangeLocation;
 import org.biojava.utils.ChangeVetoException;
+import org.biojavax.bio.seq.RichSequenceIterator;
 import org.gel.mauve.format.FastaFormat;
 import org.gel.mauve.format.SupportedFormatFactory;
 
@@ -122,7 +123,10 @@ public class GenomeBuilder
             Sequence s;
             try
             {
-                s = seqi.nextSequence();
+            	if(seqi instanceof RichSequenceIterator)
+                    s = ((RichSequenceIterator)seqi).nextRichSequence();
+            	else
+            		s = seqi.nextSequence();
             }
             catch (NoSuchElementException e)
             {
