@@ -57,16 +57,19 @@ public class XmfaViewerModel extends LcbViewerModel
         // Find cached directory, if it exists.
     	URL xmfa_url = new URL("file://" + getSrc());
         File dir = null;
-        try
+        if(ModelBuilder.getUseDiskCache())
         {
-            dir = ModelBuilder.getCachedDirectory(xmfa_url);
+	        try
+	        {
+	            dir = ModelBuilder.getCachedDirectory(xmfa_url);
+	        }
+	        catch (BackingStoreException e)
+	        {
+	            System.err.println("Error reading preferences.  Error follows.  Will load from server.");
+	            e.printStackTrace();
+	        }
         }
-        catch (BackingStoreException e)
-        {
-            System.err.println("Error reading preferences.  Error follows.  Will load from server.");
-            e.printStackTrace();
-        }
-        if( dir == null ){
+        if( ModelBuilder.getUseDiskCache() && dir == null ){
 	        // Create a temporary directory.
 	        dir = File.createTempFile("mauve", "dir");
 	        dir.delete();
@@ -78,15 +81,24 @@ public class XmfaViewerModel extends LcbViewerModel
 	        ModelBuilder.saveCachedDirectory(xmfa_url, dir);
         }
         
+        if (listener != null)
+        {
+            listener.alignmentStart();
+        }
+
         // check whether XMFA has changed since the
         // cache was created!!
         // open object I/O for caching
-        File cache_file = new File(dir, "mauve.cache");
+        File cache_file = null;
         ObjectInputStream cache_instream = null;
-        if(cache_file.exists() && cache_file.canRead() &&
-        		getSrc().lastModified() < cache_file.lastModified())
+        if(ModelBuilder.getUseDiskCache())
         {
-        	cache_instream = new ObjectInputStream(new java.io.FileInputStream(cache_file));
+            cache_file = new File(dir, "mauve.cache");
+	        if(cache_file.exists() && cache_file.canRead() &&
+	        		getSrc().lastModified() < cache_file.lastModified())
+	        {
+	        	cache_instream = new ObjectInputStream(new java.io.FileInputStream(cache_file));
+	        }
         }
 
         RandomAccessFile inputFile = new RandomAccessFile(getSrc(), "r");
@@ -155,7 +167,7 @@ public class XmfaViewerModel extends LcbViewerModel
         	{
             	// if the backbone is newer than the cache then clear the cache
 	        	File bb_file = BackboneListBuilder.getBbFile(this,xmfa);
-	            if(	bb_file.lastModified() > cache_file.lastModified())
+	            if(	ModelBuilder.getUseDiskCache() && bb_file.lastModified() > cache_file.lastModified())
 	            	cache_instream = null;
         	}
         }catch(IOException ioe)
@@ -188,7 +200,7 @@ public class XmfaViewerModel extends LcbViewerModel
 
         // if cache_instream is null there must have been a problem
         // reading the cache.  write out all objects that should be cached
-        if(cache_instream == null){
+        if(cache_instream == null && ModelBuilder.getUseDiskCache()){
         	ObjectOutputStream cache_outstream = null;
         	cache_outstream = new ObjectOutputStream(new FileOutputStream(cache_file));
         	cache_outstream.writeObject(xmfa);
@@ -223,7 +235,7 @@ public class XmfaViewerModel extends LcbViewerModel
      * 
      * @return
      */
-    XMFAAlignment getXmfa()
+    public XMFAAlignment getXmfa()
     {
         return xmfa;
     }
