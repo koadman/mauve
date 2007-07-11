@@ -6,8 +6,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
+import java.util.EventListener;
 import java.util.Iterator;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.JDialog;
@@ -16,6 +18,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
+import javax.swing.event.EventListenerList;
 
 import org.biojava.bio.gui.sequence.FeatureBlockSequenceRenderer;
 import org.biojava.bio.gui.sequence.FilteringRenderer;
@@ -59,7 +62,10 @@ public class FeaturePanel extends AbstractSequencePanel
     public static final int MAX_FEATURE_DISPLAY_RANGE = 500000;
     private TranslatedSequencePanel trans;
     private Sequence seq;
-
+    private final GenbankMenuItemBuilder gmib = new GenbankMenuItemBuilder();
+    private final DbXrefMenuItemBuilder dmib = new DbXrefMenuItemBuilder();
+    private final FeaturePopupMenuBuilder fpmb = new FeaturePopupMenuBuilder();
+    
     public FeaturePanel(Genome genome, BaseViewerModel model)
     {
         super(model, genome);
@@ -154,9 +160,16 @@ public class FeaturePanel extends AbstractSequencePanel
             JOptionPane.showMessageDialog(this, "Could not render pane", "Rendering error", JOptionPane.ERROR_MESSAGE);
             clearTransPanel();
         }
-
+        
+        // add menu item builders
+        fpmb.addMenuItemBuilder(gmib);
+        fpmb.addMenuItemBuilder(dmib);
     }
-	
+
+    public FeaturePopupMenuBuilder getFeaturePopupMenuBuilder(){ return fpmb; }
+    public DbXrefMenuItemBuilder getDbXrefMenuItemBuilder(){ return dmib; }
+    public GenbankMenuItemBuilder getGenbankMenuItemBuilder(){ return gmib; }
+    
     private SequenceRenderer barRenderer(String type, Color innerColor, double depth, StrandedFeature.Strand strand) throws ChangeVetoException
     {
     	FeatureFilter filter = new FeatureFilter.And(new FeatureFilter.ByType(type),new FeatureFilter.StrandFilter(strand));
@@ -246,18 +259,59 @@ public class FeaturePanel extends AbstractSequencePanel
             dialog.setVisible(true);
     	}
 	}
-
-    private final class ClickListener implements SequenceViewerListener
-    {
-        public void mouseClicked(SequenceViewerEvent sve)
-        {            
+	
+	public interface FeatureMenuItemBuilder extends EventListener
+	{
+		public JMenuItem[] getItem(SequenceViewerEvent sve, Genome g, BaseViewerModel model);
+	}
+	
+	public class FeaturePopupMenuBuilder
+	{
+	    protected EventListenerList builders = new EventListenerList();
+		public void addMenuItemBuilder(FeatureMenuItemBuilder fmib)
+		{
+			builders.add(FeatureMenuItemBuilder.class, fmib);
+		}
+		public JPopupMenu build(SequenceViewerEvent sve, Genome g, BaseViewerModel model)
+		{
+			Object[] listeners = builders.getListenerList();
+        	JPopupMenu leMenu = new JPopupMenu();
+        	for (int i = listeners.length-2; i>=0; i-=2) {
+                if (listeners[i]==FeatureMenuItemBuilder.class) {
+            		JMenuItem[] items = ((FeatureMenuItemBuilder)listeners[i+1]).getItem(sve, g, model);
+            		for(int j = 0; j < items.length; j++)
+            			leMenu.add(items[j]);
+                }
+            }
+			return leMenu;
+		}		
+		public void removeMenuItemBuilder(FeatureMenuItemBuilder fmib)
+		{
+			builders.remove(FeatureMenuItemBuilder.class, fmib);
+		}
+	}
+	
+	
+	private class GenbankMenuItemBuilder implements FeatureMenuItemBuilder
+	{
+		public JMenuItem[] getItem(SequenceViewerEvent sve, Genome g, BaseViewerModel model)
+		{
+        	JMenuItem gbk_item = new JMenuItem();
+        	gbk_item.setAction( new GenbankMenuAction(sve.getPos()) );
+        	return new JMenuItem[]{gbk_item};
+		}
+	}
+	private class DbXrefMenuItemBuilder implements FeatureMenuItemBuilder
+	{
+		public JMenuItem[] getItem(SequenceViewerEvent sve, Genome g, BaseViewerModel model)
+		{
+			Vector items = new Vector();
             Object t = sve.getTarget();
 
             if (t instanceof FeatureHolder)
             {
             	// we'll be popping up a menu with DB xref options
             	// for the user
-            	JPopupMenu db_xref_menu = new JPopupMenu();
 
             	FeatureHolder fh = (FeatureHolder) t;
                 for (Iterator fi = fh.features(); fi.hasNext();)
@@ -291,7 +345,7 @@ public class FeaturePanel extends AbstractSequencePanel
 		                    	String db_name = dxuf.getDbName(cur_xref);
 		                    	JMenuItem xref_item = new JMenuItem();
 		                    	xref_item.setAction( new DbXrefMenuAction(db_url,db_name,feature_name) );
-		                    	db_xref_menu.add(xref_item);
+		                    	items.add(xref_item);
                     		}catch(DbXrefFactory.UnknownDatabaseException ude)
 							{
                     			System.err.println(ude.getMessage());
@@ -299,12 +353,19 @@ public class FeaturePanel extends AbstractSequencePanel
                     	}
                     }
                 }
-            	JMenuItem gbk_item = new JMenuItem();
-            	gbk_item.setAction( new GenbankMenuAction(sve.getPos()) );
-            	db_xref_menu.add(gbk_item);
+           }
+           JMenuItem[] items_array = new JMenuItem[items.size()];
+           items.toArray(items_array);
+           return items_array;
+		}
+	}
 
-            	db_xref_menu.show(sve.getMouseEvent().getComponent(), sve.getMouseEvent().getX(), sve.getMouseEvent().getY());
-            }
+    private final class ClickListener implements SequenceViewerListener
+    {
+        public void mouseClicked(SequenceViewerEvent sve)
+        {            
+        	JPopupMenu jpm = fpmb.build(sve, getGenome(), model);
+        	jpm.show(sve.getMouseEvent().getComponent(), sve.getMouseEvent().getX(), sve.getMouseEvent().getY());
 
         }
 
