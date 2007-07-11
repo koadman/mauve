@@ -165,6 +165,20 @@ public class ModelBuilder
         }
         
     }
+
+    /** configures whether a disk cache can be used to speed up repeated loading of alignments */
+    static protected boolean useDiskCache = true;
+    
+    /** configures whether a disk cache can be used to speed up repeated loading of alignments */
+    public static void setUseDiskCache(boolean useCache)
+    {
+    	useDiskCache = useCache;
+    }
+    /** returns whether a disk cache should be used to speed up repeated loading of alignments */
+    public static boolean getUseDiskCache()
+    {
+    	return useDiskCache;
+    }
     
     private static boolean deleteDirectory(File path) 
     {
