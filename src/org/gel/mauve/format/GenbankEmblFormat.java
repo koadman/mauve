@@ -2,6 +2,8 @@ package org.gel.mauve.format;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.biojava.bio.Annotation;
 import org.biojava.bio.gui.sequence.RectangularBeadRenderer;
@@ -11,6 +13,12 @@ import org.biojava.bio.seq.FeatureHolder;
 import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.seq.StrandedFeature;
 import org.biojava.utils.ChangeVetoException;
+import org.biojavax.Note;
+import org.biojavax.RichObjectFactory;
+import org.biojavax.bio.seq.RichFeature;
+import org.biojavax.bio.seq.RichSequence;
+import org.biojavax.bio.taxa.NCBITaxon;
+import org.biojavax.ontology.ComparableTerm;
 import org.gel.mauve.FilterCacheSpec;
 import org.gel.mauve.gui.sequence.ZiggyRectangularBeadRenderer;
 
@@ -79,9 +87,17 @@ public abstract class GenbankEmblFormat extends BaseFormat
             {
                 return (String) a.getProperty("chromosome");
             }
+            else if (a.containsProperty("biojavax:chromosome"))
+            {
+                return (String) a.getProperty("biojavax:chromosome");
+            }
             else if (a.containsProperty("plasmid"))
             {
                 return (String) a.getProperty("plasmid");
+            }
+            else if (a.containsProperty("biojavax:plasmid"))
+            {
+                return (String) a.getProperty("biojavax:plasmid");
             }
         }
         return null;
@@ -89,20 +105,52 @@ public abstract class GenbankEmblFormat extends BaseFormat
 
     public String getSequenceName(Sequence s)
     {
+        String name = "<html>";
+    	if(s instanceof RichSequence)
+    	{
+    		NCBITaxon nt = ((RichSequence)s).getTaxon();
+    		if(nt == null)
+    			return "";	// no taxonomy info, so can't figure out a name
+            name += "<i>" + nt.getDisplayName() + "</i> ";
+    	}
         FeatureHolder fh = s.filter(new FeatureFilter.ByType("source"));
         if (fh.countFeatures() != 0)
         {
             Feature f2 = (Feature) fh.features().next();
             Annotation a = f2.getAnnotation();
-            String name = "";
             String add = null;
+
+            if(f2 instanceof RichFeature)
+            {
+            	RichFeature f3 = (RichFeature)f2;
+	            final Set noteSet = f3.getNoteSet();
+	            final Iterator n = noteSet.iterator();
+	            while(n.hasNext()) {
+	                final Note note = (Note) n.next();
+//	                if (note.getTerm().getName().equals("organelle")) 
+//	                	return note.getValue().equals("mitochondrion");
+	            }
+            }
+
+            ComparableTerm organismTerm = RichObjectFactory.getDefaultOntology().getOrCreateTerm("organism");
+            ComparableTerm serovarTerm = RichObjectFactory.getDefaultOntology().getOrCreateTerm("serovar");
+            ComparableTerm strainTerm = RichObjectFactory.getDefaultOntology().getOrCreateTerm("strain");
+            ComparableTerm plasmidTerm = RichObjectFactory.getDefaultOntology().getOrCreateTerm("plasmid");
             if (a.containsProperty("organism"))
             {
                 name += a.getProperty("organism") + " ";
+            }else if (a.containsProperty(organismTerm))
+            {
+                name += a.getProperty(organismTerm) + " ";
             }
             if (a.containsProperty("serovar"))
             {
             	add = a.getProperty("serovar").toString ();
+            	if (name.indexOf(add) == -1)
+            		name += add + " ";
+            }else if (a.containsProperty(serovarTerm))
+            {
+            	add = a.getProperty(serovarTerm).toString ();
             	if (name.indexOf(add) == -1)
             		name += add + " ";
             }
@@ -111,9 +159,27 @@ public abstract class GenbankEmblFormat extends BaseFormat
             	add = a.getProperty("strain").toString ();
             	if (name.indexOf(add) == -1)
             		name += add + " ";
+            }else if (a.containsProperty(strainTerm))
+            {
+            	add = a.getProperty(strainTerm).toString ();
+            	if (name.indexOf(add) == -1)
+            		name += add + " ";
             }
-            if(name != "")
-            	return name.trim ();
+            if (a.containsProperty("plasmid"))
+            {
+            	add = a.getProperty("plasmid").toString ();
+            	if (name.indexOf(add) == -1)
+            		name += add + " ";
+            }else if (a.containsProperty(plasmidTerm))
+            {
+            	add = a.getProperty(plasmidTerm).toString ();
+            	if (name.indexOf(add) == -1)
+            		name += "plasmid " + add + " ";
+            }
+            if(!name.equals("<html>") )
+            {
+            	return name.trim() + "</html>";
+            }
         }
         // if a source feature didn't exist
         // try getting the source from the headers
