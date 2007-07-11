@@ -105,6 +105,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     static ImageIcon hand_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/Hand16.gif"));
     static ImageIcon dark_hand_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/DarkHand16.gif"));
     public static ImageIcon mauve_icon = new ImageIcon(MauveFrame.class.getResource("/images/mauve_icon.gif"));
+    static ImageIcon find_feature_icon = new ImageIcon(MauveFrame.class.getResource("/images/searchBinoculars16.png"));
     static ImageIcon fist_icon = new ImageIcon(MauveFrame.class.getResource("/images/fist_icon.gif"));
     static ImageIcon hand_icon = new ImageIcon(MauveFrame.class.getResource("/images/hand_icon.gif"));
     static ImageIcon dcj_icon = new ImageIcon(MauveFrame.class.getResource("/images/Dcj16.gif"));
@@ -461,7 +462,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             }
             if (source == jMenuGoToSeqPos || ae.getActionCommand().equals(
             		jMenuGoToSeqPos.getText ())) {
-            	SequenceNavigator.goToSeqPos (this);
+            	SequenceNavigator.goToSeqPos (this, getModel(), rrpanel);
             }
             if (source == jMenuGoToFeatName || ae.getActionCommand().equals(
             		jMenuGoToFeatName.getText ())) {
@@ -555,15 +556,17 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             toolbar = new JToolBar();
             jMenuBar1.add(toolbar);
             
-            rrpanel = new RearrangementPanel(this);
+            rrpanel = new RearrangementPanel(toolbar);
             Dimension max_size = new Dimension( 10000, 10000 );
             rrpanel.setMaximumSize(max_size);
 
             scrollPane = new JScrollPane(rrpanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             getContentPane().add(scrollPane);
+            scrollPane.getVerticalScrollBar().setUnitIncrement(25);
 
             model.addHighlightListener(status_bar);
             status_bar.setModel(model);
+            rrpanel.addHintMessageListener(status_bar);
             
             rrpanel.init(model);
             validate();
