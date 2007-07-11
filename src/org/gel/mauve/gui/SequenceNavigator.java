@@ -2,7 +2,9 @@ package org.gel.mauve.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -13,17 +15,15 @@ import java.awt.event.WindowEvent;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.StringTokenizer;
 import java.util.Vector;
 
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JFrame;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JLabel;
 import javax.swing.JButton;
@@ -31,22 +31,19 @@ import javax.swing.JOptionPane;
 import javax.swing.BorderFactory;
 import javax.swing.JSplitPane;
 import javax.swing.JViewport;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 
 import org.gel.mauve.Genome;
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.SeqFeatureData;
-import org.gel.mauve.gui.navigation.AnnotationContainsFilter;
 import org.gel.mauve.gui.navigation.NavigationPanel;
 import org.gel.mauve.gui.navigation.SearchResultPanel;
 import org.gel.mauve.gui.sequence.RRSequencePanel;
 import org.gel.mauve.gui.sequence.SeqPanel;
 
-import org.biojava.bio.AnnotationType;
 import org.biojava.bio.seq.Feature;
-import org.biojava.bio.seq.FeatureFilter;
-import org.biojava.bio.seq.FeatureHolder;
-import org.biojava.bio.seq.OptimizableFilter;
 
 
 /**
@@ -62,7 +59,9 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	/**
 	 * gui components needed throughout the class
 	 */
-	protected MauveFrame mauve_frame;
+	protected Component parent_component;	/**< The parent component of the panel, if it disappears, so will the panel */
+	protected RearrangementPanel rrpanel;	/**< The panel displaying data under navigation */
+	protected BaseViewerModel data_model;	/**< The data model being displayed and navigated */
 	protected JFrame frame;
 	protected JComboBox genomes;
 	protected LinkedList nav_panels;
@@ -77,6 +76,7 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	protected JScrollPane nav_scroll;
 	protected LinkedList window_listeners;
 	protected WindowAdapter adapt;
+	protected AncestorListener ancestListener;
 	
 	protected LinkedList threads = new LinkedList ();
 	
@@ -133,7 +133,17 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 */
 	public SequenceNavigator (MauveFrame frame) {
 		super ();
-		mauve_frame = frame;
+		parent_component = frame.getRootPane();
+		data_model = frame.getModel();
+		nav_panels = new LinkedList ();
+		initGUI ();
+	}
+	public SequenceNavigator (Component parent, RearrangementPanel rrpanel, BaseViewerModel dataModel) 
+	{
+		super ();
+		parent_component = parent;
+		data_model = dataModel;
+		this.rrpanel = rrpanel;
 		nav_panels = new LinkedList ();
 		initGUI ();
 	}
@@ -199,7 +209,17 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 				frame.setVisible (false);
 			}
 		};
-		mauve_frame.addWindowListener(adapt);
+		ancestListener = new AncestorListener(){
+			public void ancestorMoved(AncestorEvent ae){}
+			public void ancestorAdded(AncestorEvent ae){}
+			public void ancestorRemoved(AncestorEvent ae){
+				frame.setVisible(false);
+			}
+		};
+		if(parent_component instanceof Frame)
+			((Frame)parent_component).addWindowListener(adapt);
+		else if(parent_component instanceof JComponent)
+			((JComponent)parent_component).addAncestorListener(ancestListener);
 		/*mauve_frame.addWindowListener(new WindowAdapter () {
 			public void windowClosing (WindowEvent e) {
 				frame.setVisible (false);
@@ -248,7 +268,7 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 		Dimension needed = frame.getSize();
 		int area = 0;
 		Dimension total = Toolkit.getDefaultToolkit().getScreenSize();
-		Dimension taken = mauve_frame.getSize ();
+		Dimension taken = parent_component.getSize ();
 		int extra = total.width - taken.width;
 		int x = 0;
 		int y = 0;
@@ -272,12 +292,11 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 *
 	 */
 	public void loadGenomeList () {
-		BaseViewerModel model = mauve_frame.getModel ();
-		genome_choices = SeqFeatureData.userSelectableGenomes (model, true, true);
+		genome_choices = SeqFeatureData.userSelectableGenomes (data_model, true, true);
 		genomes.setRenderer (GenomeCellRenderer.getListCellRenderer ());
 		genomes.setModel (new DefaultComboBoxModel (genome_choices));
 		result_pane = new SearchResultPanel (SeqFeatureData.userSelectableGenomes (
-				model, false, false), this);
+				data_model, false, false), this);
 	}
 	
 	/**
@@ -475,27 +494,30 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 * sequence position from a specific sequence to navigate to, and performs
 	 * navigation
 	 *
+	 * @param parentComponent	The parent in the GUI heirarchy
+	 * @param dataModel		A viewer data model containing sequence data of interest
+	 * @param rrpanel		The rearrangement panel to adjust when the user selects a seq coordinate
 	 */
-	public static void goToSeqPos (MauveFrame mauve_frame) {
-		Genome [] chosen = SeqFeatureData.userSelectedGenomes (mauve_frame, 
-				mauve_frame.getModel (), false, false);
+	public static void goToSeqPos (Component parentComponent, BaseViewerModel dataModel, RearrangementPanel rrpanel) {
+		Genome [] chosen = SeqFeatureData.userSelectedGenomes (parentComponent, 
+				dataModel, false, false);
 		if (chosen != null) {
 			long pos = -1;
 			do {
 				try {
-					String input = JOptionPane.showInputDialog (mauve_frame, 
+					String input = JOptionPane.showInputDialog (parentComponent, 
 					"Enter sequence coordinate to jump to...");
 					if (input != null)
 						pos = Long.parseLong (input);
 					else
 						break;
 				} catch (NumberFormatException e) {
-					JOptionPane.showMessageDialog(mauve_frame, "Invalid position entered",
+					JOptionPane.showMessageDialog(parentComponent, "Invalid position entered",
 							"Invalid Data", JOptionPane.ERROR_MESSAGE);
 				}
 			} while (pos == -1);
 			if (pos != -1)
-				goToPosition (pos, chosen [0], mauve_frame);
+				goToPosition (pos, chosen [0], rrpanel);
 		}
 	}
 	
@@ -508,9 +530,9 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 */
 	public void goToFeatureByName () {
 		Genome [] chosen = SeqFeatureData.userSelectedGenomes (
-				mauve_frame, mauve_frame.getModel (), true, true);
+				parent_component, data_model, true, true);
 		if (chosen != null) {
-			String input = JOptionPane.showInputDialog (mauve_frame, 
+			String input = JOptionPane.showInputDialog (parent_component, 
 			"Enter name of desired feature. . .");
 			if (input != null) {
 				String [][] data = new String [1][3];
@@ -532,7 +554,7 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 				if (count == 1)
 					displayFeature ((Feature) first.get(1),	(Genome) first.getFirst());
 				else if (count == 0) {
-					JOptionPane.showMessageDialog(mauve_frame, 
+					JOptionPane.showMessageDialog(parent_component, 
 							"No Features were found with specified name.");
 				}
 				else {
@@ -585,8 +607,8 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	public void displayFeature (Feature feat, Genome genome) {
 		try {
 			adjustZoom(feat);
-			goToPosition(SeqFeatureData.centerOfFeature(feat), genome, mauve_frame);
-			mauve_frame.getModel().highlightRange(genome,
+			goToPosition(SeqFeatureData.centerOfFeature(feat), genome, rrpanel);
+			data_model.highlightRange(genome,
 					feat.getLocation().getMin(), feat.getLocation().getMax());
 		} catch (Exception e) {
 			e.printStackTrace ();
@@ -620,9 +642,9 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 			}
 		}
 		if (percent != 0) {
-			mauve_frame.getModel ().zoomAndMove ((int) percent, 0);
+			data_model.zoomAndMove ((int) percent, 0);
 			while (count > 0) {
-				mauve_frame.getModel ().zoomAndMove (50, 0);
+				data_model.zoomAndMove (50, 0);
 				count--;
 			}
 		}
@@ -635,8 +657,8 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 * @param chosen   		the genome to find the position in
 	 * @param mf			the mauve frame containing the p
 	 */
-	public static void goToPosition (long position, Genome chosen, MauveFrame mf) {
-		Object [] panels = mf.rrpanel.newPanels.toArray ();
+	public static void goToPosition (long position, Genome chosen, RearrangementPanel rrpanel) {
+		Object [] panels = rrpanel.newPanels.toArray ();
 		for (int i = 0; i < panels.length; i++) {
 			RRSequencePanel panel = (RRSequencePanel) ((SeqPanel) 
 					panels [i]).getSequencePanel ();
@@ -654,7 +676,7 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 * @param chosen   		the genome to find the position in
 	 */
 	public void goToPosition (long position, Genome chosen) {
-		goToPosition (position, chosen, mauve_frame);
+		goToPosition (position, chosen, rrpanel);
 	}
 	
 	/**
@@ -673,7 +695,10 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	}
 	
 	public void dispose () {
-		mauve_frame.removeWindowListener (adapt);
+		if(parent_component instanceof Frame)
+			((Frame)parent_component).removeWindowListener (adapt);
+		else if(parent_component instanceof JComponent)
+			((JComponent)parent_component).removeAncestorListener(ancestListener);
 		frame.dispose ();
 	}
 	
