@@ -36,6 +36,8 @@ public class RRSequencePanel extends JLayeredPane implements ModelListener
         model.addModelListener(this);
     }
     
+    public MatchPanel getMatchPanel(){ return matchPanel; }
+    
     /**
      * goTo - scrolls viewer to particular coordinate of genome
      * 
