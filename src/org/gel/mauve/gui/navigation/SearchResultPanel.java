@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -212,7 +213,11 @@ public class SearchResultPanel extends JPanel implements TreeModel, TreeCellRend
 	 */
 	public void waitForResults () {
 		searching = true;
-		model.nodeStructureChanged (root);
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+				model.nodeStructureChanged (root);
+			}
+		});
 	}
 	
 	/**
