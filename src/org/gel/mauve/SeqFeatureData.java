@@ -1,5 +1,6 @@
 package org.gel.mauve;
 
+import java.awt.Component;
 import java.awt.Frame;
 import java.util.Collections;
 import java.util.Comparator;
@@ -8,6 +9,7 @@ import java.util.LinkedList;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
 import org.biojava.bio.seq.AbstractFeatureHolder;
@@ -240,7 +242,7 @@ public class SeqFeatureData implements MauveConstants {
 	 * 			annotations loaded
 	 * @return	An array of genomes that contains all genomes the user picked.
 	 */
-	public static Genome [] userSelectedGenomes (Frame parent, BaseViewerModel model, 
+	public static Genome [] userSelectedGenomes (Component parent, BaseViewerModel model, 
 			boolean all_ok, boolean needs_annotations) {
 		Vector choices = userSelectableGenomes (model, all_ok, needs_annotations);
 		Object chosen = JOptionPane.showInputDialog(parent, "Choose Sequence to Navigate", 
