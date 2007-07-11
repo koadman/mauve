@@ -12,6 +12,7 @@ import javax.swing.Timer;
 import org.biojava.bio.BioException;
 import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.seq.SequenceIterator;
+import org.biojavax.bio.seq.RichSequenceIterator;
 
 /**
  * Acts as a cache to allow for faster access to files with multiple contigs without
@@ -84,6 +85,8 @@ public class SequenceIteratorCache {
 			for (int i = ((Integer) array [INDEX_INDEX]).intValue (); i < index; i++)
 				((SequenceIterator) array [ITERATOR_INDEX]).nextSequence ();
 			array [INDEX_INDEX] = new Integer (index + 1);
+			if(array [ITERATOR_INDEX] instanceof RichSequenceIterator)
+				return ((RichSequenceIterator) array [ITERATOR_INDEX]).nextRichSequence();
 			return ((SequenceIterator) array [ITERATOR_INDEX]).nextSequence();
 		}
 		catch (Exception e) {

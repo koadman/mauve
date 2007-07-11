@@ -30,6 +30,8 @@ import org.biojava.utils.ChangeType;
 import org.biojava.utils.ChangeVetoException;
 import org.biojava.utils.Changeable;
 import org.biojava.utils.Unchangeable;
+import org.biojavax.bio.seq.RichFeature;
+import org.biojavax.bio.seq.RichLocation;
 import org.gel.mauve.FilterCacheSpec;
 import org.gel.mauve.SupportedFormat;
 
@@ -275,6 +277,26 @@ class DelegatingSequence implements Sequence
         filterCache.put(filterCacheSpec.filter, sfh);
     }
 
+    class RichStrandedFeatureTemplate extends StrandedFeature.Template
+    {
+    	static final long serialVersionUID = 243583828;
+    	RichStrandedFeatureTemplate(RichFeature.Template t)
+    	{
+    		this.annotation = t.annotation;
+    		this.location = t.location;
+    		this.source = t.source;
+    		this.sourceTerm = t.sourceTerm;
+    		this.type = t.type;
+    		this.typeTerm = t.typeTerm;
+    		if( ((RichLocation)t.location).getStrand().intValue() == -1 )
+    			strand = StrandedFeature.NEGATIVE;
+    		else if( ((RichLocation)t.location).getStrand().intValue() == 1 )
+    			strand = StrandedFeature.POSITIVE;
+    		else
+    			strand = StrandedFeature.UNKNOWN;
+    	}
+    }
+
     /**
      * @param f
      * @return
@@ -322,8 +344,14 @@ class DelegatingSequence implements Sequence
         }
         template.source = null;
         template.sourceTerm = OntoTools.ANY;
-        SimpleStrandedFeature sf = new SimpleStrandedFeature(this, this, (StrandedFeature.Template)template);
-        return sf;
+        if(template instanceof RichFeature.Template)
+        {
+        	SimpleStrandedFeature sf = new SimpleStrandedFeature(this, this, new RichStrandedFeatureTemplate((RichFeature.Template)template));
+        	return sf;
+        }else{
+        	SimpleStrandedFeature sf = new SimpleStrandedFeature(this, this, (StrandedFeature.Template)template);
+        	return sf;
+        }
     }
 
     public FeatureHolder filter(FeatureFilter fc)

@@ -7,6 +7,9 @@ import java.util.NoSuchElementException;
 import org.biojava.bio.BioException;
 import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.seq.SequenceIterator;
+import org.biojavax.bio.BioEntry;
+import org.biojavax.bio.seq.RichSequence;
+import org.biojavax.bio.seq.RichSequenceIterator;
 import org.gel.mauve.SupportedFormat;
 
 abstract class BaseFormat implements SupportedFormat
@@ -19,6 +22,8 @@ abstract class BaseFormat implements SupportedFormat
 
     public Sequence makeDelegate(Sequence s, File source, int index) throws FileNotFoundException
     {
+    	if(s instanceof RichSequence)
+    		return new RichDelegatingSequence(s, this, source, index);
         return new DelegatingSequence(s, this, source, index);
     }
 
@@ -47,6 +52,48 @@ abstract class BaseFormat implements SupportedFormat
      */
     public SequenceIterator makeIterator(final File file)
     {
+    	if(isRich())
+    	{
+            return new RichSequenceIterator()
+            {
+                SequenceIterator inner = readFile(file);
+                int index = -1;
+
+                public boolean hasNext()
+                {
+                    return inner.hasNext();
+                }
+
+                public Sequence nextSequence() throws NoSuchElementException, BioException
+                {
+                	Sequence s = null;
+                	if(inner instanceof RichSequenceIterator)
+                		s = ((RichSequenceIterator)inner).nextRichSequence();
+                	else
+                		s = inner.nextSequence();
+                    index++;
+                    try
+                    {
+                        return makeDelegate(s, file, index);
+                    }
+                    catch (FileNotFoundException e)
+                    {
+                        // The file has already been verified above, so there must
+                        // be a weird problem.
+                        throw new Error("Index: " + index, e);
+                    }
+                }
+                public RichSequence nextRichSequence() throws NoSuchElementException, BioException
+                {
+                	return (RichSequence)nextSequence();
+                }
+                
+                public BioEntry nextBioEntry() throws BioException
+                {
+                	return ((RichSequenceIterator)inner).nextBioEntry();
+                }
+            };
+    	}
         return new SequenceIterator()
         {
             SequenceIterator inner = readFile(file);
@@ -59,7 +106,11 @@ abstract class BaseFormat implements SupportedFormat
 
             public Sequence nextSequence() throws NoSuchElementException, BioException
             {
-                Sequence s = inner.nextSequence();
+            	Sequence s = null;
+            	if(inner instanceof RichSequenceIterator)
+            		s = ((RichSequenceIterator)inner).nextRichSequence();
+            	else
+            		s = inner.nextSequence();
                 index++;
                 try
                 {
