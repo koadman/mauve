@@ -46,4 +46,6 @@ public class FastaFormat extends BaseFormat
     {
         return new FilterCacheSpec[0];
     }
+
+    public boolean isRich(){ return false; }
 }

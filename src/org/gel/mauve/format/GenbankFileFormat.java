@@ -25,4 +25,6 @@ class GenbankFileFormat extends GenbankEmblFormat
         }
         return SeqIOTools.readGenbank(reader);
     }
+
+    public boolean isRich(){ return false; }
 }

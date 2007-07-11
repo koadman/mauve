@@ -26,4 +26,5 @@ class EmblFormat extends GenbankEmblFormat
         return SeqIOTools.readEmbl(reader);
     }
 
+    public boolean isRich(){ return false; }
 }

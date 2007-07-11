@@ -24,4 +24,6 @@ class RawFormat extends FastaFormat
             throw new RuntimeException(e);
         }
     }
+
+    public boolean isRich(){ return false; }
 }
