@@ -15,8 +15,13 @@ import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.geom.Rectangle2D;
+import java.util.EventListener;
 import java.util.Iterator;
 import java.util.Vector;
+
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.event.EventListenerList;
 
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.Chromosome;
@@ -65,6 +70,11 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
     
     private int depth = 0;
 
+    private final MatchPopupMenuBuilder mpmb = new MatchPopupMenuBuilder();
+    private final MatchDisplayMenuItemBuilder mdmib = new MatchDisplayMenuItemBuilder();
+    private final EditLcbMenuItemBuilder elmib = new EditLcbMenuItemBuilder();
+    private final SetReferenceMenuItemBuilder srmib = new SetReferenceMenuItemBuilder();
+    
     public MatchPanel(RearrangementPanel rrpanel, BaseViewerModel model, Genome genome)
     {
         super(model, genome);
@@ -74,7 +84,15 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
         {
             model.addHighlightListener(this);            
         }
+        mpmb.addMenuItemBuilder(mdmib);
+        mpmb.addMenuItemBuilder(elmib);
+        mpmb.addMenuItemBuilder(srmib);
     }
+
+    public MatchPopupMenuBuilder getMatchPopupMenuBuilder(){ return mpmb; }
+    public MatchDisplayMenuItemBuilder getMatchDisplayMenuItemBuilder(){ return mdmib; }
+    public EditLcbMenuItemBuilder getEditLcbMenuItemBuilder(){ return elmib; }
+    public SetReferenceMenuItemBuilder getSetReferenceMenuItemBuilder(){ return srmib; }
 
     // extra methods which aren't implemented
     /** not implemented */
@@ -102,8 +120,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
     	model.highlightRange (null, 0, 0);
         if (e.isPopupTrigger())
         {
-            MatchPopupMenu new_popup = getPopup(e);
-            new_popup.show(this, e.getX(), e.getY());
+            mpmb.build(e,rrpanel,model,getGenome()).show(this, e.getX(), e.getY());
         }
 
         if (e.getClickCount() == 1)
@@ -111,10 +128,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
             // if it is a control click then show the popup menu
             if (e.isControlDown() || ((e.getModifiers() & InputEvent.BUTTON3_MASK) != 0))
             {
-                MatchPopupMenu new_popup = getPopup(e);
-                add(new_popup);
-                new_popup.show(this, e.getX(), e.getY());
-
+                mpmb.build(e,rrpanel,model,getGenome()).show(this, e.getX(), e.getY());
             }
             else
             {
@@ -189,7 +203,125 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
     	return getGenome ().equals (comparator);
     }
 
-    MatchPopupMenu getPopup(MouseEvent evt)
+	public interface MatchPopupMenuItemBuilder extends EventListener
+	{
+		public JMenuItem[] getItem(MouseEvent evt, final RearrangementPanel rrpanel, final BaseViewerModel model, final Genome g);
+	};
+
+	private class SetReferenceMenuItemBuilder implements MatchPopupMenuItemBuilder
+	{
+		public JMenuItem[] getItem(MouseEvent evt, final RearrangementPanel rrpanel, final BaseViewerModel model, final Genome g)
+		{
+        	JMenuItem setReferenceItem = new JMenuItem("Set reference genome");
+        	setReferenceItem.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e)
+                {
+                    model.setReference(g);
+                }});
+        	return new JMenuItem[]{setReferenceItem};
+		}
+	}
+
+	private class EditLcbMenuItemBuilder implements MatchPopupMenuItemBuilder
+	{
+		public JMenuItem[] getItem(MouseEvent evt, final RearrangementPanel rrpanel, final BaseViewerModel model, final Genome g)
+		{
+	        if (model instanceof XmfaViewerModel)
+	        {
+	            XmfaViewerModel xm = (XmfaViewerModel) model;
+	            long coord = pixelToCenterSequenceCoordinate(evt.getX());
+	            try
+	            {
+	                final int lcbIndex = xm.getLCBIndex(getGenome(), coord);
+	            
+		            JMenuItem edit = new JMenuItem("Edit this LCB");
+		            edit.addActionListener(new ActionListener(){
+		                public void actionPerformed(ActionEvent e)
+		                {
+		                    new Editor((XmfaViewerModel) model, lcbIndex);
+		                }});
+		        	return new JMenuItem[]{edit};
+	            }
+	            catch (ArrayIndexOutOfBoundsException e)
+	            {
+	                // This happens when there is no LCB to edit.  Ignored.
+	            }
+	        }
+	        return new JMenuItem[0];
+		}
+	}
+	
+	private class MatchDisplayMenuItemBuilder implements MatchPopupMenuItemBuilder 
+	{
+		private void addItem(final Match m, Vector items, final BaseViewerModel model, final Genome g)
+		{
+            JMenuItem item = new JMenuItem("Align display to " + m.toString());
+            item.addActionListener(new ActionListener(){
+                public void actionPerformed(ActionEvent e)
+                {
+                    model.alignView(m, g);
+                }});			
+		}
+		public JMenuItem[] getItem(MouseEvent evt, final RearrangementPanel rrpanel, final BaseViewerModel model, final Genome g)
+		{
+			JMenuItem[] itemArray = new JMenuItem[0];
+	        if( !(model instanceof LcbViewerModel) && !(model instanceof XmfaViewerModel))
+	        {
+	        	Vector items = new Vector();
+	            int[] match_range = new int[2];
+	            getMatchPixelRange(evt.getX(), evt.getX(), match_range);
+	            
+	            Vector sortedMatches = getGenome().getSortedMatches();
+		        if (match_range[1] - match_range[0] < MAX_POPUP_MATCHES)
+		        {
+		            for (int matchI = match_range[0]; matchI < match_range[1]; matchI++)
+		            	addItem((Match) sortedMatches.get(matchI), items, model, g);
+		        }
+		        else
+		        {
+		            double pop_interval = (double) (match_range[1] - match_range[0]) / (double) MAX_POPUP_MATCHES;
+		            double popI = match_range[0];
+		            for (int matchI = match_range[0]; matchI < match_range[1]; matchI++)
+		            {
+		                if ((int) popI == matchI)
+			            	addItem((Match) sortedMatches.get(matchI), items, model, g);
+		                popI += pop_interval;
+		            }
+		        }
+		        itemArray = new JMenuItem[items.size()];
+		        items.toArray(itemArray);
+	        }
+	        return itemArray;
+		}
+	}
+
+	public class MatchPopupMenuBuilder
+	{
+	    protected EventListenerList builders = new EventListenerList();
+		public void addMenuItemBuilder(MatchPopupMenuItemBuilder fmib)
+		{
+			builders.add(MatchPopupMenuItemBuilder.class, fmib);
+		}
+		public JPopupMenu build(MouseEvent evt, final RearrangementPanel rrpanel, final BaseViewerModel model, final Genome g)
+		{
+			Object[] listeners = builders.getListenerList();
+        	JPopupMenu leMenu = new JPopupMenu();
+        	for (int i = listeners.length-2; i>=0; i-=2) {
+                if (listeners[i]==MatchPopupMenuItemBuilder.class) {
+                	JMenuItem[] items = ((MatchPopupMenuItemBuilder)listeners[i+1]).getItem(evt, rrpanel, model, g);
+            		for(int j = 0; j < items.length; j++)
+            			leMenu.add(items[j]);
+                }
+            }
+			return leMenu;
+		}
+		public void removeMenuItemBuilder(MatchPopupMenuItemBuilder mpmib)
+		{
+			builders.remove(MatchPopupMenuItemBuilder.class, mpmib);
+		}
+	}
+
+	MatchPopupMenu getPopup(MouseEvent evt)
     {
         MatchPopupMenu pop_menu = new MatchPopupMenu(rrpanel, model, getGenome());
 
