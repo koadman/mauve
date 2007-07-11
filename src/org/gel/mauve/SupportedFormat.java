@@ -79,5 +79,11 @@ public interface SupportedFormat
      */
     String getChromosomeName(Sequence s);
 
+    /**
+     * True if this parsing files of this format results in biojavax RichSequence objects
+     * @return
+     */
+    boolean isRich();
+
     FilterCacheSpec[] getFilterCacheSpecs();
 }
