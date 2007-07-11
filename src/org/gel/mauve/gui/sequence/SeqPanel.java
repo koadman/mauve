@@ -183,6 +183,10 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
     {
         return sequence;
     }
+    public FeaturePanel getFeaturePanel()
+    {
+        return feature;
+    }
 
     /**
      * @see java.awt.dnd.DragGestureListener#dragGestureRecognized(java.awt.dnd.DragGestureEvent)
