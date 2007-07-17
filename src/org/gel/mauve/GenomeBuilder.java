@@ -65,19 +65,24 @@ public class GenomeBuilder
     }
 
     private static Genome buildGenome(long length, String annotationFilename, SupportedFormat annotationFormat, BaseViewerModel model, int restrictedIndex, int sequenceIndex)
-    {
+    {    	
         File f = new File(annotationFilename);
         // first try to read the file as given in the XMFA
         if (f.canRead())
             return buildGenome(length, f, annotationFormat, model, restrictedIndex, sequenceIndex);
-        else
-        {
-            // otherwise try the directory of the source alignment
-        	String path = "";
-        	if( annotationFilename.length() > 0 )
-        		path = model.getSrc().getParent() + File.separatorChar + f.getName();
-            return buildGenome(length, new File(path), annotationFormat, model, restrictedIndex, sequenceIndex);
-        }
+
+        // try stripping quote characters
+        String nameSansQuotes = org.gel.mauve.format.SupportedFormatFactory.trimWhiteAndQuotes(annotationFilename);
+
+        f = new File(nameSansQuotes);
+        if (f.canRead())
+            return buildGenome(length, f, annotationFormat, model, restrictedIndex, sequenceIndex);
+
+        // otherwise try the directory of the source alignment
+    	String path = "";
+    	if( nameSansQuotes.length() > 0 )
+    		path = model.getSrc().getParent() + File.separatorChar + f.getName();
+        return buildGenome(length, new File(path), annotationFormat, model, restrictedIndex, sequenceIndex);
     }
 
     // Left package-visible for testing.
