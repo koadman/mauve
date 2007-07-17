@@ -14,7 +14,7 @@ public class SupportedFormatFactory
 
     public static SupportedFormat guessFormatFromFilename(String filename)
     {
-        File f = new File(filename);
+        File f = new File(trimWhiteAndQuotes(filename));
         String name = f.getName().toLowerCase();
 
         if (name.endsWith(".gbk"))
@@ -69,4 +69,15 @@ public class SupportedFormatFactory
         throw new RuntimeException("Unexpected format: " + name);
     }
 
+    public static String trimWhiteAndQuotes(String path)
+    {
+        // try stripping quote characters
+        String nameSansQuotes = new String(path);
+        nameSansQuotes = nameSansQuotes.trim();
+        if(nameSansQuotes.length() > 1 &&
+        		nameSansQuotes.charAt(0) == '"' && 
+        		nameSansQuotes.charAt(nameSansQuotes.length()-1) == '"')
+            nameSansQuotes = nameSansQuotes.substring(1, nameSansQuotes.length()-1);
+        return nameSansQuotes;
+    }
 }
