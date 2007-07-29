@@ -64,6 +64,39 @@ public class GenomeBuilder
         return buildGenome(length, annotationFilename, SupportedFormatFactory.guessFormatFromFilename(annotationFilename), model, -1, sequenceIndex);
     }
 
+    private static String windowsPathHack(String p)
+	{
+		// only do this under Mac OS X, which has an inept java.io.File
+		if(!System.getProperty("os.name").contains("Mac"))
+			return p;
+		// only operate on paths with backslashes and drive letter specs
+		if(!((p.charAt(1) == ':' && p.charAt(2) == '\\') || p.startsWith("\\\\")))
+			return p;
+
+		// replace all backslashes with forward slash and ditch the drive specifier 
+		if(p.charAt(1) == ':' && p.charAt(2) == '\\')
+			p = p.substring(2,p.length());
+		int indie = p.indexOf('\\');
+		int previa = 0;
+		StringBuilder sb = new StringBuilder();
+		while(indie >= 0)
+		{
+			if(previa < indie)
+			{
+				sb.append("/");	
+				sb.append(p.substring(previa,indie));
+			}
+			previa = indie+1;
+			indie = p.indexOf('\\', indie+1);
+		}
+		if(previa < p.length())
+		{
+			sb.append("/");
+			sb.append(p.substring(previa, p.length()));
+		}
+		return sb.toString();
+	}
+
     private static Genome buildGenome(long length, String annotationFilename, SupportedFormat annotationFormat, BaseViewerModel model, int restrictedIndex, int sequenceIndex)
     {    	
         File f = new File(annotationFilename);
@@ -77,6 +110,8 @@ public class GenomeBuilder
         f = new File(nameSansQuotes);
         if (f.canRead())
             return buildGenome(length, f, annotationFormat, model, restrictedIndex, sequenceIndex);
+
+	nameSansQuotes = = windowsPathHack(nameSansQuotes);
 
         // otherwise try the directory of the source alignment
     	String path = "";
