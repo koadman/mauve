@@ -227,9 +227,9 @@
 			mainclass="org.gel.mauve.gui.Mauve"
 			version="${release.version}"
 			infostring="Mauve ${release.version}, (c) 2003-2007  http://gel.ahabs.wisc.edu/mauve"
-			stubfile="JavaApplicationStub"
+			stubfile="osx/JavaApplicationStub"
 			aboutmenuname="Mauve"
-			icon="mauve.icns"
+			icon="osx/mauve.icns"
 			jvmversion="1.3+"
 			bundleid="org.gel.mauve.MauveBundle"
 			vmoptions="-Xmx500m"
@@ -258,6 +258,7 @@
 			</fileset>
 			<fileset dir="${basedir}">
 				<include name="mauve_docs.pdf"/>
+				<include name="ChangeLog.html"/>
 			</fileset>
 		</copy>
 		
@@ -265,7 +266,6 @@
 		     to their filename -->
 		<copy todir="staging">
 			<fileset dir="${basedir}">
-				<include name="ChangeLog.html"/>
 				<include name="COPYING"/>
 			</fileset>
 			<mapper type="glob" from="*" to="*.txt"/>
