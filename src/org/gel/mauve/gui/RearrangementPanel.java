@@ -148,7 +148,8 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
      * readRearrangementData() to load and display data.
      * 
      * @param toolbar
-     *            A toolbar which can be manipulated by this panel
+     *            A toolbar which can be manipulated by this panel, or null to indicate no
+     *            toolbar will be available
      */
     public RearrangementPanel(JToolBar toolbar)
     {
@@ -305,6 +306,8 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
      */
     private void initToolbar()
     {
+    	if(toolbar == null)
+    		return;
 
         toolbar.removeAll();
 
@@ -404,7 +407,9 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
      */
     private void initColorSelector()
     {
-        if (model instanceof XmfaViewerModel)
+    	if(toolbar == null)
+    		return;
+        if (model instanceof XmfaViewerModel && toolbar != null)
         {
         	boolean have_bb = haveBackboneData();
         	if(have_bb)
@@ -462,7 +467,7 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         lcbLinePanel.setVisible(true);
 
         // add the weight slider components, only if we have nway LCBs
-        if(haveNwayLcbData())
+        if(haveNwayLcbData() && toolbar != null)
         {
 	        toolbar.add(new JLabel("LCB weight:"));
 	
@@ -719,9 +724,11 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     		min_size.height += this.getNewPanel(seqI).getMinimumSize().height;
     		max_size.height += this.getNewPanel(seqI).getMaximumSize().height;
     	}
-    	// set the preferred height to be no less than the mininimum
+    	// set the preferred height to be no less than the minimum
     	// and no more than the maximum
     	Dimension preferred_size = this.getParent().getSize();
+    	Dimension super_size = super.getPreferredSize();
+    	preferred_size.width = super_size.width;
     	if( preferred_size.height < min_size.height )
     		preferred_size.height = min_size.height;
     	else if( preferred_size.height > max_size.height )
@@ -740,13 +747,21 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         return false;
     }
 
+    boolean scrollableTracksViewportWidth = true;	// default to true
+    /**
+     * Match component width to viewport width?
+     */ 
+    public void setScrollableTracksViewportWidth(boolean matchWidth)
+    {
+    	scrollableTracksViewportWidth = matchWidth;
+    }
     /**
      * @see javax.swing.Scrollable#getScrollableTracksViewportWidth()
      */
     public boolean getScrollableTracksViewportWidth()
     {
         // Match component width to viewport width.
-        return true;
+        return scrollableTracksViewportWidth;
     }
 
     /**
