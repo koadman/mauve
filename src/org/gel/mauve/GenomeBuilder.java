@@ -111,7 +111,7 @@ public class GenomeBuilder
         if (f.canRead())
             return buildGenome(length, f, annotationFormat, model, restrictedIndex, sequenceIndex);
 
-	nameSansQuotes = = windowsPathHack(nameSansQuotes);
+	nameSansQuotes = windowsPathHack(nameSansQuotes);
 
         // otherwise try the directory of the source alignment
     	String path = "";
