@@ -509,6 +509,25 @@ public class BaseViewerModel
         // Hook for subclasses.
     }
 
+    public void setVisible(Genome g, boolean visible)
+    {
+    	if(g.getVisible() != visible )
+    	{
+    		g.setVisible(visible);
+    		fireGenomeVisibilityChangedEvent();
+    	}
+    }
+    
+    public void fireGenomeVisibilityChangedEvent()
+    {
+        Object[] listeners = listenerList.getListenerList();
+        for (int i = listeners.length-2; i>=0; i-=2) {
+            if (listeners[i]==ModelListener.class) {
+                ((ModelListener)listeners[i+1]).genomeVisibilityChanged(modelEvent);
+            }
+        }
+    }
+    
     private void correctMatchReversals()
     {
         //Correct the orientation due to reversals.

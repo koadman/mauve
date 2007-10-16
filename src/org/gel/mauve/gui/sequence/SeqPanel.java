@@ -3,10 +3,12 @@
  */
 package org.gel.mauve.gui.sequence;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -53,6 +55,8 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
     private RRSequencePanel sequence;
     private RulerPanel ruler;
     private FeaturePanel feature;
+    private ControlPanel controls;
+    private JLabel label;
     
     
     private DragSource dragSource;
@@ -63,6 +67,12 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
     private RearrangementPanel rrPanel;
     private static final DataFlavor REARRANGEMENT_FLAVOR = new DataFlavor(Integer.class, TransferableObject.MIME_TYPE);
 
+    private Dimension min_size;
+    private Dimension my_size;
+    private Dimension my_max_size;
+    
+    private Dimension invisible_size;
+
     public SeqPanel(BaseViewerModel model, Genome genome, RearrangementPanel rearrangementPanel)
     {
         super(model, genome);
@@ -70,66 +80,43 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
         this.rrPanel = rearrangementPanel;
         
         // set the minimum dimensions
-        Dimension min_size = this.getSize();
+        min_size = this.getSize();
         min_size.height = 100;
         this.setMinimumSize(min_size);
 
         // calculate the preferred and maximum dimensions, set them below
-        Dimension my_size = this.getSize();
+        my_size = this.getSize();
         my_size.height = 115;	// start with 115, add more if a FeaturePanel is used
         my_size.width = 10000;
-        Dimension my_max_size = this.getSize();
+        my_max_size = this.getSize();
         my_max_size.height = 175;	// start with 175, add more if a FeaturePanel is used
         my_max_size.width = 10000;
         
-        GridBagLayout layoutManager = new GridBagLayout();
-        setLayout(layoutManager);
-        GridBagConstraints c = new GridBagConstraints();
+        invisible_size = this.getSize();
+        invisible_size.width = 10000;
+        invisible_size.height = 20;
+        this.setMinimumSize(invisible_size);
+        
+        
+        controls = new ControlPanel(model, genome, rearrangementPanel);
+        controls.setOpaque(true);
 
-        // Add the ruler.
+
         ruler = new RulerPanel(model, genome);
         ruler.setOpaque(true);
-        c.anchor = GridBagConstraints.CENTER;
-        c.fill = GridBagConstraints.BOTH;
-        c.gridheight = 1;
-        c.gridwidth = 1;
-        c.gridx = 0;
-        c.insets = new Insets(0, 0, 0, 0);
-        c.ipadx = 0;
-        c.ipady = 0;
-        c.weightx = 1.0;
-
-        c.gridy = 0;
-        c.weighty = RULER_RATIO;
-        add(ruler);
-        layoutManager.setConstraints(ruler, c);
 
         // Add the sequence
         sequence = new RRSequencePanel(rearrangementPanel, model, genome);
         sequence.setOpaque(true);
-        c.gridy = 1;
-        c.weighty = 2.0;
-        add(sequence);
-        layoutManager.setConstraints(sequence, c);
 
         // Add the feature panel, if desired.
         if (genome.getAnnotationSequence() != null)
         {
             feature = new FeaturePanel(genome, model);
-            add(feature);
-            c.gridy = 2;
-            c.weighty = 0.1;
-            add(feature);
-            layoutManager.setConstraints(feature, c);
             my_size.height += FeaturePanel.DEFAULT_HEIGHT;
             my_max_size.height += FeaturePanel.DEFAULT_HEIGHT;
         }
 
-        // Add the name.
-        c.gridy = 3;
-        c.weighty = 0.1;
-
-        JLabel label;
 
         // Add message if no annotations found, and this is XMFA.
         if (genome.getAnnotationSequence() == null)
@@ -141,17 +128,114 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
             label = new JLabel(genome.getDisplayName());
         }
         label.setMaximumSize(new Dimension(100000, 15 ));
-        add(label);
-        layoutManager.setConstraints(label, c);
-
         
         dragSource = new DragSource();
         dragRecognizer = dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_MOVE, null);
         dropTarget = new DropTarget(this, this);
+
+        if(genome.getViewIndex() % 2 == 1)
+        	setBackground(Color.WHITE);
         
-        setSize(my_size);
+        if(genome.getVisible())
+        	doVisibleLayout();
+        else
+        	doInvisibleLayout();
+    }
+    
+    protected void doVisibleLayout()
+    {
+    	removeAll();
+        GridBagLayout layoutManager = new GridBagLayout();
+        setLayout(layoutManager);
+        GridBagConstraints c = new GridBagConstraints();
+
+        // Add the ruler.
+        // add the control panel
+        c.anchor = GridBagConstraints.WEST;
+        c.fill = GridBagConstraints.VERTICAL;
+        c.gridx=GridBagConstraints.RELATIVE;
+        c.gridy=GridBagConstraints.RELATIVE;
+        c.gridwidth = 1;
+        c.gridheight=GridBagConstraints.REMAINDER;
+        c.insets = new Insets(0,0,0,0);
+        c.ipadx = 0;
+        c.ipady = 0;
+        c.weighty=0;
+        c.weightx=0;
+        add(controls);
+        layoutManager.setConstraints(controls, c);
+
+    	
+        c.anchor = GridBagConstraints.CENTER;
+        c.fill = GridBagConstraints.BOTH;
+        c.gridheight = 1;
+        c.gridx = GridBagConstraints.RELATIVE;
+        c.weightx = 1.0;
+
+        c.weighty = RULER_RATIO;
+        add(ruler);
+        layoutManager.setConstraints(ruler, c);
+
+        c.weighty = 2.0;
+        add(sequence);
+        layoutManager.setConstraints(sequence, c);
+
+        if (getGenome().getAnnotationSequence() != null)
+        {
+            add(feature);
+            c.weighty = 0.1;
+            layoutManager.setConstraints(feature, c);
+        }
+
+        // Add the name.
+        c.weighty = 0.1;
+        add(label);
+        layoutManager.setConstraints(label, c);
         setPreferredSize(my_size);
         setMaximumSize(my_max_size);
+        setMinimumSize(min_size);
+        setSize(my_size);
+    }
+
+    public void doInvisibleLayout()
+    {
+    	removeAll();
+        GridBagLayout layoutManager = new GridBagLayout();
+        setLayout(layoutManager);
+        GridBagConstraints c = new GridBagConstraints();
+
+        // Add the ruler.
+        // add the control panel
+        c.anchor = GridBagConstraints.WEST;
+        c.fill = GridBagConstraints.VERTICAL;
+        c.gridx=GridBagConstraints.RELATIVE;
+        c.gridy=GridBagConstraints.RELATIVE;
+        c.gridwidth = 1;
+        c.gridheight=GridBagConstraints.REMAINDER;
+        c.insets = new Insets(0,0,0,0);
+        c.ipadx = 0;
+        c.ipady = 0;
+        c.weighty=0;
+        c.weightx=0;
+        add(controls);
+        layoutManager.setConstraints(controls, c);
+
+    	
+        c.anchor = GridBagConstraints.CENTER;
+        c.fill = GridBagConstraints.BOTH;
+        c.gridheight = 1;
+        c.gridx = GridBagConstraints.RELATIVE;
+        c.weightx = 1.0;
+
+        // Add the name.
+        c.weighty = 0.1;
+        add(label);
+        layoutManager.setConstraints(label, c);
+
+        setPreferredSize(invisible_size);
+        setMaximumSize(invisible_size);    	
+        setMinimumSize(invisible_size);
+        setSize(invisible_size);
     }
 
     public void enableDragAndDrop()
@@ -187,7 +271,18 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
     {
         return feature;
     }
+    public ControlPanel getControlPanel()
+    {
+        return controls;
+    }
 
+    public void genomeVisibilityChanged(ModelEvent me)
+    {
+        if(getGenome().getVisible())
+        	doVisibleLayout();
+        else
+        	doInvisibleLayout();
+    }
     /**
      * @see java.awt.dnd.DragGestureListener#dragGestureRecognized(java.awt.dnd.DragGestureEvent)
      */

@@ -144,5 +144,6 @@ public abstract class AbstractSequencePanel extends JPanel implements ModelListe
     public void viewableRangeChangeEnd(ModelEvent event) {}
     public void genomesReordered(ModelEvent event) {}
     public void referenceChanged(ModelEvent event) {}
+    public void genomeVisibilityChanged(ModelEvent event) {}
     
 }

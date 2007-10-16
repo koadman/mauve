@@ -22,6 +22,7 @@ public class Genome
     private int viewIndex;
     private Vector sortedMatches;
     private int sourceIndex;
+    private boolean visible = true;
     
     public Genome(long length, BaseViewerModel model, int sourceIndex)
     {
@@ -154,6 +155,12 @@ public class Genome
         }
         
         return sortedMatches;
+    }
+    public boolean getVisible(){
+    	return visible;
+    }
+    public void setVisible(boolean v){
+    	visible = v;
     }
     
     public String toString()

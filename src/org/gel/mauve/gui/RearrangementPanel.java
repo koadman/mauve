@@ -1,11 +1,16 @@
 package org.gel.mauve.gui;
 
 import java.awt.Color;
+import java.awt.ComponentOrientation;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.Rectangle;
@@ -24,6 +29,7 @@ import javax.print.PrintService;
 import javax.print.attribute.standard.PrinterResolution;
 import javax.swing.AbstractAction;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -143,6 +149,11 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     /** a list of objects listening for hint messages */
     private EventListenerList hintMessageListeners = new EventListenerList();
     
+    /** variables controlling the display layout */
+    private GridBagLayout gbl = new GridBagLayout();
+    private GridBagConstraints gbc = new GridBagConstraints();
+    static final double gbc_weighty = 5.0;
+
     /**
      * Does basic initialization for a RearrangementPanel. Call
      * readRearrangementData() to load and display data.
@@ -213,6 +224,8 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         	else
         		sp.setBackground(Color.WHITE);
             sequencePanel.add(sp);
+            gbc.weighty = model.getGenomeByViewingIndex(new_order[seqI]).getVisible() ? gbc_weighty : 0;
+            gbl.setConstraints(sp, gbc);
         }
 
         // Reorder the underlying model (at some point, perhaps this
@@ -229,15 +242,26 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
      */
     protected void initMatchDisplay()
     {
-        sequencePanel = new JPanel(new GridLayout(model.getSequenceCount(), 1));
+        sequencePanel = new JPanel();
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.gridheight = 1;
+        gbc.gridwidth = 1;
+        gbc.gridx = 0;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        gbc.ipadx = 0;
+        gbc.ipady = 0;
+        gbc.weightx = 1;
+        gbc.weighty = gbc_weighty;
+        gbc.gridy = GridBagConstraints.RELATIVE;
+        sequencePanel.setLayout(gbl);
         add(sequencePanel, SEQ_PANEL);
         for (int seqI = 0; seqI < model.getSequenceCount(); seqI++)
         {
             SeqPanel seqPanel = new SeqPanel(model, model.getGenomeByViewingIndex(seqI), this);
             sequencePanel.add(seqPanel);
+            gbl.setConstraints(seqPanel, gbc);
             newPanels.add(seqPanel);
-            if(seqI % 2 == 1)
-            	seqPanel.setBackground(Color.WHITE);
         }
         initKeyBindings();
         initToolbar();
@@ -409,7 +433,7 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     {
     	if(toolbar == null)
     		return;
-        if (model instanceof XmfaViewerModel && toolbar != null)
+        if (model instanceof XmfaViewerModel)
         {
         	boolean have_bb = haveBackboneData();
         	if(have_bb)
@@ -956,6 +980,16 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     {
         // Ignored.
     }
+
+    public void genomeVisibilityChanged(ModelEvent event)
+    {
+    	// update constraints, setting invisible genomes to weighty 0
+    	for(int i = 0; i < model.getSequenceCount(); i++)
+    	{
+    		gbc.weighty = model.getGenomeByViewingIndex(i).getVisible() ? gbc_weighty : 0;
+    		gbl.setConstraints(getNewPanel(i), gbc);
+    	}
+	}
 
     public void modelReloadStart(ModelEvent event)
     {

@@ -61,6 +61,18 @@ class LcbLinePanel extends JComponent implements ModelListener
     {
         paint(g);
     }
+    
+    int nextVisibleGenome(LCB lcb, int fromSeq)
+    {
+    	int seqJ = fromSeq;
+    	for (; seqJ < model.getSequenceCount(); seqJ++)
+        {
+    		Genome lg = model.getGenomeByViewingIndex(seqJ);
+    		if(lcb.getLeftEnd(lg) != 0 && lg.getVisible())
+    			break;
+        }
+    	return seqJ;
+    }
 
     /**
      * Extract the pixel coordinates of visible LCBs and draw lines that connect
@@ -78,6 +90,7 @@ class LcbLinePanel extends JComponent implements ModelListener
         Genome genomes[] = new Genome[model.getSequenceCount()];
         SeqPanel seqpanels[] = new SeqPanel[model.getSequenceCount()];
         RRSequencePanel rrseqpanels[] = new RRSequencePanel[model.getSequenceCount()];
+        int clipx = 0;
         for (int seqI = 0; seqI < model.getSequenceCount(); seqI++)
         {
             genomes[seqI] = model.getGenomeByViewingIndex(seqI);
@@ -90,7 +103,9 @@ class LcbLinePanel extends JComponent implements ModelListener
             boxBounds[seqI] = rrseqpanels[seqI].getBounds();
             boxBounds[seqI].x += seqpanels[seqI].getBounds().x;
             boxBounds[seqI].y += seqpanels[seqI].getBounds().y;
+            clipx = seqpanels[seqI].getControlPanel().getWidth();
         }
+        g2d.clipRect(clipx, 0, this.getWidth(), this.getHeight());
 
         for (int lcbI = 0; lcbI < model.getVisibleLcbCount(); lcbI++)
         {
@@ -100,18 +115,12 @@ class LcbLinePanel extends JComponent implements ModelListener
 
             LCB lcb = model.getVisibleLcb(lcbI);
 
-            for (int seqI = 0; seqI + 1 < model.getSequenceCount(); seqI++)
-            {            	
+            int firstVisible = nextVisibleGenome(lcb,0);
+            int seqJ = model.getSequenceCount();
+            for (int seqI = firstVisible; seqI + 1 < model.getSequenceCount(); seqI = seqJ)
+            {
             	Genome g = model.getGenomeByViewingIndex(seqI);
-            	if( lcb.getLeftEnd(g) == 0 )
-            		continue;
-            	int seqJ = seqI + 1;
-            	for (; seqJ < model.getSequenceCount(); seqJ++)
-                {
-            		Genome lg = model.getGenomeByViewingIndex(seqJ);
-            		if(lcb.getLeftEnd(lg) != 0)
-            			break;
-                }
+            	seqJ = nextVisibleGenome(lcb,seqI+1);
             	if(seqJ == model.getSequenceCount())
             		continue;
 
@@ -143,6 +152,8 @@ class LcbLinePanel extends JComponent implements ModelListener
                 int upperMidpoint = upperPanel.sequenceCoordinateToCenterPixel(lcb.midpoint(upperGenome));
                 int lowerMidpoint = lowerPanel.sequenceCoordinateToCenterPixel(lcb.midpoint(lowerGenome));
 
+                upperMidpoint += upperBounds.x;
+                lowerMidpoint += lowerBounds.x;
                 // draw the connecting bars if at least one of the LCBs is
                 // visible
                 if (barVisible(bounds, upperMidpoint, lowerMidpoint))
@@ -151,7 +162,7 @@ class LcbLinePanel extends JComponent implements ModelListener
 
                     if (draw_strikethrough)
                     {
-                        if (seqI == 0)
+                        if (seqI == firstVisible)
                         {
                             if (!lcb.getReverse(upperGenome))
                             {
@@ -168,7 +179,8 @@ class LcbLinePanel extends JComponent implements ModelListener
                     if (draw_strikethrough)
                     {
                         // If there are more genomes below the lower genome, the strikethrough line extends beyond the bottom of the LCB
-                        if (seqJ + 1 < model.getSequenceCount())
+                    	int seqK = nextVisibleGenome(lcb,seqJ+1);
+                    	if(seqK < model.getSequenceCount())
                         {
                             int y_offset = lcb.getReverse(lowerGenome) ? 0 : lowerBoxHeight / 2;
                             g2d.drawLine(lowerMidpoint, lowerBounds.y + lowerBoxTop + y_offset, lowerMidpoint, lowerBounds.y + lowerBoxTop + y_offset + lowerBoxHeight / 2);
@@ -250,5 +262,10 @@ class LcbLinePanel extends JComponent implements ModelListener
     public void referenceChanged(ModelEvent event)
     {
         repaint();
+    }
+
+    public void genomeVisibilityChanged(ModelEvent event)
+    {
+        // Ignored.
     }
 }

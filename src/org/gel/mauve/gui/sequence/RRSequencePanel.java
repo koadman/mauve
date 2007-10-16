@@ -148,5 +148,10 @@ public class RRSequencePanel extends JLayeredPane implements ModelListener
     {
         // Ignored
     }
+
+    public void genomeVisibilityChanged(ModelEvent event)
+    {
+        // Ignored.
+    }
 } 
 
