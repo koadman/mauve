@@ -145,6 +145,10 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             {
                 thisWindowClosing(e);
             }
+            public void windowClosed(java.awt.event.WindowEvent e)
+            {
+            	mauve.frameClosed();
+            }
         });
 
         // Drag-and-drop handling.
@@ -608,6 +612,14 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         {
             alignFrame = new MauveAlignFrame(mauve);
             alignFrame.initComponents();
+            // notify the alignment frame if the parent window is closed...
+            addWindowListener(new java.awt.event.WindowAdapter()
+            {
+                public void windowClosed(java.awt.event.WindowEvent e)
+                {
+                	alignFrame.thisWindowClosed(e);
+                }
+            });
         }
         alignFrame.setVisible(true);
     }

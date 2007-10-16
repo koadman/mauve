@@ -288,6 +288,10 @@ public class AlignFrame extends java.awt.Frame
             {
                 thisWindowClosing(e);
             }
+            public void windowClosed(java.awt.event.WindowEvent e)
+            {
+                thisWindowClosed(e);
+            }
         });
 
         // show the user where the output file would go by default
@@ -454,10 +458,14 @@ public class AlignFrame extends java.awt.Frame
             int choice = JOptionPane.showConfirmDialog(null, "An alignment is in progress.  Closing this window will terminate the alignment.  Would you like to proceed?\n", "Alignment in progress", JOptionPane.YES_NO_OPTION);
     		if(choice == JOptionPane.NO_OPTION)
     			return;
-        	worker.interrupt();
     	}
         setVisible(false);
         dispose();
+    }
+    void thisWindowClosed(java.awt.event.WindowEvent e)
+    {
+    	if(cancelButton.isEnabled())
+    		worker.interrupt();
     }
 
     public void defaultSeedCheckBoxActionPerformed(java.awt.event.ActionEvent e)

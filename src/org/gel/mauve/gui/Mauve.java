@@ -24,6 +24,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import org.gel.mauve.MyConsole;
 import org.gel.mauve.remote.RemoteControlImpl;
@@ -314,17 +315,25 @@ public class Mauve
             frame.setVisible(false);
             frames.remove(frame);
             frame.dispose();
-            
-            if (frames.size() == 0)
-            {
-                System.exit(0); // no more frames left. exit.
-            }
         }
         else
         {
             frame.reset();
             availableFrame = frame;
         }
+    }
+    synchronized public void frameClosed()
+    {
+	    if (frames.size() == 0)
+	    {
+	    	// invoke after the current thread has notified all listeners
+	    	SwingUtilities.invokeLater(new Runnable()
+                {
+                    public void run(){
+            	        System.exit(0); // no more frames left. exit.
+                    }
+                });
+	    }
     }
     
     synchronized private MauveFrame getNewFrame()
