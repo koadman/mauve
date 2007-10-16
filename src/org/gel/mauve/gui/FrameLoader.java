@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import org.gel.mauve.BaseViewerModel;
@@ -101,12 +102,12 @@ public class FrameLoader implements Runnable
         }
         catch (IOException e)
         {
-            // TODO A better error.
+            JOptionPane.showMessageDialog(null, "An error occurred when reading the alignment file.\n" + e.getMessage(), "An error occurred", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
         catch (MauveFormatException e)
         {
-            // TODO A better error.
+            JOptionPane.showMessageDialog(null, "An error occurred when reading the alignment file.\n" + e.getMessage(), "An error occurred", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
     }
