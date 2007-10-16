@@ -12,6 +12,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
@@ -447,6 +448,14 @@ public class AlignFrame extends java.awt.Frame
     // Close the window when the close box is clicked
     void thisWindowClosing(java.awt.event.WindowEvent e)
     {
+    	if(cancelButton.isEnabled())
+    	{
+    		// ask the user whether they would like to cancel the alignment
+            int choice = JOptionPane.showConfirmDialog(null, "An alignment is in progress.  Closing this window will terminate the alignment.  Would you like to proceed?\n", "Alignment in progress", JOptionPane.YES_NO_OPTION);
+    		if(choice == JOptionPane.NO_OPTION)
+    			return;
+        	worker.interrupt();
+    	}
         setVisible(false);
         dispose();
     }
@@ -590,4 +599,5 @@ public class AlignFrame extends java.awt.Frame
             seqs[seqI] = (String) (sequenceListModel.get(seqI));
         return seqs;
     }
+
 }
