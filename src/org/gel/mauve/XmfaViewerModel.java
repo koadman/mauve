@@ -125,7 +125,7 @@ public class XmfaViewerModel extends LcbViewerModel
         // If no sequences are found, this is certainly an invalid file.
         if (xmfa.seq_count == 0)
         {
-            throw new IOException("Not an XMFA file.");
+            throw new IOException("Not an XMFA file.  Please check that the input file is a properly formatted alignment.");
         }
         
         if (listener != null)
