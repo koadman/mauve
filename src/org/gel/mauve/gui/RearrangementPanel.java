@@ -491,7 +491,7 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         lcbLinePanel.setVisible(true);
 
         // add the weight slider components, only if we have nway LCBs
-        if(haveNwayLcbData() && toolbar != null)
+        if(haveNwayLcbData() && toolbar != null && lm.getLcbCount() > 1)
         {
 	        toolbar.add(new JLabel("LCB weight:"));
 	
