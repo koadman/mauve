@@ -49,7 +49,7 @@ public class XMFAAlignment implements Serializable
     // Array of names for each sequence in the first alignment entry
     protected String[] names;
     
-    // A set of gist's that track map sequence index and column index to file offset. indexed by [interval][sequence]
+    // A set of gist's that map sequence index and column index to file offset. indexed by [interval][sequence]
     GISTree[][] gis_tree;
     
     protected TreeStore ts = new TreeStore();
