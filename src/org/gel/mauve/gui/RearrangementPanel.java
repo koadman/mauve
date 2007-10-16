@@ -515,6 +515,7 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
 	        weight_value_text.setPreferredSize(prefSize);
 	        weight_value_text.setMaximumSize(prefSize);
 	        weight_value_text.setHorizontalAlignment(JTextField.RIGHT);
+	        weight_value_text.setEditable(false);
 	        if(lm.getLcbChangePoints().size() > 0)
 	        	weight_value_text.setText(lm.getLcbChangePoints().elementAt(0).toString());
 	        toolbar.add(weight_value_text);
