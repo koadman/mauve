@@ -17,20 +17,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Vector;
 
-import javax.swing.BoxLayout;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JFrame;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JScrollPane;
-import javax.swing.JLabel;
-import javax.swing.JButton;
-import javax.swing.JOptionPane;
-import javax.swing.BorderFactory;
-import javax.swing.JSplitPane;
-import javax.swing.JViewport;
+import javax.swing.*;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
@@ -594,8 +581,12 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 * @param data			A two dimensional array; contains the constraints to
 	 * 						search by
 	 */
-	public void showResultTree (Genome [] nomes, String [][] data) {
-		result_pane.displayFeatures (SeqFeatureData.findFeatures (nomes, data));
+	public void showResultTree (final Genome [] nomes, final String [][] data) {
+        SwingUtilities.invokeLater(new Runnable(){
+            public void run(){
+                result_pane.displayFeatures (SeqFeatureData.findFeatures (nomes, data));
+            }
+        });
 	}
 
 	/**

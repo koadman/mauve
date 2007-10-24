@@ -70,7 +70,7 @@ public class GenomeBuilder
 		if(!System.getProperty("os.name").contains("Mac"))
 			return p;
 		// only operate on paths with backslashes and drive letter specs
-		if(!((p.charAt(1) == ':' && p.charAt(2) == '\\') || p.startsWith("\\\\")))
+		if(p.length() < 3 || !((p.charAt(1) == ':' && p.charAt(2) == '\\') || p.startsWith("\\\\")))
 			return p;
 
 		// replace all backslashes with forward slash and ditch the drive specifier 
