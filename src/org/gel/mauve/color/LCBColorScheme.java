@@ -12,52 +12,46 @@ import org.gel.mauve.Match;
  * Color matches by their LCB number. This will also set the color and
  * match_color field for all LCBs.
  */
-public class LCBColorScheme implements ColorScheme
-{
-    private final static double BUMP_SIZE = 1d / 6d;
-    private boolean lcbColorsComputed = false;
+public class LCBColorScheme implements ColorScheme {
+	private final static double BUMP_SIZE = 1d / 6d;
 
-    public void apply(BaseViewerModel model)
-    {
-        LcbViewerModel lcbModel = (LcbViewerModel) model;
+	private boolean lcbColorsComputed = false;
 
-        if (!lcbColorsComputed)
-        {
-            computeLCBColors(lcbModel);
-            lcbColorsComputed = true;
-        }
+	public void apply (BaseViewerModel model) {
+		LcbViewerModel lcbModel = (LcbViewerModel) model;
 
-        for (int i = 0; i < model.getMatchCount(); i++)
-        {
-            Match m = model.getMatch(i);
-            if (m.lcb >= 0)
-            {
-                m.color = lcbModel.getVisibleLcb(m.lcb).match_color;
-            }
-        }
-    }
+		if (!lcbColorsComputed) {
+			computeLCBColors (lcbModel);
+			lcbColorsComputed = true;
+		}
 
-    private void computeLCBColors(LcbViewerModel model)
-    {
-        double colorIncrement = 1d / (double) model.getLcbCount();
-        for (int i = 0; i < model.getFullLcbList().length; i++)
-        {
-            LCB lcb = model.getFullLcbList()[i];
+		for (int i = 0; i < model.getMatchCount (); i++) {
+			Match m = model.getMatch (i);
+			if (m.lcb >= 0) {
+				m.color = lcbModel.getVisibleLcb (m.lcb).match_color;
+			}
+		}
+	}
 
-            double wrapBump = ((double) i * BUMP_SIZE) / 1d;
-            double colorVal = ((double) i * BUMP_SIZE) % 1d;
+	private void computeLCBColors (LcbViewerModel model) {
+		double colorIncrement = 1d / (double) model.getLcbCount ();
+		for (int i = 0; i < model.getFullLcbList ().length; i++) {
+			LCB lcb = model.getFullLcbList ()[i];
 
-            // color the match based on its LCB number.
-            double hue = wrapBump * colorIncrement + colorVal;
-            Color color = Color.getHSBColor((float) hue, MATCH_SAT, MATCH_BRIGHT);
-            lcb.match_color = color;
-            lcb.color = color;
-        }
-    }
+			double wrapBump = ((double) i * BUMP_SIZE) / 1d;
+			double colorVal = ((double) i * BUMP_SIZE) % 1d;
 
-    public String toString()
-    {
-        return "LCB";
-    }
+			// color the match based on its LCB number.
+			double hue = wrapBump * colorIncrement + colorVal;
+			Color color = Color.getHSBColor ((float) hue, MATCH_SAT,
+					MATCH_BRIGHT);
+			lcb.match_color = color;
+			lcb.color = color;
+		}
+	}
+
+	public String toString () {
+		return "LCB";
+	}
 
 }

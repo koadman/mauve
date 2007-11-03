@@ -11,27 +11,24 @@ import javax.swing.RepaintManager;
  * adapted.
  */
 
-public class PrintUtilities
-{
+public class PrintUtilities {
 
-    /**
-     * The speed and quality of printing suffers dramatically if any of the
-     * containers have double buffering turned on. So this turns if off
-     * globally.
-     * 
-     * @see enableDoubleBuffering
-     */
-    public static void disableDoubleBuffering(Component c)
-    {
-        RepaintManager currentManager = RepaintManager.currentManager(c);
-        currentManager.setDoubleBufferingEnabled(false);
-    }
+	/**
+	 * The speed and quality of printing suffers dramatically if any of the
+	 * containers have double buffering turned on. So this turns if off
+	 * globally.
+	 * 
+	 * @see enableDoubleBuffering
+	 */
+	public static void disableDoubleBuffering (Component c) {
+		RepaintManager currentManager = RepaintManager.currentManager (c);
+		currentManager.setDoubleBufferingEnabled (false);
+	}
 
-    /** Re-enables double buffering globally. */
+	/** Re-enables double buffering globally. */
 
-    public static void enableDoubleBuffering(Component c)
-    {
-        RepaintManager currentManager = RepaintManager.currentManager(c);
-        currentManager.setDoubleBufferingEnabled(true);
-    }
+	public static void enableDoubleBuffering (Component c) {
+		RepaintManager currentManager = RepaintManager.currentManager (c);
+		currentManager.setDoubleBufferingEnabled (true);
+	}
 }

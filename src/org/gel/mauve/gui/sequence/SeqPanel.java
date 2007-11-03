@@ -54,7 +54,7 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
     static final float RULER_RATIO = .05f;
     private RRSequencePanel sequence;
     private RulerPanel ruler;
-    private FeaturePanel feature;
+    protected FeaturePanel feature;
     private ControlPanel controls;
     private JLabel label;
     

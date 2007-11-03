@@ -379,9 +379,9 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
                 // This happens when there is no LCB to edit.  Ignored.
             }
         }
-        /*MenuItem features = new MenuItem ("Filter Features");
+        MenuItem features = new MenuItem ("Filter Features");
         features.addActionListener (FeatureFilterer.getFilterer (model));
-        pop_menu.add (features);*/
+        pop_menu.add (features);
         
         return pop_menu;
     }

@@ -43,6 +43,7 @@ import org.gel.mauve.DbXrefFactory;
 import org.gel.mauve.FilterCacheSpec;
 import org.gel.mauve.Genome;
 import org.gel.mauve.GenomeBuilder;
+import org.gel.mauve.MauveConstants;
 import org.gel.mauve.ModelEvent;
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.gui.MySymbolSequenceRenderer;
@@ -120,22 +121,16 @@ public class FeaturePanel extends AbstractSequencePanel
 
             MultiLineRenderer multi = new MultiLineRenderer();
             FilterCacheSpec[] specs = getGenome().getAnnotationFormat().getFilterCacheSpecs();
-            //FeatureFilterer filterer = FeatureFilterer.getFilterer (model);
+            FeatureFilterer filterer = FeatureFilterer.getFilterer (model);
             MySymbolSequenceRenderer my_symbol = new MySymbolSequenceRenderer();
-            //filterer.addMultiRenderer (multi, my_symbol);
+            filterer.addMultiRenderer (multi, my_symbol);
             
             for (int i = 0; i < specs.length; i++)
             {
                 FilterCacheSpec spec = specs[i];
                 if (spec.getFeatureRenderer() != null)
                 {
-                    FeatureBlockSequenceRenderer fbr = new FeatureBlockSequenceRenderer();
-                    fbr.setFeatureRenderer(spec.getFeatureRenderer());
-                    fbr.setCollapsing(false);
-                    OverlayRendererWrapper over = new OverlayRendererWrapper(
-                    		new FilteringRenderer(fbr, spec.getFilter(), true));
-                    //filterer.addOverlayRenderer (multi, over);
-                    multi.addRenderer(over);
+                	makeRenderer (model, multi, spec);
                 }
             }
             
@@ -146,14 +141,7 @@ public class FeaturePanel extends AbstractSequencePanel
             Dimension my_size = new Dimension();
             my_size.height = DEFAULT_HEIGHT;
             my_size.width = DEFAULT_WIDTH;
-            setSize( my_size );
-            setPreferredSize( my_size );
-            setMaximumSize( my_size );
-            setMinimumSize( my_size );
-            trans.setSize( my_size );
-            trans.setPreferredSize( my_size );
-            trans.setMaximumSize( my_size );
-            trans.setMinimumSize( my_size );
+            setNewSize (my_size);
         }
         catch (ChangeVetoException e)
         {
@@ -165,6 +153,44 @@ public class FeaturePanel extends AbstractSequencePanel
         fpmb.addMenuItemBuilder(gmib);
         fpmb.addMenuItemBuilder(dmib);
     }
+    
+	/**
+	 * makes renderers for displaying a type of feature
+	 * 
+	 * @param multi
+	 *            the MultiLineRenderer that renders features for this panel
+	 * @param spec
+	 *            the FilterCacheSpec that describes the feature type
+	 * @throws ChangeVetoException
+	 */
+	protected static void makeRenderer (BaseViewerModel model,
+			MultiLineRenderer multi, FilterCacheSpec spec)
+			throws ChangeVetoException {
+		FeatureBlockSequenceRenderer fbr = new FeatureBlockSequenceRenderer ();
+		fbr.setFeatureRenderer (spec.getFeatureRenderer ());
+		fbr.setCollapsing (false);
+		OverlayRendererWrapper over = new OverlayRendererWrapper (
+				new FilteringRenderer (fbr, spec.getFilter (), true));
+		FeatureFilterer.getFilterer (model).addOverlayRenderer (multi, over);
+		multi.addRenderer (over);
+	}
+	
+	public void resizeForMoreFeatures () {
+		Dimension my_size = getSize ();
+		my_size.height += MauveConstants.FEATURE_HEIGHT;
+		setNewSize (my_size);
+	}
+	
+	private void setNewSize (Dimension my_size) {
+		setSize (my_size);
+		setPreferredSize (my_size);
+		setMaximumSize (my_size);
+		setMinimumSize (my_size);
+		trans.setSize (my_size);
+		trans.setPreferredSize (my_size);
+		trans.setMaximumSize (my_size);
+		trans.setMinimumSize (my_size);
+	}
 
     public FeaturePopupMenuBuilder getFeaturePopupMenuBuilder(){ return fpmb; }
     public DbXrefMenuItemBuilder getDbXrefMenuItemBuilder(){ return dmib; }

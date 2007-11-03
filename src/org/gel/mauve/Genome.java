@@ -8,163 +8,155 @@ import java.util.Vector;
 
 import org.biojava.bio.seq.Sequence;
 
-public class Genome
-{
-    private long length;
-    private BaseViewerModel model;
-    private Sequence annotationSequence;
-    private List chromosomes = new ArrayList();
-    private String displayName;
-    private SupportedFormat format;
-    private String id;
-    private long viewStart;
-    private long viewLength;
-    private int viewIndex;
-    private Vector sortedMatches;
-    private int sourceIndex;
-    private boolean visible = true;
-    
-    public Genome(long length, BaseViewerModel model, int sourceIndex)
-    {
-        this.length = length;
-        this.model = model;
-        this.sourceIndex = sourceIndex;
-    }
+public class Genome {
+	private long length;
 
-    public int getSourceIndex()
-    {
-        return sourceIndex;
-    }
-    
-    public long getLength()
-    {
-        return length;
-    }
+	private BaseViewerModel model;
 
-    public void setAnnotationSequence(Sequence annotationSequence, SupportedFormat format)
-    {
-        this.format = format;
-        this.annotationSequence = annotationSequence;
-    }
-    
-    public BaseViewerModel getModel()
-    {
-        return model;
-    }
+	private Sequence annotationSequence;
 
-    // list must be in order by position in sequence!
-    public void setChromosomes(List list)
-    {
-        this.chromosomes = list;
-    }
+	private List chromosomes = new ArrayList ();
 
-    public Sequence getAnnotationSequence()
-    {
-        return annotationSequence;
-    }
+	private String displayName;
 
-    public SupportedFormat getAnnotationFormat()
-    {
-        return format;
-    }
+	private SupportedFormat format;
 
-    public String getDisplayName()
-    {
-        return displayName;
-    }
+	private String id;
 
-    public void setDisplayName(String displayName)
-    {
-        this.displayName = displayName;
-    }
+	private long viewStart;
 
-    public List getChromosomes()
-    {
-        return Collections.unmodifiableList(chromosomes);
-    }
+	private long viewLength;
 
-    public Chromosome getChromosomeAt(long loc)
-    {
+	private int viewIndex;
 
-        if (loc < 1 || loc > length)
-            return null;
+	private Vector sortedMatches;
 
-        // This could be done smarter, if there are many chromosomes, since the
-        // list is sorted.
-        Iterator i = chromosomes.iterator();
-        while (i.hasNext())
-        {
-            Chromosome c = (Chromosome) i.next();
-            if (c.getStart() <= loc && loc <= c.getEnd())
-            {
-                return c;
-            }
-        }
-        return null;
-    }
-    
-    public void setID(String id)
-    {
-        this.id = id;
-    }
-    
-    public String getID()
-    {
-        return id;
-    }
-    
-    public long getViewLength()
-    {
-        return viewLength;
-    }
+	private int sourceIndex;
+	private boolean visible = true;
+	public Genome (long length, BaseViewerModel model, int sourceIndex) {
+		this.length = length;
+		this.model = model;
+		this.sourceIndex = sourceIndex;
+	}
 
-    public void setViewLength(long viewLength)
-    {
-        this.viewLength = viewLength;
-    }
+	public int getSourceIndex () {
+		return sourceIndex;
+	}
 
-    public long getViewStart()
-    {
-        return viewStart;
-    }
+	public long getLength () {
+		return length;
+	}
 
-    public void setViewStart(long viewStart)
-    {
-        this.viewStart = viewStart;
-    }
+	public void setAnnotationSequence (Sequence annotationSequence,
+			SupportedFormat format) {
+		this.format = format;
+		this.annotationSequence = annotationSequence;
+	}
 
-    public int getViewIndex()
-    {
-        return viewIndex;
-    }
+	public BaseViewerModel getModel () {
+		return model;
+	}
 
-    //TODO: Fire an event?
-    public void setViewIndex(int viewIndex)
-    {
-        this.viewIndex = viewIndex;
+	// list must be in order by position in sequence!
+	public void setChromosomes (List list) {
+		this.chromosomes = list;
+		System.out.println ("chrom: " + list.size());
+	}
 
-        // Clear cache of matches.
-        sortedMatches = null;
-    }
+	public Sequence getAnnotationSequence () {
+		return annotationSequence;
+	}
 
-    public Vector getSortedMatches()
-    {
-        if (sortedMatches == null)
-        {
-            sortedMatches = model.sortedMatches(new MatchStartComparator(this));
-        }
-        
-        return sortedMatches;
-    }
-    public boolean getVisible(){
+	public SupportedFormat getAnnotationFormat () {
+		return format;
+	}
+
+	public String getDisplayName () {
+		return displayName;
+	}
+
+	public void setDisplayName (String displayName) {
+		this.displayName = displayName;
+	}
+
+	public List getChromosomes () {
+		return Collections.unmodifiableList (chromosomes);
+	}
+
+	public Chromosome getChromosomeAt (long loc) {
+
+		if (loc < 1 || loc > length)
+			return null;
+
+		// This could be done smarter, if there are many chromosomes, since the
+		// list is sorted.
+		Iterator i = chromosomes.iterator ();
+		while (i.hasNext ()) {
+			Chromosome c = (Chromosome) i.next ();
+			if (c.getStart () <= loc && loc <= c.getEnd ()) {
+				return c;
+			}
+		}
+		return null;
+	}
+
+	public void setID (String id) {
+		this.id = id;
+	}
+
+	public String getID () {
+		return id;
+	}
+
+	public long getViewLength () {
+		return viewLength;
+	}
+
+	public void setViewLength (long viewLength) {
+		this.viewLength = viewLength;
+	}
+
+	public long getViewStart () {
+		return viewStart;
+	}
+
+	public void setViewStart (long viewStart) {
+		this.viewStart = viewStart;
+	}
+
+	public int getViewIndex () {
+		return viewIndex;
+	}
+
+	// TODO: Fire an event?
+	public void setViewIndex (int viewIndex) {
+		this.viewIndex = viewIndex;
+
+		// Clear cache of matches.
+		sortedMatches = null;
+	}
+
+	public Vector getSortedMatches () {
+		try {
+			if (sortedMatches == null) {
+				sortedMatches = model
+						.sortedMatches (new MatchStartComparator (this));
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return sortedMatches;
+	}
+	
+	public boolean getVisible(){
     	return visible;
     }
     public void setVisible(boolean v){
     	visible = v;
     }
-    
-    public String toString()
-    {
-        return getDisplayName();
-    }
+
+	public String toString () {
+		return getDisplayName ();
+	}
 }

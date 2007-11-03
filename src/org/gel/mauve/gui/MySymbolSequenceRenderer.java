@@ -22,109 +22,95 @@ import org.biojava.bio.symbol.SymbolList;
  * A slightly revised version of Biojava's SymbolSequenceRenderer, which prints
  * symbols near center of range for location, and offset a little further down.
  */
-public class MySymbolSequenceRenderer implements SequenceRenderer
-{
-    private double depth = 51.0;
-    private Paint outline;
+public class MySymbolSequenceRenderer implements SequenceRenderer {
+	private double depth = 51.0;
 
-    public MySymbolSequenceRenderer()
-    {
-        outline = Color.black;
-    }
+	private Paint outline;
 
-    public double getDepth(SequenceRenderContext context)
-    {
-        return depth + 1.0;
-    }
+	public MySymbolSequenceRenderer () {
+		outline = Color.black;
+	}
 
-    public double getMinimumLeader(SequenceRenderContext context)
-    {
-        return 0.0;
-    }
+	public double getDepth (SequenceRenderContext context) {
+		return depth + 1.0;
+	}
 
-    public double getMinimumTrailer(SequenceRenderContext context)
-    {
-        return 0.0;
-    }
+	public double getMinimumLeader (SequenceRenderContext context) {
+		return 0.0;
+	}
 
-    public void paint(Graphics2D g2, SequenceRenderContext context)
-    {
-        Rectangle2D prevClip = g2.getClipBounds();
-        AffineTransform prevTransform = g2.getTransform();
+	public double getMinimumTrailer (SequenceRenderContext context) {
+		return 0.0;
+	}
 
-        g2.setPaint(outline);
+	public void paint (Graphics2D g2, SequenceRenderContext context) {
+		Rectangle2D prevClip = g2.getClipBounds ();
+		AffineTransform prevTransform = g2.getTransform ();
 
-        Font font = context.getFont();
+		g2.setPaint (outline);
 
-        Rectangle2D maxCharBounds = font.getMaxCharBounds(g2.getFontRenderContext());
+		Font font = context.getFont ();
 
-        double scale = context.getScale();
+		Rectangle2D maxCharBounds = font.getMaxCharBounds (g2
+				.getFontRenderContext ());
 
-        if (scale >= (maxCharBounds.getWidth() * 0.3) && scale >= (maxCharBounds.getHeight() * 0.3))
-        {
-            double xFontOffset = 0.0;
-            double yFontOffset = 0.0;
+		double scale = context.getScale ();
 
-            // These offsets are not set quite correctly yet. The
-            // Rectangle2D from getMaxCharBounds() seems slightly
-            // off. The "correct" application of translations based on
-            // the Rectangle2D seem to give the wrong results. The
-            // values below are mostly fudges.
-            if (context.getDirection() == SequenceRenderContext.HORIZONTAL)
-            {
-                xFontOffset = maxCharBounds.getCenterX() * 0.2;
-                yFontOffset = -maxCharBounds.getCenterY() + (depth * 0.5);
-            }
-            else
-            {
-                xFontOffset = -maxCharBounds.getCenterX() + (depth * 0.5);
-                yFontOffset = -maxCharBounds.getCenterY() * 3.0;
-            }
+		if (scale >= (maxCharBounds.getWidth () * 0.3)
+				&& scale >= (maxCharBounds.getHeight () * 0.3)) {
+			double xFontOffset = 0.0;
+			double yFontOffset = 0.0;
 
-            SymbolList seq = context.getSymbols();
-            SymbolTokenization toke = null;
-            try
-            {
-                toke = seq.getAlphabet().getTokenization("token");
-            }
-            catch (Exception e)
-            {
-                throw new BioRuntimeException(e);
-            }
+			// These offsets are not set quite correctly yet. The
+			// Rectangle2D from getMaxCharBounds() seems slightly
+			// off. The "correct" application of translations based on
+			// the Rectangle2D seem to give the wrong results. The
+			// values below are mostly fudges.
+			if (context.getDirection () == SequenceRenderContext.HORIZONTAL) {
+				xFontOffset = maxCharBounds.getCenterX () * 0.2;
+				yFontOffset = -maxCharBounds.getCenterY () + (depth * 0.5);
+			} else {
+				xFontOffset = -maxCharBounds.getCenterX () + (depth * 0.5);
+				yFontOffset = -maxCharBounds.getCenterY () * 3.0;
+			}
 
-            Location visible = GUITools.getVisibleRange(context, g2);
-            for (int sPos = visible.getMin(); sPos <= visible.getMax(); sPos++)
-            {
-                double gPos = (context.sequenceToGraphics(sPos) + context.sequenceToGraphics(sPos + 1)) / 2.0;
-                String s = "?";
-                try
-                {
-                    s = toke.tokenizeSymbol(seq.symbolAt(sPos));
-                }
-                catch (Exception ex)
-                {
-                    // We'll ignore the case of not being able to tokenize it
-                }
+			SymbolList seq = context.getSymbols ();
+			SymbolTokenization toke = null;
+			try {
+				toke = seq.getAlphabet ().getTokenization ("token");
+			} catch (Exception e) {
+				throw new BioRuntimeException (e);
+			}
 
-                if (context.getDirection() == SequenceRenderContext.HORIZONTAL)
-                {
-                    g2.drawString(s, (float) (gPos + xFontOffset), (float) yFontOffset);
-                }
-                else
-                {
-                    g2.drawString(s, (float) xFontOffset, (float) (gPos + yFontOffset));
-                }
-            }
-        }
+			Location visible = GUITools.getVisibleRange (context, g2);
+			for (int sPos = visible.getMin (); sPos <= visible.getMax (); sPos++) {
+				double gPos = (context.sequenceToGraphics (sPos) + context
+						.sequenceToGraphics (sPos + 1)) / 2.0;
+				String s = "?";
+				try {
+					s = toke.tokenizeSymbol (seq.symbolAt (sPos));
+				} catch (Exception ex) {
+					// We'll ignore the case of not being able to tokenize it
+				}
 
-        g2.setClip(prevClip);
-        g2.setTransform(prevTransform);
-    }
+				if (context.getDirection () == SequenceRenderContext.HORIZONTAL) {
+					g2.drawString (s, (float) (gPos + xFontOffset),
+							(float) yFontOffset);
+				} else {
+					g2.drawString (s, (float) xFontOffset,
+							(float) (gPos + yFontOffset));
+				}
+			}
+		}
 
-    public SequenceViewerEvent processMouseEvent(SequenceRenderContext context, MouseEvent me, List path)
-    {
-        path.add(this);
-        int sPos = context.graphicsToSequence(me.getPoint());
-        return new SequenceViewerEvent(this, null, sPos, me, path);
-    }
+		g2.setClip (prevClip);
+		g2.setTransform (prevTransform);
+	}
+
+	public SequenceViewerEvent processMouseEvent (
+			SequenceRenderContext context, MouseEvent me, List path) {
+		path.add (this);
+		int sPos = context.graphicsToSequence (me.getPoint ());
+		return new SequenceViewerEvent (this, null, sPos, me, path);
+	}
 }

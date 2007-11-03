@@ -35,247 +35,168 @@ import org.biojavax.bio.seq.RichLocation;
 import org.gel.mauve.FilterCacheSpec;
 import org.gel.mauve.SupportedFormat;
 
-class DelegatingSequence implements Sequence
-{
-    protected File source;
-    protected int sequenceIndex;
-    protected Annotation annotation;
-    protected Alphabet alphabet;
-    protected int length;
-    protected String name;
-    protected String urn;
-    protected int featureCount;
-    protected Map filterCache = new HashMap();
-    protected SupportedFormat format;
+class DelegatingSequence implements Sequence {
+	protected File source;
 
-    // Delegate changeable stuff to unchangeable implementation
-    Changeable ch = new Unchangeable();
+	protected int sequenceIndex;
 
-    SymbolList packedList = null;	// a packed symbol list
+	protected Annotation annotation;
 
-    public DelegatingSequence(Sequence s, SupportedFormat format, File source, int index) throws FileNotFoundException
-    {
-        format.validate(s, source, index);
+	protected Alphabet alphabet;
 
-        this.format = format;
-        this.source = source;
-        this.sequenceIndex = index;
+	protected int length;
 
-        init(s);
-    }
+	protected String name;
 
-    protected void init(Sequence s)
-    {
-        PackedSymbolListFactory pslFactory = new PackedSymbolListFactory();
-        Symbol[] symArray = new Symbol[s.length()];
-        int symI = 0;
-        for( Iterator symIter = s.iterator(); symIter.hasNext(); )
-        {
-        	symArray[symI++] = (Symbol)symIter.next();
-        }
-        try{
-        	packedList = pslFactory.makeSymbolList(symArray, s.length(), s.getAlphabet());
-        }catch(IllegalAlphabetException iae)
-        {
-        	iae.printStackTrace();
-        }
+	protected String urn;
 
-        annotation = new SimpleAnnotation(s.getAnnotation());
-        alphabet = s.getAlphabet();
-        length = s.length();
-        name = s.getName();
-        urn = s.getURN();
-        featureCount = s.countFeatures();
+	protected int featureCount;
 
-        for (int i = 0; i < format.getFilterCacheSpecs().length; i++)
-        {
-            addToCache(s, format.getFilterCacheSpecs()[i]);
-        }
+	protected Map filterCache = new HashMap ();
 
-        completeInit(s);
-    }
+	protected SupportedFormat format;
 
-    protected void completeInit(Sequence s)
-    {
-        // Added for subclass convenience.
-    }
+	// Delegate changeable stuff to unchangeable implementation
+	Changeable ch = new Unchangeable ();
 
-    ///////////////////////////////////////////////////////////////////
-    // Begin Sequence-specific implementation
-    public String getName()
-    {
-        return name;
-    }
+	SymbolList packedList = null; // a packed symbol list
 
-    public String getURN()
-    {
-        return urn;
-    }
+	public DelegatingSequence (Sequence s, SupportedFormat format, File source,
+			int index) throws FileNotFoundException {
+		format.validate (s, source, index);
 
-    // End Sequence-specific implementation
-    ///////////////////////////////////////////////////////////////////
+		this.format = format;
+		this.source = source;
+		this.sequenceIndex = index;
 
-    ///////////////////////////////////////////////////////////////////
-    // Begin ChangeListener implementation.
-    /**
-     * @deprecated
-     */
-    public void addChangeListener(ChangeListener cl)
-    {
-        ch.addChangeListener(cl);
-    }
+		init (s);
+	}
 
-    public void addChangeListener(ChangeListener cl, ChangeType ct)
-    {
-        ch.addChangeListener(cl, ct);
-    }
+	protected void init (Sequence s) {
+		PackedSymbolListFactory pslFactory = new PackedSymbolListFactory ();
+		Symbol [] symArray = new Symbol [s.length ()];
+		int symI = 0;
+		for (Iterator symIter = s.iterator (); symIter.hasNext ();) {
+			symArray[symI++] = (Symbol) symIter.next ();
+		}
+		try {
+			packedList = pslFactory.makeSymbolList (symArray, s.length (), s
+					.getAlphabet ());
+		} catch (IllegalAlphabetException iae) {
+			iae.printStackTrace ();
+		}
 
-    /**
-     * @deprecated
-     */
-    public void removeChangeListener(ChangeListener cl)
-    {
-        ch.removeChangeListener(cl);
-    }
+		annotation = new SimpleAnnotation (s.getAnnotation ());
+		alphabet = s.getAlphabet ();
+		length = s.length ();
+		name = format.getChromosomeName (s);
+		//name = s.getName ();
+		urn = s.getURN ();
+		featureCount = s.countFeatures ();
 
-    public void removeChangeListener(ChangeListener cl, ChangeType ct)
-    {
-        ch.removeChangeListener(cl, ct);
-    }
+		for (int i = 0; i < format.getFilterCacheSpecs ().length; i++) {
+			addToCache (s, format.getFilterCacheSpecs ()[i]);
+		}
 
-    public boolean isUnchanging(ChangeType ct)
-    {
-        return ch.isUnchanging(ct);
-    }
+		completeInit (s);
+	}
 
-    // End ChangeListener implementation.
-    ///////////////////////////////////////////////////////////////////
+	protected void completeInit (Sequence s) {
+		// Added for subclass convenience.
+	}
 
-    ///////////////////////////////////////////////////////////////////
-    // Begin Annotatable implementation.
-    public Annotation getAnnotation()
-    {
-        return annotation;
-    }
+	// /////////////////////////////////////////////////////////////////
+	// Begin Sequence-specific implementation
+	public String getName () {
+		return name;
+	}
 
-    // End Annotatable implementation.
-    ///////////////////////////////////////////////////////////////////
+	public String getURN () {
+		return urn;
+	}
 
-    ///////////////////////////////////////////////////////////////////
-    // Begin SymbolList implementation.
-    public Alphabet getAlphabet()
-    {
-		return packedList.getAlphabet();
-    }
+	// End Sequence-specific implementation
+	// /////////////////////////////////////////////////////////////////
 
-    public int length()
-    {
-        return length;
-    }
+	// /////////////////////////////////////////////////////////////////
+	// Begin ChangeListener implementation.
+	/**
+	 * @deprecated
+	 */
+	public void addChangeListener (ChangeListener cl) {
+		ch.addChangeListener (cl);
+	}
 
-    public Symbol symbolAt(int index) throws IndexOutOfBoundsException
-    {
-		return packedList.symbolAt(index);
-    }
+	public void addChangeListener (ChangeListener cl, ChangeType ct) {
+		ch.addChangeListener (cl, ct);
+	}
 
-    public List toList()
-    {
-		return packedList.toList();
-    }
+	/**
+	 * @deprecated
+	 */
+	public void removeChangeListener (ChangeListener cl) {
+		ch.removeChangeListener (cl);
+	}
 
-    public Iterator iterator()
-    {
-		return packedList.iterator();
-    }
+	public void removeChangeListener (ChangeListener cl, ChangeType ct) {
+		ch.removeChangeListener (cl, ct);
+	}
 
-    public SymbolList subList(int start, int end) throws IndexOutOfBoundsException
-    {
-        return new DelegatingSublist(start, end);
-    }
+	public boolean isUnchanging (ChangeType ct) {
+		return ch.isUnchanging (ct);
+	}
 
-    public String seqString()
-    {
-		return packedList.seqString();
-    }
+	// End ChangeListener implementation.
+	// /////////////////////////////////////////////////////////////////
 
-    public String subStr(int start, int end) throws IndexOutOfBoundsException
-    {
-		return packedList.subStr(start,end);
-    }
+	// /////////////////////////////////////////////////////////////////
+	// Begin Annotatable implementation.
+	public Annotation getAnnotation () {
+		return annotation;
+	}
 
-    public void edit(Edit edit) throws IllegalAlphabetException, ChangeVetoException
-    {
-        throw new ChangeVetoException();
-    }
+	// End Annotatable implementation.
+	// /////////////////////////////////////////////////////////////////
 
-    // End SymbolList implementation.
-    ///////////////////////////////////////////////////////////////////
+	// /////////////////////////////////////////////////////////////////
+	// Begin SymbolList implementation.
+	public Alphabet getAlphabet () {
+		return packedList.getAlphabet ();
+	}
 
-    public int countFeatures()
-    {
-        return featureCount;
-    }
+	public int length () {
+		return length;
+	}
 
-    public Iterator features()
-    {
-        Sequence s = format.readInnerSequence(source, sequenceIndex);
-        return s.features();
-    }
+	public Symbol symbolAt (int index) throws IndexOutOfBoundsException {
+		return packedList.symbolAt (index);
+	}
 
-    public FeatureHolder filter(FeatureFilter fc, boolean recurse)
-    {
-        FeatureHolder fh;
-        // if this is of the form And(SomeFilter,OverlapsLocation)
-        // used by TranslatedSequencePanels, see if we have
-        // data corresponding to SomeFilter in one of the cache entries
-        if (fc instanceof FeatureFilter.And && ((FeatureFilter.And) fc).getChild2() instanceof FeatureFilter.OverlapsLocation)
-        {
-            fh = getCachedFilterResults( ((FeatureFilter.And) fc).getChild1() );
-        }
-        else
-        {
-            fh = format.readInnerSequence(source, sequenceIndex);
-        }
-        return fh.filter(fc, recurse);
-    }
+	public List toList () {
+		return packedList.toList ();
+	}
 
-    private FeatureHolder getCachedFilterResults(FeatureFilter ff)
-    {
-        if (!filterCache.containsKey(ff))
-        {
-            Sequence s = format.readInnerSequence(source, sequenceIndex);
-            addToCache(s, new FilterCacheSpec(ff));
-        }
+	public Iterator iterator () {
+		return packedList.iterator ();
+	}
 
-        return (FeatureHolder) filterCache.get(ff);
-    }
+	public SymbolList subList (int start, int end)
+			throws IndexOutOfBoundsException {
+		return new DelegatingSublist (start, end);
+	}
 
-    private void addToCache(Sequence s, FilterCacheSpec filterCacheSpec)
-    {
-        FeatureHolder results = s.filter(filterCacheSpec.filter, true);
+	public String seqString () {
+		return packedList.seqString ();
+	}
 
-        // Save them.
-        SimpleFeatureHolder sfh = new SimpleFeatureHolder();
-        Iterator i = results.features();
-        while (i.hasNext())
-        {
-            Feature f = (Feature) i.next();
-            Feature sf = null;
-            if( f instanceof StrandedFeature )
-            	sf = makeThinFeature((StrandedFeature)f, filterCacheSpec);
-            else
-            	System.err.println("found one that ain't stranded");
-            try
-            {
-                sfh.addFeature(sf);
-            }
-            catch (ChangeVetoException e)
-            {
-                throw new Error(e);
-            }
-        }
-        filterCache.put(filterCacheSpec.filter, sfh);
-    }
+	public String subStr (int start, int end) throws IndexOutOfBoundsException {
+		return packedList.subStr (start, end);
+	}
+
+	public void edit (Edit edit) throws IllegalAlphabetException,
+			ChangeVetoException {
+		throw new ChangeVetoException ();
+	}
 
     class RichStrandedFeatureTemplate extends StrandedFeature.Template
     {
@@ -297,53 +218,100 @@ class DelegatingSequence implements Sequence
     	}
     }
 
-    /**
-     * @param f
-     * @return
-     * @throws ChangeVetoException
-     * 
-     * Make a slimmed-down copy of the feature for caching.
-     *  
-     */
-    protected SimpleStrandedFeature makeThinFeature(StrandedFeature f, FilterCacheSpec spec)
-    {
-        Feature.Template template = f.makeTemplate();
-        if (f.getAnnotation() != null && spec.getAnnotations() != null && spec.getAnnotations().length > 0)
-        {
-            if (spec.getAnnotations()[0].equals(FilterCacheSpec.ALL_ANNOTATIONS))
-            {
-                // Don't replace any annotations.
-            }
-            else
-            {
-                Annotation a = new SimpleAnnotation();
-                for (int i = 0; i < spec.getAnnotations().length; i++)
-                {
-                    String property = spec.getAnnotations()[i];
 
-                    if (f.getAnnotation().containsProperty(property))
-                    {
-                        try
-                        {
-                            a.setProperty(property, f.getAnnotation().getProperty(property));
-                        }
-                        catch (ChangeVetoException e)
-                        {
-                            // We don't expect an exception here.
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }
-                template.annotation = a;
-            }
-        }
-        else
-        {
-            // Strip out everything except location and type
-            template.annotation = Annotation.EMPTY_ANNOTATION;
-        }
-        template.source = null;
-        template.sourceTerm = OntoTools.ANY;
+	public int countFeatures () {
+		return featureCount;
+	}
+
+	public Iterator features () {
+		Sequence s = format.readInnerSequence (source, sequenceIndex);
+		return s.features ();
+	}
+
+	public FeatureHolder filter (FeatureFilter fc, boolean recurse) {
+		FeatureHolder fh;
+		// if this is of the form And(SomeFilter,OverlapsLocation)
+		// used by TranslatedSequencePanels, see if we have
+		// data corresponding to SomeFilter in one of the cache entries
+		if (fc instanceof FeatureFilter.And
+				&& ((FeatureFilter.And) fc).getChild2 () instanceof FeatureFilter.OverlapsLocation) {
+			fh = getCachedFilterResults (((FeatureFilter.And) fc).getChild1 ());
+		} else {
+			fh = format.readInnerSequence (source, sequenceIndex);
+		}
+		return fh.filter (fc, recurse);
+	}
+
+	private FeatureHolder getCachedFilterResults (FeatureFilter ff) {
+		if (!filterCache.containsKey (ff)) {
+			Sequence s = format.readInnerSequence (source, sequenceIndex);
+			addToCache (s, new FilterCacheSpec (ff));
+		}
+
+		return (FeatureHolder) filterCache.get (ff);
+	}
+
+	private void addToCache (Sequence s, FilterCacheSpec filterCacheSpec) {
+		FeatureHolder results = s.filter (filterCacheSpec.filter, true);
+
+		// Save them.
+		SimpleFeatureHolder sfh = new SimpleFeatureHolder ();
+		Iterator i = results.features ();
+		while (i.hasNext ()) {
+			Feature f = (Feature) i.next ();
+			Feature sf = null;
+			if (f instanceof StrandedFeature)
+				sf = makeThinFeature ((StrandedFeature) f, filterCacheSpec);
+			else
+				System.err.println ("found one that ain't stranded");
+			try {
+				sfh.addFeature (sf);
+			} catch (ChangeVetoException e) {
+				throw new Error (e);
+			}
+		}
+		filterCache.put (filterCacheSpec.filter, sfh);
+	}
+
+	/**
+	 * @param f
+	 * @return
+	 * @throws ChangeVetoException
+	 * 
+	 * Make a slimmed-down copy of the feature for caching.
+	 * 
+	 */
+	protected SimpleStrandedFeature makeThinFeature (StrandedFeature f,
+			FilterCacheSpec spec) {
+		Feature.Template template = f.makeTemplate ();
+		if (f.getAnnotation () != null && spec.getAnnotations () != null
+				&& spec.getAnnotations ().length > 0) {
+			if (spec.getAnnotations ()[0]
+					.equals (FilterCacheSpec.ALL_ANNOTATIONS)) {
+				// Don't replace any annotations.
+			} else {
+				Annotation a = new SimpleAnnotation ();
+				for (int i = 0; i < spec.getAnnotations ().length; i++) {
+					String property = spec.getAnnotations ()[i];
+
+					if (f.getAnnotation ().containsProperty (property)) {
+						try {
+							a.setProperty (property, f.getAnnotation ()
+									.getProperty (property));
+						} catch (ChangeVetoException e) {
+							// We don't expect an exception here.
+							throw new RuntimeException (e);
+						}
+					}
+				}
+				template.annotation = a;
+			}
+		} else {
+			// Strip out everything except location and type
+			template.annotation = Annotation.EMPTY_ANNOTATION;
+		}
+		template.source = null;
+		template.sourceTerm = OntoTools.ANY;
         if(template instanceof RichFeature.Template)
         {
         	SimpleStrandedFeature sf = new SimpleStrandedFeature(this, this, new RichStrandedFeatureTemplate((RichFeature.Template)template));
@@ -352,139 +320,121 @@ class DelegatingSequence implements Sequence
         	SimpleStrandedFeature sf = new SimpleStrandedFeature(this, this, (StrandedFeature.Template)template);
         	return sf;
         }
-    }
+	}
 
-    public FeatureHolder filter(FeatureFilter fc)
-    {
-        FeatureHolder fh;
-        // if this is of the form And(SomeFilter,OverlapsLocation)
-        // used by TranslatedSequencePanels, see if we have
-        // data corresponding to SomeFilter in one of the cache entries
-        if (fc instanceof FeatureFilter.And && ((FeatureFilter.And) fc).getChild2() instanceof FeatureFilter.OverlapsLocation)
-        {
-            fh = getCachedFilterResults( ((FeatureFilter.And) fc).getChild1() );
-        }
-        else if (fc instanceof FeatureFilter.ByType)
-        {
-            fh = getCachedFilterResults(fc);
-        }
-        else
-        {
-            fh = format.readInnerSequence(source, sequenceIndex);
-        }
-        return fh.filter(fc);
-    }
+	public FeatureHolder filter (FeatureFilter fc) {
+		FeatureHolder fh;
+		// if this is of the form And(SomeFilter,OverlapsLocation)
+		// used by TranslatedSequencePanels, see if we have
+		// data corresponding to SomeFilter in one of the cache entries
+		if (fc instanceof FeatureFilter.And
+				&& ((FeatureFilter.And) fc).getChild2 () instanceof FeatureFilter.OverlapsLocation) {
+			fh = getCachedFilterResults (((FeatureFilter.And) fc).getChild1 ());
+		} else if (fc instanceof FeatureFilter.ByType) {
+			fh = getCachedFilterResults (fc);
+		} else {
+			fh = format.readInnerSequence (source, sequenceIndex);
+		}
+		return fh.filter (fc);
+	}
 
-    public Feature createFeature(Template ft) throws BioException, ChangeVetoException
-    {
-        throw new ChangeVetoException();
-    }
+	public Feature createFeature (Template ft) throws BioException,
+			ChangeVetoException {
+		throw new ChangeVetoException ();
+	}
 
-    public void removeFeature(Feature f) throws ChangeVetoException, BioException
-    {
-        throw new ChangeVetoException();
-    }
+	public void removeFeature (Feature f) throws ChangeVetoException,
+			BioException {
+		throw new ChangeVetoException ();
+	}
 
-    public boolean containsFeature(Feature f)
-    {
-        Sequence s = format.readInnerSequence(source, sequenceIndex);
-        return s.containsFeature(f);
-    }
+	public boolean containsFeature (Feature f) {
+		Sequence s = format.readInnerSequence (source, sequenceIndex);
+		return s.containsFeature (f);
+	}
 
-    public FeatureFilter getSchema()
-    {
-        Sequence s = format.readInnerSequence(source, sequenceIndex);
-        return s.getSchema();
-    }
+	public FeatureFilter getSchema () {
+		Sequence s = format.readInnerSequence (source, sequenceIndex);
+		return s.getSchema ();
+	}
 
+	private class DelegatingSublist implements SymbolList {
+		private int start;
 
-    private class DelegatingSublist implements SymbolList
-    {
-        private int start;
-        private int end;
+		private int end;
 
-        public DelegatingSublist(int start, int end)
-        {
-            this.start = start;
-            this.end = end;
-        }
+		public DelegatingSublist (int start, int end) {
+			this.start = start;
+			this.end = end;
+		}
 
-        public Alphabet getAlphabet()
-        {
-            return alphabet;
-        }
+		public Alphabet getAlphabet () {
+			return alphabet;
+		}
 
-        public int length()
-        {
-            return start - end + 1;
-        }
+		public int length () {
+			return end - start + 1;
+		}
 
-        public Symbol symbolAt(int index) throws IndexOutOfBoundsException
-        {
-            return DelegatingSequence.this.symbolAt(index + start - 1);
-        }
+		public Symbol symbolAt (int index) throws IndexOutOfBoundsException {
+			return DelegatingSequence.this.symbolAt (index + start - 1);
+		}
 
-        public List toList()
-        {
-            throw new Error("Not implemented");
-        }
+		public List toList () {
+			throw new Error ("Not implemented");
+		}
 
-        public Iterator iterator()
-        {
-            throw new Error("Not implemented");
-        }
+		public Iterator iterator () {
+			throw new Error ("Not implemented");
+		}
 
-        public SymbolList subList(int start, int end) throws IndexOutOfBoundsException
-        {
-            return new DelegatingSublist(this.start + start - 1, this.start + end - 1);
-        }
+		public SymbolList subList (int start, int end)
+				throws IndexOutOfBoundsException {
+			return new DelegatingSublist (this.start + start - 1, this.start
+					+ end - 1);
+		}
 
-        public String seqString()
-        {
-            throw new Error("Not implemented");
-        }
+		public String seqString () {
+			return packedList.subStr (start, end);
+			//throw new Error ("Not implemented");
+		}
 
-        public String subStr(int start, int end) throws IndexOutOfBoundsException
-        {
-            throw new Error("Not implemented");
-        }
+		public String subStr (int start, int end)
+				throws IndexOutOfBoundsException {
+			throw new Error ("Not implemented");
+		}
 
-        public void edit(Edit edit) throws IndexOutOfBoundsException, IllegalAlphabetException, ChangeVetoException
-        {
-            throw new ChangeVetoException();
-        }
+		public void edit (Edit edit) throws IndexOutOfBoundsException,
+				IllegalAlphabetException, ChangeVetoException {
+			throw new ChangeVetoException ();
+		}
 
-        /**
-         * @deprecated
-         */
-        public void addChangeListener(ChangeListener cl)
-        {
-            ch.addChangeListener(cl);
-        }
+		/**
+		 * @deprecated
+		 */
+		public void addChangeListener (ChangeListener cl) {
+			ch.addChangeListener (cl);
+		}
 
-        public void addChangeListener(ChangeListener cl, ChangeType ct)
-        {
-            ch.addChangeListener(cl, ct);
-        }
+		public void addChangeListener (ChangeListener cl, ChangeType ct) {
+			ch.addChangeListener (cl, ct);
+		}
 
-        /**
-         * @deprecated
-         */
-        public void removeChangeListener(ChangeListener cl)
-        {
-            ch.removeChangeListener(cl);
-        }
+		/**
+		 * @deprecated
+		 */
+		public void removeChangeListener (ChangeListener cl) {
+			ch.removeChangeListener (cl);
+		}
 
-        public void removeChangeListener(ChangeListener cl, ChangeType ct)
-        {
-            ch.removeChangeListener(cl, ct);
-        }
+		public void removeChangeListener (ChangeListener cl, ChangeType ct) {
+			ch.removeChangeListener (cl, ct);
+		}
 
-        public boolean isUnchanging(ChangeType ct)
-        {
-            return true;
-        }
+		public boolean isUnchanging (ChangeType ct) {
+			return true;
+		}
 
-    }
+	}
 
 }

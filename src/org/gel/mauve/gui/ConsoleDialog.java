@@ -7,29 +7,25 @@ import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-public class ConsoleDialog extends JDialog
-{
-    JTextArea text;
+public class ConsoleDialog extends JDialog {
+	JTextArea text;
 
-    public ConsoleDialog(Frame owner) throws HeadlessException
-    {
-        super(owner, "Mauve Console");
+	public ConsoleDialog (Frame owner) throws HeadlessException {
+		super (owner, "Mauve Console");
 
-        initComponents();
-    }
+		initComponents ();
+	}
 
-    private void initComponents()
-    {
-        setSize(400, 600);
-        text = new JTextArea();
-        JScrollPane sp = new JScrollPane(text);
-        getContentPane().add(sp);
-    }
+	private void initComponents () {
+		setSize (400, 600);
+		text = new JTextArea ();
+		JScrollPane sp = new JScrollPane (text);
+		getContentPane ().add (sp);
+	}
 
-    public void appendText(String s)
-    {
-        text.append(s);
-        setVisible(true);
-    }
+	public void appendText (String s) {
+		text.append (s);
+		setVisible (true);
+	}
 
 }

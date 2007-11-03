@@ -12,48 +12,40 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
-
-public class PrintPreviewDialog extends JDialog
-{
+public class PrintPreviewDialog extends JDialog {
 	private static final int HEIGHT = 570;
+
 	private static final int WIDTH = 400;
-	
+
 	private PrintPreviewCanvas canvas;
-	
-	
-	public PrintPreviewDialog(Printable p, PageFormat pf, int pages)
-	{
-		Book book = new Book();
-		book.append(p, pf, pages);
-		layoutUI(book);
-	}
-	
-	public PrintPreviewDialog(Book b)
-	{
-		layoutUI(b);
+
+	public PrintPreviewDialog (Printable p, PageFormat pf, int pages) {
+		Book book = new Book ();
+		book.append (p, pf, pages);
+		layoutUI (book);
 	}
 
-	public void layoutUI(Book b)
-	{
-		setSize(WIDTH, HEIGHT);
-		setTitle("Mauve Print Preview");
-		Container contentPane = getContentPane();
-		canvas = new PrintPreviewCanvas(b);
-		contentPane.add(canvas, BorderLayout.CENTER);
-		
-		JPanel buttonPanel = new JPanel();
+	public PrintPreviewDialog (Book b) {
+		layoutUI (b);
+	}
 
-		JButton closeButton = new JButton("Close");
-		buttonPanel.add(closeButton);
-		closeButton.addActionListener(new
-				ActionListener()
-				{
-					public void actionPerformed(ActionEvent evt)
-					{
-						setVisible(false);
-					}
-				});
-		
-		contentPane.add(buttonPanel, BorderLayout.SOUTH);
+	public void layoutUI (Book b) {
+		setSize (WIDTH, HEIGHT);
+		setTitle ("Mauve Print Preview");
+		Container contentPane = getContentPane ();
+		canvas = new PrintPreviewCanvas (b);
+		contentPane.add (canvas, BorderLayout.CENTER);
+
+		JPanel buttonPanel = new JPanel ();
+
+		JButton closeButton = new JButton ("Close");
+		buttonPanel.add (closeButton);
+		closeButton.addActionListener (new ActionListener () {
+			public void actionPerformed (ActionEvent evt) {
+				setVisible (false);
+			}
+		});
+
+		contentPane.add (buttonPanel, BorderLayout.SOUTH);
 	}
 }

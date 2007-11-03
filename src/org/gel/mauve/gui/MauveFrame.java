@@ -54,10 +54,9 @@ import org.gel.mauve.gui.sequence.FlatFileFeatureImporter;
  */
 public class MauveFrame extends JFrame implements ActionListener, ModelProgressListener
 {
-    BaseViewerModel model;
+    protected BaseViewerModel model;
     
     String documentation_url = "http://gel.ahabs.wisc.edu/mauve/mauve-user-guide";
-    
     // member declarations
     JMenuBar jMenuBar1 = new JMenuBar();
     JMenuItem jMenuFileOpen = new JMenuItem();
@@ -66,7 +65,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     JMenuItem jMenuFilePrint = new JMenuItem();
     JMenuItem jMenuFilePageSetup = new JMenuItem();
     JMenuItem jMenuFilePrintPreview = new JMenuItem();
-    //JMenuItem jMenuFileImport = new JMenuItem();
+    JMenuItem jMenuFileImport = new JMenuItem();
     JMenuItem jMenuFileExport = new JMenuItem();
     JMenuItem jMenuFileClose = new JMenuItem();
     JMenuItem jMenuFileQuit = new JMenuItem();
@@ -91,7 +90,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     AlignFrame progressiveAlignFrame;
     JScrollPane scrollPane;
     SequenceNavigator navigator;
-    //FlatFileFeatureImporter importer;
+    protected FlatFileFeatureImporter importer;
     
     private int progressSequenceCount;
 
@@ -215,12 +214,12 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFileExport.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK));
         jMenuFileExport.setMnemonic('E');
         
-        /*jMenuFileImport.setToolTipText("Import annotation file...");
+        jMenuFileImport.setToolTipText("Import annotation file...");
         jMenuFileImport.setVisible(true);
         jMenuFileImport.setEnabled(false);
         jMenuFileImport.setText("Import Annotations");
         jMenuFileImport.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
-        jMenuFileImport.setMnemonic('s');*/
+        jMenuFileImport.setMnemonic('s');
         
         jMenuFileClose.setToolTipText("Close this alignment...");
         jMenuFileClose.setVisible(true);
@@ -294,7 +293,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFile.add(jMenuFilePrint);
         jMenuFile.add(jMenuFilePageSetup);
         jMenuFile.add(jMenuFilePrintPreview);
-        //jMenuFile.add(jMenuFileImport);
+        jMenuFile.add(jMenuFileImport);
         jMenuFile.add(jMenuFileExport);
         jMenuFile.add(jMenuFileClose);
         jMenuFile.add(jMenuFileSeparator1);
@@ -324,7 +323,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFilePageSetup.addActionListener(this);
         jMenuFilePrintPreview.addActionListener(this);
         jMenuFileExport.addActionListener(this);
-        //jMenuFileImport.addActionListener(this);
+        jMenuFileImport.addActionListener(this);
         jMenuFileQuit.addActionListener(this);
         jMenuHelpAbout.addActionListener(this);
         jMenuHelpDocumentation.addActionListener(this);
@@ -344,7 +343,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFilePrint.getActionMap().put("Print", new GenericAction(this, "Print"));
         jMenuFilePageSetup.getActionMap().put("PageSetup", new GenericAction(this, "PageSetup"));
         jMenuFilePrintPreview.getActionMap().put("PrintPreview", new GenericAction(this, "PrintPreview"));
-        //jMenuFileImport.getActionMap().put("Import", new GenericAction(this, "Import"));
+        jMenuFileImport.getActionMap().put("Import", new GenericAction(this, "Import"));
         jMenuFileExport.getActionMap().put("Export", new GenericAction(this, "Export"));
         jMenuFileOpen.getActionMap().put("Open", new GenericAction(this, "Open"));
         jMenuFileClose.getActionMap().put("Close", new GenericAction(this, "Close"));
@@ -425,10 +424,10 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             		dialog.setVisible(true);
             	}
             }
-            /*if (source == jMenuFileImport || ae.getActionCommand().equals("Import"))
+            if (source == jMenuFileImport || ae.getActionCommand().equals("Import"))
             {
             	importer.setVisible (true);
-            }*/
+            }
             if (source == jMenuFileExport || ae.getActionCommand().equals("Export"))
             {
                 ExportFrame exportFrame = new ExportFrame(rrpanel);
@@ -498,15 +497,15 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     /** Close the window when the close box is clicked */
     void thisWindowClosing(java.awt.event.WindowEvent e)
     {
-    	/*if (model != null)
-    		FeatureFilterer.removeFilterer (model);*/
+    	if (model != null)
+    		FeatureFilterer.removeFilterer (model);
         mauve.closeFrame(this);
         if (navigator != null) {
         	navigator.dispose ();
         	navigator = null;
         }
-        /*importer.dispose ();
-        importer = null;*/
+        importer.dispose ();
+        importer = null;
         System.gc ();
     }
     
@@ -526,7 +525,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFilePrint.setEnabled(false);
         jMenuFilePageSetup.setEnabled(false);
         jMenuFilePrintPreview.setEnabled(false);
-        //jMenuFileImport.setEnabled(false);
+        jMenuFileImport.setEnabled(false);
         jMenuFileExport.setEnabled(false);
         jMenuGoTo.setEnabled(false);
         jMenuFileClose.setEnabled(false);
@@ -541,11 +540,19 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         setTitle("Mauve " + mauve.getVersion() + " - Genome Alignment Visualization");
         model = null;
     }
+    
+	public FlatFileFeatureImporter getFeatureImporter () {
+		return importer;
+	}
 
     public BaseViewerModel getModel()
     {
         return model;
     }
+    
+	public RearrangementPanel getRearrangementPanel () {
+		return rrpanel;
+	}
     
     public void setModel(BaseViewerModel model)
     {
@@ -583,7 +590,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             jMenuFilePrint.setEnabled(true);
             jMenuFilePageSetup.setEnabled(true);
             jMenuFilePrintPreview.setEnabled(true);
-            //jMenuFileImport.setEnabled(true);
+            jMenuFileImport.setEnabled(true);
             jMenuFileExport.setEnabled(true);
             jMenuFileClose.setEnabled(true);
             jMenuGoTo.setEnabled(true);
@@ -596,7 +603,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             	jMenuGoToFeatName.setEnabled (false);
             	jMenuGoToSearchFeatures.setEnabled (false);
             }
-            //importer = new FlatFileFeatureImporter (this);
+            importer = new FlatFileFeatureImporter (this);
             toFront();
         }
     }
@@ -612,7 +619,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         {
             alignFrame = new MauveAlignFrame(mauve);
             alignFrame.initComponents();
-            // notify the alignment frame if the parent window is closed...
+       		// notify the alignment frame if the parent window is closed...
             addWindowListener(new java.awt.event.WindowAdapter()
             {
                 public void windowClosed(java.awt.event.WindowEvent e)

@@ -20,82 +20,75 @@ import org.gel.mauve.gui.RearrangementPanel;
  * alignment
  */
 
-class MatchPopupMenu extends PopupMenu implements ActionListener, ItemListener
-{
-    LinkedList match_list;
-    RearrangementPanel rrpanel;
-    Genome g;
-    BaseViewerModel model;
+class MatchPopupMenu extends PopupMenu implements ActionListener, ItemListener {
+	LinkedList match_list;
 
-    int lcb_id;
-    int remove_item = Integer.MAX_VALUE;
-    int keep_item = Integer.MAX_VALUE;
-    static final String remove_string = "Remove this LCB";
-    static final String keep_string = "Keep this LCB";
+	RearrangementPanel rrpanel;
 
-    public MatchPopupMenu(RearrangementPanel rrpanel, BaseViewerModel model, Genome g)
-    {
-        this.rrpanel = rrpanel;
-        this.g = g;
-        match_list = new LinkedList();
-        addActionListener(this);
-    }
+	Genome g;
 
-    public void addLCBOptions(int lcb_id)
-    {
-        //		remove_item = getItemCount();
-        //		add( new MenuItem( remove_string ) );
-        keep_item = getItemCount();
-        JCheckBoxMenuItem keep_checkbox = new JCheckBoxMenuItem(keep_string);
-        keep_checkbox.setState(false);
-        keep_checkbox.addItemListener(this);
-        //		add( keep_checkbox );
-    }
+	BaseViewerModel model;
 
-    public void addMatch(Match m)
-    {
-        add(new MenuItem("Align display to " + m.toString()));
-        //		add( new MenuItem( new String( "Show annotation between " ) +
-        //			m.starts[ sequence ] + new String(" and ") + (m.starts[ sequence ] +
-        // m.lengths[ sequence ] - 1) ) );
-        match_list.addLast(m);
-    }
+	int lcb_id;
 
-    public void actionPerformed(ActionEvent e)
-    {
-        String act_command = e.getActionCommand();
-        int itemI = 0;
-        for (; itemI < getItemCount(); itemI++)
-        {
-            if (getItem(itemI).getActionCommand() == act_command)
-                break;
-        }
-        if (itemI == remove_item)
-        {
-            //				rrpanel.removeLCB( lcb_id );
-        }
-        else if (itemI == keep_item)
-        {
-            //				rrpanel.keepLCB( lcb_id );
-        }
-        else
-        {
-            if (itemI > keep_item)
-            {
-                itemI -= 1;
-            }
-            int matchI = itemI;
-            Match selected_match = (Match) match_list.get(matchI);
-            model.alignView(selected_match, g);
-        }
-    }
+	int remove_item = Integer.MAX_VALUE;
 
-    /** this gets called when the "Keep LCB" item is selected */
-    public void itemStateChanged(ItemEvent e)
-    {
-        //		rrpanel.toggleKeepLCB( lcb_id );
-    }
+	int keep_item = Integer.MAX_VALUE;
+
+	static final String remove_string = "Remove this LCB";
+
+	static final String keep_string = "Keep this LCB";
+
+	public MatchPopupMenu (RearrangementPanel rrpanel, BaseViewerModel model,
+			Genome g) {
+		this.rrpanel = rrpanel;
+		this.g = g;
+		match_list = new LinkedList ();
+		addActionListener (this);
+	}
+
+	public void addLCBOptions (int lcb_id) {
+		// remove_item = getItemCount();
+		// add( new MenuItem( remove_string ) );
+		keep_item = getItemCount ();
+		JCheckBoxMenuItem keep_checkbox = new JCheckBoxMenuItem (keep_string);
+		keep_checkbox.setState (false);
+		keep_checkbox.addItemListener (this);
+		// add( keep_checkbox );
+	}
+
+	public void addMatch (Match m) {
+		add (new MenuItem ("Align display to " + m.toString ()));
+		// add( new MenuItem( new String( "Show annotation between " ) +
+		// m.starts[ sequence ] + new String(" and ") + (m.starts[ sequence ] +
+		// m.lengths[ sequence ] - 1) ) );
+		match_list.addLast (m);
+	}
+
+	public void actionPerformed (ActionEvent e) {
+		String act_command = e.getActionCommand ();
+		int itemI = 0;
+		for (; itemI < getItemCount (); itemI++) {
+			if (getItem (itemI).getActionCommand () == act_command)
+				break;
+		}
+		if (itemI == remove_item) {
+			// rrpanel.removeLCB( lcb_id );
+		} else if (itemI == keep_item) {
+			// rrpanel.keepLCB( lcb_id );
+		} else {
+			if (itemI > keep_item) {
+				itemI -= 1;
+			}
+			int matchI = itemI;
+			Match selected_match = (Match) match_list.get (matchI);
+			model.alignView (selected_match, g);
+		}
+	}
+
+	/** this gets called when the "Keep LCB" item is selected */
+	public void itemStateChanged (ItemEvent e) {
+		// rrpanel.toggleKeepLCB( lcb_id );
+	}
 
 }
-
-

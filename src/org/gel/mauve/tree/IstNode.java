@@ -1,74 +1,67 @@
 package org.gel.mauve.tree;
 
-class IstNode
-{
-    private IstNode parent;
-    private IstNode left;
-    private IstNode right;
-    private long subtreeSize;
-    private long length;
-    private Key key;
+class IstNode {
+	private IstNode parent;
 
-    void setParent(IstNode parent)
-    {
-        if (parent == this)
-            throw new RuntimeException("Error:  attempt to set node's parent as itself.");
+	private IstNode left;
 
-        this.parent = parent;
-    }
+	private IstNode right;
 
-    IstNode getParent()
-    {
-        return parent;
-    }
+	private long subtreeSize;
 
-    void setLeft(IstNode left)
-    {
-        this.left = left;
-    }
+	private long length;
 
-    IstNode getLeft()
-    {
-        return left;
-    }
+	private Key key;
 
-    void setRight(IstNode right)
-    {
-        this.right = right;
-    }
+	void setParent (IstNode parent) {
+		if (parent == this)
+			throw new RuntimeException (
+					"Error:  attempt to set node's parent as itself.");
 
-    IstNode getRight()
-    {
-        return right;
-    }
+		this.parent = parent;
+	}
 
-    void setSubtreeSize(long subtreeSize)
-    {
-        this.subtreeSize = subtreeSize;
-    }
+	IstNode getParent () {
+		return parent;
+	}
 
-    long getSubtreeSize()
-    {
-        return subtreeSize;
-    }
+	void setLeft (IstNode left) {
+		this.left = left;
+	}
 
-    void setLength(long length)
-    {
-        this.length = length;
-    }
+	IstNode getLeft () {
+		return left;
+	}
 
-    long getLength()
-    {
-        return length;
-    }
+	void setRight (IstNode right) {
+		this.right = right;
+	}
 
-    void setKey(Key key)
-    {
-        this.key = key;
-    }
+	IstNode getRight () {
+		return right;
+	}
 
-    Key getKey()
-    {
-        return key;
-    }
+	void setSubtreeSize (long subtreeSize) {
+		this.subtreeSize = subtreeSize;
+	}
+
+	long getSubtreeSize () {
+		return subtreeSize;
+	}
+
+	void setLength (long length) {
+		this.length = length;
+	}
+
+	long getLength () {
+		return length;
+	}
+
+	void setKey (Key key) {
+		this.key = key;
+	}
+
+	Key getKey () {
+		return key;
+	}
 };

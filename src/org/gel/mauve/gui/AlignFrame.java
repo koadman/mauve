@@ -12,15 +12,12 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Point;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.Vector;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -57,12 +54,12 @@ public class AlignFrame extends java.awt.Frame
     public JButton alignButton = new JButton();
     public JButton cancelButton = new JButton();
 
-    JPanel sequencesPanel = new JPanel();
-    JButton addButton = new JButton();
-    JButton removeButton = new JButton();
+    protected JPanel sequencesPanel = new JPanel();
+    protected JButton addButton = new JButton();
+    protected JButton removeButton = new JButton();
     JTextField outputFileText = new JTextField();
     JButton outputButton = new JButton();
-    DnDList sequenceList = new DnDList();
+    protected DnDList sequenceList = new DnDList();
     JLabel outputLabel = new JLabel();
     JLabel sequencesLabel = new JLabel();
 
@@ -71,8 +68,8 @@ public class AlignFrame extends java.awt.Frame
     /** < contains the various parameter panels */
 
     final JFileChooser fc = new JFileChooser();
-    JScrollPane listScrollPane = new JScrollPane();
-    DefaultListModel sequenceListModel = new DefaultListModel();
+    protected JScrollPane listScrollPane = new JScrollPane();
+    protected DefaultListModel sequenceListModel = new DefaultListModel();
     Dimension d;
 
     Mauve mauve;
@@ -354,6 +351,7 @@ public class AlignFrame extends java.awt.Frame
         worker = new AlignWorker(this, mauve_cmd);
         worker.start();
         cancelButton.setEnabled(true);
+        toFront ();
     }
     
     public void completeAlignment(int retcode)
@@ -598,6 +596,7 @@ public class AlignFrame extends java.awt.Frame
     public void setOutput(String filename)
     {
         outputFileText.setText(filename);
+        outputFileText.setCaretPosition (filename.length ());
     }
 
     public String[] getSequences()

@@ -23,27 +23,25 @@ import org.gel.mauve.color.LCBColorScheme;
  * A viewer model backed by an XMFA file. Models a global gapped sequence
  * alignment in an XMFA format file
  */
-public class XmfaViewerModel extends LcbViewerModel
-{
-    private XMFAAlignment xmfa;
-    // Sequence similarity profiles calculated over the length of each sequence
-    // represented in an XMFA file
-    private SimilarityIndex[] sim;
-    private long[] highlights;
-    private BackboneList bb_list;
+public class XmfaViewerModel extends LcbViewerModel {
+	private XMFAAlignment xmfa;
+	// Sequence similarity profiles calculated over the length of each sequence
+	// represented in an XMFA file
+	private SimilarityIndex [] sim;
+	private long [] highlights;
+	private BackboneList bb_list;
 
-    public void setSequenceCount(int sequenceCount)
-    {
-        super.setSequenceCount(sequenceCount);
-        sim = new SimilarityIndex[sequenceCount];
-    }
+	public void setSequenceCount (int sequenceCount) {
+		super.setSequenceCount (sequenceCount);
+		sim = new SimilarityIndex [sequenceCount];
+	}
 
-    public XmfaViewerModel(File src, ModelProgressListener listener) throws IOException
-    {
-        super(src);
+	public XmfaViewerModel (File src, ModelProgressListener listener)
+			throws IOException {
+		super (src);
 
-        init(listener, false);
-    }
+		init (listener, false);
+	}
 
     /**
      * @param listener
@@ -125,7 +123,8 @@ public class XmfaViewerModel extends LcbViewerModel
         // If no sequences are found, this is certainly an invalid file.
         if (xmfa.seq_count == 0)
         {
-            throw new IOException("Not an XMFA file.  Please check that the input file is a properly formatted alignment.");
+            throw new IOException("Not an XMFA file.  Please check that the" +
+            		" input file is a properly formatted alignment.");
         }
         
         if (listener != null)
@@ -225,13 +224,12 @@ public class XmfaViewerModel extends LcbViewerModel
         initModelLCBs();
     }
 
-    protected void referenceUpdated()
-    {
-        super.referenceUpdated();
-        xmfa.setReference(getReference());
-    }
-    
-    /**
+	protected void referenceUpdated () {
+		super.referenceUpdated ();
+		xmfa.setReference (getReference ());
+	}
+
+/**
      * 
      * @return
      */
@@ -240,157 +238,147 @@ public class XmfaViewerModel extends LcbViewerModel
         return xmfa;
     }
 
-    //NEWTODO: Sort sims on sourceIndex instead!
-    public SimilarityIndex getSim(Genome g)
-    {
-        return sim[g.getSourceIndex()];
-    }
+	// NEWTODO: Sort sims on sourceIndex instead!
+	public SimilarityIndex getSim (Genome g) {
+		return sim[g.getSourceIndex ()];
+	}
 
-    public long[] getLCBAndColumn(Genome g, long position)
-    {
-        return xmfa.getLCBAndColumn(g, position);
-    }
-    
-    public int getLCBIndex(Genome g, long position)
-    {
-        return xmfa.getLCB(g, position);
-    }
+	public long [] getLCBAndColumn (Genome g, long position) {
+		return xmfa.getLCBAndColumn (g, position);
+	}
 
-    
-    /**
-     * The backbone list or null if none exists
-     * @return The backbone list or null if none exists
-     */
-    public BackboneList getBackboneList(){ return bb_list; }
+	public int getLCBIndex (Genome g, long position) {
+		return xmfa.getLCB (g, position);
+	}
 
-    /**
-     * 
-     * Returns column coordinates in source genome order
-     * 
-     * @param lcb
-     * @param column
-     * @return
-     */
-    public void getColumnCoordinates(int lcb, long column, long[] seq_coords, boolean[] gap)
-    {
-        xmfa.getColumnCoordinates(this, lcb, column, seq_coords, gap);
-    }
-    
-    public void updateHighlight(Genome g, long coordinate)
-    {
-        highlights = null;
-        // Wait til end to call super, since it fires event.
-        super.updateHighlight(g, coordinate);
-    }
-    
-    public long getHighlight(Genome g)
-    {
-        if (highlights == null)
-        {
-            long[] iv_col = getLCBAndColumn(getHighlightGenome(), getHighlightCoordinate());
-            boolean[] gap = new boolean[this.getSequenceCount()];;
-            highlights = new long[this.getSequenceCount()];
-            getColumnCoordinates((int) iv_col[0], iv_col[1], highlights, gap);
-            for( int i = 0; i < highlights.length; ++i )
-            {
-            	highlights[i] = Math.abs(highlights[i]);
-            	if(gap[i])
-            		highlights[i] *= -1;
-            }
-        }
-        return highlights[g.getSourceIndex()];
-    }
+	/**
+	 * The backbone list or null if none exists
+	 * 
+	 * @return The backbone list or null if none exists
+	 */
+	public BackboneList getBackboneList () {
+		return bb_list;
+	}
 
-    /**
-     * aligns the display to a particular position of a particular sequence.
-     * typically called by RRSequencePanel when the user clicks a part of the
-     * sequence. Used for display mode 3
-     */
-    public void alignView(Genome g, long position)
-    {
-        long[] iv_col;
-        try
-        {
-            iv_col = getLCBAndColumn(g, position);
-        }
-        catch (ArrayIndexOutOfBoundsException e)
-        {
-            // User clicked outside of bounds of sequence, so do nothing.
-            return;
-        }
-        long[] coords = new long[this.getSequenceCount()];;
-        boolean[] gap = new boolean[this.getSequenceCount()];;
-        getColumnCoordinates((int) iv_col[0], iv_col[1], coords, gap);
-        alignView(coords, g);
-    }
+	/**
+	 * 
+	 * Returns column coordinates in source genome order
+	 * 
+	 * @param lcb
+	 * @param column
+	 * @return
+	 */
+	public void getColumnCoordinates (int lcb, long column, long [] seq_coords,
+			boolean [] gap) {
+		xmfa.getColumnCoordinates (this, lcb, column, seq_coords, gap);
+	}
 
-    /** Overrides setFocus() in BaseViewerModel to
-     *  also align the display appropriately
-     */
-    public void setFocus(String sequenceID, long start, long end)
-    {
-    	super.setFocus(sequenceID, start, end);
-        Genome g = null;
-        for (int i = 0; i < genomes.length; i++)
-        {
-            if (sequenceID.equals(genomes[i].getID()))
-            {
-                g = genomes[i];
-                break;
-            }
-        }
-        if (g == null)
-        {
-            System.err.println("Received focus request for nonexistent sequence id " + sequenceID);
-            return;
-        }
-        alignView(g, start);
-    }
-    
-    public void reload()
-    {
-        fireReloadStartEvent();
-        
-        try
-        {
-            init(null, true);
-        }
-        catch (FileNotFoundException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        
-        fireReloadEndEvent();
-    }
-    
-    protected void fireReloadEndEvent() {
-        // Guaranteed to return a non-null array
-        Object[] listeners = listenerList.getListenerList();
-        // Process the listeners last to first, notifying
-        // those that are interested in this event
-        for (int i = listeners.length-2; i>=0; i-=2) {
-            if (listeners[i]==ModelListener.class) {
-                ((ModelListener)listeners[i+1]).modelReloadEnd(modelEvent);
-            }
-        }
-    }
-     
-    protected void fireReloadStartEvent() {
-        // Guaranteed to return a non-null array
-        Object[] listeners = listenerList.getListenerList();
-        // Process the listeners last to first, notifying
-        // those that are interested in this event
-        for (int i = listeners.length-2; i>=0; i-=2) {
-            if (listeners[i]==ModelListener.class) {
-                ((ModelListener)listeners[i+1]).modelReloadStart(modelEvent);
-            }
-        }
-    }
+	public void updateHighlight (Genome g, long coordinate) {
+		highlights = null;
+		// Wait til end to call super, since it fires event.
+		super.updateHighlight (g, coordinate);
+	}
+
+	public long getHighlight (Genome g) {
+		if (highlights == null) {
+			long [] iv_col = getLCBAndColumn (getHighlightGenome (),
+					getHighlightCoordinate ());
+			boolean [] gap = new boolean [this.getSequenceCount ()];
+			;
+			highlights = new long [this.getSequenceCount ()];
+			getColumnCoordinates ((int) iv_col[0], iv_col[1], highlights, gap);
+			for (int i = 0; i < highlights.length; ++i) {
+				highlights[i] = Math.abs (highlights[i]);
+				if (gap[i])
+					highlights[i] *= -1;
+			}
+		}
+		return highlights[g.getSourceIndex ()];
+	}
+
+	/**
+	 * aligns the display to a particular position of a particular sequence.
+	 * typically called by RRSequencePanel when the user clicks a part of the
+	 * sequence. Used for display mode 3
+	 */
+	public void alignView (Genome g, long position) {
+		long [] iv_col;
+		try {
+			iv_col = getLCBAndColumn (g, position);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			// User clicked outside of bounds of sequence, so do nothing.
+			return;
+		}
+		long [] coords = new long [this.getSequenceCount ()];
+		;
+		boolean [] gap = new boolean [this.getSequenceCount ()];
+		;
+		getColumnCoordinates ((int) iv_col[0], iv_col[1], coords, gap);
+		alignView (coords, g);
+	}
+
+	/**
+	 * Overrides setFocus() in BaseViewerModel to also align the display
+	 * appropriately
+	 */
+	public void setFocus (String sequenceID, long start, long end, String contig) {
+		super.setFocus (sequenceID, start, end, contig);
+		Genome g = null;
+		for (int i = 0; i < genomes.length; i++) {
+			if (sequenceID.equals (genomes[i].getID ())) {
+				g = genomes[i];
+				break;
+			}
+		}
+		if (g == null) {
+			System.err
+					.println ("Received focus request for nonexistent sequence id "
+							+ sequenceID);
+			return;
+		}
+		if (contig != null)
+			start = contig_handler.getPseudoCoord(g.getSourceIndex(), start, contig);
+		alignView (g, start);
+	}
+
+	public void reload () {
+		fireReloadStartEvent ();
+
+		try {
+			init (null, true);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace ();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace ();
+		}
+
+		fireReloadEndEvent ();
+	}
+
+	protected void fireReloadEndEvent () {
+		// Guaranteed to return a non-null array
+		Object [] listeners = listenerList.getListenerList ();
+		// Process the listeners last to first, notifying
+		// those that are interested in this event
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if (listeners[i] == ModelListener.class) {
+				((ModelListener) listeners[i + 1]).modelReloadEnd (modelEvent);
+			}
+		}
+	}
+
+	protected void fireReloadStartEvent () {
+		// Guaranteed to return a non-null array
+		Object [] listeners = listenerList.getListenerList ();
+		// Process the listeners last to first, notifying
+		// those that are interested in this event
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if (listeners[i] == ModelListener.class) {
+				((ModelListener) listeners[i + 1])
+						.modelReloadStart (modelEvent);
+			}
+		}
+	}
 }
-

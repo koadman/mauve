@@ -3,12 +3,14 @@ package org.gel.mauve;
 import java.awt.Color;
 import java.io.Serializable;
 
+import org.gel.mauve.analysis.Segment;
+
 /**
  * Records an ungapped local alignment among multiple sequences. Sequence
  * coordinates start at 1 and a coordinate of 0 indicates that the alignment is
  * undefined in that sequence.
  */
-public class Match implements Serializable
+public class Match extends Segment //implements Serializable
 {
 	static final long serialVersionUID = 1;
     public static final int NO_MATCH = 0;
@@ -20,26 +22,26 @@ public class Match implements Serializable
     public int lcb = 0;
 
     // The start coordinate of this match in each sequence
-    private long[] starts;
+    //private long[] starts;
     // The lengths of this match in each sequence
-    private long[] lengths;
+    //private long[] ends;
     // The direction of each match. false is forward, true is reverse
-    private boolean[] reverse;
+    //private boolean[] reverse;
 
     public Match(int sequenceCount)
     {
         starts = new long[sequenceCount];
-        lengths = new long[sequenceCount];
+        ends = new long[sequenceCount];
         reverse = new boolean[sequenceCount];
     }
 
     public Match(Match m)
     {
         starts = new long[m.starts.length];
-        lengths = new long[m.lengths.length];
+        ends = new long[m.ends.length];
         reverse = new boolean[m.reverse.length];
         System.arraycopy(m.starts, 0, starts, 0, starts.length);
-        System.arraycopy(m.lengths, 0, lengths, 0, lengths.length);
+        System.arraycopy(m.ends, 0, ends, 0, ends.length);
         System.arraycopy(m.reverse, 0, reverse, 0, reverse.length);
 
         color = m.color;
@@ -77,7 +79,7 @@ public class Match implements Serializable
     
     public long getLength(Genome g)
     {
-        return lengths[g.getSourceIndex()];
+        return ends[g.getSourceIndex()];
     }
     
     /**
@@ -87,12 +89,12 @@ public class Match implements Serializable
      */
     public long getLength(int sourceIndex)
     {
-        return lengths[sourceIndex];
+        return ends[sourceIndex];
     }
     
     public void setLength(Genome g, long length)
     {
-        lengths[g.getSourceIndex()] = length;
+        ends[g.getSourceIndex()] = length;
     }
     
     /**
@@ -102,7 +104,7 @@ public class Match implements Serializable
      */
     public void setLength(int sourceIndex, long length)
     {
-        lengths[sourceIndex] = length;
+        ends[sourceIndex] = length;
     }
     
     public boolean getReverse(Genome g)
@@ -158,50 +160,10 @@ public class Match implements Serializable
         return g_offset;
     }
 
-    /** format the ungapped local alignment coordinates into a string */
-    public String toString()
-    {
-        String rval = new String();
-        for (int seqI = 0; seqI < starts.length; seqI++)
-        {
-            rval += "<";
-            if (starts[seqI] != NO_MATCH)
-            {
-                if (reverse[seqI])
-                    rval += "-";
-                rval += starts[seqI];
-                rval += ",";
-                rval += lengths[seqI];
-            }
-            rval += "> ";
-        }
-        return rval;
-    }
-
-    /**
-     * compute a number indicating which genomes the local alignment is defined
-     * in. This is a binary number where a 1 indicates that the match is defined
-     * and a 0 indicates it is undefined. For example, a local alignment shared
-     * by the first and the fourth (out of five) genomes would be represented as
-     * 10010.
-     */
-    public long multiplicityType()
-    {
-        // determine the match's multiplicity type.
-        long mult_type = 0;
-        for (int seqI = 0; seqI < starts.length; seqI++)
-        {
-            mult_type <<= 1;
-            if (starts[seqI] != Match.NO_MATCH)
-                mult_type |= 1;
-        }
-        return mult_type;
-    }
-
     public void copyArrays(LCB lcb, long[] starts, long[] lengths, boolean[] reverse, int seq_count)
     {
         System.arraycopy(this.starts, 0, starts, 0, seq_count);
-        System.arraycopy(this.lengths, 0, lengths, 0, seq_count);
+        System.arraycopy(this.ends, 0, lengths, 0, seq_count);
         System.arraycopy(this.reverse, 0, reverse, 0, seq_count);
     }
 

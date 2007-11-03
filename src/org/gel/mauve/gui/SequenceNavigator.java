@@ -34,8 +34,10 @@ import org.biojava.bio.seq.Feature;
 
 
 /**
- * This class acts as a GUI interface for choosing a place in a particular
- * genome to navigate to based on which features match the desired constraints
+ * A gui that allows a user to search genome features by annotation.  Allows multiple
+ * constraints.  Results are shown in a tree, and selecting the feature in the tree
+ * scrolls to that position in the genome.  Results can be added to previous search
+ * results, or previous results can be cleared.
  * 
  * @author rissman
  *
@@ -49,23 +51,65 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	protected Component parent_component;	/**< The parent component of the panel, if it disappears, so will the panel */
 	protected RearrangementPanel rrpanel;	/**< The panel displaying data under navigation */
 	protected BaseViewerModel data_model;	/**< The data model being displayed and navigated */
+	/**
+	 * parent frame containing this panel
+	 */
 	protected JFrame frame;
+	
+	/**
+	 * list of genomes with searchable features
+	 */
 	protected JComboBox genomes;
+	
+	/**
+	 * each NavPanel in the list represents a constraint on the current search
+	 */
 	protected LinkedList nav_panels;
+	
+	/**
+	 * when pressed, a search is performed
+	 */
 	protected JButton search;
 	protected JButton cancel;
 	protected JButton add;
+	
+	/**
+	 * when pressed, resets search to one constraint with no values entered
+	 */
 	protected JButton reset;
+	
+	/**
+	 * panel that contains all NavPanels
+	 */
 	protected JPanel nav_panel_holder;
+	
+	/**
+	 * panel that shows results
+	 */
 	protected SearchResultPanel result_pane;
+	
+	/**
+	 * if checked, previous search results are cleared when a new search is performed
+	 */
 	protected JCheckBox clear;
+	
+	/**
+	 * allows results to be scrolled through
+	 */
 	protected JScrollPane result_scroller;
+	
+	/**
+	 * allows constraints to be scrolled through
+	 */
 	protected JScrollPane nav_scroll;
 	protected LinkedList window_listeners;
 	protected WindowAdapter adapt;
-	protected AncestorListener ancestListener;
 	
-	protected LinkedList threads = new LinkedList ();
+	/**
+	 * if there is no frame containing the alignment, so when it is removed,
+	 * this SequenceNavigator can be closed
+	 */
+	protected AncestorListener ancestListener;
 	
 	/**
 	 * availabe genome sequences to search
@@ -73,11 +117,15 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	protected Vector genome_choices;
 	
 	/**
-	 * sets maximum height and width programmatically given to the frame
+	 * sets maximum height programmatically given to the frame
 	 */
 	public static int MAX_HEIGHT = 400;
-	public static int MAX_WIDTH = 850;
 	
+	/**
+	 *sets maximum height and width programmatically given to the frame.
+	 **/
+	 public static int MAX_WIDTH = 850;
+
 	
 	/**
 	 * initializes hashtable and hashset inherited from NavigationConstants
@@ -123,6 +171,7 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 		parent_component = frame.getRootPane();
 		data_model = frame.getModel();
 		nav_panels = new LinkedList ();
+		rrpanel = frame.getRearrangementPanel ();
 		initGUI ();
 	}
 	public SequenceNavigator (Component parent, RearrangementPanel rrpanel, BaseViewerModel dataModel) 

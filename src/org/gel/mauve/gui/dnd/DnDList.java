@@ -46,251 +46,219 @@ import org.gel.mauve.MyConsole;
  * @author rharder@usa.net
  * @version 1.1
  */
-public class DnDList extends JList implements DropTargetListener, DragSourceListener, DragGestureListener
-{
+public class DnDList extends JList implements DropTargetListener,
+		DragSourceListener, DragGestureListener {
 
-    private DropTarget dropTarget = null;
+	private DropTarget dropTarget = null;
 
-    private DragSource dragSource = null;
+	private DragSource dragSource = null;
 
-    private int sourceIndex = -1;
-    private int dropIndex = -1;
-    private Object sourceObject;
+	private int sourceIndex = -1;
 
-    /**
-     * Constructs a default {@link DnDList}using a {@link DefaultListModel}.
-     * 
-     * @since 1.1
-     */
-    public DnDList()
-    {
-        super(new DefaultListModel());
-        initComponents();
-    } // end constructor
+	private int dropIndex = -1;
 
-    /**
-     * Constructs a {@link DnDList}using the passed list model that must be
-     * extended from {@link DefaultListModel}.
-     * 
-     * @param model
-     *            The model to use
-     * @since 1.1
-     */
-    public DnDList(DefaultListModel model)
-    {
-        super(model);
-        initComponents();
-    } // end constructor
+	private Object sourceObject;
 
-    /**
-     * Constructs a {@link DnDList}by filling in a {@link DefaultListModel}
-     * with the passed array of objects.
-     * 
-     * @param data
-     *            The data from which to construct a list
-     * @since 1.1
-     */
-    public DnDList(Object[] data)
-    {
-        this();
-        ((DefaultListModel) getModel()).copyInto(data);
-    } // end constructor
+	/**
+	 * Constructs a default {@link DnDList}using a {@link DefaultListModel}.
+	 * 
+	 * @since 1.1
+	 */
+	public DnDList () {
+		super (new DefaultListModel ());
+		initComponents ();
+	} // end constructor
 
-    /**
-     * Constructs a {@link DnDList}by filling in a {@link DefaultListModel}
-     * with the passed {@link Vector}of objects.
-     * 
-     * @param data
-     *            The data from which to construct a list
-     * @since 1.1
-     */
-    public DnDList(Vector data)
-    {
-        this();
-        ((DefaultListModel) getModel()).copyInto(data.toArray());
-    } // end constructor
+	/**
+	 * Constructs a {@link DnDList}using the passed list model that must be
+	 * extended from {@link DefaultListModel}.
+	 * 
+	 * @param model
+	 *            The model to use
+	 * @since 1.1
+	 */
+	public DnDList (DefaultListModel model) {
+		super (model);
+		initComponents ();
+	} // end constructor
 
-    private void initComponents()
-    {
-        dropTarget = new DropTarget(this, this);
-        dragSource = new DragSource();
-        dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_MOVE, this);
-    } // end initComponents
+	/**
+	 * Constructs a {@link DnDList}by filling in a {@link DefaultListModel}
+	 * with the passed array of objects.
+	 * 
+	 * @param data
+	 *            The data from which to construct a list
+	 * @since 1.1
+	 */
+	public DnDList (Object [] data) {
+		this ();
+		((DefaultListModel) getModel ()).copyInto (data);
+	} // end constructor
 
-    /* ******** D R A G G E S T U R E L I S T E N E R M E T H O D S ******** */
+	/**
+	 * Constructs a {@link DnDList}by filling in a {@link DefaultListModel}
+	 * with the passed {@link Vector}of objects.
+	 * 
+	 * @param data
+	 *            The data from which to construct a list
+	 * @since 1.1
+	 */
+	public DnDList (Vector data) {
+		this ();
+		((DefaultListModel) getModel ()).copyInto (data.toArray ());
+	} // end constructor
 
-    public void dragGestureRecognized(DragGestureEvent event)
-    {
-        final Object selected = getSelectedValue();
-        if (selected != null)
-        {
-            sourceIndex = getSelectedIndex();
-            Transferable transfer = new TransferableObject(new TransferableObject.Fetcher()
-            {
-                /**
-                 * This will be called when the transfer data is requested at
-                 * the very end. At this point we can remove the object from its
-                 * original place in the list.
-                 */
-                public Object getObject()
-                {
-                    ((DefaultListModel) getModel()).remove(sourceIndex);
-                    return selected;
-                } // end getObject
-            }); // end fetcher
+	private void initComponents () {
+		dropTarget = new DropTarget (this, this);
+		dragSource = new DragSource ();
+		dragSource.createDefaultDragGestureRecognizer (this,
+				DnDConstants.ACTION_MOVE, this);
+	} // end initComponents
+	
+	public void setDropActive (boolean active) {
+		dropTarget.setActive(active);
+	}
 
-            // as the name suggests, starts the dragging
-            dragSource.startDrag(event, DragSource.DefaultLinkDrop, transfer, this);
-        }
-        else
-        {
-            //System.out.println( "nothing was selected");
-        }
-    } // end dragGestureRecognized
+	/* ******** D R A G G E S T U R E L I S T E N E R M E T H O D S ******** */
 
-    /* ******** D R A G S O U R C E L I S T E N E R M E T H O D S ******** */
+	public void dragGestureRecognized (DragGestureEvent event) {
+		final Object selected = getSelectedValue ();
+		if (selected != null) {
+			sourceIndex = getSelectedIndex ();
+			Transferable transfer = new TransferableObject (
+					new TransferableObject.Fetcher () {
+						/**
+						 * This will be called when the transfer data is
+						 * requested at the very end. At this point we can
+						 * remove the object from its original place in the
+						 * list.
+						 */
+						public Object getObject () {
+							((DefaultListModel) getModel ())
+									.remove (sourceIndex);
+							return selected;
+						} // end getObject
+					}); // end fetcher
 
-    public void dragDropEnd(DragSourceDropEvent evt)
-    {
-    }
+			// as the name suggests, starts the dragging
+			dragSource.startDrag (event, DragSource.DefaultLinkDrop, transfer,
+					this);
+		} else {
+			// System.out.println( "nothing was selected");
+		}
+	} // end dragGestureRecognized
 
-    public void dragEnter(DragSourceDragEvent evt)
-    {
-    }
+	/* ******** D R A G S O U R C E L I S T E N E R M E T H O D S ******** */
 
-    public void dragExit(DragSourceEvent evt)
-    {
-    }
+	public void dragDropEnd (DragSourceDropEvent evt) {
+	}
 
-    public void dragOver(DragSourceDragEvent evt)
-    {
-    }
+	public void dragEnter (DragSourceDragEvent evt) {
+	}
 
-    public void dropActionChanged(DragSourceDragEvent evt)
-    {
-    }
+	public void dragExit (DragSourceEvent evt) {
+	}
 
-    /* ******** D R O P T A R G E T L I S T E N E R M E T H O D S ******** */
+	public void dragOver (DragSourceDragEvent evt) {
+	}
 
-    public void dragEnter(DropTargetDragEvent evt)
-    {
-        evt.acceptDrag(DnDConstants.ACTION_MOVE);
-    }
+	public void dropActionChanged (DragSourceDragEvent evt) {
+	}
 
-    public void dragExit(DropTargetEvent evt)
-    {
-    }
+	/* ******** D R O P T A R G E T L I S T E N E R M E T H O D S ******** */
 
-    public void dragOver(DropTargetDragEvent evt)
-    {
-    }
+	public void dragEnter (DropTargetDragEvent evt) {
+		evt.acceptDrag (DnDConstants.ACTION_MOVE);
+	}
 
-    public void dropActionChanged(DropTargetDragEvent evt)
-    {
-        evt.acceptDrag(DnDConstants.ACTION_MOVE);
-    }
+	public void dragExit (DropTargetEvent evt) {
+	}
 
-    public void drop(DropTargetDropEvent evt)
-    {
-        Transferable t = evt.getTransferable();
+	public void dragOver (DropTargetDragEvent evt) {
+	}
 
-        if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
-        {
-            evt.acceptDrop(DnDConstants.ACTION_MOVE);
-            Object obj;
-            try
-            {
-                obj = t.getTransferData(DataFlavor.javaFileListFlavor);
-            }
-            catch (UnsupportedFlavorException e)
-            {
-                // Unexpected, because we just checked whether it is supported.
-                throw new RuntimeException(e);
-            }
-            catch (IOException e)
-            {
-                MyConsole.err().println("Drag and drop data no longer available");
-                e.printStackTrace(MyConsole.err());
-                evt.rejectDrop();
-                return;
-            }
+	public void dropActionChanged (DropTargetDragEvent evt) {
+		evt.acceptDrag (DnDConstants.ACTION_MOVE);
+	}
 
-            List listobj = (List) obj;
+	public void drop (DropTargetDropEvent evt) {
+		Transferable t = evt.getTransferable ();
 
-            // See where in the list we dropped the element.
-            int dropIndex = locationToIndex(evt.getLocation());
-            DefaultListModel model = (DefaultListModel) getModel();
+		if (t.isDataFlavorSupported (DataFlavor.javaFileListFlavor)) {
+			evt.acceptDrop (DnDConstants.ACTION_MOVE);
+			Object obj;
+			try {
+				obj = t.getTransferData (DataFlavor.javaFileListFlavor);
+			} catch (UnsupportedFlavorException e) {
+				// Unexpected, because we just checked whether it is supported.
+				throw new RuntimeException (e);
+			} catch (IOException e) {
+				MyConsole.err ().println (
+						"Drag and drop data no longer available");
+				e.printStackTrace (MyConsole.err ());
+				evt.rejectDrop ();
+				return;
+			}
 
-            Iterator iterator = listobj.iterator();
-            if (dropIndex < 0)
-            {
-                while (iterator.hasNext())
-                {
-                    model.addElement(((File) iterator.next()).getPath());
-                }
-            }
-            // Else is it moving down the list?
-            else if (sourceIndex >= 0 && dropIndex > sourceIndex)
-            {
-                while (iterator.hasNext())
-                {
-                    model.add(dropIndex - 1, ((File) iterator.next()).getPath());
-                }
-            }
-            else
-            {
-                while (iterator.hasNext())
-                {
-                    model.add(dropIndex, ((File) iterator.next()).getPath());
-                }
-            }
-            evt.getDropTargetContext().dropComplete(true);
-        }
-        else if (t.isDataFlavorSupported(DataFlavor.stringFlavor))
-        {
-            evt.acceptDrop(DnDConstants.ACTION_MOVE);
-            Object obj;
-            try
-            {
-                obj = t.getTransferData(DataFlavor.stringFlavor);
-            }
-            catch (UnsupportedFlavorException e)
-            {
-                // Unexpected, because we just checked whether it is supported.
-                throw new RuntimeException(e);
-            }
-            catch (IOException e)
-            {
-                MyConsole.err().println("Drag and drop data no longer available");
-                e.printStackTrace(MyConsole.err());
-                evt.rejectDrop();
-                return;
-            }
+			List listobj = (List) obj;
 
-            // See where in the list we dropped the element.
-            int dropIndex = locationToIndex(evt.getLocation());
-            DefaultListModel model = (DefaultListModel) getModel();
+			// See where in the list we dropped the element.
+			int dropIndex = locationToIndex (evt.getLocation ());
+			DefaultListModel model = (DefaultListModel) getModel ();
 
-            if (dropIndex < 0)
-            {
-                model.addElement(obj);
-            }
-            // Else is it moving down the list?
-            else if (sourceIndex >= 0 && dropIndex > sourceIndex)
-            {
-                model.add(dropIndex - 1, obj);
-            }
-            else
-            {
-                model.add(dropIndex, obj);
-            }
+			Iterator iterator = listobj.iterator ();
+			if (dropIndex < 0) {
+				while (iterator.hasNext ()) {
+					model.addElement (((File) iterator.next ()).getPath ());
+				}
+			}
+			// Else is it moving down the list?
+			else if (sourceIndex >= 0 && dropIndex > sourceIndex) {
+				while (iterator.hasNext ()) {
+					model.add (dropIndex - 1, ((File) iterator.next ())
+							.getPath ());
+				}
+			} else {
+				while (iterator.hasNext ()) {
+					model.add (dropIndex, ((File) iterator.next ()).getPath ());
+				}
+			}
+			evt.getDropTargetContext ().dropComplete (true);
+		} else if (t.isDataFlavorSupported (DataFlavor.stringFlavor)) {
+			evt.acceptDrop (DnDConstants.ACTION_MOVE);
+			Object obj;
+			try {
+				obj = t.getTransferData (DataFlavor.stringFlavor);
+			} catch (UnsupportedFlavorException e) {
+				// Unexpected, because we just checked whether it is supported.
+				throw new RuntimeException (e);
+			} catch (IOException e) {
+				MyConsole.err ().println (
+						"Drag and drop data no longer available");
+				e.printStackTrace (MyConsole.err ());
+				evt.rejectDrop ();
+				return;
+			}
 
-            evt.getDropTargetContext().dropComplete(true);
-        }
-        else
-        // Else we can't handle this
-        {
-            evt.rejectDrop();
-        }
-    }
+			// See where in the list we dropped the element.
+			int dropIndex = locationToIndex (evt.getLocation ());
+			DefaultListModel model = (DefaultListModel) getModel ();
+
+			if (dropIndex < 0) {
+				model.addElement (obj);
+			}
+			// Else is it moving down the list?
+			else if (sourceIndex >= 0 && dropIndex > sourceIndex) {
+				model.add (dropIndex - 1, obj);
+			} else {
+				model.add (dropIndex, obj);
+			}
+
+			evt.getDropTargetContext ().dropComplete (true);
+		} else
+		// Else we can't handle this
+		{
+			evt.rejectDrop ();
+		}
+	}
 }

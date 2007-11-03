@@ -2,34 +2,30 @@ package org.gel.mauve.tree;
 
 import java.util.Iterator;
 
-class IstIterator implements Iterator
-{
-    IstNode node;
-    IntervalSequenceTree ist;
+class IstIterator implements Iterator {
+	IstNode node;
 
-    IstIterator(IntervalSequenceTree ist, IstNode node)
-    {
-        this.ist = ist;
-        this.node = node;
-    }
+	IntervalSequenceTree ist;
 
-    //	Returns true if the iteration has more elements.
-    public boolean hasNext()
-    {
-        return ist.increment(node) != null;
-    }
+	IstIterator (IntervalSequenceTree ist, IstNode node) {
+		this.ist = ist;
+		this.node = node;
+	}
 
-    //	Returns the next element in the iteration.
-    public Object next()
-    {
-        node = ist.increment(node);
-        return node.getKey();
-    }
+	// Returns true if the iteration has more elements.
+	public boolean hasNext () {
+		return ist.increment (node) != null;
+	}
 
-    //	Removes from the underlying collection the last element returned by the
-    // iterator (optional operation).
-    public void remove()
-    {
+	// Returns the next element in the iteration.
+	public Object next () {
+		node = ist.increment (node);
+		return node.getKey ();
+	}
 
-    }
+	// Removes from the underlying collection the last element returned by the
+	// iterator (optional operation).
+	public void remove () {
+
+	}
 }
