@@ -194,8 +194,8 @@ public class ControlPanel extends AbstractSequencePanel implements org.gel.mauve
         layoutManager.setConstraints(plusMinusButton, c);
         add(setReferenceButton);
         layoutManager.setConstraints(setReferenceButton, c);
-        add(loadFeaturesButton);
-        layoutManager.setConstraints(loadFeaturesButton, c);
+//        add(loadFeaturesButton);
+//        layoutManager.setConstraints(loadFeaturesButton, c);
         add(moveDownButton);
         layoutManager.setConstraints(moveDownButton, c);
 
@@ -232,7 +232,6 @@ public class ControlPanel extends AbstractSequencePanel implements org.gel.mauve
         plusMinusButton.setIcon(plus_button_icon);
         plusMinusButton.setRolloverIcon(plusRollover_button_icon);
     	plusMinusButton.setToolTipText("Show this sequence in the display");
-        System.err.println("Setting + for genome " + genome.getViewIndex());
         invalidate();
         validate();
         revalidate();
