@@ -83,6 +83,9 @@ public class Mauve
         	}
     }
     
+    private String release_version = "unknown";
+    private String build_number = "0";
+
     public synchronized void init()
     {
         // On OS X the aqua look and feel is default, but we can't develop for
@@ -118,9 +121,6 @@ public class Mauve
         {
             RemoteControlImpl.startRemote(this);
         }
-
-        String release_version = "unknown";
-        String build_number = "0";
 
         // read in the version properties file
         try
@@ -350,5 +350,12 @@ public class Mauve
             frames.add(frame);
         }
         return frame;
+    }
+    /**
+     *  The string with the version number
+     * @return The version number
+     */
+    public String getVersion(){
+    	return release_version;
     }
 }

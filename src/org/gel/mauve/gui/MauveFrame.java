@@ -128,7 +128,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
 
     private void initComponents()
     {
-        setTitle("Mauve - Genome Alignment Visualization");
+        setTitle("Mauve " + mauve.getVersion() + " - Genome Alignment Visualization");
         setIconImage(mauve_icon.getImage());
         status_bar = new LCBStatusBar();
         getContentPane().add(status_bar, BorderLayout.SOUTH);
@@ -522,7 +522,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuBar1.validate();
         jMenuBar1.repaint();
         getContentPane().repaint();
-        setTitle("Mauve - Genome Alignment Visualization");
+        setTitle("Mauve " + mauve.getVersion() + " - Genome Alignment Visualization");
         jMenuFilePrint.setEnabled(false);
         jMenuFilePageSetup.setEnabled(false);
         jMenuFilePrintPreview.setEnabled(false);
@@ -538,7 +538,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     void loadError(String message)
     {
         MyConsole.err().println(message);
-        setTitle("Mauve - Genome Alignment Visualization");
+        setTitle("Mauve " + mauve.getVersion() + " - Genome Alignment Visualization");
         model = null;
     }
 
@@ -579,7 +579,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
              * go into visualization mode: set the title and enable the print
              * option
              */
-            setTitle("Mauve - " + model.getSrc().getName());
+            setTitle("Mauve " + mauve.getVersion() + " - " + model.getSrc().getName());
             jMenuFilePrint.setEnabled(true);
             jMenuFilePageSetup.setEnabled(true);
             jMenuFilePrintPreview.setEnabled(true);
