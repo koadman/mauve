@@ -342,11 +342,32 @@ public class ExportFrame extends JFrame
     
     private void doExport()
     {
-        File f = new File(outputFile.getText());
         String format = (String) formatSelector.getSelectedItem();
+    	File f = getFileWithExtension(outputFile.getText(), format);
         export(f, scale, format);
     }
+    
+    private File getFileWithExtension(String fileName, String format)
+    {
+    	String lastFour = "";
+    	String lastFive = "";
+    	if(fileName.length() >= 4)
+    		lastFour = fileName.substring(fileName.length()-4);
+    	if(fileName.length() >= 5)
+    		lastFive = fileName.substring(fileName.length()-5);
+    	if(format.equalsIgnoreCase("JPEG"))
+    	{
+    		if(!lastFive.equalsIgnoreCase(".jpeg") && 
+    				!lastFour.equalsIgnoreCase(".jpg") )
+    			fileName += ".jpg";
+    	}else if(format.equalsIgnoreCase("PNG"))
+    	{
+    		if(	!lastFour.equalsIgnoreCase(".png") )
+    			fileName += ".png";
+    	}
 
+    	return new File(fileName);
+    }
     private void export(File outputFile, double scale, String formatName)
     {
         if (outputFile.exists())
