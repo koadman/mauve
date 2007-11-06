@@ -156,6 +156,8 @@ public class FeatureFilterer extends JFrame implements ActionListener {
 		for (int i = 0; i < count; i++) {
 			SupportedFormat format = model.getGenomeBySourceIndex (i)
 					.getAnnotationFormat ();
+			if(format == null)
+				continue;	// aed: If no annotation was loaded, then getAnnotationFormat returns null
 			FilterCacheSpec [] specs = format.getFilterCacheSpecs ();
 			for (int j = 0; j < specs.length; j++) {
 				// will eventually be mapped to whether these sorts are
