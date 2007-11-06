@@ -17,8 +17,6 @@ import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.symbol.Location;
 import org.gel.air.util.MathUtils;
 import org.gel.mauve.analysis.Segment;
-import org.gel.mauve.analysis.output.AbstractTabbedDataWriter;
-import org.gel.mauve.analysis.output.SegmentDataProcessor;
 import org.gel.mauve.gui.sequence.FlatFileFeatureConstants;
 
 /**
@@ -80,7 +78,7 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 			System.out.println ("couldn't output genomes and indeces");
 		}
 	}
-
+/*
 	public static void printSegment (Segment segment,
 			AbstractTabbedDataWriter writer) {
 		String [] data = new String [segment.ends.length * 2];
@@ -91,17 +89,17 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 		}
 		writer.printRow (data);
 	}
-
+*/
 	public static String doubleToString (double number, int decimals) {
 		DecimalFormat format = new DecimalFormat ();
 		format.setMaximumFractionDigits (decimals);
 		return format.format (number);
 	}
-	
+/*	
 	public static String getSeqPartOfFile (SegmentDataProcessor processor) {
 		return "seq_" + processor.get (SEQUENCE_INDEX).toString ();
 	}
-	
+	*/
 	public static String getReadableMultiplicity (Segment segment) {
 		return getReadableMultiplicity (segment.multiplicityType (), segment.starts.length);
 	}
