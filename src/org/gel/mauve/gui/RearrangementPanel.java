@@ -34,7 +34,9 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JMenu;
 import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
@@ -103,9 +105,6 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
 
     // Panel showing the sequences, rulers, etc.
     JPanel sequencePanel;
-
-    // Color scheme selector for matches
-    JComboBox color_selector;
 
     // A toolbar for various alignment manipulation tools, given by the parent
     // frame
@@ -405,8 +404,6 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
 	        toolbar.add(grimm_button);
         }
         
-        initColorSelector();
-
         // Fill out the toolbar
         Dimension minSize = new Dimension(5, 3);
         Dimension prefSize = new Dimension(5, 3);
@@ -414,48 +411,6 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         toolbar.add(new Box.Filler(minSize, prefSize, maxSize));
     }
 
-    /**
-     * The color selector allows the choice of color schemes, in certain modes.
-     */
-    private void initColorSelector()
-    {
-    	if(toolbar == null)
-    		return;
-        if (model instanceof XmfaViewerModel)
-        {
-        	boolean have_bb = haveBackboneData();
-        	if(have_bb)
-        		color_selector = new JComboBox(new ColorScheme[] { new BackboneLcbColor(), new BackboneMultiplicityColor() });
-        	else
-        		color_selector = new JComboBox(new ColorScheme[] { new LCBColorScheme() });
-            color_selector.setSelectedIndex(0);
-        	if(!have_bb)
-        		color_selector.setEnabled(false);
-        }
-        else if (model instanceof LcbViewerModel)
-        {
-
-            if (model.getSequenceCount() < 62)
-            {
-                color_selector = new JComboBox(new ColorScheme[] { new LCBColorScheme(), new OffsetColorScheme(), new NormalizedOffsetColorScheme(), new MultiplicityColorScheme(), new MultiplicityTypeColorScheme(), new NormalizedMultiplicityTypeColorScheme() });
-            }
-            else
-            {
-                color_selector = new JComboBox(new ColorScheme[] { new LCBColorScheme(), new OffsetColorScheme(), new NormalizedOffsetColorScheme(), new MultiplicityColorScheme() });
-            }
-
-            color_selector.setSelectedIndex(0);
-        }
-        else
-        {
-            color_selector = new JComboBox(new ColorScheme[] { new OffsetColorScheme(), new NormalizedOffsetColorScheme(), new MultiplicityColorScheme(), new MultiplicityTypeColorScheme(), new NormalizedMultiplicityTypeColorScheme() });
-            color_selector.setSelectedIndex(0);
-
-        }
-
-        color_selector.addActionListener(this);
-        toolbar.add(color_selector);
-    }
 
     /**
      * Initialize data structures to support LCB display and manipulation.
@@ -605,11 +560,7 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
 
     public void actionPerformed(ActionEvent e)
     {
-        if (e.getSource() == color_selector)
-        {
-            model.setColorScheme((ColorScheme) color_selector.getSelectedItem());
-        }
-        else if (e.getActionCommand().equals("Home"))
+    	if (e.getActionCommand().equals("Home"))
         {
             model.zoomAndMove(0, Integer.MIN_VALUE);
             
