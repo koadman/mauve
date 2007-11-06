@@ -126,10 +126,13 @@ public class MauveAlignFrame extends AlignFrame {
         String cur_cmd;
         boolean detect_lcbs = true;
         String os_type = System.getProperty("os.name");
+        String os_arch = System.getProperty("os.arch");
 
-        MyConsole.out().println("OS name is: " + os_type);
+        MyConsole.out().println("OS name is: " + os_type + " arch: " + os_arch);
         if (os_type.startsWith("Windows"))
         {
+        	if(os_arch.indexOf("64") >= 0)
+        		cmd_vec.addElement("win64/");
             cmd_vec.addElement("mauveAligner");
         }
         else if (os_type.startsWith("Mac"))
