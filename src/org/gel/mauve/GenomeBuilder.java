@@ -111,9 +111,15 @@ public class GenomeBuilder
         if (f.canRead())
             return buildGenome(length, f, annotationFormat, model, restrictedIndex, sequenceIndex);
 
-	nameSansQuotes = windowsPathHack(nameSansQuotes);
+        // normalize windows path names in case we're running on OS X
+        nameSansQuotes = windowsPathHack(nameSansQuotes);
 
-        // otherwise try the directory of the source alignment
+        // try the directory of the source alignment with the full path
+        f = new File(model.getSrc().getParent() + File.separatorChar + nameSansQuotes);
+        if (f.canRead())
+            return buildGenome(length, f, annotationFormat, model, restrictedIndex, sequenceIndex);
+
+        // otherwise try the directory of the source alignment with just the filename
     	String path = "";
     	if( nameSansQuotes.length() > 0 )
     		path = model.getSrc().getParent() + File.separatorChar + f.getName();
