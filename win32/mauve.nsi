@@ -196,9 +196,9 @@ JavaMessage:
 
 InstallJava:
   SetOutPath $TEMP
-  File "win32\jre-6-windows-i586-iftw.exe"
-  ExecWait "$TEMP\jre-6-windows-i586-iftw.exe"
-  Delete /REBOOTOK "$TEMP\jre-6-windows-i586-iftw.exe"
+  File "win32\jre-6u2-windows-i586-p-iftw.exe"
+  ExecWait "$TEMP\jre-6u2-windows-i586-p-iftw.exe"
+  Delete /REBOOTOK "$TEMP\jre-6u2-windows-i586-p-iftw.exe"
   Goto FindJava
 
 
@@ -224,6 +224,12 @@ pop $0
   File "Mauve.jar"
   File "win32\mauve.ico"
   File "win32\Mauve Online Documentation.url"
+
+  ; 64-bit programs
+  SetOutPath "$INSTDIR\win64"
+  File "win64\mauveAligner.exe"
+  File "win64\progressiveMauve.exe"
+  File "win64\muscle_aed.exe"
 
   ; external dependencies
   SetOutPath "$INSTDIR\ext"
