@@ -141,7 +141,6 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     private boolean oldDrawMatches;
     private boolean oldFillBoxes;
     private JToggleButton zoom_button;
-    private JToggleButton hand_button;
     
     // A weird hack to change cursor for zooming.
     private CtrlKeyDetector ctrlDetector = new CtrlKeyDetector();
@@ -281,7 +280,6 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         addKeyMapping("shift ctrl RIGHT", "ShiftRight");
         addKeyMapping("typed r", "ToggleStrikethrough");
         addKeyMapping("typed L", "ToggleLCBlines");
-        addKeyMapping("typed h", "ToggleHandMode");
         addKeyMapping("typed q", "ToggleLcbBounds");
         addKeyMapping("typed w", "ToggleFillBoxes");
         addKeyMapping("typed e", "ToggleDrawMatches");
@@ -342,16 +340,6 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         home_button.setActionCommand("Home");
         home_button.addActionListener(this);
         toolbar.add(home_button);
-
-        // the hand button toggles between the "reorder sequences" mode
-        // and standard browsing mode
-        hand_button = new JToggleButton(MauveFrame.hand_button_icon);
-        hand_button.setToolTipText("Toggle sequence reordering mode.");
-        hand_button.setActionCommand("ToggleHandMode");
-        hand_button.setPressedIcon(MauveFrame.dark_hand_button_icon);
-        hand_button.setSelectedIcon(MauveFrame.dark_hand_button_icon);
-        hand_button.addActionListener(this);
-        toolbar.add(hand_button);
 
         // When clicked, the left button shifts the display 20% to the left
         JButton left_button = new JButton(MauveFrame.left_button_icon);
@@ -684,17 +672,6 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
                 model.setMode(ViewerMode.ZOOM);
             }
         }
-        else if (e.getActionCommand().equals("ToggleHandMode"))
-        {
-            if (model.getMode() == ViewerMode.HAND)
-            {
-                model.setMode(ViewerMode.NORMAL);
-            }
-            else
-            {
-                model.setMode(ViewerMode.HAND);
-            }
-        }
         else if (e.getActionCommand().equals("ToggleLCBlines"))
         {
         	lcbLinePanel.setHidden(!lcbLinePanel.getHidden());
@@ -921,22 +898,12 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     {
         if (model.getMode() == ViewerMode.NORMAL)
         {
-            hand_button.setSelected(false);
             zoom_button.setSelected(false);
             setCursor(null);
             KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(ctrlDetector);
         }
-        else if (model.getMode() == ViewerMode.HAND)
-        {
-            zoom_button.setSelected(false);
-            setCursor(MauveFrame.hand_cursor);
-            
-            // See javadoc for CtrlKeyDetector for an explanation of the next line.
-            KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(ctrlDetector);
-        }
         else if (model.getMode() == ViewerMode.ZOOM)
         {
-            hand_button.setSelected(false);
             setCursor(MauveFrame.zoom_in_cursor);
 
             // See javadoc for CtrlKeyDetector for an explanation of the next line.

@@ -102,19 +102,12 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     static ImageIcon zoomin_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/ZoomIn16.gif"));
     static ImageIcon zoomout_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/ZoomOut16.gif"));
     static ImageIcon zoom_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/Zoom16.gif"));
-    static ImageIcon hand_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/Hand16.gif"));
-    static ImageIcon dark_hand_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/DarkHand16.gif"));
     public static ImageIcon mauve_icon = new ImageIcon(MauveFrame.class.getResource("/images/mauve_icon.gif"));
     static ImageIcon find_feature_icon = new ImageIcon(MauveFrame.class.getResource("/images/searchBinoculars16.png"));
-    static ImageIcon fist_icon = new ImageIcon(MauveFrame.class.getResource("/images/fist_icon.gif"));
-    static ImageIcon hand_icon = new ImageIcon(MauveFrame.class.getResource("/images/hand_icon.gif"));
     static ImageIcon dcj_icon = new ImageIcon(MauveFrame.class.getResource("/images/Dcj16.gif"));
     static ImageIcon grimm_icon = new ImageIcon(MauveFrame.class.getResource("/images/Grimm16.gif"));
-    static Cursor hand_cursor = Toolkit.getDefaultToolkit().createCustomCursor(hand_icon.getImage(), new Point(8, 8), "hand");
     static Cursor zoom_in_cursor = Toolkit.getDefaultToolkit().createCustomCursor(new ImageIcon(MauveFrame.class.getResource("/images/ZoomIn24.gif")).getImage(), new Point(8, 8), "zoomin");
     static Cursor zoom_out_cursor = Toolkit.getDefaultToolkit().createCustomCursor(new ImageIcon(MauveFrame.class.getResource("/images/ZoomOut24.gif")).getImage(), new Point(8, 8), "zoomout");
-
-    public static Cursor fist_cursor = Toolkit.getDefaultToolkit().createCustomCursor(fist_icon.getImage(), new Point(8, 8), "fist");
 
     public MauveFrame(Mauve mauve)
     {

@@ -58,12 +58,7 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
     private ControlPanel controls;
     private JLabel label;
     
-    
-    private DragSource dragSource;
-    DragGestureRecognizer dragRecognizer;
-    private DropTarget dropTarget;
-    private boolean dndEnabled = false;
-    
+        
     private RearrangementPanel rrPanel;
     private static final DataFlavor REARRANGEMENT_FLAVOR = new DataFlavor(Integer.class, TransferableObject.MIME_TYPE);
 
@@ -129,10 +124,6 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
         }
         label.setMaximumSize(new Dimension(100000, 15 ));
         
-        dragSource = new DragSource();
-        dragRecognizer = dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_MOVE, null);
-        dropTarget = new DropTarget(this, this);
-
         if(genome.getViewIndex() % 2 == 1)
         	setBackground(Color.WHITE);
         
@@ -238,31 +229,6 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
         setSize(invisible_size);
     }
 
-    public void enableDragAndDrop()
-    {
-        if (dndEnabled) return;
-        
-        try
-        {
-            dragRecognizer.addDragGestureListener(this);
-        }
-        catch (TooManyListenersException e)
-        {
-            throw new RuntimeException("Too many listeners", e);
-        }
-        
-        dndEnabled = true;
-    }
-    
-    public void disableDragAndDrop()
-    {
-        if (!dndEnabled) return;
-        
-        dragRecognizer.removeDragGestureListener(this);
-        
-        dndEnabled = false;
-    }
-
     public RRSequencePanel getSequencePanel()
     {
         return sequence;
@@ -302,15 +268,6 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
             }
         });
 
-        // as the name suggests, starts the dragging
-        if (MauveFrame.fist_cursor != null)
-        {
-            dragSource.startDrag(event, MauveFrame.fist_cursor, transfer, this);
-        }
-        else
-        {
-            dragSource.startDrag(event, DragSource.DefaultLinkDrop, transfer, this);
-        }
     }
 
     /*
@@ -485,12 +442,7 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
         // Hand mode toggles drag and drop.
         if (model.getMode() == ViewerMode.NORMAL)
         {
-            disableDragAndDrop();
             disableZoom();
-        }
-        else if (model.getMode() == ViewerMode.HAND)
-        {
-            enableDragAndDrop();
         }
         else if (model.getMode() == ViewerMode.ZOOM)
         {
