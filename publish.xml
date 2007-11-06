@@ -4,7 +4,7 @@
     </description>
 	
 	<!-- set the release version -->
-	<property name="release.version" value="1.2.0"/>
+	<property name="release.version" value="2.0.0"/>
 
 	<!-- set global properties for this build -->
 	<property name="support" location="build_support"/>
@@ -45,18 +45,15 @@
 				<!-- Changes are an english prose summary of changes, 
 				     limited to 300 characters -->
 				<changes>
-Mauve now uses the MUSCLE algorithm to compute gapped alignments.  A new image export 
-feature can save the current display in high-resolution PNG, TIFF, and JPG formats.
-Memory consumption has been reduced.  An option to explicitly assume collinear genomes 
-can improve accuracy in some cases.
+Mauve 2.0 includes a new accurate and sensitive genome alignment algorithm called progressiveMauve.  Hundreds of genomes can now be aligned, and rearranged segments conserved in subsets of the genomes can be identified.  A new annotation search can find features by things like gene name and others.
 				</changes>
 		 
 				<urlBlock
 				    homepage="http://genome-alignment.org/mauve/"
-				    tgz="http://gel.ahabs.wisc.edu/[..]mauve/downloads/mauve_linux_${release.version}.tar.gz"
+				    tgz="http://gel.ahabs.wisc.edu/mauve/downloads/mauve_linux_${release.version}.tar.gz"
 				    osx="http://gel.ahabs.wisc.edu/mauve/downloads/Mauve-${release.version}.dmg"
-				    changelog="http://gel.ahabs.wisc.edu/docserver/mauve/version_history.stx"
-				    mailinglist="http://svm.vetmed.wisc.edu/Lists/gel-software/List.html"
+				    changelog="http://asap.ahabs.wisc.edu/mauve-aligner/mauve-user-guide/mauve-version-history.html"
+				    mailinglist="http://sourceforge.net/mail/?group_id=181544"
 				/>
 			</publish>
 		</freshmeat>
