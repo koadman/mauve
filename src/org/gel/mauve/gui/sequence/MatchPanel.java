@@ -490,10 +490,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
                 drawMatchBoxes(unitsPerPixel, box_height, half_height, g2);
             }
 
-            if (lm.getDrawLcbBounds())
-            {
-                drawLcbBounds(unitsPerPixel, box_height, half_height, g2, arc_size);
-            }
+            drawLcbBounds(unitsPerPixel, box_height, half_height, g2, arc_size);
         }
         else
         {
@@ -540,7 +537,10 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
 
             java.awt.geom.RoundRectangle2D.Double lcb_rect = new java.awt.geom.RoundRectangle2D.Double(leftPixel + HALF_PEN_WIDTH, lcb_top + HALF_PEN_WIDTH, pixelWidth - LCB_BOUNDARY_WIDTH, half_height - LCB_BOUNDARY_WIDTH, arc_size, arc_size);
 
-            matchGraphics.draw(lcb_rect);
+            if (lm.getDrawLcbBounds())
+            {
+            	matchGraphics.draw(lcb_rect);
+            }
             
             if (lm.getFillLcbBoxes())
             {
@@ -657,7 +657,14 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
                 Match cur_match = (Match) sortedMatches.get(matchI);
                 // don't draw the match if it's not on the current strand
                 // or if it's part of a 'disabled' LCB.
-                if (cur_match.getReverse(getGenome()) == reverse_matches && cur_match.lcb >= 0)
+                boolean rev = false;
+                if(cur_match.lcb <0 || cur_match.lcb > 2)
+                	System.out.println("debugger");
+                if(model instanceof LcbViewerModel && cur_match.lcb >= 0)
+                	rev = ((LcbViewerModel)model).getFullLcbList()[cur_match.lcb].getReverse(getGenome());
+                else
+                	rev = cur_match.getReverse(getGenome());
+                if ( rev == reverse_matches && cur_match.lcb >= 0)
                 {
                     cur_start_pixel = (int) ((double) (cur_match.getStart(getGenome()) - getGenome().getViewStart()) / unitsPerPixel);
                     cur_pixel_width = (int) Math.ceil((double) cur_match.getLength(getGenome()) / unitsPerPixel);
@@ -687,7 +694,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
 
                     prev_start_pixel = cur_start_pixel;
                     prev_pixel_width = cur_pixel_width;
-                    prev_reverse = cur_match.getReverse(getGenome());
+                    prev_reverse = rev;
                     prev_color = ((Match) sortedMatches.get(matchI)).color;
                 }
             }
