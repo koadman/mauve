@@ -324,8 +324,19 @@ public class AlignFrame extends java.awt.Frame
      */
     public void alignButtonActionPerformed(java.awt.event.ActionEvent evt)
     {
-    	if(this.getOutput().length()==0)
-    		this.outputButtonActionPerformed(null);
+    	File outfile = new File(this.getOutput());
+    	while(this.getOutput().length()==0 || outfile.isDirectory())
+    	{
+        	fc.setDialogTitle("Save alignment file");
+            int returnVal = fc.showSaveDialog(this);
+
+            if (returnVal == JFileChooser.APPROVE_OPTION)
+            {
+            	outfile = fc.getSelectedFile();
+                outputFileText.setText(outfile.getPath());
+            }else
+            	return;
+    	}
     	
         alignButton.setEnabled(false);
         
