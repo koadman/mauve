@@ -270,29 +270,23 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
      */
     private void initKeyBindings()
     {
-        addKeyMapping("ctrl UP", "ZoomIn");
-        addKeyMapping("ctrl DOWN", "ZoomOut");
-        addKeyMapping("ctrl LEFT", "ScrollLeft");
-        addKeyMapping("ctrl RIGHT", "ScrollRight");
-        addKeyMapping("ctrl D", "DCJ");
-        addKeyMapping("shift ctrl LEFT", "ShiftLeft");
-        addKeyMapping("shift ctrl RIGHT", "ShiftRight");
-        addKeyMapping("typed r", "ToggleStrikethrough");
-        addKeyMapping("typed L", "ToggleLCBlines");
-        addKeyMapping("typed q", "ToggleLcbBounds");
-        addKeyMapping("typed w", "ToggleFillBoxes");
-        addKeyMapping("typed e", "ToggleDrawMatches");
+        addKeyMapping("ctrl UP", "ZoomIn", this);
+        addKeyMapping("ctrl DOWN", "ZoomOut", this);
+        addKeyMapping("ctrl LEFT", "ScrollLeft", this);
+        addKeyMapping("ctrl RIGHT", "ScrollRight", this);
+        addKeyMapping("ctrl D", "DCJ", this);
+        addKeyMapping("shift ctrl LEFT", "ShiftLeft", this);
+        addKeyMapping("shift ctrl RIGHT", "ShiftRight", this);
     }
     
-    private void addKeyMapping(String stroke, String actionName)
+    public void addKeyMapping(String stroke, String actionName, ActionListener listener)
     {
         getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(stroke), actionName);
         getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(stroke), actionName);
         getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(stroke), actionName);
-        getActionMap().put(actionName, new GenericAction(this, actionName));
+        getActionMap().put(actionName, new GenericAction(listener, actionName));
     }
-    
-    private void removeKeyMapping(String stroke)
+    public void removeKeyMapping(String stroke)
     {
         getInputMap(WHEN_IN_FOCUSED_WINDOW).remove(KeyStroke.getKeyStroke(stroke));
     }
@@ -621,42 +615,6 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
             else
             {
                 model.setMode(ViewerMode.ZOOM);
-            }
-        }
-        else if (e.getActionCommand().equals("ToggleLCBlines"))
-        {
-        	lcbLinePanel.setHidden(!lcbLinePanel.getHidden());
-        }
-        else if (e.getActionCommand().equals("ToggleStrikethrough"))
-        {
-            lcbLinePanel.draw_strikethrough = !lcbLinePanel.draw_strikethrough;
-            lcbLinePanel.repaint();
-        }
-        else if (e.getActionCommand().equals("ToggleLcbBounds"))
-        {
-            if (model instanceof LcbViewerModel)
-            {
-                LcbViewerModel lv = (LcbViewerModel) model;
-                lv.setDrawLcbBounds(!lv.getDrawLcbBounds());
-            }
-        }
-        else if (e.getActionCommand().equals("ToggleFillBoxes"))
-        {
-            if (model != null)
-            {
-                if (model instanceof LcbViewerModel)
-                {
-                    LcbViewerModel lv = (LcbViewerModel) model;
-                    lv.setFillLcbBoxes(!lv.getFillLcbBoxes());
-                }
-            }
-        }
-        else if (e.getActionCommand().equals("ToggleDrawMatches"))
-        {
-            if (model != null)
-            {
-                model.setDrawMatches(!model.getDrawMatches());
-                
             }
         }
         else if (e.getActionCommand().equals("ZoomInMode"))

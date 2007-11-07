@@ -85,15 +85,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     JMenu jMenuView = new JMenu ();
 
     ColorMenu jMenuViewColorScheme = new ColorMenu ();
-    JMenuItem jMenuVcsLcbColor = new JMenuItem();
-    JMenuItem jMenuVcsBackboneColor = new JMenuItem();
-
-    JMenu jMenuViewStyle = new JMenu ();
-    JCheckBoxMenuItem jMenuViewStyleLcbOutlines = new JCheckBoxMenuItem();
-    JCheckBoxMenuItem jMenuViewStyleSimilarityPlot = new JCheckBoxMenuItem();
-    JCheckBoxMenuItem jMenuViewStyleSolidBlocks = new JCheckBoxMenuItem();
-    JCheckBoxMenuItem jMenuViewStyleLcbStrikethroughLines = new JCheckBoxMenuItem();
-    JCheckBoxMenuItem jMenuViewStyleLcbConnectingLines = new JCheckBoxMenuItem();
+    StyleMenu jMenuViewStyle = new StyleMenu ();
 
     JMenu jMenuGoTo = new JMenu ();
     JMenuItem jMenuGoToSeqPos = new JMenuItem ();
@@ -285,15 +277,6 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuViewColorScheme.setText("Color Scheme");
         jMenuViewColorScheme.setMnemonic('C');
 
-        jMenuVcsLcbColor.setToolTipText("Colors each LCB with a different color");
-        jMenuVcsLcbColor.setVisible(true);
-        jMenuVcsLcbColor.setText("LCB Color");
-        jMenuVcsLcbColor.setMnemonic('L');
-
-        jMenuVcsBackboneColor.setToolTipText("Colors according to the backbone segment presence/absence pattern");
-        jMenuVcsBackboneColor.setVisible(true);
-        jMenuVcsBackboneColor.setText("Backbone Color");
-        jMenuVcsBackboneColor.setMnemonic('B');
 
         jMenuViewStyle.setToolTipText("Drawing styles for the genome comparison");
         jMenuViewStyle.setVisible(true);
@@ -301,30 +284,6 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuViewStyle.setText("Style");
         jMenuViewStyle.setMnemonic('S');
 
-        jMenuViewStyleLcbOutlines.setToolTipText("Draw outlines around each Locally Collinear Block");
-        jMenuViewStyleLcbOutlines.setVisible(true);
-        jMenuViewStyleLcbOutlines.setText("LCB outlines");
-        jMenuViewStyleLcbOutlines.setMnemonic('o');
-
-        jMenuViewStyleSimilarityPlot.setToolTipText("Draw a similarity plot indicating average similarity of each region");
-        jMenuViewStyleSimilarityPlot.setVisible(true);
-        jMenuViewStyleSimilarityPlot.setText("Similarity plot");
-        jMenuViewStyleSimilarityPlot.setMnemonic('S');
-
-        jMenuViewStyleSolidBlocks.setToolTipText("Draw solid colors for each locally collinear block");
-        jMenuViewStyleSolidBlocks.setVisible(true);
-        jMenuViewStyleSolidBlocks.setText("Solid LCB coloring");
-        jMenuViewStyleSolidBlocks.setMnemonic('L');
-
-        jMenuViewStyleLcbStrikethroughLines.setToolTipText("Draw connecting lines that strike through LCBs");
-        jMenuViewStyleLcbStrikethroughLines.setVisible(true);
-        jMenuViewStyleLcbStrikethroughLines.setText("LCB strikethrough lines");
-        jMenuViewStyleLcbStrikethroughLines.setMnemonic('t');
-
-        jMenuViewStyleLcbConnectingLines.setToolTipText("Draw lines connecting homologous LCBs across genomes");
-        jMenuViewStyleLcbConnectingLines.setVisible(true);
-        jMenuViewStyleLcbConnectingLines.setText("LCB connecting lines");
-        jMenuViewStyleLcbConnectingLines.setMnemonic('l');
 
  //       jMenuGoTo.setToolTipText("Go to specific location in genome");
         jMenuGoTo.setVisible(true);
@@ -368,12 +327,6 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuView.add(jMenuViewColorScheme);
         jMenuView.add(jMenuViewStyle);
         jMenuView.add(jMenuGoTo);
-
-        jMenuViewStyle.add(jMenuViewStyleLcbOutlines);
-        jMenuViewStyle.add(jMenuViewStyleSimilarityPlot);
-        jMenuViewStyle.add(jMenuViewStyleSolidBlocks);
-        jMenuViewStyle.add(jMenuViewStyleLcbStrikethroughLines);
-        jMenuViewStyle.add(jMenuViewStyleLcbConnectingLines);
 
 //        jMenuBar1.add (jMenuGoTo);
         jMenuGoTo.add (jMenuGoToSeqPos);
@@ -675,27 +628,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             jMenuView.setEnabled(true);
             jMenuViewColorScheme.setEnabled(true);
             jMenuViewColorScheme.build(model);
-            if(model instanceof XmfaViewerModel || model instanceof LcbViewerModel)
-            {
-                jMenuViewStyle.setEnabled(true);
-	            // set checkboxes appropriately
-	            jMenuViewStyleLcbConnectingLines.setSelected(true);
-	            jMenuViewStyleLcbOutlines.setSelected(true);
-	            jMenuViewStyleLcbStrikethroughLines.setSelected(true);
-	            jMenuViewStyleSimilarityPlot.setSelected(true);
-	            jMenuViewStyleSolidBlocks.setSelected(false);
-	            // tie menu actions to the new rearrangement panel
-	            jMenuViewStyleLcbConnectingLines.addActionListener(rrpanel);
-	            jMenuViewStyleLcbOutlines.addActionListener(rrpanel);
-	            jMenuViewStyleLcbStrikethroughLines.addActionListener(rrpanel);
-	            jMenuViewStyleSimilarityPlot.addActionListener(rrpanel);
-	            jMenuViewStyleSolidBlocks.addActionListener(rrpanel);
-	            jMenuViewStyleLcbConnectingLines.setActionCommand("ToggleLCBlines");
-	            jMenuViewStyleLcbOutlines.setActionCommand("ToggleLcbBounds");
-	            jMenuViewStyleLcbStrikethroughLines.setActionCommand("ToggleStrikethrough");
-	            jMenuViewStyleSimilarityPlot.setActionCommand("ToggleDrawMatches");
-	            jMenuViewStyleSolidBlocks.setActionCommand("ToggleFillBoxes");
-            }
+            jMenuViewStyle.setTarget(model, rrpanel);
             //importer = new FlatFileFeatureImporter (this);
             toFront();
         }
