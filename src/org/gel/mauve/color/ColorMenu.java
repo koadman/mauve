@@ -17,12 +17,12 @@ public class ColorMenu extends JMenu implements ActionListener {
 	
 	JRadioButtonMenuItem bbLcbColor = new JRadioButtonMenuItem("LCB color");
 	JRadioButtonMenuItem bbMultiplicityColor = new JRadioButtonMenuItem("Backbone color");
-	JRadioButtonMenuItem LcbColor = new JRadioButtonMenuItem("LCB color");
-	JRadioButtonMenuItem OffsetColor = new JRadioButtonMenuItem("Offset color");
-	JRadioButtonMenuItem NormalizedOffsetColor = new JRadioButtonMenuItem("Normalized offset color");
-	JRadioButtonMenuItem MultiplicityColor = new JRadioButtonMenuItem("Multiplicity color");
-	JRadioButtonMenuItem MultiplicityTypeColor = new JRadioButtonMenuItem("Multiplicity type color");
-	JRadioButtonMenuItem NormalizedMultiplicityTypeColor = new JRadioButtonMenuItem("Normalized multiplicity type color");
+	JRadioButtonMenuItem lcbColor = new JRadioButtonMenuItem("LCB color");
+	JRadioButtonMenuItem offsetColor = new JRadioButtonMenuItem("Offset color");
+	JRadioButtonMenuItem normalizedOffsetColor = new JRadioButtonMenuItem("Normalized offset color");
+	JRadioButtonMenuItem multiplicityColor = new JRadioButtonMenuItem("Multiplicity color");
+	JRadioButtonMenuItem multiplicityTypeColor = new JRadioButtonMenuItem("Multiplicity type color");
+	JRadioButtonMenuItem normalizedMultiplicityTypeColor = new JRadioButtonMenuItem("Normalized multiplicity type color");
 
     ButtonGroup bg = new ButtonGroup();
 
@@ -37,14 +37,22 @@ public class ColorMenu extends JMenu implements ActionListener {
 	
 	public ColorMenu()
 	{
+		bbLcbColor.setActionCommand(bbLcbColor.getText());
+		bbMultiplicityColor.setActionCommand(bbMultiplicityColor.getText());
+		lcbColor.setActionCommand(lcbColor.getText());
+		offsetColor.setActionCommand(offsetColor.getText());
+		normalizedOffsetColor.setActionCommand(normalizedOffsetColor.getText());
+		multiplicityColor.setActionCommand(multiplicityColor.getText());
+		multiplicityTypeColor.setActionCommand(multiplicityTypeColor.getText());
+		normalizedMultiplicityTypeColor.setActionCommand(normalizedMultiplicityTypeColor.getText());
 		bbLcbColor.addActionListener(this);
 		bbMultiplicityColor.addActionListener(this);
-		LcbColor.addActionListener(this);
-		OffsetColor.addActionListener(this);
-		NormalizedOffsetColor.addActionListener(this);
-		MultiplicityColor.addActionListener(this);
-		MultiplicityTypeColor.addActionListener(this);
-		NormalizedMultiplicityTypeColor.addActionListener(this);
+		lcbColor.addActionListener(this);
+		offsetColor.addActionListener(this);
+		normalizedOffsetColor.addActionListener(this);
+		multiplicityColor.addActionListener(this);
+		multiplicityTypeColor.addActionListener(this);
+		normalizedMultiplicityTypeColor.addActionListener(this);
 	}
 	
 	public void build(BaseViewerModel model)
@@ -52,12 +60,12 @@ public class ColorMenu extends JMenu implements ActionListener {
 		bg = new ButtonGroup();
         bg.add(bbLcbColor);
         bg.add(bbMultiplicityColor);
-        bg.add(LcbColor);
-        bg.add(OffsetColor);
-        bg.add(NormalizedOffsetColor);
-        bg.add(MultiplicityColor);
-        bg.add(MultiplicityTypeColor);
-        bg.add(NormalizedMultiplicityTypeColor);
+        bg.add(lcbColor);
+        bg.add(offsetColor);
+        bg.add(normalizedOffsetColor);
+        bg.add(multiplicityColor);
+        bg.add(multiplicityTypeColor);
+        bg.add(normalizedMultiplicityTypeColor);
 
         this.removeAll();
 
@@ -79,40 +87,40 @@ public class ColorMenu extends JMenu implements ActionListener {
         else
         {
         	if(model instanceof LcbViewerModel)
-        		add(LcbColor);
-        	add(OffsetColor);
-        	add(NormalizedOffsetColor);
-        	add(MultiplicityColor);
-        	add(MultiplicityTypeColor);
+        		add(lcbColor);
+        	add(offsetColor);
+        	add(normalizedOffsetColor);
+        	add(multiplicityColor);
+        	add(multiplicityTypeColor);
 
     		if (model.getSequenceCount() < 62)
-        		add(NormalizedMultiplicityTypeColor);
+        		add(normalizedMultiplicityTypeColor);
 
         	if(model instanceof LcbViewerModel)
-        		LcbColor.setSelected(true);
+        		lcbColor.setSelected(true);
         	else
-        		OffsetColor.setSelected(true);
+        		offsetColor.setSelected(true);
         }
 		
 	}
 
 	public void actionPerformed(ActionEvent e)
     {
-        if (e.getSource() == bbLcbColor)
+        if (e.getActionCommand() == bbLcbColor.getText())
             model.setColorScheme(backboneLcbColor);
-        if (e.getSource() == bbMultiplicityColor)
+        if (e.getActionCommand() == bbMultiplicityColor.getText())
             model.setColorScheme(backboneMultiplicityColor);
-        if (e.getSource() == LcbColor)
+        if (e.getActionCommand() == lcbColor.getText())
             model.setColorScheme(lcbColorScheme);
-        if (e.getSource() == OffsetColor)
+        if (e.getActionCommand() == offsetColor.getText())
             model.setColorScheme(offsetColorScheme);
-        if (e.getSource() == NormalizedOffsetColor)
+        if (e.getActionCommand() == normalizedOffsetColor.getText())
             model.setColorScheme(normalizedOffsetColorScheme);
-        if (e.getSource() == MultiplicityColor)
+        if (e.getActionCommand() == multiplicityColor.getText())
             model.setColorScheme(multiplicityColorScheme);
-        if (e.getSource() == MultiplicityTypeColor)
+        if (e.getActionCommand() == multiplicityTypeColor.getText())
             model.setColorScheme(multiplicityTypeColorScheme);
-        if (e.getSource() == NormalizedMultiplicityTypeColor)
+        if (e.getActionCommand() == normalizedMultiplicityTypeColor.getText())
             model.setColorScheme(normalizedMultiplicityTypeColorScheme);
     }
 }
