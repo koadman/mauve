@@ -20,6 +20,7 @@ import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.taxa.NCBITaxon;
 import org.biojavax.ontology.ComparableTerm;
 import org.gel.mauve.FilterCacheSpec;
+import org.gel.mauve.gui.navigation.AnnotationContainsFilter;
 import org.gel.mauve.gui.sequence.ZiggyRectangularBeadRenderer;
 
 public abstract class GenbankEmblFormat extends BaseFormat
@@ -76,32 +77,70 @@ public abstract class GenbankEmblFormat extends BaseFormat
 
     }
 
-    public String getChromosomeName(Sequence s)
-    {
-        FeatureHolder fh = s.filter(new FeatureFilter.ByType("source"));
+	public String getChromosomeName (Sequence s) {
+		FeatureHolder fh = s.filter(new FeatureFilter.ByType("source"));
+        String name = null;
+        Annotation a = null;
         if (fh.countFeatures() != 0)
         {
             Feature f2 = (Feature) fh.features().next();
-            Annotation a = f2.getAnnotation();
+            a = f2.getAnnotation();
+        }
+        if (a != null) {
             if (a.containsProperty("chromosome"))
             {
-                return (String) a.getProperty("chromosome");
+                name = (String) a.getProperty("chromosome");
             }
             else if (a.containsProperty("biojavax:chromosome"))
             {
-                return (String) a.getProperty("biojavax:chromosome");
+            	name = (String) a.getProperty("biojavax:chromosome");
             }
             else if (a.containsProperty("plasmid"))
             {
-                return (String) a.getProperty("plasmid");
+            	name = (String) a.getProperty("plasmid");
             }
             else if (a.containsProperty("biojavax:plasmid"))
             {
-                return (String) a.getProperty("biojavax:plasmid");
+            	name = (String) a.getProperty("biojavax:plasmid");
             }
-        }
-        return null;
-    }
+		}
+        if (name == null || name.trim().equals("") && 
+        		AnnotationContainsFilter.getKeyIgnoreCase ("definition",
+				s.getAnnotation()) != null) {
+			name = getChromNameFromDescription (s);
+		}
+		return name;
+	}
+
+	public String getChromNameFromDescription (Sequence seq) {
+		String desc = ((String) AnnotationContainsFilter.getValueIgnoreCase (
+				"definition", seq.getAnnotation ())).toLowerCase ();
+		int ind = desc.indexOf ("contig");
+		if (ind > -1) {
+			ind = desc.lastIndexOf (" ", ind);
+			if (ind < 0)
+				ind = 0;
+			int ind2 = desc.indexOf (" ", ind + 1);
+			if (ind2 < 0)
+				ind2 = desc.length ();
+			desc = desc.substring (ind, ind2);
+		}
+		else if (desc.indexOf("chromosome") > 0)
+			desc = "chromosome";
+		else if (desc.indexOf("plasmid") > 0)
+			desc = "plasmid";
+		/*else {
+			StringTokenizer toke = new StringTokenizer (getSequenceName (seq));
+			while (toke.hasMoreTokens ()) {
+				String [] pieces = desc.split (toke.nextToken ().toLowerCase ());
+				desc = "";
+				for (int i = 0; i < pieces.length; i++)
+					desc += pieces[i].trim () + " ";
+				desc = desc.trim ();
+			}
+		}*/
+		return desc;
+	}
 
     public String getSequenceName(Sequence s)
     {
