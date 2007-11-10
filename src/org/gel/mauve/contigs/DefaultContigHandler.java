@@ -7,7 +7,7 @@ import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.Chromosome;
 import org.gel.mauve.Genome;
 import org.gel.mauve.MauveConstants;
-import org.gel.mauve.analysis.Segment;
+//import org.gel.mauve.analysis.Segment;
 
 public class DefaultContigHandler implements ContigHandler, MauveConstants {
 	
@@ -45,7 +45,7 @@ public class DefaultContigHandler implements ContigHandler, MauveConstants {
 		return null;
 	}
 
-	public void fixSegmentByContigs(int sequence, Segment segment) {
+	/*public void fixSegmentByContigs(int sequence, Segment segment) {
 		// TODO Auto-generated method stub
 
 	}
@@ -55,6 +55,6 @@ public class DefaultContigHandler implements ContigHandler, MauveConstants {
 			return "";
 		Chromosome chrom = model.getGenomeBySourceIndex (sequence).getChromosomeAt (loci);
 		return chrom == null ? DEFAULT_CONTIG : chrom.getName ();
-	}
+	}*/
 
 }

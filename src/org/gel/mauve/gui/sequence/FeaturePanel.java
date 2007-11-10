@@ -175,11 +175,11 @@ public class FeaturePanel extends AbstractSequencePanel
 		multi.addRenderer (over);
 	}
 	
-	public void resizeForMoreFeatures () {
+	/*public void resizeForMoreFeatures () {
 		Dimension my_size = getSize ();
 		my_size.height += MauveConstants.FEATURE_HEIGHT;
 		setNewSize (my_size);
-	}
+	}*/
 	
 	private void setNewSize (Dimension my_size) {
 		setSize (my_size);
