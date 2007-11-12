@@ -5,16 +5,16 @@
 	</description>
 	
 	<!-- set the release version -->
-	<property name="release.version" value="2.0.0"/>
+	<property name="release.version" value="2.1.0a1"/>
 
 	<!-- deployment locations for production ASAP integration -->
-<!--
 	<property name="deploy.asapdir" value="/srv/asap/htdocs/mauve" />
 	<property name="asap.codebase" value="http://asap.ahabs.wisc.edu/asap/mauve/" />
--->
 	<!-- deployment locations for devel ASAP integration -->
+	<!--
 	<property name="deploy.asapdir" value="/srv/asap-devel/htdocs/mauve" />
 	<property name="asap.codebase" value="http://asap.ahabs.wisc.edu/asap-devel/mauve/" />
+	-->
 	<!-- deployment locations for standalone releases -->
 <!--
 	<property name="deploy.dir" value="\\192.168.26.120\darling\productionmauve\" />
@@ -208,7 +208,10 @@
 				<include name="Mauve" />
 				<include name="mauveAligner" />
 				<include name="progressiveMauve" />
-				<include name="muscle_aed" />
+			</tarfileset>
+			<tarfileset dir="linux-x64" prefix="/mauve_${release.version}/x64" mode="755">
+				<include name="mauveAligner" />
+				<include name="progressiveMauve" />
 			</tarfileset>
 			<tarfileset dir="${ext}" prefix="/mauve_${release.version}/ext" includes="*.jar" />
 		</tar>
@@ -246,7 +249,6 @@
 			<execfileset dir="${basedir}/osx">
 				<include name="mauveAligner" />
 				<include name="progressiveMauve" />
-				<include name="muscle_aed" />
 			</execfileset>
 		</jarbundler>
 		
