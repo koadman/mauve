@@ -212,7 +212,7 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         refineCheckBox.setToolTipText("Iteratively refines the alignment, significantly improving accuracy");
 
         sumOfPairsCheckBox.setVisible(true);
-        sumOfPairsCheckBox.setSize(new java.awt.Dimension(180, 20));
+        sumOfPairsCheckBox.setSize(new java.awt.Dimension(200, 20));
         sumOfPairsCheckBox.setText("Sum-of-pairs LCB scoring");
         sumOfPairsCheckBox.setSelected(true);
         sumOfPairsCheckBox.setLocation(new java.awt.Point(10, 135));
@@ -281,6 +281,7 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         conservationWeightScaleText.setText("0.500");
         conservationWeightScaleText.setLocation(new java.awt.Point(200, 230));
 
+        parameterPanel.add(seedFamiliesCheckBox);
         parameterPanel.add(refineCheckBox);
         parameterPanel.add(sumOfPairsCheckBox);
 // this stuff isn't working yet:
