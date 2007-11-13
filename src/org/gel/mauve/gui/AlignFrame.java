@@ -93,7 +93,7 @@ public class AlignFrame extends java.awt.Frame
         parameterPanel.setVisible(true);
         parameterPanel.setLayout(null);
         defaultSeedCheckBox.setVisible(true);
-        defaultSeedCheckBox.setSize(new java.awt.Dimension(140, 20));
+        defaultSeedCheckBox.setSize(new java.awt.Dimension(160, 20));
         defaultSeedCheckBox.setText("Default seed weight");
         defaultSeedCheckBox.setSelected(true);
         defaultSeedCheckBox.setLocation(new java.awt.Point(10, 10));
@@ -129,7 +129,7 @@ public class AlignFrame extends java.awt.Frame
         recursiveCheckBox.setLocation(new java.awt.Point(10, 145));
         recursiveCheckBox.setToolTipText("This enables recursive anchor search and gapped alignment using MUSCLE");
         collinearCheckBox.setVisible(true);
-        collinearCheckBox.setSize(new java.awt.Dimension(190, 20));
+        collinearCheckBox.setSize(new java.awt.Dimension(195, 20));
         collinearCheckBox.setText("Assume collinear genomes");
         collinearCheckBox.setSelected(false);
         collinearCheckBox.setLocation(new java.awt.Point(10, 110));
@@ -151,9 +151,9 @@ public class AlignFrame extends java.awt.Frame
         alignButton.setLocation(new java.awt.Point(250, 320));
         cancelButton.setVisible(true);
         cancelButton.setEnabled(false);
-        cancelButton.setSize(new java.awt.Dimension(135, 30));
+        cancelButton.setSize(new java.awt.Dimension(145, 30));
         cancelButton.setText("Cancel alignment");
-        cancelButton.setLocation(new java.awt.Point(110, 320));
+        cancelButton.setLocation(new java.awt.Point(100, 320));
         sequencesPanel.setSize(new java.awt.Dimension(350, 210));
         sequencesPanel.setLocation(new java.awt.Point(0, 0));
         sequencesPanel.setVisible(true);
