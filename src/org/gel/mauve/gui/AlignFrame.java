@@ -328,6 +328,7 @@ public class AlignFrame extends java.awt.Frame
     	while(this.getOutput().length()==0 || outfile.isDirectory())
     	{
         	fc.setDialogTitle("Save alignment file");
+        	fc.setSelectedFile(new File( "" ));
             int returnVal = fc.showSaveDialog(this);
 
             if (returnVal == JFileChooser.APPROVE_OPTION)
