@@ -132,8 +132,9 @@ public class MauveAlignFrame extends AlignFrame {
         if (os_type.startsWith("Windows"))
         {
         	if(os_arch.indexOf("64") >= 0)
-        		cmd_vec.addElement("win64/");
-            cmd_vec.addElement("mauveAligner");
+        		cmd_vec.addElement("win64/mauveAligner");
+        	else
+        		cmd_vec.addElement("mauveAligner");
         }
         else if (os_type.startsWith("Mac"))
         {
@@ -143,9 +144,12 @@ public class MauveAlignFrame extends AlignFrame {
         }
         else
         {
-        	File f = new File("./mauveAligner");
+        	String pname = "./mauveAligner";
+        	if(os_arch.indexOf("64") >= 0)
+        		pname = "./linux-x64/mauveAligner";
+        	File f = new File(pname);
         	if( f.exists())
-        		cmd_vec.addElement("./mauveAligner");
+        		cmd_vec.addElement(pname);
         	else
         		cmd_vec.addElement("mauveAligner");
         }
