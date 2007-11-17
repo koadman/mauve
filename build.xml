@@ -80,7 +80,7 @@
 		<!-- Build all java source files -->
 		<javac
 			classpath="
-				${ext}/biojava-1.4.jar;
+				${ext}/biojava-1.5.jar;
 				${ext}/bytecode.jar;
 				${ext}/commons-cli.jar;
 				${ext}/commons-collections-2.1.jar;
