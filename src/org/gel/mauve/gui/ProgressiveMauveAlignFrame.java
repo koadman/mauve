@@ -350,27 +350,9 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         read_filename = null;
         String cur_cmd;
         boolean detect_lcbs = true;
-        String os_type = System.getProperty("os.name");
 
-        MyConsole.out().println("OS name is: " + os_type);
-        if (os_type.startsWith("Windows"))
-        {
-            cmd_vec.addElement("progressiveMauve");
-        }
-        else if (os_type.startsWith("Mac"))
-        {
-            String mauve_path = System.getProperty("user.dir");
-            mauve_path += "/Mauve.app/Contents/MacOS/progressiveMauve";
-            cmd_vec.addElement(mauve_path);
-        }
-        else
-        {
-        	File f = new File("./progressiveMauve");
-        	if( f.exists())
-        		cmd_vec.addElement("./progressiveMauve");
-        	else
-        		cmd_vec.addElement("progressiveMauve");
-        }
+        String pname = getBinaryPath("progressiveMauve");
+        cmd_vec.addElement(pname);
 
         if (getSeedFamilies())
         {

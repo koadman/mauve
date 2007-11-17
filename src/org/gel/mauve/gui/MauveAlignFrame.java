@@ -119,40 +119,16 @@ public class MauveAlignFrame extends AlignFrame {
         });
     }
     
+    
     protected String[] makeAlignerCommand()
     {
         Vector cmd_vec = new Vector();
         read_filename = null;
         String cur_cmd;
         boolean detect_lcbs = true;
-        String os_type = System.getProperty("os.name");
-        String os_arch = System.getProperty("os.arch");
 
-        MyConsole.out().println("OS name is: " + os_type + " arch: " + os_arch);
-        if (os_type.startsWith("Windows"))
-        {
-        	if(os_arch.indexOf("64") >= 0)
-        		cmd_vec.addElement("win64/mauveAligner");
-        	else
-        		cmd_vec.addElement("mauveAligner");
-        }
-        else if (os_type.startsWith("Mac"))
-        {
-            String mauve_path = System.getProperty("user.dir");
-            mauve_path += "/Mauve.app/Contents/MacOS/mauveAligner";
-            cmd_vec.addElement(mauve_path);
-        }
-        else
-        {
-        	String pname = "./mauveAligner";
-        	if(os_arch.indexOf("64") >= 0)
-        		pname = "./linux-x64/mauveAligner";
-        	File f = new File(pname);
-        	if( f.exists())
-        		cmd_vec.addElement(pname);
-        	else
-        		cmd_vec.addElement("mauveAligner");
-        }
+        String pname = getBinaryPath("mauveAligner");
+        cmd_vec.addElement(pname);
 
         if (getSeedWeight() > 0)
         {

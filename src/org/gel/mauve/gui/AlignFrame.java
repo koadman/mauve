@@ -316,6 +316,42 @@ public class AlignFrame extends java.awt.Frame
         return File.createTempFile("mauve", ".mln");
     }
 
+    /*
+     * Build a platform-dependent path to the aligner binary
+     * @param name	The name of the aligner binary
+     */
+    protected String getBinaryPath(String name)
+    {
+        String os_type = System.getProperty("os.name");
+        String os_arch = System.getProperty("os.arch");
+
+        MyConsole.out().println("OS name is: " + os_type + " arch: " + os_arch);
+        if (os_type.startsWith("Windows"))
+        {
+        	if(os_arch.indexOf("64") >= 0)
+        		return "win64" + File.pathSeparator + name;
+        	else
+        		return name;
+        }
+        else if (os_type.startsWith("Mac"))
+        {
+            String mauve_path = System.getProperty("user.dir");
+            mauve_path += "/Mauve.app/Contents/MacOS/" + name;
+            return mauve_path;
+        }
+        else
+        {
+        	String pname = "./" + name;
+        	if(os_arch.indexOf("64") >= 0)
+        		pname = "./linux-x64/" + name;
+        	File f = new File(pname);
+        	if( f.exists())
+        		return pname;
+        	else
+        		return name;
+        }
+    }
+
     /**
      * Read the user's genome alignment parameters and start the alignment using
      * the command line mauveAligner tool. This function translates information
