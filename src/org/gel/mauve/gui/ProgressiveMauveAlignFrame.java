@@ -202,7 +202,7 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         seedFamiliesCheckBox.setText("Use seed families");
         seedFamiliesCheckBox.setSelected(true);
         seedFamiliesCheckBox.setLocation(new java.awt.Point(10, 30));
-        seedFamiliesCheckBox.setToolTipText("Uses multiple spaced seed patterns to identify potential homology.<br>Can substantially improve sensitivity and accuracy on divergent genomes.");
+        seedFamiliesCheckBox.setToolTipText("<html>Uses multiple spaced seed patterns to identify potential homology.<br>Can substantially improve sensitivity and accuracy on divergent genomes.</html>");
 
         refineCheckBox.setVisible(true);
         refineCheckBox.setSize(new java.awt.Dimension(160, 20));
