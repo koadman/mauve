@@ -329,7 +329,7 @@ public class AlignFrame extends java.awt.Frame
         if (os_type.startsWith("Windows"))
         {
         	if(os_arch.indexOf("64") >= 0)
-        		return "win64" + File.pathSeparator + name;
+        		return "win64\\" + name;
         	else
         		return name;
         }
