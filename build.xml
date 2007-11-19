@@ -209,7 +209,7 @@
 				<include name="mauveAligner" />
 				<include name="progressiveMauve" />
 			</tarfileset>
-			<tarfileset dir="linux-x64" prefix="/mauve_${release.version}/x64" mode="755">
+			<tarfileset dir="linux-x64" prefix="/mauve_${release.version}/linux-x64" mode="755">
 				<include name="mauveAligner" />
 				<include name="progressiveMauve" />
 			</tarfileset>
@@ -318,7 +318,7 @@
                  <get src="http://gel.ahabs.wisc.edu/mauve/downloads/UserGuide_latest.pdf" dest="mauve_user_guide.pdf" usetimestamp="true"/>
 	</target>
 
-	<target name="nsicompile" depends="jar,getChangeLog" description="make windows installer" >
+	<target name="nsicompile" depends="jar,getChangeLog,getDoco" description="make windows installer" >
 
 		<!-- create output directory -->
 		<mkdir dir="${dist}" />
