@@ -616,7 +616,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             jMenuFileClose.setEnabled(true);
             jMenuGoTo.setEnabled(true);
             if (SeqFeatureData.userSelectableGenomes (model, false, true).size () > 0) {
-            	navigator = new SequenceNavigator (this);
+            	navigator = new SequenceNavigator(this, rrpanel, model);
             	jMenuGoToFeatName.setEnabled (true);
             	jMenuGoToSearchFeatures.setEnabled (true);
             }
