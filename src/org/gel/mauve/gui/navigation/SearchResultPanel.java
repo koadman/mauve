@@ -142,7 +142,6 @@ public class SearchResultPanel extends JPanel implements TreeModel,
 	 */
 	public SearchResultPanel (Vector genomes, SequenceNavigator nav) {
 		super (new FlowLayout (FlowLayout.LEFT));
-		System.out.println (getLayout ());
 		navigator = nav;
 		genome_data = new Hashtable ();
 		genome_indexes = new Object [genomes.size ()];

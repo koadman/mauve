@@ -5,7 +5,7 @@
 	</description>
 	
 	<!-- set the release version -->
-	<property name="release.version" value="2.1.0"/>
+	<property name="release.version" value="2.1.1"/>
 
 	<!-- deployment locations for production ASAP integration -->
 	<property name="deploy.asapdir" value="/srv/asap/htdocs/mauve" />
