@@ -155,8 +155,14 @@ public abstract class GenbankEmblFormat extends BaseFormat {
 
 	public String getChromNameFromDescription (Sequence seq) {
 		String desc = ((String) AnnotationContainsFilter.getValueIgnoreCase (
-				"definition", seq.getAnnotation ())).toLowerCase ();
-		int ind = desc.indexOf ("contig");
+				"definition", seq.getAnnotation ()));
+        if(desc == null) {
+            return null;
+        } else {
+            desc = desc.toLowerCase();
+        }
+
+        int ind = desc.indexOf ("contig");
 		if (ind > -1) {
 			ind = desc.lastIndexOf (" ", ind);
 			if (ind < 0)
