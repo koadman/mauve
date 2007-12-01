@@ -162,18 +162,11 @@ public class MauveAlignFrame extends AlignFrame {
 			cmd_vec.addElement (cur_cmd);
 		}
 
-		// get a good output file name
-		String output_file = getOutput ();
-		cur_cmd = "--output=";
-		try {
-			output_file = makeOutputFile (output_file);
-		} catch (IOException e) {
-			MyConsole.err ().println ("Couldn't create output file.");
-			e.printStackTrace (MyConsole.err ());
-			return null;
-		}
-		cur_cmd += output_file;
-		cmd_vec.addElement (cur_cmd);
+        // get a good output file name
+        String output_file = getOutput();
+        cur_cmd = "--output=";
+        cur_cmd += output_file;
+        cmd_vec.addElement(cur_cmd);
 
 		read_filename = output_file;
 

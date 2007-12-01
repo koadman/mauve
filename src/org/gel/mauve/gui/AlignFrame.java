@@ -291,20 +291,6 @@ public class AlignFrame extends java.awt.Frame
             }
         });
 
-        // show the user where the output file would go by default
-        File ofile;
-        try
-        {
-            ofile = getDefaultFile();
-        }
-        catch (IOException e)
-        {
-            MyConsole.err().println("Couldn't create temporary file.");
-            e.printStackTrace(MyConsole.err());
-            return;
-        }
-        setOutput(ofile.getPath());
-        ofile.delete(); 
         // delete the file in case the user chooses a different file name
         alignButton.addActionListener(new java.awt.event.ActionListener()
         {
@@ -335,6 +321,20 @@ public class AlignFrame extends java.awt.Frame
      */
     public void alignButtonActionPerformed(java.awt.event.ActionEvent evt)
     {
+    	File outfile = new File(this.getOutput());
+    	while(this.getOutput().length()==0 || outfile.isDirectory())
+    	{
+        	fc.setDialogTitle("Save alignment file");
+            int returnVal = fc.showSaveDialog(this);
+
+            if (returnVal == JFileChooser.APPROVE_OPTION)
+            {
+            	outfile = fc.getSelectedFile();
+                outputFileText.setText(outfile.getPath());
+            }else
+            	return;
+    	}
+    	
         alignButton.setEnabled(false);
         
         String[] mauve_cmd = makeAlignerCommand();
@@ -399,31 +399,6 @@ public class AlignFrame extends java.awt.Frame
         MyConsole.out().println("Executing: ");
         MyConsole.out().println(mauve_str);
     }
-    
-    /**
-     * @param output_file
-     * @return
-     * @throws IOException
-     */
-    protected String makeOutputFile(String output_file) throws IOException
-    {
-        if (output_file.length() > 0)
-        {
-            File ofile = new File(output_file);
-            if (ofile.isDirectory())
-            {
-                ofile = File.createTempFile("mauve", ".mln", ofile);
-                output_file = ofile.getPath();
-            }
-        }
-        else
-        {
-            File ofile = File.createTempFile("mauve", ".mln");
-            output_file = ofile.getPath();
-        }
-        return output_file;
-    }
-    
     
     private boolean mShown = false;
 
@@ -520,6 +495,7 @@ public class AlignFrame extends java.awt.Frame
 
     public void addButtonActionPerformed(java.awt.event.ActionEvent e)
     {
+    	fc.setDialogTitle("Select a genome sequence");
         int returnVal = fc.showOpenDialog(this);
 
         if (returnVal == JFileChooser.APPROVE_OPTION)
@@ -544,7 +520,8 @@ public class AlignFrame extends java.awt.Frame
 
     public void outputButtonActionPerformed(java.awt.event.ActionEvent e)
     {
-        int returnVal = fc.showOpenDialog(this);
+    	fc.setDialogTitle("Save alignment file");
+        int returnVal = fc.showSaveDialog(this);
 
         if (returnVal == JFileChooser.APPROVE_OPTION)
         {

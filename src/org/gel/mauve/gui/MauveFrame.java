@@ -25,6 +25,7 @@ import java.util.prefs.BackingStoreException;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -39,10 +40,13 @@ import javax.swing.WindowConstants;
 
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.BrowserLauncher;
+import org.gel.mauve.LcbViewerModel;
 import org.gel.mauve.ModelBuilder;
 import org.gel.mauve.ModelProgressListener;
 import org.gel.mauve.MyConsole;
 import org.gel.mauve.SeqFeatureData;
+import org.gel.mauve.XmfaViewerModel;
+import org.gel.mauve.color.ColorMenu;
 import org.gel.mauve.gui.dnd.FileDrop;
 import org.gel.mauve.gui.sequence.FeatureFilterer;
 import org.gel.mauve.gui.sequence.FlatFileFeatureImporter;
@@ -76,6 +80,12 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     JMenuItem jMenuHelpDocumentation = new JMenuItem();
     JMenuItem jMenuHelpClearCache = new JMenuItem();
     
+    
+    JMenu jMenuView = new JMenu ();
+
+    ColorMenu jMenuViewColorScheme = new ColorMenu ();
+    StyleMenu jMenuViewStyle = new StyleMenu ();
+    
     JMenu jMenuGoTo = new JMenu ();
     JMenuItem jMenuGoToSeqPos = new JMenuItem ();
     JMenuItem jMenuGoToFeatName = new JMenuItem ();
@@ -101,19 +111,12 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     static ImageIcon zoomin_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/ZoomIn16.gif"));
     static ImageIcon zoomout_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/ZoomOut16.gif"));
     static ImageIcon zoom_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/Zoom16.gif"));
-    static ImageIcon hand_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/Hand16.gif"));
-    static ImageIcon dark_hand_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/DarkHand16.gif"));
     public static ImageIcon mauve_icon = new ImageIcon(MauveFrame.class.getResource("/images/mauve_icon.gif"));
     static ImageIcon find_feature_icon = new ImageIcon(MauveFrame.class.getResource("/images/searchBinoculars16.png"));
-    static ImageIcon fist_icon = new ImageIcon(MauveFrame.class.getResource("/images/fist_icon.gif"));
-    static ImageIcon hand_icon = new ImageIcon(MauveFrame.class.getResource("/images/hand_icon.gif"));
     static ImageIcon dcj_icon = new ImageIcon(MauveFrame.class.getResource("/images/Dcj16.gif"));
     static ImageIcon grimm_icon = new ImageIcon(MauveFrame.class.getResource("/images/Grimm16.gif"));
-    static Cursor hand_cursor = Toolkit.getDefaultToolkit().createCustomCursor(hand_icon.getImage(), new Point(8, 8), "hand");
     static Cursor zoom_in_cursor = Toolkit.getDefaultToolkit().createCustomCursor(new ImageIcon(MauveFrame.class.getResource("/images/ZoomIn24.gif")).getImage(), new Point(8, 8), "zoomin");
     static Cursor zoom_out_cursor = Toolkit.getDefaultToolkit().createCustomCursor(new ImageIcon(MauveFrame.class.getResource("/images/ZoomOut24.gif")).getImage(), new Point(8, 8), "zoomout");
-
-    public static Cursor fist_cursor = Toolkit.getDefaultToolkit().createCustomCursor(fist_icon.getImage(), new Point(8, 8), "fist");
 
     public MauveFrame(Mauve mauve)
     {
@@ -261,7 +264,25 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuHelpClearCache.setText("Clear alignment cache");
         jMenuHelpClearCache.setMnemonic('r');
         
-        jMenuGoTo.setToolTipText("Go to specific location in genome");
+        jMenuView.setToolTipText("Viewer controls");
+        jMenuView.setVisible(true);
+        jMenuView.setEnabled(false);
+        jMenuView.setText("View");
+        jMenuView.setMnemonic('V');
+
+//        jMenuViewColorScheme.setToolTipText("Color schemes for the similarity plot");
+        jMenuViewColorScheme.setVisible(true);
+        jMenuViewColorScheme.setEnabled(false);
+        jMenuViewColorScheme.setText("Color Scheme");
+        jMenuViewColorScheme.setMnemonic('C');
+
+        jMenuViewStyle.setToolTipText("Drawing styles for the genome comparison");
+        jMenuViewStyle.setVisible(true);
+        jMenuViewStyle.setEnabled(false);
+        jMenuViewStyle.setText("Style");
+        jMenuViewStyle.setMnemonic('S');
+
+//       jMenuGoTo.setToolTipText("Go to specific location in genome");
         jMenuGoTo.setVisible(true);
         jMenuGoTo.setEnabled(false);
         jMenuGoTo.setText("Go To");
@@ -299,7 +320,12 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFile.add(jMenuFileSeparator1);
         jMenuFile.add(jMenuFileQuit);
 
-        jMenuBar1.add (jMenuGoTo);
+        jMenuBar1.add (jMenuView);
+        jMenuView.add(jMenuViewColorScheme);
+        jMenuView.add(jMenuViewStyle);
+        jMenuView.add(jMenuGoTo);
+
+//        jMenuBar1.add (jMenuGoTo);
         jMenuGoTo.add (jMenuGoToSeqPos);
         jMenuGoTo.add (jMenuGoToFeatName);
         jMenuGoTo.add (jMenuGoToSearchFeatures);
@@ -311,7 +337,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuHelp.add(jMenuHelpConsole);
 
         jMenuFile.setMinimumSize(jMenuFile.getSize());
-        jMenuGoTo.setMinimumSize(jMenuGoTo.getSize());
+        jMenuView.setMinimumSize(jMenuView.getSize());
         jMenuHelp.setMinimumSize(jMenuHelp.getSize());
         jMenuBar1.setVisible(true);
 
@@ -603,6 +629,11 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             	jMenuGoToFeatName.setEnabled (false);
             	jMenuGoToSearchFeatures.setEnabled (false);
             }
+
+            jMenuView.setEnabled(true);
+            jMenuViewColorScheme.setEnabled(true);
+            jMenuViewColorScheme.build(model);
+            jMenuViewStyle.setTarget(model, rrpanel);
             //importer = new FlatFileFeatureImporter (this);
             toFront();
         }

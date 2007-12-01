@@ -4,7 +4,7 @@
     </description>
 	
 	<!-- set the release version -->
-	<property name="release.version" value="2.0.0"/>
+	<property name="release.version" value="2.1.1"/>
 
 	<!-- set global properties for this build -->
 	<property name="support" location="build_support"/>
@@ -27,7 +27,7 @@
 			<publish projectName="Mauve"
 				branchName="Default"
 				version="${release.version}"
-				focus="majorEnhancements"
+				focus="majorBugfixes"
 				hidden="false">
 	
 			<!-- focus can be one of 	
@@ -45,7 +45,7 @@
 				<!-- Changes are an english prose summary of changes, 
 				     limited to 300 characters -->
 				<changes>
-Mauve 2.0 includes a new accurate and sensitive genome alignment algorithm called progressiveMauve.  Hundreds of genomes can now be aligned, and rearranged segments conserved in subsets of the genomes can be identified.  A new annotation search can find features by things like gene name and others.
+					The new release fixes a missing library problem on Mac OS X.  Other fixes include reduced memory usage in some cases, fix for the failure of the sequence navigator to highlight annotation search results, and a fixed divide-by-zero that rarely arose in progressiveMauve.
 				</changes>
 		 
 				<urlBlock

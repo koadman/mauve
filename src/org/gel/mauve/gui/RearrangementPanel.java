@@ -34,7 +34,9 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JMenu;
 import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
@@ -104,9 +106,6 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     // Panel showing the sequences, rulers, etc.
     JPanel sequencePanel;
 
-    // Color scheme selector for matches
-    JComboBox color_selector;
-
     // A toolbar for various alignment manipulation tools, given by the parent
     // frame
     JToolBar toolbar;
@@ -141,7 +140,6 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     private boolean oldDrawMatches;
     private boolean oldFillBoxes;
     private JToggleButton zoom_button;
-    private JToggleButton hand_button;
     
     // A weird hack to change cursor for zooming.
     private CtrlKeyDetector ctrlDetector = new CtrlKeyDetector();
@@ -272,30 +270,23 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
      */
     private void initKeyBindings()
     {
-        addKeyMapping("ctrl UP", "ZoomIn");
-        addKeyMapping("ctrl DOWN", "ZoomOut");
-        addKeyMapping("ctrl LEFT", "ScrollLeft");
-        addKeyMapping("ctrl RIGHT", "ScrollRight");
-        addKeyMapping("ctrl D", "DCJ");
-        addKeyMapping("shift ctrl LEFT", "ShiftLeft");
-        addKeyMapping("shift ctrl RIGHT", "ShiftRight");
-        addKeyMapping("typed r", "ToggleStrikethrough");
-        addKeyMapping("typed L", "ToggleLCBlines");
-        addKeyMapping("typed h", "ToggleHandMode");
-        addKeyMapping("typed q", "ToggleLcbBounds");
-        addKeyMapping("typed w", "ToggleFillBoxes");
-        addKeyMapping("typed e", "ToggleDrawMatches");
+        addKeyMapping("ctrl UP", "ZoomIn", this);
+        addKeyMapping("ctrl DOWN", "ZoomOut", this);
+        addKeyMapping("ctrl LEFT", "ScrollLeft", this);
+        addKeyMapping("ctrl RIGHT", "ScrollRight", this);
+        addKeyMapping("ctrl D", "DCJ", this);
+        addKeyMapping("shift ctrl LEFT", "ShiftLeft", this);
+        addKeyMapping("shift ctrl RIGHT", "ShiftRight", this);
     }
     
-    private void addKeyMapping(String stroke, String actionName)
+    public void addKeyMapping(String stroke, String actionName, ActionListener listener)
     {
         getInputMap(WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(stroke), actionName);
         getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(stroke), actionName);
         getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(stroke), actionName);
-        getActionMap().put(actionName, new GenericAction(this, actionName));
+        getActionMap().put(actionName, new GenericAction(listener, actionName));
     }
-    
-    private void removeKeyMapping(String stroke)
+    public void removeKeyMapping(String stroke)
     {
         getInputMap(WHEN_IN_FOCUSED_WINDOW).remove(KeyStroke.getKeyStroke(stroke));
     }
@@ -342,16 +333,6 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         home_button.setActionCommand("Home");
         home_button.addActionListener(this);
         toolbar.add(home_button);
-
-        // the hand button toggles between the "reorder sequences" mode
-        // and standard browsing mode
-        hand_button = new JToggleButton(MauveFrame.hand_button_icon);
-        hand_button.setToolTipText("Toggle sequence reordering mode.");
-        hand_button.setActionCommand("ToggleHandMode");
-        hand_button.setPressedIcon(MauveFrame.dark_hand_button_icon);
-        hand_button.setSelectedIcon(MauveFrame.dark_hand_button_icon);
-        hand_button.addActionListener(this);
-        toolbar.add(hand_button);
 
         // When clicked, the left button shifts the display 20% to the left
         JButton left_button = new JButton(MauveFrame.left_button_icon);
@@ -417,8 +398,6 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
 	        toolbar.add(grimm_button);
         }
         
-        initColorSelector();
-
         // Fill out the toolbar
         Dimension minSize = new Dimension(5, 3);
         Dimension prefSize = new Dimension(5, 3);
@@ -426,48 +405,6 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         toolbar.add(new Box.Filler(minSize, prefSize, maxSize));
     }
 
-    /**
-     * The color selector allows the choice of color schemes, in certain modes.
-     */
-    private void initColorSelector()
-    {
-    	if(toolbar == null)
-    		return;
-        if (model instanceof XmfaViewerModel)
-        {
-        	boolean have_bb = haveBackboneData();
-        	if(have_bb)
-        		color_selector = new JComboBox(new ColorScheme[] { new BackboneLcbColor(), new BackboneMultiplicityColor() });
-        	else
-        		color_selector = new JComboBox(new ColorScheme[] { new LCBColorScheme() });
-            color_selector.setSelectedIndex(0);
-        	if(!have_bb)
-        		color_selector.setEnabled(false);
-        }
-        else if (model instanceof LcbViewerModel)
-        {
-
-            if (model.getSequenceCount() < 62)
-            {
-                color_selector = new JComboBox(new ColorScheme[] { new LCBColorScheme(), new OffsetColorScheme(), new NormalizedOffsetColorScheme(), new MultiplicityColorScheme(), new MultiplicityTypeColorScheme(), new NormalizedMultiplicityTypeColorScheme() });
-            }
-            else
-            {
-                color_selector = new JComboBox(new ColorScheme[] { new LCBColorScheme(), new OffsetColorScheme(), new NormalizedOffsetColorScheme(), new MultiplicityColorScheme() });
-            }
-
-            color_selector.setSelectedIndex(0);
-        }
-        else
-        {
-            color_selector = new JComboBox(new ColorScheme[] { new OffsetColorScheme(), new NormalizedOffsetColorScheme(), new MultiplicityColorScheme(), new MultiplicityTypeColorScheme(), new NormalizedMultiplicityTypeColorScheme() });
-            color_selector.setSelectedIndex(0);
-
-        }
-
-        color_selector.addActionListener(this);
-        toolbar.add(color_selector);
-    }
 
     /**
      * Initialize data structures to support LCB display and manipulation.
@@ -617,11 +554,7 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
 
     public void actionPerformed(ActionEvent e)
     {
-        if (e.getSource() == color_selector)
-        {
-            model.setColorScheme((ColorScheme) color_selector.getSelectedItem());
-        }
-        else if (e.getActionCommand().equals("Home"))
+    	if (e.getActionCommand().equals("Home"))
         {
             model.zoomAndMove(0, Integer.MIN_VALUE);
             
@@ -682,53 +615,6 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
             else
             {
                 model.setMode(ViewerMode.ZOOM);
-            }
-        }
-        else if (e.getActionCommand().equals("ToggleHandMode"))
-        {
-            if (model.getMode() == ViewerMode.HAND)
-            {
-                model.setMode(ViewerMode.NORMAL);
-            }
-            else
-            {
-                model.setMode(ViewerMode.HAND);
-            }
-        }
-        else if (e.getActionCommand().equals("ToggleLCBlines"))
-        {
-        	lcbLinePanel.setHidden(!lcbLinePanel.getHidden());
-        }
-        else if (e.getActionCommand().equals("ToggleStrikethrough"))
-        {
-            lcbLinePanel.draw_strikethrough = !lcbLinePanel.draw_strikethrough;
-            lcbLinePanel.repaint();
-        }
-        else if (e.getActionCommand().equals("ToggleLcbBounds"))
-        {
-            if (model instanceof LcbViewerModel)
-            {
-                LcbViewerModel lv = (LcbViewerModel) model;
-                lv.setDrawLcbBounds(!lv.getDrawLcbBounds());
-            }
-        }
-        else if (e.getActionCommand().equals("ToggleFillBoxes"))
-        {
-            if (model != null)
-            {
-                if (model instanceof LcbViewerModel)
-                {
-                    LcbViewerModel lv = (LcbViewerModel) model;
-                    lv.setFillLcbBoxes(!lv.getFillLcbBoxes());
-                }
-            }
-        }
-        else if (e.getActionCommand().equals("ToggleDrawMatches"))
-        {
-            if (model != null)
-            {
-                model.setDrawMatches(!model.getDrawMatches());
-                
             }
         }
         else if (e.getActionCommand().equals("ZoomInMode"))
@@ -921,22 +807,12 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     {
         if (model.getMode() == ViewerMode.NORMAL)
         {
-            hand_button.setSelected(false);
             zoom_button.setSelected(false);
             setCursor(null);
             KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(ctrlDetector);
         }
-        else if (model.getMode() == ViewerMode.HAND)
-        {
-            zoom_button.setSelected(false);
-            setCursor(MauveFrame.hand_cursor);
-            
-            // See javadoc for CtrlKeyDetector for an explanation of the next line.
-            KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(ctrlDetector);
-        }
         else if (model.getMode() == ViewerMode.ZOOM)
         {
-            hand_button.setSelected(false);
             setCursor(MauveFrame.zoom_in_cursor);
 
             // See javadoc for CtrlKeyDetector for an explanation of the next line.
