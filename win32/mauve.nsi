@@ -151,6 +151,13 @@ AdminInst2:
   SetShellVarContext all   
 UserInst2:
 
+;
+; if we're running 64-bit then use the 64-bit registry
+;
+${If} ${RunningX64}
+SetRegView 64
+${EndIf}
+
 ; Look for Java Runtime Environment
 push $0
 push $1
@@ -183,6 +190,7 @@ CreateDirectory "$SMPROGRAMS\Mauve $%release_version%"
 Delete "$SMPROGRAMS\Mauve $%release_version%\Mauve.lnk"
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve.lnk" "$1\bin\javaw" "-jar -Xmx1000m Mauve.jar" "$INSTDIR\mauve.ico"
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve ChangeLog.lnk" "$INSTDIR\ChangeLog.html"
+CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve User Guide.lnk" "$INSTDIR\mauve_user_guide.pdf"
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve License.lnk" "notepad.exe" "COPYING" "$INSTDIR\COPYING" 0
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve Online Documentation.lnk" "$INSTDIR\Mauve Online Documentation.url" "" "$INSTDIR\Mauve Online Documentation.url" 0
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Uninstall Mauve.lnk" "$INSTDIR\Uninstall.exe"
@@ -192,8 +200,13 @@ DetailPrint "Creating Mauve shortcut for java version $0 in directory $1"
 Goto JavaDone
 
 JavaMessage:
+
+${If} ${RunningX64}
+  MessageBox MB_OK "Could not detect a suitable 64-bit Java Runtime Environment.  Mauve requires Java version 1.4 or later.  Please visit http://java.sun.com/javase/downloads/?intcmp=1281 and download the Windows X64 installer for the Java Runtime Environment"
+${Else}
   MessageBox MB_YESNOCANCEL "Could not detect a suitable Java Runtime Environment.  Mauve requires Java version 1.4 or later.  Would you like to install it now?  Mauve will not work correctly without Java 1.4." IDYES InstallJava IDNO JavaDone
-  Quit
+${EndIf}
+Quit
 
 InstallJava:
   SetOutPath $TEMP
@@ -233,6 +246,7 @@ ${EndIf}
 
   ; Top level directory files
   File "ChangeLog.html"
+  File "mauve_user_guide.pdf"
   File "COPYING"
   File "README"
   File "win32\mauveAligner.exe"
@@ -309,10 +323,11 @@ Section "Uninstall"
 	Delete /REBOOTOK "$INSTDIR\README"
 	Delete /REBOOTOK "$INSTDIR\mauveAligner.exe"
 	Delete /REBOOTOK "$INSTDIR\progressiveMauve.exe"
-	Delete /REBOOTOK "$INSTDIR\muscle_aed.exe"
+	Delete /REBOOTOK "$INSTDIR\win64\mauveAligner.exe"
+	Delete /REBOOTOK "$INSTDIR\win64\progressiveMauve.exe"
 	Delete /REBOOTOK "$INSTDIR\Mauve.jar"
 	Delete /REBOOTOK "$INSTDIR\mauve.ico"
-	Delete /REBOOTOK "$INSTDIR\mauve_docs.pdf"
+	Delete /REBOOTOK "$INSTDIR\mauve_user_guide.pdf"
 	Delete /REBOOTOK "$INSTDIR\Mauve Online Documentation.url"
 	
 	; External dependency files

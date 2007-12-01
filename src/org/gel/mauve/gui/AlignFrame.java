@@ -90,7 +90,7 @@ public class AlignFrame extends java.awt.Frame
         parameterPanel.setVisible(true);
         parameterPanel.setLayout(null);
         defaultSeedCheckBox.setVisible(true);
-        defaultSeedCheckBox.setSize(new java.awt.Dimension(140, 20));
+        defaultSeedCheckBox.setSize(new java.awt.Dimension(160, 20));
         defaultSeedCheckBox.setText("Default seed weight");
         defaultSeedCheckBox.setSelected(true);
         defaultSeedCheckBox.setLocation(new java.awt.Point(10, 10));
@@ -126,7 +126,7 @@ public class AlignFrame extends java.awt.Frame
         recursiveCheckBox.setLocation(new java.awt.Point(10, 145));
         recursiveCheckBox.setToolTipText("This enables recursive anchor search and gapped alignment using MUSCLE");
         collinearCheckBox.setVisible(true);
-        collinearCheckBox.setSize(new java.awt.Dimension(190, 20));
+        collinearCheckBox.setSize(new java.awt.Dimension(195, 20));
         collinearCheckBox.setText("Assume collinear genomes");
         collinearCheckBox.setSelected(false);
         collinearCheckBox.setLocation(new java.awt.Point(10, 110));
@@ -148,9 +148,9 @@ public class AlignFrame extends java.awt.Frame
         alignButton.setLocation(new java.awt.Point(250, 320));
         cancelButton.setVisible(true);
         cancelButton.setEnabled(false);
-        cancelButton.setSize(new java.awt.Dimension(135, 30));
+        cancelButton.setSize(new java.awt.Dimension(145, 30));
         cancelButton.setText("Cancel alignment");
-        cancelButton.setLocation(new java.awt.Point(110, 320));
+        cancelButton.setLocation(new java.awt.Point(100, 320));
         sequencesPanel.setSize(new java.awt.Dimension(350, 210));
         sequencesPanel.setLocation(new java.awt.Point(0, 0));
         sequencesPanel.setVisible(true);
@@ -313,6 +313,42 @@ public class AlignFrame extends java.awt.Frame
         return File.createTempFile("mauve", ".mln");
     }
 
+    /*
+     * Build a platform-dependent path to the aligner binary
+     * @param name	The name of the aligner binary
+     */
+    protected String getBinaryPath(String name)
+    {
+        String os_type = System.getProperty("os.name");
+        String os_arch = System.getProperty("os.arch");
+
+        MyConsole.out().println("OS name is: " + os_type + " arch: " + os_arch);
+        if (os_type.startsWith("Windows"))
+        {
+        	if(os_arch.indexOf("64") >= 0)
+        		return "win64\\" + name;
+        	else
+        		return name;
+        }
+        else if (os_type.startsWith("Mac"))
+        {
+            String mauve_path = System.getProperty("user.dir");
+            mauve_path += "/Mauve.app/Contents/MacOS/" + name;
+            return mauve_path;
+        }
+        else
+        {
+        	String pname = "./" + name;
+        	if(os_arch.indexOf("64") >= 0)
+        		pname = "./linux-x64/" + name;
+        	File f = new File(pname);
+        	if( f.exists())
+        		return pname;
+        	else
+        		return name;
+        }
+    }
+
     /**
      * Read the user's genome alignment parameters and start the alignment using
      * the command line mauveAligner tool. This function translates information
@@ -325,6 +361,7 @@ public class AlignFrame extends java.awt.Frame
     	while(this.getOutput().length()==0 || outfile.isDirectory())
     	{
         	fc.setDialogTitle("Save alignment file");
+        	fc.setSelectedFile(new File( "" ));
             int returnVal = fc.showSaveDialog(this);
 
             if (returnVal == JFileChooser.APPROVE_OPTION)

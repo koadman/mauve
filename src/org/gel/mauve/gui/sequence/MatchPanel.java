@@ -658,8 +658,6 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
                 // don't draw the match if it's not on the current strand
                 // or if it's part of a 'disabled' LCB.
                 boolean rev = false;
-                if(cur_match.lcb <0 || cur_match.lcb > 2)
-                	System.out.println("debugger");
                 if(model instanceof LcbViewerModel && cur_match.lcb >= 0)
                 	rev = ((LcbViewerModel)model).getFullLcbList()[cur_match.lcb].getReverse(getGenome());
                 else

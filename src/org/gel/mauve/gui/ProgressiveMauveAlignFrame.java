@@ -27,8 +27,7 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
     // member declarations
     Dimension d;
     JCheckBox refineCheckBox = new JCheckBox();
-    JLabel islandScoreLabel = new JLabel();
-    JTextField islandScoreText = new JTextField();
+    JCheckBox seedFamiliesCheckBox = new JCheckBox();
     
     JCheckBox sumOfPairsCheckBox = new JCheckBox();
     JSlider breakpointWeightScaleSlider = new JSlider();
@@ -72,11 +71,11 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
     	
         // the following code sets the frame's initial state
         defaultSeedCheckBox.setLocation(new java.awt.Point(10, 10));
-        determineLCBsCheckBox.setLocation(new java.awt.Point(10, 30));
+        determineLCBsCheckBox.setLocation(new java.awt.Point(10, 50));
         seedLengthSlider.setLocation(new java.awt.Point(200, 30));
         seedLengthLabel.setLocation(new java.awt.Point(210, 10));
-        recursiveCheckBox.setLocation(new java.awt.Point(10, 70));
-        collinearCheckBox.setLocation(new java.awt.Point(10, 50));
+        recursiveCheckBox.setLocation(new java.awt.Point(10, 90));
+        collinearCheckBox.setLocation(new java.awt.Point(10, 70));
         d = minLcbWeightLabel.getPreferredSize();
         minLcbWeightLabel.setLocation(new java.awt.Point(265 - d.width, 90));
         minLcbWeightText.setLocation(new java.awt.Point(270, 90));
@@ -92,7 +91,7 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
 
         d = matrixChoice.getPreferredSize();
         matrixChoice.setSize(d);
-        matrixChoice.setLocation(new java.awt.Point(100, 10));
+        matrixChoice.setLocation(new java.awt.Point(110, 10));
         matrixChoice.setVisible(true);
     	musclePanel.add(matrixChoice);
         matrixChoiceLabel.getPreferredSize();
@@ -193,27 +192,27 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         muscleParamsText.setLocation(new java.awt.Point(15, 230));
         muscleParamsText.setText("-maxmb 900");
     	musclePanel.add(muscleParamsText);
-        
-        alignmentOptionPane.addTab("MUSCLE", musclePanel);
+
+    	// custom MUSCLE scoring matrices are currently broken in the aligner
+//        alignmentOptionPane.addTab("MUSCLE", musclePanel);
 
         // initialize progressiveMauve-specific configuration options
+        seedFamiliesCheckBox.setVisible(true);
+        seedFamiliesCheckBox.setSize(new java.awt.Dimension(160, 20));
+        seedFamiliesCheckBox.setText("Use seed families");
+        seedFamiliesCheckBox.setSelected(true);
+        seedFamiliesCheckBox.setLocation(new java.awt.Point(10, 30));
+        seedFamiliesCheckBox.setToolTipText("<html>Uses multiple spaced seed patterns to identify potential homology.<br>Can substantially improve sensitivity and accuracy on divergent genomes.</html>");
+
         refineCheckBox.setVisible(true);
         refineCheckBox.setSize(new java.awt.Dimension(160, 20));
         refineCheckBox.setText("Iterative refinement");
         refineCheckBox.setSelected(true);
-        refineCheckBox.setLocation(new java.awt.Point(10, 90));
+        refineCheckBox.setLocation(new java.awt.Point(10, 110));
         refineCheckBox.setToolTipText("Iteratively refines the alignment, significantly improving accuracy");
-        islandScoreLabel.setSize(new java.awt.Dimension(175, 20));
-        islandScoreLabel.setLocation(new java.awt.Point(135, 115));
-        islandScoreLabel.setVisible(true);
-        islandScoreLabel.setText("Island Score Threshold:");
-        islandScoreText.setVisible(true);
-        islandScoreText.setSize(new java.awt.Dimension(60, 20));
-        islandScoreText.setLocation(new java.awt.Point(270, 115));
-        islandScoreText.setText("2727");
 
         sumOfPairsCheckBox.setVisible(true);
-        sumOfPairsCheckBox.setSize(new java.awt.Dimension(180, 20));
+        sumOfPairsCheckBox.setSize(new java.awt.Dimension(200, 20));
         sumOfPairsCheckBox.setText("Sum-of-pairs LCB scoring");
         sumOfPairsCheckBox.setSelected(true);
         sumOfPairsCheckBox.setLocation(new java.awt.Point(10, 135));
@@ -282,10 +281,9 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         conservationWeightScaleText.setText("0.500");
         conservationWeightScaleText.setLocation(new java.awt.Point(200, 230));
 
+        parameterPanel.add(seedFamiliesCheckBox);
         parameterPanel.add(refineCheckBox);
         parameterPanel.add(sumOfPairsCheckBox);
-        parameterPanel.add(islandScoreLabel);
-        parameterPanel.add(islandScoreText);
 // this stuff isn't working yet:
 /*
         parameterPanel.add(breakpointWeightScaleLabel);
@@ -352,28 +350,15 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         read_filename = null;
         String cur_cmd;
         boolean detect_lcbs = true;
-        String os_type = System.getProperty("os.name");
 
-        MyConsole.out().println("OS name is: " + os_type);
-        if (os_type.startsWith("Windows"))
-        {
-            cmd_vec.addElement("progressiveMauve");
-        }
-        else if (os_type.startsWith("Mac"))
-        {
-            String mauve_path = System.getProperty("user.dir");
-            mauve_path += "/Mauve.app/Contents/MacOS/progressiveMauve";
-            cmd_vec.addElement(mauve_path);
-        }
-        else
-        {
-        	File f = new File("./progressiveMauve");
-        	if( f.exists())
-        		cmd_vec.addElement("./progressiveMauve");
-        	else
-        		cmd_vec.addElement("progressiveMauve");
-        }
+        String pname = getBinaryPath("progressiveMauve");
+        cmd_vec.addElement(pname);
 
+        if (getSeedFamilies())
+        {
+        	cmd_vec.addElement("--seed-family");
+        }
+        	
         if (getSeedWeight() > 0)
         {
             cur_cmd = "--seed-weight=";
@@ -504,14 +489,10 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         if (determineLCBsCheckBox.isSelected())
         {
             refineCheckBox.setEnabled(true);
-            islandScoreText.setEnabled(true);
-            islandScoreLabel.setEnabled(true);
         }
         else
         {
         	refineCheckBox.setEnabled(false);
-            islandScoreText.setEnabled(false);
-            islandScoreLabel.setEnabled(false);
         }
     	if(collinearCheckBox.isSelected() || !determineLCBsCheckBox.isSelected())
     	{
@@ -582,6 +563,13 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
     	matrixChoice.setSelectedIndex(matrixChoice.getItemCount()-1);
     }
 
+    public boolean getSeedFamilies()
+    {
+    	if(seedFamiliesCheckBox.isEnabled())
+    		return seedFamiliesCheckBox.isSelected();
+    	return false;
+    }
+
     public boolean getRefine()
     {
     	if(refineCheckBox.isEnabled())
@@ -596,17 +584,6 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
     	return false;
     }
 
-    public int getIslandScoreThreshold()
-    {
-        try
-        {
-            return Integer.parseInt(islandScoreText.getText());
-        }
-        catch (NumberFormatException nfe)
-        {
-            return -1;
-        }
-    }
     public String getScoreMatrixName()
     {
     	return matrixChoice.getSelectedItem().toString();
