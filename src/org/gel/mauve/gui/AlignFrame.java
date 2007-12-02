@@ -48,7 +48,7 @@ public class AlignFrame extends java.awt.Frame
     JLabel seedLengthLabel = new JLabel();
     JCheckBox recursiveCheckBox = new JCheckBox();
     JLabel minLcbWeightLabel = new JLabel();
-    JTextField minLcbWeightText = new JTextField();
+    protected JTextField minLcbWeightText = new JTextField();
     JCheckBox collinearCheckBox = new JCheckBox();
 
     public JButton alignButton = new JButton();
