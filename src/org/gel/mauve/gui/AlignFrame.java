@@ -328,7 +328,13 @@ public class AlignFrame extends java.awt.Frame
         	if(os_arch.indexOf("64") >= 0)
         		return "win64\\" + name;
         	else
+        	{
+        		// check for a win32 folder to support running in the dev environment
+        		File f = new File("win32\\" + name);
+        		if(f.exists())
+        			return "win32\\" + name;
         		return name;
+        	}
         }
         else if (os_type.startsWith("Mac"))
         {
