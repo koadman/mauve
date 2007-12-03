@@ -506,7 +506,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
         // draw the center line
         
         g2.setTransform(oldTransform);
-        
+        g2.setStroke(new BasicStroke(0f));
         g2.setColor(Color.black);
         g2.drawLine(0, getHeight() / 2, getWidth(), getHeight() / 2);
     }
@@ -575,6 +575,8 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
      */
     private void drawChromosomeBoundaries(Graphics2D g)
     {
+    	if(!model.getDrawChromosomeBoundaries())
+    		return;	// don't draw if we're not supposed to draw!
         g.setStroke(new BasicStroke(0f));
         g.setColor(Color.red);
         Iterator i = getGenome().getChromosomes().iterator();

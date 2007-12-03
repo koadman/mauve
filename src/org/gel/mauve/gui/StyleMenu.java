@@ -17,6 +17,7 @@ public class StyleMenu extends JMenu implements ActionListener {
     JCheckBoxMenuItem jMenuViewStyleSolidBlocks = new JCheckBoxMenuItem();
     JCheckBoxMenuItem jMenuViewStyleLcbStrikethroughLines = new JCheckBoxMenuItem();
     JCheckBoxMenuItem jMenuViewStyleLcbConnectingLines = new JCheckBoxMenuItem();
+    JCheckBoxMenuItem jMenuViewStyleChromosomeBoundaries = new JCheckBoxMenuItem();
     
     BaseViewerModel model;
     RearrangementPanel rrpanel;
@@ -58,11 +59,19 @@ public class StyleMenu extends JMenu implements ActionListener {
         jMenuViewStyleLcbConnectingLines.setActionCommand("ToggleLCBlines");
         jMenuViewStyleLcbConnectingLines.addActionListener(this);
     	
+        jMenuViewStyleChromosomeBoundaries.setToolTipText("Draw red lines at chromosome or contig boundaries");
+        jMenuViewStyleChromosomeBoundaries.setVisible(true);
+        jMenuViewStyleChromosomeBoundaries.setText("Chromosome/contig boundaries");
+        jMenuViewStyleChromosomeBoundaries.setMnemonic('c');
+        jMenuViewStyleChromosomeBoundaries.setActionCommand("ToggleChromosomeBoundaries");
+        jMenuViewStyleChromosomeBoundaries.addActionListener(this);
+
         add(jMenuViewStyleLcbOutlines);
         add(jMenuViewStyleSimilarityPlot);
         add(jMenuViewStyleSolidBlocks);
         add(jMenuViewStyleLcbStrikethroughLines);
         add(jMenuViewStyleLcbConnectingLines);
+        add(jMenuViewStyleChromosomeBoundaries);
     }
     
     /**
@@ -90,6 +99,7 @@ public class StyleMenu extends JMenu implements ActionListener {
             jMenuViewStyleLcbStrikethroughLines.setSelected(true);
             jMenuViewStyleSimilarityPlot.setSelected(true);
             jMenuViewStyleSolidBlocks.setSelected(false);
+            jMenuViewStyleChromosomeBoundaries.setSelected(true);
     	}else
     		setEnabled(false);
     }
@@ -140,6 +150,14 @@ public class StyleMenu extends JMenu implements ActionListener {
             {
                 model.setDrawMatches(!model.getDrawMatches());
                 jMenuViewStyleSimilarityPlot.setSelected(model.getDrawMatches());
+            }
+        }
+        else if (e.getActionCommand().equals("ToggleChromosomeBoundaries"))
+        {
+            if (model != null)
+            {
+                model.setDrawChromosomeBoundaries(!model.getDrawChromosomeBoundaries());
+                jMenuViewStyleChromosomeBoundaries.setSelected(model.getDrawChromosomeBoundaries());
             }
         }
     	

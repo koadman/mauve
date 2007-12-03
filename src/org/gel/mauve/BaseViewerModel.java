@@ -61,6 +61,9 @@ public class BaseViewerModel {
 	// Whether to draw matches.
 	private boolean drawMatches = true;
 
+	// Whether to draw contig/chromosome boundary lines.
+	private boolean drawChromosomeBoundaries = true;
+
 	// Original source file for this model.
 	private File src;
 
@@ -676,6 +679,17 @@ public class BaseViewerModel {
 
 	public boolean getDrawMatches () {
 		return drawMatches;
+	}
+
+	public void setDrawChromosomeBoundaries (boolean value) {
+		if (value != drawChromosomeBoundaries) {
+			this.drawChromosomeBoundaries = value;
+			this.fireDrawingSettingsEvent ();
+		}
+	}
+
+	public boolean getDrawChromosomeBoundaries () {
+		return drawChromosomeBoundaries;
 	}
 
 	public void setFocus (String sequenceID, long start, long end, String contig) {
