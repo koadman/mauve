@@ -5,7 +5,7 @@
 	</description>
 	
 	<!-- set the release version -->
-	<property name="release.version" value="2.1.1"/>
+	<property name="release.version" value="2.1.2"/>
 
 	<!-- deployment locations for production ASAP integration -->
 	<property name="deploy.asapdir" value="/srv/asap/htdocs/mauve" />
@@ -91,7 +91,8 @@
 				${ext}/cinema-mxc.jar;
 				${ext}/cinema-sequence.jar;
 				${ext}/cinema-util.jar;
-				${ext}/xerces.jar;
+				${ext}/xercesImpl.jar;
+				${ext}/xml-apis.jar;
 				${ext}/jakarta-regexp.jar"
 			srcdir="${src}"
 			destdir="${build}"
