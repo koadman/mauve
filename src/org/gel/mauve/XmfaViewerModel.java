@@ -27,13 +27,13 @@ public class XmfaViewerModel extends LcbViewerModel {
 	private XMFAAlignment xmfa;
 	// Sequence similarity profiles calculated over the length of each sequence
 	// represented in an XMFA file
-	private SimilarityIndex [] sim;
+	private ZoomHistogram [] sim;
 	private long [] highlights;
 	private BackboneList bb_list;
 
 	public void setSequenceCount (int sequenceCount) {
 		super.setSequenceCount (sequenceCount);
-		sim = new SimilarityIndex [sequenceCount];
+		sim = new ZoomHistogram [sequenceCount];
 	}
 
 	public XmfaViewerModel (File src, ModelProgressListener listener)
@@ -181,7 +181,7 @@ public class XmfaViewerModel extends LcbViewerModel {
             // read the SimilarityIndex from object cache if possible
             if(cache_instream != null){
                 try{
-                	sim[seqI] = (SimilarityIndex)cache_instream.readObject();
+                	sim[seqI] = (ZoomHistogram)cache_instream.readObject();
                 }catch(ClassNotFoundException cnfe){
                 	// cache must be corrupt
                 	cache_instream = null;
@@ -194,7 +194,7 @@ public class XmfaViewerModel extends LcbViewerModel {
             }
             // it didn't get read from the cache
             if(cache_instream == null)
-            	sim[seqI] = new SimilarityIndex(g, xmfa, bb_list);
+            	sim[seqI] = new SimilarityIndex (g, xmfa, bb_list);
         }
 
         // if cache_instream is null there must have been a problem
@@ -239,7 +239,7 @@ public class XmfaViewerModel extends LcbViewerModel {
     }
 
 	// NEWTODO: Sort sims on sourceIndex instead!
-	public SimilarityIndex getSim (Genome g) {
+	public ZoomHistogram getSim (Genome g) {
 		return sim[g.getSourceIndex ()];
 	}
 
