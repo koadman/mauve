@@ -79,7 +79,7 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 			throw new RuntimeException ("Similarity index is too large.");
 		}
 
-		sim_index = new byte [(int) size_sum];
+		values = new byte [(int) size_sum];
 	}
 
 	void advanceIndex (String [] cols, int [] col_index, int seq) {
@@ -264,9 +264,9 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 			tmp = 1 - tmp; // make lower entropy values higher
 			tmp -= .5; // convert to a value between -128 and 127
 			tmp *= 255;
-			sim_index[indexI] = (byte) tmp;
+			values[indexI] = (byte) tmp;
 			if (tmp < -127)
-				sim_index[indexI] = -128;
+				values[indexI] = -128;
 			cur_offset += max_resolution;
 		}
 
@@ -277,11 +277,11 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 			for (int indexI = 0; indexI < index_size[levelI]; indexI++) {
 				int sim_sum = 0;
 				for (int subI = 0; subI < index_factor; subI++) {
-					sim_sum += sim_index[componentI];
+					sim_sum += values[componentI];
 					componentI++;
 				}
 				// set to the average of its components
-				sim_index[level_offset + indexI] = (byte) (sim_sum / index_factor);
+				values[level_offset + indexI] = (byte) (sim_sum / index_factor);
 			}
 		}
 	}

@@ -900,7 +900,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
                         g.setClip(r);
                     }
                     boolean reverse = lcb.getReverse(getGenome());
-                    double s = ((XmfaViewerModel) model).getSim(getGenome()).getSimilarityByRange(seq_left, seq_right);
+                    double s = ((XmfaViewerModel) model).getSim(getGenome()).getValueForRange(seq_left, seq_right);
                     // normalize to a box_height
                     double height = (((double) s + 127d) / 256d * sim_height);
                     double match_top = reverse ? half_height + HALF_PEN_WIDTH : HALF_PEN_WIDTH + sim_height - height;

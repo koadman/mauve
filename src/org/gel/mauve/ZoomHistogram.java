@@ -10,7 +10,7 @@ import org.biojava.bio.symbol.RangeLocation;
  * Meant to represent data that varies over a range and needs to be viewed at
  * multiple resolutions.
  * 
- * @author Aaron Darling and Anna Rissman
+ * @author Aaron Darling
  *
  */
 public class ZoomHistogram {
@@ -25,7 +25,7 @@ public class ZoomHistogram {
 	protected long [] index_size;
 
 	/** < The similarity index, similarity values are discretized to a byte value */
-	protected byte [] sim_index;
+	protected byte [] values;
 
 	/** < The number of resolution levels */
 	protected int levels;
@@ -53,19 +53,19 @@ public class ZoomHistogram {
 		init (level, max_res, sizes, res, sims);
 	}
 	
-	public ZoomHistogram (int level, int max_res, long [] sizes, long [] res, byte [] sims) {
-		init (level, max_res, sizes, res, sims);
+	public ZoomHistogram (int level, int max_res, long [] sizes, long [] res, byte [] vals) {
+		init (level, max_res, sizes, res, vals);
 	}
 	
-	protected void init (int levels, int max_res, long [] sizes, long [] res, byte [] sims) {
+	protected void init (int levels, int max_res, long [] sizes, long [] res, byte [] vals) {
 		this.levels = levels;
 		max_resolution = max_res;
 		index_size = sizes;
 		resolutions = res;
-		sim_index = sims;
+		values = vals;
 	}
 	/**
-	 * Returns the distance into the similarity index where a particular
+	 * Returns the distance into the values where a particular
 	 * resolution level's data begins
 	 */
 	public long getLevelOffset (int level) {
@@ -77,9 +77,9 @@ public class ZoomHistogram {
 	}
 
 	/**
-	 * get an individual similarity value
+	 * get an individual value
 	 */
-	public byte getSimilarity (int level, int index) {
+	public byte getValue (int level, int index) {
 		int level_offset = 0;
 		for (int levelI = 0; levelI < level; levelI++) {
 			level_offset += index_size[levelI];
@@ -87,13 +87,13 @@ public class ZoomHistogram {
 		if (index >= index_size[level])
 			throw new ArrayIndexOutOfBoundsException ();
 
-		return sim_index[level_offset + index];
+		return values[level_offset + index];
 	}
 
 	/**
 	 * Set an individual similarity value
 	 */
-	protected void setSimilarity (int level, int index, byte sim_value) {
+	protected void setValue (int level, int index, byte val) {
 		int level_offset = 0;
 		for (int levelI = 0; levelI < level; levelI++) {
 			level_offset += index_size[levelI];
@@ -101,7 +101,7 @@ public class ZoomHistogram {
 		if (index > index_size[level])
 			throw new ArrayIndexOutOfBoundsException ();
 
-		sim_index[level_offset + index] = sim_value;
+		values[level_offset + index] = val;
 	}
 
 	public long getResolution (int level) {
@@ -112,10 +112,10 @@ public class ZoomHistogram {
 		return levels;
 	}
 	
-	// if asked for similarity of a range that spans beyond legal coordinates
+	// if asked for value of a range that spans beyond legal coordinates
 	// this function will return the average for the portion of the requested
 	// range that lies within bounds
-	public byte getSimilarityByRange (long left, long right) {
+	public byte getValueForRange (long left, long right) {
 		// never allow the range to be less than window_size--
 		// why not max_resolution * 2? with max_res * 2 we can ensure that at
 		// least
@@ -155,7 +155,7 @@ public class ZoomHistogram {
 		long sim_sum = 0;
 		int indexI = 0;
 		for (; indexI <= lastI - firstI; indexI++) {
-			sim_sum += getSimilarity (levelI, (int) (firstI + indexI));
+			sim_sum += getValue (levelI, (int) (firstI + indexI));
 		}
 		if (lastI < firstI) {
 			throw new RuntimeException ("Corrupt SimilarityIndex");
@@ -168,13 +168,13 @@ public class ZoomHistogram {
 		long left_size = firstI * resolutions[levelI] - left;
 		byte left_sim = 0;
 		if (left_size > resolutions[0] && levelI > 0)
-			left_sim = getSimilarityByRange (left, firstI * resolutions[levelI]);
+			left_sim = getValueForRange (left, firstI * resolutions[levelI]);
 		else
 			left_sim = sim;
 		long right_size = right - (lastI + 1) * resolutions[levelI];
 		byte right_sim = 0;
 		if (right_size > resolutions[0] && levelI > 0)
-			right_sim = getSimilarityByRange (
+			right_sim = getValueForRange (
 					(lastI + 1) * resolutions[levelI], right);
 		else
 			right_sim = sim;
