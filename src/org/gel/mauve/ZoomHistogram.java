@@ -1,10 +1,6 @@
 package org.gel.mauve;
 
-import java.util.Hashtable;
-
-import org.biojava.bio.symbol.Location;
-import org.biojava.bio.symbol.LocationTools;
-import org.biojava.bio.symbol.RangeLocation;
+import java.io.Serializable;
 
 /**
  * Meant to represent data that varies over a range and needs to be viewed at
@@ -13,7 +9,9 @@ import org.biojava.bio.symbol.RangeLocation;
  * @author Aaron Darling
  *
  */
-public class ZoomHistogram {
+public class ZoomHistogram implements Serializable {
+	
+	static final long serialVersionUID = 1;
 	
 	/** < Never index fewer than this many alignment columns */
 	protected int max_resolution = 5;
@@ -22,10 +20,7 @@ public class ZoomHistogram {
 	protected long [] resolutions;
 
 	/** < The number of index entries at each level */
-	protected long [] index_size;
-
-	/** < The similarity index, similarity values are discretized to a byte value */
-	protected byte [] values;
+	protected long [] level_sizes;
 
 	/** < The number of resolution levels */
 	protected int levels;
@@ -33,36 +28,22 @@ public class ZoomHistogram {
 	/**
 	 * whether the entire histogram is loaded
 	 */
-	protected Loader loader;
-	
-	/**
-	 * Represents loaded range
-	 */
-	Location loaded_range;
+	protected Handler handler;
+
 	
 	protected ZoomHistogram () {
 	}
 	
-	public ZoomHistogram (int level, int max_res, long [] sizes, long [] res, Loader load) {
-		loader = load;
-		loaded_range = new RangeLocation (0, 0);
-		long total = 0;
-		for (int i = 0; i < sizes.length; i++)
-			total += sizes [i];
-		byte [] sims = new byte [(int) total];
-		init (level, max_res, sizes, res, sims);
+	public ZoomHistogram (int level, int max_res, long [] sizes, long [] res, Handler load) {
+		handler = load;
+		init (level, max_res, sizes, res);
 	}
 	
-	public ZoomHistogram (int level, int max_res, long [] sizes, long [] res, byte [] vals) {
-		init (level, max_res, sizes, res, vals);
-	}
-	
-	protected void init (int levels, int max_res, long [] sizes, long [] res, byte [] vals) {
+	protected void init (int levels, int max_res, long [] sizes, long [] res) {
 		this.levels = levels;
 		max_resolution = max_res;
-		index_size = sizes;
+		level_sizes = sizes;
 		resolutions = res;
-		values = vals;
 	}
 	/**
 	 * Returns the distance into the values where a particular
@@ -71,44 +52,27 @@ public class ZoomHistogram {
 	public long getLevelOffset (int level) {
 		long level_offset = 0;
 		for (int levelI = 0; levelI < level; levelI++) {
-			level_offset += index_size[levelI];
+			level_offset += level_sizes[levelI];
 		}
 		return level_offset;
 	}
-
+	
 	/**
-	 * get an individual value
+	 * Returns the size of the specified level
 	 */
-	public byte getValue (int level, int index) {
-		int level_offset = 0;
-		for (int levelI = 0; levelI < level; levelI++) {
-			level_offset += index_size[levelI];
-		}
-		if (index >= index_size[level])
-			throw new ArrayIndexOutOfBoundsException ();
-
-		return values[level_offset + index];
-	}
-
-	/**
-	 * Set an individual similarity value
-	 */
-	protected void setValue (int level, int index, byte val) {
-		int level_offset = 0;
-		for (int levelI = 0; levelI < level; levelI++) {
-			level_offset += index_size[levelI];
-		}
-		if (index > index_size[level])
-			throw new ArrayIndexOutOfBoundsException ();
-
-		values[level_offset + index] = val;
+	public long getLevelSize (int level) {
+		return level_sizes [level];
 	}
 
 	public long getResolution (int level) {
 		return resolutions[level];
 	}
 
-	public long getLevels () {
+	public int getMaxResolution() {
+		return max_resolution;
+	}
+
+	public int getLevels () {
 		return levels;
 	}
 	
@@ -143,24 +107,16 @@ public class ZoomHistogram {
 		long lastI = right / resolutions[levelI];
 
 		// truncate them if they are out-of-range
-		firstI = firstI < index_size[levelI] ? firstI : index_size[levelI] - 1;
-		lastI = lastI < index_size[levelI] ? lastI : index_size[levelI] - 1;
+		firstI = firstI < level_sizes[levelI] ? firstI : level_sizes[levelI] - 1;
+		lastI = lastI < level_sizes[levelI] ? lastI : level_sizes[levelI] - 1;
 		firstI = firstI < 0 ? 0 : firstI;
 		lastI = lastI < 0 ? 0 : lastI;
 
 		lastI = lastI < firstI ? firstI : lastI;
-		
-		if (loader != null)
-			loadNecessary (firstI, lastI);
-		long sim_sum = 0;
-		int indexI = 0;
-		for (; indexI <= lastI - firstI; indexI++) {
-			sim_sum += getValue (levelI, (int) (firstI + indexI));
-		}
-		if (lastI < firstI) {
-			throw new RuntimeException ("Corrupt SimilarityIndex");
-		}
-		byte sim = (byte) (sim_sum / (indexI));
+		long lev_offset = getLevelOffset (levelI);
+		int start_ind = (int) (lev_offset + firstI);
+		int end_ind = (int) (lev_offset + lastI);
+		byte sim = averageValues (start_ind, end_ind);
 
 		// recursively get the beginning and ending pieces
 		// only recurse if enough space remains on either side and we
@@ -187,25 +143,35 @@ public class ZoomHistogram {
 		return final_sim;
 	}
 	
-	protected void loadNecessary (long start, long end) {
-		Location current = new RangeLocation ((int) start, (int) end);
-		current = LocationTools.subtract(current, loaded_range);
-		if (!LocationTools.areEqual(current, Location.empty)) {
-			loader.loadRanges (current, this);
-			loaded_range = loaded_range.union(current);
+	/**
+	 * returns the average of the value of the given range, inclusive
+	 * @param start_ind
+	 * @param end_ind
+	 * @return
+	 */
+	public byte averageValues (int start_ind, int end_ind) {
+		if (end_ind < start_ind) {
+			throw new RuntimeException ("Corrupt SimilarityIndex");
 		}
+		end_ind++;
+		long sim_sum = 0;
+		int indexI = start_ind;
+		for (; indexI < end_ind; indexI++) {
+			sim_sum += handler.getValue (indexI);
+		}
+		return (byte) (sim_sum / (indexI - start_ind));
 	}
 	
 	
-	public static interface Loader {
+	public static interface Handler {
 		
 		/**
-		 * Loads the ranges specified; can be gapped.
-		 * Should block thread until all is loaded.
+		 * Returns the specified value
 		 * 
-		 * @param locations
+		 * @param index
+		 * @return
 		 */
-		public void loadRanges (Location locations, ZoomHistogram hist);
+		public byte getValue (int index);
 		
 	}
 
