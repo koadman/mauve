@@ -51,9 +51,13 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 		return model.getSrc ().getParentFile ();
 	}
 	
+	public static File getChildOfRootDir (BaseViewerModel model, String child) {
+		return new File (getRootDirectory (model), child);
+	}
+	
 	public static String getFileStub (BaseViewerModel model) {
 		String name = model.getSrc().getName ();
-		if (!new File (getRootDirectory (model), name + ".backbone").exists())
+		if (!getChildOfRootDir (model, name + ".backbone").exists())
 			name = name.substring(0, name.indexOf(".alignment"));
 		return name;
 	}
