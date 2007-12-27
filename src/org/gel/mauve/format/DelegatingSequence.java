@@ -19,7 +19,9 @@ import org.biojava.bio.seq.StrandedFeature;
 import org.biojava.bio.seq.Feature.Template;
 import org.biojava.bio.seq.impl.SimpleStrandedFeature;
 import org.biojava.bio.symbol.Alphabet;
+import org.biojava.bio.symbol.AtomicSymbol;
 import org.biojava.bio.symbol.Edit;
+import org.biojava.bio.symbol.FiniteAlphabet;
 import org.biojava.bio.symbol.IllegalAlphabetException;
 import org.biojava.bio.symbol.PackedSymbolListFactory;
 import org.biojava.bio.symbol.Symbol;
@@ -31,7 +33,6 @@ import org.biojava.utils.ChangeVetoException;
 import org.biojava.utils.Changeable;
 import org.biojava.utils.Unchangeable;
 import org.biojavax.bio.seq.RichFeature;
-import org.biojavax.bio.seq.RichLocation;
 import org.gel.mauve.FilterCacheSpec;
 import org.gel.mauve.SupportedFormat;
 
@@ -80,6 +81,10 @@ class DelegatingSequence implements Sequence {
 			symArray[symI++] = (Symbol) symIter.next ();
 		}
 		try {
+			System.out.println ("alph: ");
+			Iterator itty = ((FiniteAlphabet) s.getAlphabet()).iterator();
+			while (itty.hasNext())
+				System.out.print(((AtomicSymbol) itty.next()).getName ());
 			packedList = pslFactory.makeSymbolList (symArray, s.length (), s
 					.getAlphabet ());
 		} catch (IllegalAlphabetException iae) {
@@ -169,6 +174,7 @@ class DelegatingSequence implements Sequence {
 	}
 
 	public Symbol symbolAt (int index) throws IndexOutOfBoundsException {
+		System.out.println ("getting it");
 		return packedList.symbolAt (index);
 	}
 
@@ -198,28 +204,7 @@ class DelegatingSequence implements Sequence {
 		throw new ChangeVetoException ();
 	}
 
-    class RichStrandedFeatureTemplate extends StrandedFeature.Template
-    {
-    	static final long serialVersionUID = 243583828;
-    	RichStrandedFeatureTemplate(RichFeature.Template t)
-    	{
-    		this.annotation = t.annotation;
-    		this.location = t.location;
-    		this.source = t.source;
-    		this.sourceTerm = t.sourceTerm;
-    		this.type = t.type;
-    		this.typeTerm = t.typeTerm;
-    		if( ((RichLocation)t.location).getStrand().intValue() == -1 )
-    			strand = StrandedFeature.NEGATIVE;
-    		else if( ((RichLocation)t.location).getStrand().intValue() == 1 )
-    			strand = StrandedFeature.POSITIVE;
-    		else
-    			strand = StrandedFeature.UNKNOWN;
-    	}
-    }
-
-
-	public int countFeatures () {
+    public int countFeatures () {
 		return featureCount;
 	}
 
@@ -272,6 +257,10 @@ class DelegatingSequence implements Sequence {
 		}
 		filterCache.put (filterCacheSpec.filter, sfh);
 	}
+	
+	protected SimpleStrandedFeature makeThinFeature (StrandedFeature f, FilterCacheSpec spec) {
+		return makeThinFeature (this, f, spec);
+	}
 
 	/**
 	 * @param f
@@ -281,8 +270,8 @@ class DelegatingSequence implements Sequence {
 	 * Make a slimmed-down copy of the feature for caching.
 	 * 
 	 */
-	protected SimpleStrandedFeature makeThinFeature (StrandedFeature f,
-			FilterCacheSpec spec) {
+	protected static SimpleStrandedFeature makeThinFeature (Sequence sequence, 
+			StrandedFeature f, FilterCacheSpec spec) {
 		Feature.Template template = f.makeTemplate ();
 		if (f.getAnnotation () != null && spec.getAnnotations () != null
 				&& spec.getAnnotations ().length > 0) {
@@ -314,10 +303,12 @@ class DelegatingSequence implements Sequence {
 		template.sourceTerm = OntoTools.ANY;
         if(template instanceof RichFeature.Template)
         {
-        	SimpleStrandedFeature sf = new SimpleStrandedFeature(this, this, new RichStrandedFeatureTemplate((RichFeature.Template)template));
+        	SimpleStrandedFeature sf = new SimpleStrandedFeature(sequence, sequence, 
+        			new RichStrandedFeatureTemplate((RichFeature.Template)template));
         	return sf;
         }else{
-        	SimpleStrandedFeature sf = new SimpleStrandedFeature(this, this, (StrandedFeature.Template)template);
+        	SimpleStrandedFeature sf = new SimpleStrandedFeature(sequence, sequence,
+        			(StrandedFeature.Template)template);
         	return sf;
         }
 	}
