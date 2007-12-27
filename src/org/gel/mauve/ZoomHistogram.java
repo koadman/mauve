@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @author Aaron Darling
  *
  */
-public class ZoomHistogram implements Serializable {
+abstract public class ZoomHistogram implements Serializable {
 	
 	static final long serialVersionUID = 1;
 	
@@ -24,18 +24,12 @@ public class ZoomHistogram implements Serializable {
 
 	/** < The number of resolution levels */
 	protected int levels;
-	
-	/**
-	 * whether the entire histogram is loaded
-	 */
-	protected Handler handler;
 
 	
 	protected ZoomHistogram () {
 	}
 	
-	public ZoomHistogram (int level, int max_res, long [] sizes, long [] res, Handler load) {
-		handler = load;
+	public ZoomHistogram (int level, int max_res, long [] sizes, long [] res) {
 		init (level, max_res, sizes, res);
 	}
 	
@@ -157,22 +151,20 @@ public class ZoomHistogram implements Serializable {
 		long sim_sum = 0;
 		int indexI = start_ind;
 		for (; indexI < end_ind; indexI++) {
-			sim_sum += handler.getValue (indexI);
+			sim_sum += getValue (indexI);
 		}
 		return (byte) (sim_sum / (indexI - start_ind));
 	}
 	
-	
-	public static interface Handler {
-		
-		/**
-		 * Returns the specified value
-		 * 
-		 * @param index
-		 * @return
-		 */
-		public byte getValue (int index);
-		
-	}
+
+
+	/**
+	 * Returns the specified value
+	 * 
+	 * @param index
+	 * @return
+	 */
+	abstract public byte getValue (int index);
+
 
 }

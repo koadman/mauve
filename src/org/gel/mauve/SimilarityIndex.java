@@ -5,8 +5,6 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import org.biojava.bio.symbol.Location;
-import org.gel.mauve.ZoomHistogram.Handler;
 import org.gel.mauve.backbone.Backbone;
 import org.gel.mauve.backbone.BackboneList;
 
@@ -15,8 +13,7 @@ import org.gel.mauve.backbone.BackboneList;
  * a group of aligned sequences. This implementation uses the average entropy
  * over a sliding window of alignment columns
  */
-public class SimilarityIndex extends ZoomHistogram implements ZoomHistogram.Handler,
-		Serializable {
+public class SimilarityIndex extends ZoomHistogram implements Serializable {
 	/** object format version */
 	static final long serialVersionUID = 3;
 
@@ -45,7 +42,6 @@ public class SimilarityIndex extends ZoomHistogram implements ZoomHistogram.Hand
 
 	SimilarityIndex (Genome g, XMFAAlignment xmfa, BackboneList bb_list)
 			throws IOException {
-		handler = this;
 		this.seq_length = g.getLength ();
 		allocateIndex ();
 		calculateIndex (g, xmfa, bb_list);
@@ -55,7 +51,6 @@ public class SimilarityIndex extends ZoomHistogram implements ZoomHistogram.Hand
 			byte [] sims) {
 		init (level, max_res, sizes, res);
 		sim_index = sims;
-		handler = this;
 	}
 
 	/** Change the sequence indexed to seqI */
