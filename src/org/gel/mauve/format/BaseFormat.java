@@ -12,7 +12,7 @@ import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.RichSequenceIterator;
 import org.gel.mauve.SupportedFormat;
 
-abstract class BaseFormat implements SupportedFormat
+public abstract class BaseFormat implements SupportedFormat
 {
     public void validate(Sequence s, File source, int index) throws FileNotFoundException
     {
