@@ -1,0 +1,58 @@
+#FormatVersion Mauve1
+#Sequence1File	C:\Documents and Settings\pinfield\workspace\mauve\testdata\S_bayanus_small.raw
+#Sequence1Format	Raw
+#Sequence2File	C:\Documents and Settings\pinfield\workspace\mauve\testdata\S_cerevisiae_small.gbk
+#Sequence2Format	GenBank
+#Annotation2File	C:\Documents and Settings\pinfield\workspace\mauve\testdata\S_cerevisiae_small.gbk
+#Annotation2Format	GenBank
+> 1:566-608 + C:\Documents and Settings\pinfield\workspace\mauve\testdata\S_bayanus_small.raw
+CTTATCCACCACACCTCATTAAAACG------------------------------------------------------
+--------------------------TGTA--------------------------------------------------
+--------------------------------------------------------------------------------
+-------------------------------------------------------TTTACTAGAAATT
+> 2:305-609 + C:\Documents and Settings\pinfield\workspace\mauve\testdata\S_cerevisiae_small.gbk
+cttctacccacca---tattgaaacgCTAACAAATGATCGTAAATAACACACACGTGCTTACCCTACCACTTTATACCAC
+CACCACATGCCATACTCACCCTCACTTGTATACTGATTTTACGTACGCACACGGATGCTACAGTATATACCATCTCAAAC
+TTACCCTACTCTCAGATTCCACTTCACTCCATGGCCCATCTCTCACTGAATCAGTACCAAATGCACTCACATCATTATGC
+ACGGCACTTGCCTCAGCGGTCTATACCCTGTGCCATTTACCCATAACGCCCATCAttatccacatttt
+=
+> 1:1-565 + C:\Documents and Settings\pinfield\workspace\mauve\testdata\S_bayanus_small.raw
+TTATTCAACATCCTTCCACACACACACACACACTCTCACACACACACTATATACATAATATTTTATAACCGCCGCTGCTA
+ATTCTTCGCAAGGAAACCCGCCTCTTTCTCTCTCTCTATCTCTATCTCTCCCCACGGTGAGTTATACGCCCTTTATAATA
+CAATAGTTTTCTTTCTCTCTTTTACCCACTACCCTTATTTTCTTTTACCCGGACTGCGCTTTTCTCGCACTACGTAATTG
+AAGTCATAACTATACAGCACCTTTGTTGGGTCTATGATCCGGAGACCTGTGAGGCCAGACAGTACTAGACAGCCTATGGT
+CCACAATCTCGTCACCACAGGAATGTCCCCTAGGATATTCAGTATCACAGCATCCATAGTCGTTTGATCCTAAGTTTTCT
+TGGCCCACTACACCAGACAAAATAGTCATGATTGCAAGAGATGTGGAGCTGATGCTGAAAACACCAAAAGTCGTTGATGA
+TGCAGCATGTTTTGTGTTTACATTTCAAGATACCGCAGATTGTTAAGTTTTTAGGATAATTGATAATCGTTAGAAGAATG
+TTATG
+=
+> 2:1-304 + C:\Documents and Settings\pinfield\workspace\mauve\testdata\S_cerevisiae_small.gbk
+ccacaccacacccacacacccacacaccacaccacacaccacaccacacccacacacacacatcctaacactaccctaac
+acagccctaatctaaccctggccaacctgtctctcaacttaccctccattaccctgcctccactcgttaccctgtcccat
+tcaaccataccactccgaaccaccatccatccctctacttactaccactcacccaccgttaccctccaattacccatatc
+caacccactgccacttaccctaccattaccctaccatccaccatgacctactcaccatactgtt
+=
+> 1:609-693 + C:\Documents and Settings\pinfield\workspace\mauve\testdata\S_bayanus_small.raw
+TAGAAGTAGGCACCTAAGCAAAAACCCTCTACAAGTATCAAGTACAAAAGATATTCGAGTATGTACAACTCTTTCGGCAA
+ACTTC
+=
+> 2:610-2000 + C:\Documents and Settings\pinfield\workspace\mauve\testdata\S_cerevisiae_small.gbk
+gatatctatatctcattcggcggtcccaaatattgtataactgcccttaatacatacgttataccacttttgcaccatat
+acttaccactccatttatatacacttatgtcaatattacagaaaaatccccacaaaaatcacctaaacataaaaatattc
+tacttttcaacaataatacataaacatattggcttgtggtagcaacactatcatggtatcactaacgtaaaagttcctca
+atattgcaatttgcttgaacggatgctatttcagaatatttcgtacttacacaggccatacattagaataatatgtcaca
+tcactgtcgtaacactctttattcaccgagcaataatacggtagtggctcaaactcatgcgggtgctatgaaaatagccc
+tcatgtacgtctcctccaagccctgttgtctcttacccggatgttcaaccaaaagctacttactacctttattttatgtt
+tactttttataggttgtctttttatcccacttcttcgcacttgtctctcgctactgccgtgcaacaaacactaaatcaaa
+acaatgaaatactactacatcaaaacgcattttccctagaaaaaaaattttcttacaatatactatactacacaatacat
+aatcactgactttcgtaacaacaatttccttcactctccaacttctctgctcgaatctctacatagtaatattatatcaa
+atctaccgtctggaacatcatcgctatccagctctttgtgaaccgctaccatcagcatgtacagtggtaccctcgtgtta
+tctgcagcgagaacttcaacgtttgccaaatcaagccaatgtggtaacaaccacatctccgaaatctgctccaaaagata
+ttccagtttctgccgaaatgttttattgtagaacagccctatcagcatcgacaggaatgccgtccaatgcggcactttag
+atggggtaactcccagcgcaagctgatctcgcaagtgcattcctagacttaattcatatctgctcctcaactgtcgatga
+tgcctgctaaactgcagcttgacgtactgcggaccctgcagtccagcgctcgtcatggaacgcaaacgctgaaaaactcc
+aactttctcgagcgcttccacaaagaccgtatcgtcttttgcctcccattcttcccggcactttttttcgtcccagttca
+aaaagtactgcagcacctctgtcttcgattcacgcaagttgctccatactttataatacaactctttgatctgccttcca
+gacatgcggaaaacttggctcccttgcttgcctcttgtcgaatccaatacactaattgtttctcttcttctagtaatggc
+caggtaccaagcataatttctctgtatctga
+=

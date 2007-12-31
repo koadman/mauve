@@ -1,0 +1,48 @@
+Pick some directory MAUVEDIR in which to put application jars and such.  This 
+should be accessible via the path MAUVEPATH.
+
+I.  Set up files. (Do this for every deployment).
+
+	1.  Set the properties "asap.dir" to MAUVEDIR and "asap.codebase" to MAUVEPATH
+		in build.xml.  Then run the target "deployASAP".  This will copy over the old
+		version, if present.  *If additional external dependencies are added to the
+		project, then use the "signextjars" target to add sign them.
+		
+		You will need to set the "key.password" property on the command line, using
+		the option "-Dkey.password=<password>"
+		
+		This task updates a templatized JNLP file, so don't edit the JNLP file on the
+		server, unless you want those changes to be lost in the future, which I doubt
+		you would want.  It also copies required files, signs jars, all that nifty stuff.
+
+II.  Update PHP code. (Only required on first setup)
+
+	1.  Include the mauve-launching applet in basic_feature_info.php page:
+	
+		See lines 279-283 of ~pinfield/public_html/asap/basic_feature_info.  
+		This should be copied entirely, changing the CODEBASE attribute to reflect
+		the MAUVEPATH chosen.
+
+	2.  Include link to open alignment at a particular location:
+
+		See lines 160-163 of ~pinfield/public_html/asap/basic_feature_info.php for an
+		example.  *The line beginning "$alignmentJarURL..." will need to be 
+		adjusted to point to a meaningful jar file.*  Note the trailing "!/" in 
+		the URL; this is very much required.
+
+III.  Package alignments
+
+	1.  Package alignment.
+	
+		See "makeMixedJar" target in build.xml for an example.  The file contents 
+		are the alignment file and source files.  In the manifest, the following
+		attributes are required:
+
+		Mauve-Alignment: the name of the alignment file.
+		Sequence-N-ID: the combination of ASAP genome id and location ID for the 
+		Nth sequence, separated by an underscore.  
+
+	2.  Put alignment where it belongs.
+	
+		Copy the resulting alignment file to wherever it needs to live to be
+		accessible at URL generated for basic_feature_info link.

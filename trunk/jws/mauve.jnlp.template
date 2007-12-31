@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This file is AUTO-GENERATED.  Edit mauve.jnlp.template to make permanent changes! -->
+<jnlp spec="1.0+" codebase="@CODEBASE@" href="mauve.jnlp">
+  <information>
+    <title>Mauve</title>
+    <vendor>University of Wisconsin - Madison</vendor>
+    <homepage href="docs/help.html"/>
+    <description>Mauve Application</description>
+    <icon href="mauve_icon.gif"/>
+    <icon kind="splash" href="mauve_logo.png"/>
+    <offline-allowed/>
+  </information>
+  <security>
+      <all-permissions/>
+  </security>
+  <resources>
+    <j2se version="1.4+" java-vm-args="-Xmx500m"/>
+    <jar href="Mauve.jar"/>
+    <!-- begin auto-generated section -->
+    @RESOURCES@
+    <!-- end auto-generated section -->
+	<property name="mauve.enable.remote" value="any_value_means_yes" />
+  </resources>
+  <application-desc main-class="org.gel.mauve.gui.Mauve">
+    <!-- begin auto-generated section -->
+  	@ARGUMENTS@
+    <!-- end auto-generated section -->
+  </application-desc>
+</jnlp> 
