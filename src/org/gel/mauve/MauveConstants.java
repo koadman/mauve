@@ -8,6 +8,27 @@ import org.biojava.bio.seq.FeatureFilter;
 import org.biojava.bio.seq.OptimizableFilter;
 
 public interface MauveConstants {
+	
+	
+	/**
+	 * strings representing required information for general flat file feature
+	 * type
+	 */
+	public final static String TYPE_STRING = "type";
+
+	public final static String LABEL_STRING = "label";
+
+	public final static String CONTIG_STRING = "contig";
+
+	public final static String STRAND_STRING = "strand";
+
+	public final static String LEFT_STRING = "left_end";
+
+	public final static String RIGHT_STRING = "right_end";
+
+	public final static String FORWARD = "forward";
+	
+	public final static String COMPLEMENT = "complement";
 
 	/**
 	 * Strings representing choices for ways to navigate
@@ -25,13 +46,18 @@ public interface MauveConstants {
 	/**
 	 * Strings representing prebuilt groupings of search fields
 	 */
-	public static final String PRODUCT = "Product";
+	public static final String PRODUCT_GROUP = "Product";
 
-	public static final String NAME = "Name";
+	public static final String NAME_GROUP = "Name";
 
-	public static final String GO = "Go Features";
+	public static final String GO_GROUP = "Go Features";
 
-	public static final String ID = "ID Number";
+	public static final String ID_GROUP = "ID Number";
+	
+	/**
+	 * Fields biojava uses as constants that are protected for some reason
+	 */
+	public static final String LOCUS = "LOCUS";
 
 	/**
 	 * Strings representing keys possibly present in a SegmentDataProcessor
@@ -144,6 +170,16 @@ public interface MauveConstants {
 	public static final String CONTIG_OUTPUT = "contigs";
 	
 	/**
+	 * represents subfolder similarity indexes are written to.
+	 */
+	public static final String SIMILARITY_OUTPUT = "sim_inds";
+	
+	/**
+	 * extension for a similarity index file
+	 */
+	public static final String SIMILARITY_EXT = ".sim";
+	
+	/**
 	 * height that should be added when a new type of feature is displayed
 	 */
 	public static final int FEATURE_HEIGHT = 25;
@@ -152,6 +188,17 @@ public interface MauveConstants {
 	 * String present in all ASAP generated db_xref values
 	 */
 	public static final String ASAP = "asap";
+	
+	/**
+	 * Strings representing supported mauve formats; ie those extending
+	 * org.gel.mauve.SupportedFormat
+	 */
+	public static final String FASTA_FORMAT = "FastA";
+	public static final String GENBANK_FORMAT = "GenBank";
+	public static final String RAW_FORMAT = "Raw";
+	public static final String EMBL_FORMAT = "EMBL";
+	public static final String INSD_FORMAT = "INSDSeq";
+	
 	
 	public static final OptimizableFilter NULL_AVOIDER = new OptimizableFilter () {
 		public boolean accept (Feature f) {

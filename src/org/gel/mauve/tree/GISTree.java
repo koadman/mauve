@@ -1,7 +1,6 @@
 package org.gel.mauve.tree;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 /**
  * Records a mapping between gapped sequence coordinates and ungapped sequence

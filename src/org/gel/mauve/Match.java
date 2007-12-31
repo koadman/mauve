@@ -20,6 +20,7 @@ public class Match extends Segment //implements Serializable
     public boolean highlighted = false;
     // The lcb which this match belongs to
     public int lcb = 0;
+    
 
     // The start coordinate of this match in each sequence
     //private long[] starts;
@@ -31,17 +32,17 @@ public class Match extends Segment //implements Serializable
     public Match(int sequenceCount)
     {
         starts = new long[sequenceCount];
-        ends = new long[sequenceCount];
+        lengths = new long[sequenceCount];
         reverse = new boolean[sequenceCount];
     }
 
     public Match(Match m)
     {
         starts = new long[m.starts.length];
-        ends = new long[m.ends.length];
+        lengths = new long[m.lengths.length];
         reverse = new boolean[m.reverse.length];
         System.arraycopy(m.starts, 0, starts, 0, starts.length);
-        System.arraycopy(m.ends, 0, ends, 0, ends.length);
+        System.arraycopy(m.lengths, 0, lengths, 0, lengths.length);
         System.arraycopy(m.reverse, 0, reverse, 0, reverse.length);
 
         color = m.color;
@@ -79,7 +80,7 @@ public class Match extends Segment //implements Serializable
     
     public long getLength(Genome g)
     {
-        return ends[g.getSourceIndex()];
+        return lengths[g.getSourceIndex()];
     }
     
     /**
@@ -89,12 +90,12 @@ public class Match extends Segment //implements Serializable
      */
     public long getLength(int sourceIndex)
     {
-        return ends[sourceIndex];
+        return lengths[sourceIndex];
     }
     
     public void setLength(Genome g, long length)
     {
-        ends[g.getSourceIndex()] = length;
+        lengths[g.getSourceIndex()] = length;
     }
     
     /**
@@ -104,7 +105,7 @@ public class Match extends Segment //implements Serializable
      */
     public void setLength(int sourceIndex, long length)
     {
-        ends[sourceIndex] = length;
+        lengths[sourceIndex] = length;
     }
     
     public boolean getReverse(Genome g)
@@ -163,7 +164,7 @@ public class Match extends Segment //implements Serializable
     public void copyArrays(LCB lcb, long[] starts, long[] lengths, boolean[] reverse, int seq_count)
     {
         System.arraycopy(this.starts, 0, starts, 0, seq_count);
-        System.arraycopy(this.ends, 0, lengths, 0, seq_count);
+        System.arraycopy(this.lengths, 0, lengths, 0, seq_count);
         System.arraycopy(this.reverse, 0, reverse, 0, seq_count);
     }
 

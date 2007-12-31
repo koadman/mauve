@@ -3,15 +3,19 @@ package org.gel.mauve.format;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.EventListener;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import javax.swing.Timer;
 
 import org.biojava.bio.BioException;
 import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.seq.SequenceIterator;
+import org.biojavax.bio.BioEntry;
+import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.RichSequenceIterator;
 
 /**
@@ -61,6 +65,8 @@ public class SequenceIteratorCache {
 	/**
 	 * Returns an iterator already iterated to the appropriate index.
 	 * 
+	 * @deprecated		Use getSequence (File, BaseFormat, int) instead.
+	 * 					Only here for backwards compatibility
 	 * @param format	The format the file to parse is in
 	 * @param source	The file containing the information from which to
 	 * 					 construct the iterator
@@ -69,6 +75,15 @@ public class SequenceIteratorCache {
 	 * 					 nextSequence () call.
 	 */
 	public static Sequence getSequence (BaseFormat format, final File source, int index) {
+		return new SequenceIteratorCache ().getSequence(source, format, index);
+	}
+	
+	/**
+	 * Added to enforce type safety for subclasses.  Should be used instead of
+	 * static getSequence ().  Creating an instance of this type is virtually
+	 * costless.
+	 */
+	public Sequence getSequence (final File source, BaseFormat format, int index) {
 		Object [] array = null;
 		if (cache.containsKey (source)) {
 			array = (Object []) cache.get (source);
@@ -111,6 +126,81 @@ public class SequenceIteratorCache {
 				}
 			}
 		}
+	}
+	
+	public SequenceIterator makeIterator (final BaseFormat format, final File file) {
+	   	if(format.isRich())
+    	{
+            return new RichSequenceIterator()
+            {
+                SequenceIterator inner = format.readFile(file);
+                int index = -1;
+
+                public boolean hasNext()
+                {
+                    return inner.hasNext();
+                }
+
+                public Sequence nextSequence() throws NoSuchElementException, BioException
+                {
+                	Sequence s = null;
+                	if(inner instanceof RichSequenceIterator)
+                		s = ((RichSequenceIterator)inner).nextRichSequence();
+                	else
+                		s = inner.nextSequence();
+                    index++;
+                    try
+                    {
+                        return format.makeDelegate(s, file, index);
+                    }
+                    catch (FileNotFoundException e)
+                    {
+                        // The file has already been verified above, so there must
+                        // be a weird problem.
+                        throw new Error("Index: " + index, e);
+                    }
+                }
+                public RichSequence nextRichSequence() throws NoSuchElementException, BioException
+                {
+                	return (RichSequence)nextSequence();
+                }
+                
+                public BioEntry nextBioEntry() throws BioException
+                {
+                	return ((RichSequenceIterator)inner).nextBioEntry();
+                }
+            };
+    	}
+        return new SequenceIterator()
+        {
+            SequenceIterator inner = format.readFile(file);
+            int index = -1;
+
+            public boolean hasNext()
+            {
+                return inner.hasNext();
+            }
+
+            public Sequence nextSequence() throws NoSuchElementException, BioException
+            {
+            	Sequence s = null;
+            	if(inner instanceof RichSequenceIterator)
+            		s = ((RichSequenceIterator)inner).nextRichSequence();
+            	else
+            		s = inner.nextSequence();
+                index++;
+                try
+                {
+                    return format.makeDelegate(s, file, index);
+                }
+                catch (FileNotFoundException e)
+                {
+                    // The file has already been verified above, so there must
+                    // be a weird problem.
+                    throw new Error("Index: " + index, e);
+                }
+            }
+        };
 	}
 	
 }

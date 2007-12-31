@@ -81,10 +81,6 @@ class DelegatingSequence implements Sequence {
 			symArray[symI++] = (Symbol) symIter.next ();
 		}
 		try {
-			System.out.println ("alph: ");
-			Iterator itty = ((FiniteAlphabet) s.getAlphabet()).iterator();
-			while (itty.hasNext())
-				System.out.print(((AtomicSymbol) itty.next()).getName ());
 			packedList = pslFactory.makeSymbolList (symArray, s.length (), s
 					.getAlphabet ());
 		} catch (IllegalAlphabetException iae) {
@@ -174,7 +170,7 @@ class DelegatingSequence implements Sequence {
 	}
 
 	public Symbol symbolAt (int index) throws IndexOutOfBoundsException {
-		System.out.println ("getting it");
+
 		return packedList.symbolAt (index);
 	}
 
