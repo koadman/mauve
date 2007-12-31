@@ -85,6 +85,12 @@ public interface SupportedFormat {
      * @return
      */
     boolean isRich();
+    
+    /**
+     * A name representing the format
+     * @return
+     */
+    public String getFormatName ();
 
     FilterCacheSpec[] getFilterCacheSpecs();
 }

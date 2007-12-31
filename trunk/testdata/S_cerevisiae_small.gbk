@@ -1,0 +1,207 @@
+LOCUS       NC_001133               1000 bp    DNA     linear   PLN 07-FEB-2005
+DEFINITION  Saccharomyces cerevisiae chromosome I, complete chromosome
+            sequence.
+ACCESSION   NC_001133
+VERSION     NC_001133.5  GI:50593113
+KEYWORDS    .
+SOURCE      Saccharomyces cerevisiae (baker's yeast)
+  ORGANISM  Saccharomyces cerevisiae
+            Eukaryota; Fungi; Ascomycota; Saccharomycotina; Saccharomycetes;
+            Saccharomycetales; Saccharomycetaceae; Saccharomyces.
+REFERENCE   1  (bases 1 to 1000)
+  AUTHORS   Goffeau,A., Barrell,B.G., Bussey,H., Davis,R.W., Dujon,B.,
+            Feldmann,H., Galibert,F., Hoheisel,J.D., Jacq,C., Johnston,M.,
+            Louis,E.J., Mewes,H.W., Murakami,Y., Philippsen,P., Tettelin,H. and
+            Oliver,S.G.
+  TITLE     Life with 6000 genes
+  JOURNAL   Science 274 (5287), 546-547 (1996)
+  MEDLINE   97002444
+   PUBMED   8849441
+REFERENCE   2  (bases 1 to 1000)
+  AUTHORS   Bussey,H., Kaback,D.B., Zhong,W., Vo,D.T., Clark,M.W., Fortin,N.,
+            Hall,J., Ouellette,B.F., Keng,T., Barton,A.B. et al.
+  TITLE     The nucleotide sequence of chromosome I from Saccharomyces
+            cerevisiae
+  JOURNAL   Proc. Natl. Acad. Sci. U.S.A. 92 (9), 3809-3813 (1995)
+  MEDLINE   95249563
+   PUBMED   7731988
+REFERENCE   3  (bases 1 to 1000)
+  AUTHORS   Saccharomyces Genome Database (yeast-curator@genome.stanford.edu).
+  TITLE     Direct Submission
+  JOURNAL   Submitted (17-NOV-1999) Department of Genetics, Stanford
+            University, Saccharomyces Genome Database, Stanford, CA 94305-5120,
+            USA
+REFERENCE   4  (bases 1 to 1000)
+  AUTHORS   .
+  CONSRTM   NCBI Genome Project
+  TITLE     Direct Submission
+  JOURNAL   Submitted (10-NOV-1999) National Center for Biotechnology
+            Information, NIH, Bethesda, MD 20894, USA
+COMMENT     REVIEWED REFSEQ: This record has been curated by SGD.
+            On Jul 26, 2004 this sequence version replaced gi:41629665.
+            REFSEQ: This reference sequence was provided by the Saccharomyces
+            Genome Database (SGD).
+FEATURES             Location/Qualifiers
+     source          1..1000
+                     /organism="Saccharomyces cerevisiae"
+                     /mol_type="genomic DNA"
+                     /strain="S288C"
+                     /db_xref="taxon:4932"
+                     /chromosome="I"
+     repeat_region   1..801
+                     /gene="TEL01L"
+                     /note="I left telomeric region"
+                     /evidence=not_experimental
+                     /rpt_family="Telomeric Region"
+                     /db_xref="SGD:S000028862"
+     repeat_region   complement(1..62)
+                     /gene="TEL01L-TR"
+                     /note="I left telomere TG(1-3)"
+                     /evidence=not_experimental
+                     /rpt_family="Telomeric Repeat"
+                     /db_xref="SGD:S000028864"
+     repeat_region   complement(63..336)
+                     /gene="TEL01L-XR"
+                     /note="X element Combinatorial Repeats (DCBA) containing
+                     Tbf1p binding sites. Formerly called SubTelomeric Repeats"
+                     /evidence=not_experimental
+                     /rpt_family="X element Combinatorial Repeats"
+                     /db_xref="SGD:S000028866"
+     repeat_region   complement(337..801)
+                     /gene="TEL01L-XC"
+                     /note="X element Core sequence"
+                     /evidence=not_experimental
+                     /rpt_family="X element Core sequence"
+                     /db_xref="SGD:S000028865"
+ORIGIN      
+        1 ccacaccaca cccacacacc cacacaccac accacacacc acaccacacc cacacacaca
+       61 catcctaaca ctaccctaac acagccctaa tctaaccctg gccaacctgt ctctcaactt
+      121 accctccatt accctgcctc cactcgttac cctgtcccat tcaaccatac cactccgaac
+      181 caccatccat ccctctactt actaccactc acccaccgtt accctccaat tacccatatc
+      241 caacccactg ccacttaccc taccattacc ctaccatcca ccatgaccta ctcaccatac
+      301 tgttcttcta cccaccatat tgaaacgcta acaaatgatc gtaaataaca cacacgtgct
+      361 taccctacca ctttatacca ccaccacatg ccatactcac cctcacttgt atactgattt
+      421 tacgtacgca cacggatgct acagtatata ccatctcaaa cttaccctac tctcagattc
+      481 cacttcactc catggcccat ctctcactga atcagtacca aatgcactca catcattatg
+      541 cacggcactt gcctcagcgg tctataccct gtgccattta cccataacgc ccatcattat
+      601 ccacattttg atatctatat ctcattcggc ggtcccaaat attgtataac tgcccttaat
+      661 acatacgtta taccactttt gcaccatata cttaccactc catttatata cacttatgtc
+      721 aatattacag aaaaatcccc acaaaaatca cctaaacata aaaatattct acttttcaac
+      781 aataatacat aaacatattg gcttgtggta gcaacactat catggtatca ctaacgtaaa
+      841 agttcctcaa tattgcaatt tgcttgaacg gatgctattt cagaatattt cgtacttaca
+      901 caggccatac attagaataa tatgtcacat cactgtcgta acactcttta ttcaccgagc
+      961 aataatacgg tagtggctca aactcatgcg ggtgctatga
+//
+LOCUS       NC_001134               1000 bp    DNA     linear   PLN 07-FEB-2005
+DEFINITION  Saccharomyces cerevisiae chromosome II, complete chromosome
+            sequence.
+ACCESSION   NC_001134
+VERSION     NC_001134.7  GI:50593115
+KEYWORDS    .
+SOURCE      Saccharomyces cerevisiae (baker's yeast)
+  ORGANISM  Saccharomyces cerevisiae
+            Eukaryota; Fungi; Ascomycota; Saccharomycotina; Saccharomycetes;
+            Saccharomycetales; Saccharomycetaceae; Saccharomyces.
+REFERENCE   1  (bases 1 to 813178)
+  AUTHORS   Goffeau,A., Barrell,B.G., Bussey,H., Davis,R.W., Dujon,B.,
+            Feldmann,H., Galibert,F., Hoheisel,J.D., Jacq,C., Johnston,M.,
+            Louis,E.J., Mewes,H.W., Murakami,Y., Philippsen,P., Tettelin,H. and
+            Oliver,S.G.
+  TITLE     Life with 6000 genes
+  JOURNAL   Science 274 (5287), 546-547 (1996)
+  MEDLINE   97002444
+   PUBMED   8849441
+REFERENCE   2  (bases 1 to 1000)
+  AUTHORS   Feldmann,H., Aigle,M., Aljinovic,G., Andre,B., Baclet,M.C.,
+            Barthe,C., Baur,A., Becam,A.M., Biteau,N., Boles,E. et al.
+  TITLE     Complete DNA sequence of yeast chromosome II
+  JOURNAL   EMBO J. 13 (24), 5795-5809 (1994)
+  MEDLINE   95112788
+   PUBMED   7813418
+REFERENCE   3  (bases 1 to 1000)
+  AUTHORS   Saccharomyces Genome Database (yeast-curator@genome.stanford.edu).
+  TITLE     Direct Submission
+  JOURNAL   Submitted (17-NOV-1999) Department of Genetics, Stanford
+            University, Saccharomyces Genome Database, Stanford, CA 94305-5120,
+            USA
+REFERENCE   4  (bases 1 to 1000)
+  AUTHORS   .
+  CONSRTM   NCBI Genome Project
+  TITLE     Direct Submission
+  JOURNAL   Submitted (10-NOV-1999) National Center for Biotechnology
+            Information, NIH, Bethesda, MD 20894, USA
+COMMENT     REVIEWED REFSEQ: This record has been curated by SGD.
+            On Jul 26, 2004 this sequence version replaced gi:50234881.
+            REFSEQ: This reference sequence was provided by the Saccharomyces
+            Genome Database (SGD).
+FEATURES             Location/Qualifiers
+     source          1..1000
+                     /organism="Saccharomyces cerevisiae"
+                     /mol_type="genomic DNA"
+                     /strain="S288C"
+                     /db_xref="taxon:4932"
+                     /chromosome="II"
+     repeat_region   1..1000
+                     /gene="TEL02L"
+                     /note="II left telomeric region"
+                     /evidence=not_experimental
+                     /rpt_family="Telomeric Region"
+                     /db_xref="SGD:S000028867"
+     repeat_region   complement(1..1000)
+                     /gene="TEL02L-YP"
+                     /note="Y' element (short)"
+                     /evidence=not_experimental
+                     /rpt_family="Y' element"
+                     /db_xref="SGD:S000028870"
+     gene            complement(280..1000)
+                     /locus_tag="YBL113C"
+                     /db_xref="GeneID:852159"
+     CDS             complement(280..1000)
+                     /locus_tag="YBL113C"
+                     /note="Ybl113cp;
+                     go_component: cellular_component unknown [goid GO:0008372]
+                     [evidence ND];
+                     go_function: helicase activity [goid GO:0004386] [evidence
+                     ISS] [pmid 9837911];
+                     go_process: biological_process unknown [goid GO:0000004]
+                     [evidence ND]"
+                     /codon_start=1
+                     /evidence=not_experimental
+                     /product="Hypothetical ORF"
+                     /protein_id="NP_009437.1"
+                     /db_xref="GI:6319355"
+                     /db_xref="SGD:S000002153"
+                     /db_xref="GeneID:852159"
+                     /translation="MDLNQRKEKKGQHVGCCGSRTDLSADTVELIERMDRLAENQATA
+                     SMSIVALPSSFQESNSSDRCRKYCSSDEDSDTCIHGSANASTNATTNSSTNATTTASI
+                     NVRTSATTTASINVRTSATTTESTNSNTNATTTESTNSSTNATTTASINVRTSATTTE
+                     STNSSTNATTTASINVRTSATTTESTNSSTNATTTASINVRTSATTTESTNSNTNAST
+                     NATTNSSTNATTTASTNVRTSATTNATTNSSTNATTTASTNVRTSATTTASTNVRTSA
+                     TTTASINVRTSATTTESINSSTNATTTESTNSNTSATTTESTDSNTNATTTASINVRT
+                     SATTTESTNSNTSATTTESTDSNTSATTTASTNSSTNATTTASTNSSTNATTTESTNA
+                     SAKEDANKDGNAEDNRFHPVTDINKESYKRKGSQMVFLERKKLKAQFPNTSENMNVLQ
+                     FLGFRSDEIKHLFLYGIDIYFCPEGVFTQYGLCKGCQKMFGLCVCWAGQKVSYRRIAW
+                     EALAVERMLRNDEEYKEYLEDIEPYHGDPVGYLKYFSVKRREIYSQIQRNYAWYLAIT
+                     RRRETISVLDSTRGKQGSQVFRMSGRQIKELYYKVWSNLRESKTEVLQYFLNWDEKKC
+                     REEWEAKDDTVFVEALEKVGVFQRLRSMTSAGLQGPQYVKLQFSRHHRQLRSRYELSL
+                     GMHLRDQLALGVTPSKVPHWTAFLSMLIGLFYNKTFRQKLEYLLEQISEMWLLPHWLD
+                     LANVEVLAADNTRVPLYMLMVAVHKELDSDDVPDGRFDIILLCRDSSREVGE"
+ORIGIN      
+        1 aaatagccct catgtacgtc tcctccaagc cctgttgtct cttacccgga tgttcaacca
+       61 aaagctactt actaccttta ttttatgttt actttttata ggttgtcttt ttatcccact
+      121 tcttcgcact tgtctctcgc tactgccgtg caacaaacac taaatcaaaa caatgaaata
+      181 ctactacatc aaaacgcatt ttccctagaa aaaaaatttt cttacaatat actatactac
+      241 acaatacata atcactgact ttcgtaacaa caatttcctt cactctccaa cttctctgct
+      301 cgaatctcta catagtaata ttatatcaaa tctaccgtct ggaacatcat cgctatccag
+      361 ctctttgtga accgctacca tcagcatgta cagtggtacc ctcgtgttat ctgcagcgag
+      421 aacttcaacg tttgccaaat caagccaatg tggtaacaac cacatctccg aaatctgctc
+      481 caaaagatat tccagtttct gccgaaatgt tttattgtag aacagcccta tcagcatcga
+      541 caggaatgcc gtccaatgcg gcactttaga tggggtaact cccagcgcaa gctgatctcg
+      601 caagtgcatt cctagactta attcatatct gctcctcaac tgtcgatgat gcctgctaaa
+      661 ctgcagcttg acgtactgcg gaccctgcag tccagcgctc gtcatggaac gcaaacgctg
+      721 aaaaactcca actttctcga gcgcttccac aaagaccgta tcgtcttttg cctcccattc
+      781 ttcccggcac tttttttcgt cccagttcaa aaagtactgc agcacctctg tcttcgattc
+      841 acgcaagttg ctccatactt tataatacaa ctctttgatc tgccttccag acatgcggaa
+      901 aacttggctc ccttgcttgc ctcttgtcga atccaataca ctaattgttt ctcttcttct
+      961 agtaatggcc aggtaccaag cataatttct ctgtatctga
+//

@@ -15,8 +15,11 @@ import org.biojava.bio.seq.FeatureFilter;
 import org.biojava.bio.seq.FeatureHolder;
 import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.symbol.Location;
+import org.biojava.bio.symbol.SymbolList;
 import org.gel.air.util.MathUtils;
 import org.gel.mauve.analysis.Segment;
+import org.gel.mauve.analysis.output.AbstractTabbedDataWriter;
+import org.gel.mauve.analysis.output.SegmentDataProcessor;
 import org.gel.mauve.gui.sequence.FlatFileFeatureConstants;
 
 /**
@@ -82,7 +85,7 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 			System.out.println ("couldn't output genomes and indeces");
 		}
 	}
-/*
+
 	public static void printSegment (Segment segment,
 			AbstractTabbedDataWriter writer) {
 		String [] data = new String [segment.ends.length * 2];
@@ -93,17 +96,17 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 		}
 		writer.printRow (data);
 	}
-*/
+
 	public static String doubleToString (double number, int decimals) {
 		DecimalFormat format = new DecimalFormat ();
 		format.setMaximumFractionDigits (decimals);
 		return format.format (number);
 	}
-/*	
+	
 	public static String getSeqPartOfFile (SegmentDataProcessor processor) {
 		return "seq_" + processor.get (SEQUENCE_INDEX).toString ();
 	}
-	*/
+	
 	public static String getReadableMultiplicity (Segment segment) {
 		return getReadableMultiplicity (segment.multiplicityType (), segment.starts.length);
 	}
@@ -141,13 +144,18 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 	}
 
 
+	//I'm not sure the first if statement is safe. . .
 	public static String getAsapID (Feature feat) {
+		return getDBXrefID (feat, ASAP);
+	}
+	
+	public static String getDBXrefID (Feature feat, String header) {
 		String id = null;
-		if (feat.getAnnotation ().containsProperty (LABEL_STRING)) {
+		/*if (feat.getAnnotation ().containsProperty (LABEL_STRING)) {
 			String label = (String) feat.getAnnotation ().getProperty (LABEL_STRING);
-			if (label.toLowerCase ().startsWith ("asap"))
+			if (label.toLowerCase ().startsWith (header))
 					return label;
-		}
+		}*/
 		Object val = feat.getAnnotation ().getProperty (DB_XREF);
 		if (val != null) {
 			if (val instanceof Collection) {
@@ -155,13 +163,13 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 				Iterator itty = ids.iterator ();
 				while (itty.hasNext ()) {
 					id = (String) itty.next ();
-					if (id.toLowerCase ().indexOf (ASAP) > -1)
+					if (id.toLowerCase ().indexOf (header) > -1)
 						return id;
 				}
 			}
 			else if (val instanceof String) {
 				id = (String) val;
-				if (id.toLowerCase ().indexOf (ASAP) > -1)
+				if (id.toLowerCase ().indexOf (header) > -1)
 					return id;
 			}
 			else
@@ -182,6 +190,13 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 			}
 		}
 		return all_contigs;
+	}
+	
+	/**
+	 * to be called cautiously.  Copies a whole sequence into a byte array.
+	 */
+	public static byte [] getDNABytes (SymbolList sequence) {
+		return sequence.seqString().getBytes();
 	}
 
 }

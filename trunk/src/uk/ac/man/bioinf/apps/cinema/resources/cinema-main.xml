@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration SYSTEM "module.dtd">
+
+ 
+<!-- This program is free software; you can redistribute it and/or modify -->
+<!-- it under the terms of the GNU General Public License as published by -->
+<!-- the Free Software Foundation; either version 2 of the License, or -->
+<!-- (at your option) any later version. -->
+    
+<!-- This program is distributed in the hope that it will be useful, -->
+<!-- but WITHOUT ANY WARRANTY; without even the implied warranty of -->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the -->
+<!-- GNU General Public License for more details. -->
+    
+<!-- You should have received a copy of the GNU General Public License -->
+<!-- along with this program; if not, write to the Free Software -->
+<!-- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA -->
+
+
+<!-- This file is loaded for every main frame of Cinema that is loaded -->
+<!-- into memory. Its meant to load everything that is needed by a -->
+<!-- working Cinema -->
+
+<configuration>
+   
+  <!-- Loads the identifiers -->
+  <read>cinema-identifiers.xml</read>
+
+  <!-- Load support for persistance. This needs to be done fairly
+  early!-->
+  <module>
+    <name>CINEMA_PERSIST</name>
+    <provide>
+      <name>CINEMA_FILE_PERSIST</name>
+    </provide>
+    <config>
+    </config>
+  </module>
+
+  <load>
+    <name>CINEMA_PERSIST</name>
+  </load>
+  <start>
+    <name>CINEMA_PERSIST</name>
+  </start>
+  
+  <load>
+    <name>CINEMA_SYSTEM_EVENTS</name>
+  </load>
+  
+  <!-- Loads the input and output modules -->
+  <read>cinema-io.xml</read>
+  
+  <!-- Load the calculation modules -->
+  <read>cinema-calculate.xml</read>
+
+  <!-- Loads the viewing modules -->
+  <read>cinema-view.xml</read>
+  
+  <!-- Loads the manipulation modules -->
+  <read>cinema-manipulate.xml</read>
+
+  <!-- read in the configuration for the menu system -->
+  <read>cinema-menu.xml</read>
+
+  <!-- load the user defined config -->
+	<read required='false'>main.xml</read>
+  
+  <load>
+    <name>CINEMA_GO</name>
+  </load>
+  <start>
+    <name>CINEMA_GO</name>
+  </start>
+
+</configuration>
+
+
+
+
+
+
+
+
+
+
+
+

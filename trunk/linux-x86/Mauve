@@ -1,0 +1,10 @@
+#!/bin/sh
+# simple script to execute java with the appropriate options to run Mauve
+# Change JAVA_CMD to the location of your java binary if necessary
+# Change the values of the -Xms and -Xmx parameters if you are getting
+# out of memory errors
+#
+# (c) 2003 Aaron Darling
+
+JAVA_CMD=java
+$JAVA_CMD -Xms200M -Xmx1500M -jar Mauve.jar
