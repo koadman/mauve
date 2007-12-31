@@ -1,0 +1,28 @@
+FormatVersion	4
+SequenceCount	2
+Sequence0File	C:\Documents and Settings\pinfield\workspace\mauve\testdata\S_bayanus_small.fasta
+Sequence0Length	693
+Sequence1File	C:\Documents and Settings\pinfield\workspace\mauve\testdata\S_cerevisiae_small.gbk
+Sequence1Length	2000
+IntervalCount	5
+Interval 0
+13	566	305
+10	582	318
+GappedAlignment
+269	592	328
+--------------------------------------------------------------------------------TGTA-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CTAACAAATGATCGTAAATAACACACACGTGCTTACCCTACCACTTTATACCACCACCACATGCCATACTCACCCTCACTTGTATACTGATTTTACGTACGCACACGGATGCTACAGTATATACCATCTCAAACTTACCCTACTCTCAGATTCCACTTCACTCCATGGCCCATCTCTCACTGAATCAGTACCAAATGCACTCACATCATTATGCACGGCACTTGCCTCAGCGGTCTATACCCTGTGCCATTTACCCATAACGCCCATCA
+13	596	597
+
+Interval 1
+565	1	0
+
+Interval 2
+304	0	1
+
+Interval 3
+85	609	0
+
+Interval 4
+1391	0	610
+

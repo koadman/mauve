@@ -1,0 +1,95 @@
+MauveFrame has the menu items, an AlignFrame and A DnDRearrangementPanel.
+
+AlignFrame provides a GUI interface to the alignment tool, and so is of
+no consequence at the moment.  
+
+DnDRearrangementPanel extends RearrangmentPanel by allowing drag-and-drop
+opening of alignment files.  This is especially useful for setting up the
+viewing window with multiple alignments.  
+
+RearrangementPanel is the mother of all GUI elements.
+
+============
+
+Initial plan of attack:
+
+RearrangementPanel currently maintains two parallel Vectors of RulePanels and 
+RRSequencePanels, as well as a bunch of arrays and some fields that constitute 
+the data model for the application.  We need to add to this some number of
+panels containing feature data a la FastBeadDemo.
+
+Rather than further complicate an already overly large class, I will convert the
+RearrangementPanel into (basically) an association of a collection of child panels,
+each of which will contain a ruler, sequence and optional feature display.  The 
+RearrangementPanel will also maintain a reference to a separate data model.  This
+data model will contain the arrays etc that the RearrangementPanel currently holds, 
+plus whatever additional data is necessary for the feature display.
+
+============
+
+General problems
+- Data model and GUI code are too intertwined
+- Lots of commented-out code
+- No tests, manual or otherwise
+- Spotty comments
+
+============
+
+
+How sequencePanel vector is used:
+
+DnDRearrangementPanel:
+	drag
+		- To determine the target for dragging
+	* drop
+		- To determine the sequencePanel target for dropping
+		- To determine the rulerPanel target for dropping
+
+LcbLinePanel
+	- To obtain LCBs that should be connected
+	
+RearrangementPanel
+	actionPerformed
+		- to add or remove mouse listeners when the hand button is activated
+	*X alignView
+		- to find the viewable range(*) given a clicked-on sequence 
+		- to adjust the viewable range for all the other sequences
+		- to adjust the viewable range for all the other rulers
+	highlightRegions
+		- to iterate through sequences, clearing highlighting and then redrawing.  In some indirect way, this causes the highlight lines to move around under the mouse.
+	*X initMatchDisplay
+		- Add a ruler for each sequence in the model
+		- Add a sequencePanel for each sequence in the model.
+	keyPressed
+		- to iterate through sequences, toggling different pieces of the display of each sequence (boxes, lines, etc)
+	* layoutDisplay
+		- to iterate through sequences, forcing their being relaid-out
+		- includes relaying-out ruler
+	print
+		- to iterate through sequences, doing some stuff for printing (seems to construct a different layout for printing, I think).
+	* reorderSequences
+		- to put sequencePanels in a different order, based on an array of integers
+		- to put rulerPanels in a different order, based on an array of integers
+		- sequencePanels vector is replaced entirely in this method
+		- rulerPanels vector is replaced entirely in this method
+	*X repaintSequencePanels
+		- to iterate through and repaint every sequence and ruler panel
+	stateChanged
+		- to iterate through sequences and either show blocky or non-block stuff
+	* zoomAndMove
+		- to iterate through sequences and change their viewable ranges, redraw.  
+		- to iterate through rulers and change their viewable ranges, redraw.
+
+==============================
+
+
+          Matches      XMFA      LCBs       Sim
+
+MUMS         X
+
+MAUVE        X                     X
+
+XMFA         *          X          X         X
+		
+		* XMFA matches come from the XMFA file, used differently.
+

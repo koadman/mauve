@@ -1,0 +1,68 @@
+DON'T USE THIS!!!!!  I'm only keeping this for updating changes or whatever.
+
+CLOSED ISSUES
+(DEFECT) Can't scroll at max zoom
+	Resolution: added some code in SeqPanel.zoomAndMove for when move is less than 1 symbol.
+(DEFECT) Printout of "doubleclick.net" when a double-click is detected.
+	Resolution: Got rid of junk double-click handling code in RRSequencePanel	
+(DEFECT) Errors printed when click to left or right of genome
+	Resolution: Added exception-handling code to RearrangementPanel.alignView()
+(FEATURE) file checks (missing, unreadable, wrong format) for loading genbank files
+	Resolution: Added checks to FeaturePanel
+(DEFECT) FeaturePanel displays at wrong zoom initially, then resizes.
+	Resolution: Added hack to FeaturePanel.setBounds()	
+(FEATURE) Validate length of Genbank sequence for target.
+	Resolution: Added check at file-loading time.
+(DEFECT) Reasonably fast-moving mouse causes clicks to be lost.
+	Resolution: Greatly improved mouseover performance, by eliminating unnecessary repainting and using threading.
+(USABILITY) How about a scrollbar instead of left-right arrows?
+	Resolution: Not done, because it will take too many resources.	
+(USABILITY) Extremely slow and memory-hungry when showing features at low magnification
+	Resolution: Currently okay again, with changes to mouse-handling.
+(DESIGN) Some panels might be getting unnecessarily repainted.
+	Resolution: Reviewed calls to repaintSeqPanels(), a very expensive call, eliminated one.
+(FEATURE) Show feature details for CDS, rRNA, tRNA and misc_RNA in popup window.
+	Resolution: Added QualifierPanel
+(DEFECT) Off by one in alignment file writing
+	Resolution: fixed by Aaron.		
+(DEFECT) FeaturePanel currently assumes genbank file will be one larger than sequence (interim fix for alignment file off by one problem).
+	Resolution: fixed by Paul, after above fix.	
+(DEFECT) NullPointerExceptions when dealing with .mauve and .mums files.
+	Resolution: revised highlighting routine	
+(DEFECT) No product qualifier for a feature causes java.util.NoSuchElementException for mouseovers.
+	Resolution: Qualifier is checked for, and only location of feature shown if not present.
+(FEATURE) Show feature symbols on single line.
+	Resolution: Using biojava features to render on one line.	
+(FEATURE) If RRSequencePanel double-clicked, do something like move the annotation browser window onto this section of sequence.
+	Resolution: Apparently, this describes the feature popup.
+(DEFECT) Rearrangement of .mums sequences fails
+	Resolution: Pushed down fix for reordering / LCB problem.		
+(USABILITY) Maybe restore variable-sized label for sequence
+	Resolution: Eh, why bother?
+(FEATURE) Update licensing to GPL.
+	Replaced COPYING with the GPL text
+(DEFECT) Text information in bottom toolbar doesn't go away when file is closed
+	Added a clear() method to LCBStatusBar, call it when final RearrangementPanel is being closed
+(DEFECT) ArrayIndexOutOfBounds exceptions when clicking on .mauve sequences after adjusting LCB weight
+	References to LCBs weren't being properly updated in filterLCBs; now they are.
+(DEFECT) When too many sequences need to fit in window need to be displayed, display punks out.
+	Taken care of by adding scrolling.		
+(USABILITY) Allow use of scrollbar for set of sequence panels.
+	Added a scrollPane to mauveFrame.
+(DEFECT) Moving LCB slider after rearranging sequences makes everything go to hell.
+	Added call to updateLCBweight() after rearrangement, in LcbViewerModel.
+(DEFECT) Selecting "LCB" color option when viewing MUMS format breaks display.
+	Initialization of color_selector is now later, when model is known, and LCB is omitted.
+(DEFECT) Slider use also breaks color picker when viewing .mauve files.
+	Added reapplication of color scheme after updating LCB weight.
+(DEFECT) Ruler shows the same number twice for different ticks at high magnification.
+	Replaced home-grown ruler panel with Ruler from biojava.
+(DEFECT) Printing output is very small.
+	Replaced some printing code, added an x-scaling.
+(USABILITY) Multi-threading viewer panels for usability during alignment
+	Silly idea, ignored.	
+(USABILITY) Ruler units float around too much, even take fractional values at high magnification
+	Taken care of by replacement
+(DEFECT) Output file name text (in AlignFrame.java) doesn't scroll right with long file names
+	Changed TextArea (?) to TextField; this was probably just a typo.
+			
