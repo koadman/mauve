@@ -21,6 +21,7 @@ import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.taxa.NCBITaxon;
 import org.biojavax.ontology.ComparableTerm;
 import org.gel.mauve.FilterCacheSpec;
+import org.gel.mauve.MauveConstants;
 import org.gel.mauve.gui.navigation.AnnotationContainsFilter;
 import org.gel.mauve.gui.sequence.ZiggyRectangularBeadRenderer;
 
@@ -145,11 +146,19 @@ public abstract class GenbankEmblFormat extends BaseFormat {
             	name = (String) a.getProperty("biojavax:plasmid");
             }
 		}
-        if (name == null || name.trim().equals("") && 
+        if (name != null) {
+        	name = name.trim();
+        	if (name.length() == 0)
+        		name = null;
+        }
+        if (name == null && s.getAnnotation() != null) {
+        	name = (String) s.getAnnotation().getProperty(MauveConstants.LOCUS);
+        }
+        if (name == null && 
         		AnnotationContainsFilter.getKeyIgnoreCase ("definition",
-				s.getAnnotation()) != null) {
-			name = getChromNameFromDescription (s);
-		}
+        				s.getAnnotation()) != null) {
+        	name = getChromNameFromDescription (s);
+        }
 		return name;
 	}
 

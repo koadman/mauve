@@ -2,9 +2,10 @@ package org.gel.mauve.format;
 
 import java.io.File;
 
+import org.gel.mauve.MauveConstants;
 import org.gel.mauve.SupportedFormat;
 
-public class SupportedFormatFactory
+public class SupportedFormatFactory implements MauveConstants
 {
     final static SupportedFormat GENBANK = new GenbankFileFormat();
     final static SupportedFormat EMBL = new EmblFormat();
@@ -45,23 +46,23 @@ public class SupportedFormatFactory
 
     public static SupportedFormat formatNameToFormat(String name)
     {
-        if (name.equals("GenBank"))
+        if (name.equals(GENBANK_FORMAT))
         {
             return SupportedFormatFactory.GENBANK;
         }
-        else if (name.equals("FastA"))
+        else if (name.equals(FASTA_FORMAT))
         {
             return SupportedFormatFactory.FASTA;
         }
-        else if (name.equals("Raw"))
+        else if (name.equals(RAW_FORMAT))
         {
             return SupportedFormatFactory.RAW;
         }
-        else if (name.equals("EMBL"))
+        else if (name.equals(EMBL_FORMAT))
         {
             return SupportedFormatFactory.EMBL;
         }
-        else if (name.equals("INSDseq"))
+        else if (name.equals(INSD_FORMAT))
         {
             return SupportedFormatFactory.INSDSEQ;
         }

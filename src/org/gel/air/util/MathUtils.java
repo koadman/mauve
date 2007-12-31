@@ -1,5 +1,7 @@
 package org.gel.air.util;
 
+import java.util.Random;
+
 public class MathUtils {
 	
 	public static double percentContained (long in_left, long in_right, 
@@ -30,5 +32,16 @@ public class MathUtils {
 		return ret;
 	}
 	
+	public static int getRandomFromRange (Random random, int average, int deviation) {
+		int val = Math.abs(random.nextInt(2 * deviation + 1));
+		return val + average - deviation;
+	}
+	
+	public static int gaussianAsRange (Random random, int deviation) {
+		double gaus = random.nextGaussian();
+		gaus *= deviation;
+		return (int) gaus;
+		
+	}
 
 }
