@@ -1,0 +1,4 @@
+#client side msg properties
+
+port = 23517
+server = localhost
