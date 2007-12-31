@@ -180,10 +180,10 @@ public class NavigationPanel extends JPanel implements ActionListener,
 	 */
 	protected void setNavigationChoices () {
 		nav_methods = new Vector ();
-		nav_methods.add (NAME_GROUP);
-		nav_methods.add (ID_GROUP);
-		nav_methods.add (PRODUCT_GROUP);
-		nav_methods.add (GO_GROUP);
+		nav_methods.add (NAME);
+		nav_methods.add (ID);
+		nav_methods.add (PRODUCT);
+		nav_methods.add (GO);
 		nav_methods.addAll (navigator.getGenomeKeys ());
 	}
 

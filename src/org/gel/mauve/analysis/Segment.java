@@ -10,15 +10,8 @@ public class Segment implements Serializable {
 	// The start coordinate of this match in each sequence
 	public long [] starts;
 
-	/**
-	 * only one of the next two variables is necessary for the
-	 * class; and only one should be set.  By default, it is ends.
-	 */
 	// The ends of this match in each sequence
 	public long [] ends;
-	
-	//Alternately, lengths could be set.
-	public long [] lengths;
 
 	// The direction of each match. false is forward, true is reverse
 	public boolean [] reverse;
@@ -27,24 +20,24 @@ public class Segment implements Serializable {
 
 	public Segment [] nexts;
 	
-	public String typed_id;
+	public String id;
 
-	public static final Segment END = new Segment ();
+	public static final Segment END = new Segment (0, false);
 
 	public static final String MULTIPLICITY_STRING = "multiplicity";
 
 	// represents which sequences this segment is part of
 	protected long mult_type;
 
-	public Segment (long [] l, long [] r, boolean [] c, boolean end) {
+	public Segment (long [] l, long [] r, boolean [] c) {
 		starts = l;
-		setEndOrLength (r, end);
+		ends = r;
 		reverse = c;
 	}
 
-	public Segment (int count, boolean links, boolean end) {
+	public Segment (int count, boolean links) {
 		starts = new long [count];
-		setEndOrLength (new long [count], end);
+		ends = new long [count];
 		reverse = new boolean [count];
 		if (links) {
 			prevs = new Segment [count];
@@ -52,18 +45,11 @@ public class Segment implements Serializable {
 		}
 	}
 
-	public Segment (int count, boolean end) {
-		this (count, false, end);
+	public Segment (int count) {
+		this (count, false);
 	}
 	
-	protected Segment () {
-	}
-	
-	protected void setEndOrLength (long [] data, boolean end) {
-		if (end)
-			ends = data;
-		else
-			lengths = data;
+	public Segment () {
 	}
 
 	/**
@@ -133,17 +119,8 @@ public class Segment implements Serializable {
 	public long getSegmentLength (int sequence) {
 		if (starts[sequence] == 0)
 			return 0;
-		else if (lengths == null)
+		else
 			return ends[sequence] - starts[sequence] + 1;
-		else
-			return lengths [sequence];
-	}
-	
-	public long getSegmentEnd (int sequence) {
-		if (ends == null)
-			return lengths [sequence] + starts [sequence] - 1;
-		else
-			return ends [sequence];
 	}
 
 	public double getAvgSegmentLength () {

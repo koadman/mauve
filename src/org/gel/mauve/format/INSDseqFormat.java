@@ -10,7 +10,6 @@ import org.biojava.bio.seq.SequenceIterator;
 import org.biojavax.SimpleNamespace;
 import org.biojavax.bio.seq.RichSequence;
 import org.gel.mauve.FilterCacheSpec;
-import org.gel.mauve.MauveConstants;
 
 public class INSDseqFormat extends GenbankEmblFormat {
 
@@ -31,8 +30,4 @@ public class INSDseqFormat extends GenbankEmblFormat {
 	}
 
     public boolean isRich(){ return true; }
-    
-    public String getFormatName () {
-    	return MauveConstants.INSD_FORMAT;
-    }
 }

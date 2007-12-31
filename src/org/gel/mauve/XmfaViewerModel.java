@@ -16,7 +16,6 @@ import org.gel.mauve.backbone.BackboneList;
 import org.gel.mauve.backbone.BackboneListBuilder;
 import org.gel.mauve.color.BackboneLcbColor;
 import org.gel.mauve.color.LCBColorScheme;
-import org.gel.mauve.ext.MauveInterfacer;
 
 /**
  * @author pinfield
@@ -28,14 +27,13 @@ public class XmfaViewerModel extends LcbViewerModel {
 	private XMFAAlignment xmfa;
 	// Sequence similarity profiles calculated over the length of each sequence
 	// represented in an XMFA file
-	private ZoomHistogram [] sim;
+	private SimilarityIndex [] sim;
 	private long [] highlights;
 	private BackboneList bb_list;
 
-	@Override
 	public void setSequenceCount (int sequenceCount) {
 		super.setSequenceCount (sequenceCount);
-		sim = new ZoomHistogram [sequenceCount];
+		sim = new SimilarityIndex [sequenceCount];
 	}
 
 	public XmfaViewerModel (File src, ModelProgressListener listener)
@@ -177,20 +175,8 @@ public class XmfaViewerModel extends LcbViewerModel {
         }
 
         // now compute SimilarityIndex
-        File sim_dir = MauveHelperFunctions.getChildOfRootDir (this, 
-        		MauveConstants.SIMILARITY_OUTPUT);
-        boolean sim_from_file = false;
-        if (sim_dir.exists())
-        	sim_from_file = true;
-        else
-        	sim_dir.mkdir();
         for (int seqI = 0; seqI < xmfa.seq_count; seqI++)
         {
-        	if (sim_from_file) {
-        		MauveInterfacer.readSimilarity(this, seqI); 
-        		if (sim [seqI] != null)
-        			continue;
-        	}
             Genome g = getGenomeBySourceIndex(seqI);
             // read the SimilarityIndex from object cache if possible
             if(cache_instream != null){
@@ -207,15 +193,9 @@ public class XmfaViewerModel extends LcbViewerModel {
                 }
             }
             // it didn't get read from the cache
-            if(cache_instream == null || sim [seqI] == null)
+            if(cache_instream == null)
             	sim[seqI] = new SimilarityIndex (g, xmfa, bb_list);
-            
-            if (!dir.getParent().equals(MauveHelperFunctions.getRootDirectory(this).getParent())
-            		&& MauveInterfacer.writeSimilarity (this, seqI)) {
-            	MauveInterfacer.readSimilarity(this, seqI);
-            }
         }
-        
 
         // if cache_instream is null there must have been a problem
         // reading the cache.  write out all objects that should be cached
@@ -226,7 +206,6 @@ public class XmfaViewerModel extends LcbViewerModel {
         	for( int seqI = 0; seqI < xmfa.seq_count; seqI++ )
             	cache_outstream.writeObject(sim[seqI]);
         }
-       
         
         // copy the LCB list
         setFullLcbList(new LCB[xmfa.lcb_list.length]);
@@ -245,7 +224,6 @@ public class XmfaViewerModel extends LcbViewerModel {
         initModelLCBs();
     }
 
-	@Override
 	protected void referenceUpdated () {
 		super.referenceUpdated ();
 		xmfa.setReference (getReference ());
@@ -261,12 +239,8 @@ public class XmfaViewerModel extends LcbViewerModel {
     }
 
 	// NEWTODO: Sort sims on sourceIndex instead!
-	public ZoomHistogram getSim (Genome g) {
+	public SimilarityIndex getSim (Genome g) {
 		return sim[g.getSourceIndex ()];
-	}
-	
-	public void setSim (Genome g, ZoomHistogram gram) {
-		sim[g.getSourceIndex ()] = gram;
 	}
 
 	public long [] getLCBAndColumn (Genome g, long position) {
@@ -299,7 +273,6 @@ public class XmfaViewerModel extends LcbViewerModel {
 		xmfa.getColumnCoordinates (this, lcb, column, seq_coords, gap);
 	}
 
-	@Override
 	public void updateHighlight (Genome g, long coordinate) {
 		highlights = null;
 		// Wait til end to call super, since it fires event.
@@ -328,7 +301,6 @@ public class XmfaViewerModel extends LcbViewerModel {
 	 * typically called by RRSequencePanel when the user clicks a part of the
 	 * sequence. Used for display mode 3
 	 */
-	@Override
 	public void alignView (Genome g, long position) {
 		long [] iv_col;
 		try {
@@ -349,7 +321,6 @@ public class XmfaViewerModel extends LcbViewerModel {
 	 * Overrides setFocus() in BaseViewerModel to also align the display
 	 * appropriately
 	 */
-	@Override
 	public void setFocus (String sequenceID, long start, long end, String contig) {
 		super.setFocus (sequenceID, start, end, contig);
 		Genome g = null;

@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 public class TreeStore implements Serializable {
-	public final static int NULL_REF = -1;
+	final static int NULL_REF = -1;
 
 	private final static int INITIAL_SIZE = 10;
 
