@@ -11,16 +11,9 @@ import org.biojavax.bio.BioEntry;
 import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.RichSequenceIterator;
 import org.gel.mauve.SupportedFormat;
-import org.gel.mauve.ext.LoadedSequenceIteratorCache;
 
 public abstract class BaseFormat implements SupportedFormat
 {
-	
-	public SequenceIteratorCache iterator_cache;
-	
-	public BaseFormat () {
-		iterator_cache = new LoadedSequenceIteratorCache ();
-	}
     public void validate(Sequence s, File source, int index) throws FileNotFoundException
     {
         if (!source.exists())
@@ -38,8 +31,8 @@ public abstract class BaseFormat implements SupportedFormat
     {
     	try
         {
-        	return iterator_cache.getSequence (
-        			source, this, index);
+        	return SequenceIteratorCache.getSequence (
+        			this, source, index);
         }
         catch (NoSuchElementException e)
         {
@@ -59,7 +52,78 @@ public abstract class BaseFormat implements SupportedFormat
      */
     public SequenceIterator makeIterator(final File file)
     {
-    	return iterator_cache.makeIterator (this, file);
+    	if(isRich())
+    	{
+            return new RichSequenceIterator()
+            {
+                SequenceIterator inner = readFile(file);
+                int index = -1;
+
+                public boolean hasNext()
+                {
+                    return inner.hasNext();
+                }
+
+                public Sequence nextSequence() throws NoSuchElementException, BioException
+                {
+                	Sequence s = null;
+                	if(inner instanceof RichSequenceIterator)
+                		s = ((RichSequenceIterator)inner).nextRichSequence();
+                	else
+                		s = inner.nextSequence();
+                    index++;
+                    try
+                    {
+                        return makeDelegate(s, file, index);
+                    }
+                    catch (FileNotFoundException e)
+                    {
+                        // The file has already been verified above, so there must
+                        // be a weird problem.
+                        throw new Error("Index: " + index, e);
+                    }
+                }
+                public RichSequence nextRichSequence() throws NoSuchElementException, BioException
+                {
+                	return (RichSequence)nextSequence();
+                }
+                
+                public BioEntry nextBioEntry() throws BioException
+                {
+                	return ((RichSequenceIterator)inner).nextBioEntry();
+                }
+            };
+    	}
+        return new SequenceIterator()
+        {
+            SequenceIterator inner = readFile(file);
+            int index = -1;
+
+            public boolean hasNext()
+            {
+                return inner.hasNext();
+            }
+
+            public Sequence nextSequence() throws NoSuchElementException, BioException
+            {
+            	Sequence s = null;
+            	if(inner instanceof RichSequenceIterator)
+            		s = ((RichSequenceIterator)inner).nextRichSequence();
+            	else
+            		s = inner.nextSequence();
+                index++;
+                try
+                {
+                    return makeDelegate(s, file, index);
+                }
+                catch (FileNotFoundException e)
+                {
+                    // The file has already been verified above, so there must
+                    // be a weird problem.
+                    throw new Error("Index: " + index, e);
+                }
+            }
+        };
     }
 
 }

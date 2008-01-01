@@ -30,8 +30,6 @@ public class Genome {
 	private int viewIndex;
 
 	private Vector sortedMatches;
-	
-	private String uri;
 
 	private int sourceIndex;
 	private boolean visible = true;
@@ -157,14 +155,6 @@ public class Genome {
     public void setVisible(boolean v){
     	visible = v;
     }
-
-	public String getURI() {
-		return uri;
-	}
-
-	public void setURI(String uri) {
-		this.uri = uri;
-	}
 
 	public String toString () {
 		return getDisplayName ();

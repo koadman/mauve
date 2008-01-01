@@ -131,10 +131,10 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 * initializes hashtable and hashset inherited from NavigationConstants
 	 */
 	static {
-		READ_TO_ACTUAL.put(NAME_GROUP, LOC_NAME);
-		READ_TO_ACTUAL.put(PRODUCT_GROUP, PRODUCT_NAME);
-		READ_TO_ACTUAL.put(ID_GROUP, ID_NUMBER);
-		READ_TO_ACTUAL.put(GO_GROUP, GO_FEATS);
+		READ_TO_ACTUAL.put(NAME, LOC_NAME);
+		READ_TO_ACTUAL.put(PRODUCT, PRODUCT_NAME);
+		READ_TO_ACTUAL.put(ID, ID_NUMBER);
+		READ_TO_ACTUAL.put(GO, GO_FEATS);
 		ANNOTATION_KEYS.add ("biovar");
 		ANNOTATION_KEYS.add ("codon_start");
 		ANNOTATION_KEYS.add ("db_xref");

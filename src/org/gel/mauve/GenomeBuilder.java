@@ -148,15 +148,11 @@ public class GenomeBuilder
         // We will also build chromosome list simultaneously.
         chromo = new ArrayList();
 
-        if /*(true)*/ (!annotationFile.exists())
+        if (!annotationFile.exists())
         {
             return g;
         }
-        try {
-        	g.setURI (annotationFile.toURL().toString());
-        } catch (Exception e) {
-        	g.setURI(annotationFile.getAbsolutePath());
-        }
+
         // Use the format to read the file; this most likely will create
         // an iterator of delegating sequences.
         SequenceIterator seqi = annotationFormat.makeIterator(annotationFile);

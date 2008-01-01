@@ -26,7 +26,6 @@ import java.util.Vector;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
-import org.gel.mauve.ModelBuilder;
 import org.gel.mauve.MyConsole;
 import org.gel.mauve.remote.RemoteControlImpl;
 
@@ -47,9 +46,6 @@ public class Mauve {
 	}
 	
 	public static void mainHook (String args [], final Mauve mv) {
-		MyConsole.setUseSwing (true);
-		MyConsole.showConsole ();
-		ModelBuilder.setUseDiskCache (false);
 		if (args.length >= 1) {
 			final String filename = args[0];
 			javax.swing.SwingUtilities.invokeLater (new Runnable () {
