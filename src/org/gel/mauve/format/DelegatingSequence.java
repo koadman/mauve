@@ -19,9 +19,7 @@ import org.biojava.bio.seq.StrandedFeature;
 import org.biojava.bio.seq.Feature.Template;
 import org.biojava.bio.seq.impl.SimpleStrandedFeature;
 import org.biojava.bio.symbol.Alphabet;
-import org.biojava.bio.symbol.AtomicSymbol;
 import org.biojava.bio.symbol.Edit;
-import org.biojava.bio.symbol.FiniteAlphabet;
 import org.biojava.bio.symbol.IllegalAlphabetException;
 import org.biojava.bio.symbol.PackedSymbolListFactory;
 import org.biojava.bio.symbol.Symbol;
@@ -81,13 +79,9 @@ class DelegatingSequence implements Sequence {
 			symArray[symI++] = (Symbol) symIter.next ();
 		}
 		try {
-			System.out.println ("alph: ");
-			Iterator itty = ((FiniteAlphabet) s.getAlphabet()).iterator();
-			while (itty.hasNext())
-				System.out.print(((AtomicSymbol) itty.next()).getName ());
-			packedList = pslFactory.makeSymbolList (symArray, s.length (), s
-					.getAlphabet ());
-		} catch (IllegalAlphabetException iae) {
+        	packedList = pslFactory.makeSymbolList(symArray, s.length(), s.getAlphabet());
+        }catch(IllegalAlphabetException iae)
+        {
 			iae.printStackTrace ();
 		}
 
@@ -128,6 +122,7 @@ class DelegatingSequence implements Sequence {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	public void addChangeListener (ChangeListener cl) {
 		ch.addChangeListener (cl);
 	}
@@ -139,6 +134,7 @@ class DelegatingSequence implements Sequence {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	public void removeChangeListener (ChangeListener cl) {
 		ch.removeChangeListener (cl);
 	}
@@ -174,7 +170,6 @@ class DelegatingSequence implements Sequence {
 	}
 
 	public Symbol symbolAt (int index) throws IndexOutOfBoundsException {
-		System.out.println ("getting it");
 		return packedList.symbolAt (index);
 	}
 
@@ -403,6 +398,7 @@ class DelegatingSequence implements Sequence {
 		/**
 		 * @deprecated
 		 */
+		@Deprecated
 		public void addChangeListener (ChangeListener cl) {
 			ch.addChangeListener (cl);
 		}
@@ -414,6 +410,7 @@ class DelegatingSequence implements Sequence {
 		/**
 		 * @deprecated
 		 */
+		@Deprecated
 		public void removeChangeListener (ChangeListener cl) {
 			ch.removeChangeListener (cl);
 		}
