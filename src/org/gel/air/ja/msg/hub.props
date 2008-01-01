@@ -1,0 +1,5 @@
+#properties for message hub
+
+port = 23517
+max_connections = 300
+pool_size = 0

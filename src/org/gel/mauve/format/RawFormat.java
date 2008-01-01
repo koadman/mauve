@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
+import org.gel.mauve.MauveConstants;
+
 class RawFormat extends FastaFormat {
 	/*
 	 * (non-Javadoc)
@@ -23,4 +25,8 @@ class RawFormat extends FastaFormat {
 	}
 	
 	 public boolean isRich(){ return false; }
+	 
+	    public String getFormatName () {
+	    	return MauveConstants.RAW_FORMAT;
+	    }
 }

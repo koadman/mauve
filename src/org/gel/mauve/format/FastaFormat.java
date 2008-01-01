@@ -9,6 +9,7 @@ import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.seq.SequenceIterator;
 import org.biojava.bio.seq.io.SeqIOTools;
 import org.gel.mauve.FilterCacheSpec;
+import org.gel.mauve.MauveConstants;
 
 public class FastaFormat extends BaseFormat {
 	public SequenceIterator readFile (File file) {
@@ -39,4 +40,8 @@ public class FastaFormat extends BaseFormat {
 	}
 
     public boolean isRich(){ return false; }
+    
+    public String getFormatName () {
+    	return MauveConstants.FASTA_FORMAT;
+    }
 }

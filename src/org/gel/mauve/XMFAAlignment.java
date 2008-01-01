@@ -436,7 +436,6 @@ public class XMFAAlignment implements Serializable {
 			int seqI = ((Integer) gist_seqnums.elementAt (gistI)).intValue ();
 			gis_tree[ivI][seqI] = (GISTree) gis_tree_tmp.elementAt (gistI);
 		}
-
 		for (int seqI = 0; seqI < seq_count; seqI++) {
 			long seq_len = 0;
 			int treeI = 0;
@@ -735,9 +734,9 @@ public class XMFAAlignment implements Serializable {
 
 	/**
 	 * return the LCB index that contains the given position of the given
-	 * sequence
+	 * sequence.  this is relative to the intervals array, not the lcb ids or array.
 	 */
-	int getLCB (Genome g, long position) {
+	public int getLCB (Genome g, long position) {
 		int ivI = 0;
 		for (; ivI < intervals.length; ivI++) {
 			if (intervals[ivI].getStart (g) <= position
@@ -828,5 +827,9 @@ public class XMFAAlignment implements Serializable {
 		for (int lcbI = 0; lcbI < lcb_list.length; lcbI++) {
 			lcb_list[lcbI].setReference (g);
 		}
+	}
+	
+	public GISTree getGISTree (int interval, Genome genome) {
+		return gis_tree [interval][genome.getSourceIndex()];
 	}
 }

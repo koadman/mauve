@@ -5,26 +5,6 @@ import org.gel.mauve.MauveConstants;
 public interface FlatFileFeatureConstants extends MauveConstants {
 
 	/**
-	 * strings representing required information for general flat file feature
-	 * type
-	 */
-	public final static String TYPE_STRING = "type";
-
-	public final static String LABEL_STRING = "label";
-
-	public final static String CONTIG_STRING = "contig";
-
-	public final static String STRAND_STRING = "strand";
-
-	public final static String LEFT_STRING = "left_end";
-
-	public final static String RIGHT_STRING = "right_end";
-
-	public final static String FORWARD = "forward";
-	
-	public final static String COMPLEMENT = "complement";
-
-	/**
 	 * integers that programmatically represent the required information in the
 	 * file
 	 */

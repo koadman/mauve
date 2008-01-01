@@ -7,6 +7,7 @@ import java.io.FileReader;
 
 import org.biojava.bio.seq.SequenceIterator;
 import org.biojava.bio.seq.io.SeqIOTools;
+import org.gel.mauve.MauveConstants;
 
 class GenbankFileFormat extends GenbankEmblFormat {
 	public SequenceIterator readFile (File file) {
@@ -22,4 +23,8 @@ class GenbankFileFormat extends GenbankEmblFormat {
 	}
 
 	public boolean isRich(){ return false; }
+	
+    public String getFormatName () {
+    	return MauveConstants.GENBANK_FORMAT;
+    }
 }

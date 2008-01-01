@@ -19,7 +19,9 @@ import org.biojava.bio.seq.StrandedFeature;
 import org.biojava.bio.seq.Feature.Template;
 import org.biojava.bio.seq.impl.SimpleStrandedFeature;
 import org.biojava.bio.symbol.Alphabet;
+import org.biojava.bio.symbol.AtomicSymbol;
 import org.biojava.bio.symbol.Edit;
+import org.biojava.bio.symbol.FiniteAlphabet;
 import org.biojava.bio.symbol.IllegalAlphabetException;
 import org.biojava.bio.symbol.PackedSymbolListFactory;
 import org.biojava.bio.symbol.Symbol;
@@ -79,9 +81,9 @@ class DelegatingSequence implements Sequence {
 			symArray[symI++] = (Symbol) symIter.next ();
 		}
 		try {
-        	packedList = pslFactory.makeSymbolList(symArray, s.length(), s.getAlphabet());
-        }catch(IllegalAlphabetException iae)
-        {
+			packedList = pslFactory.makeSymbolList (symArray, s.length (), s
+					.getAlphabet ());
+		} catch (IllegalAlphabetException iae) {
 			iae.printStackTrace ();
 		}
 
@@ -168,6 +170,7 @@ class DelegatingSequence implements Sequence {
 	}
 
 	public Symbol symbolAt (int index) throws IndexOutOfBoundsException {
+
 		return packedList.symbolAt (index);
 	}
 

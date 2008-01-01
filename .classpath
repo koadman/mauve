@@ -9,7 +9,6 @@
 	<classpathentry kind="lib" path="ext/commons-dbcp-1.1.jar"/>
 	<classpathentry kind="lib" path="ext/commons-pool-1.1.jar"/>
 	<classpathentry kind="lib" path="ext/xercesImpl.jar"/>
-	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="lib" path="ext/zeus-jscl.jar"/>
 	<classpathentry kind="lib" path="ext/jakarta-regexp.jar"/>
 	<classpathentry kind="lib" path="ext/cinema-app_support.jar"/>
