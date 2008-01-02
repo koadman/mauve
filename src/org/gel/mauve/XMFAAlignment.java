@@ -24,9 +24,6 @@ public class XMFAAlignment implements Serializable {
 	// The match class instances store the boundaries of each aligned segment
 	protected Match [] intervals;
 
-	// These store the offset within each file where an interval's sequence
-	protected Match [] file_pos;
-
 	// The number of newline bytes, as detected on the first line of the file
 	protected int newline_size = 0;
 
@@ -425,8 +422,6 @@ public class XMFAAlignment implements Serializable {
 
 		intervals = new Match [tmp_ivs.size ()];
 		intervals = (Match []) tmp_ivs.toArray (intervals);
-		file_pos = new Match [tmp_offs.size ()];
-		file_pos = (Match []) tmp_offs.toArray (file_pos);
 		lcb_list = new LCB [tmp_lcbs.size ()];
 		lcb_list = (LCB []) tmp_lcbs.toArray (lcb_list);
 		seq_length = new long [seq_count];
@@ -764,7 +759,7 @@ public class XMFAAlignment implements Serializable {
 
 	// converts an LCB local coordinate to a global sequence coordinate, taking
 	// rev. comp. into account
-	long globalToLCB (long position, Genome g, int ivI) {
+	public long globalToLCB (long position, Genome g, int ivI) {
 		long offset = position - intervals[ivI].getStart (g);
 		return revCompify (offset, g, ivI);
 	}
