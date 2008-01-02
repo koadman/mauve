@@ -33,7 +33,6 @@ public interface MauveStoreConstants extends StashConstants, MauveConstants {
 	public static final String GENOMES = "genomes";
 	public static final String LCBS = "lcbs";
 	public static final String GENOME = "genome";
-	public static final String STARTS_WITH_GAP = "starts_with_gap";
 	public static final String GAP_FILE_START = "gap_file_start";
 	public static final String GAP_FILE_END = "gap_file_end";
 	public static final String REVERSE = "reverse";

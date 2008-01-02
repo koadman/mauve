@@ -81,7 +81,7 @@ public class AlignmentConverter implements MauveStoreConstants {
 			convertBackbone (backbone, i);
 			try {
 				gap_out.close();
-				loader.writeXMLFile(genome, "c:\\" + genome.getInt(ID) + ".xml");
+				loader.writeXMLFile(genome, "c:\\" + genome.getString (ID) + ".xml");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -118,12 +118,12 @@ public class AlignmentConverter implements MauveStoreConstants {
 				lcb.put(REVERSE, lcb_list [i].reverse [genome_ind] ? REVERSE_SYMBOL : 
 						FORWARD_SYMBOL);
 				lcb.put(GAP_FILE_START, gap_file_pos + "");
-				lcb.put(STARTS_WITH_GAP, writeGapData (model.getXmfa().getLCB (
+				writeGapData (model.getXmfa().getLCB (
 						model.getGenomeBySourceIndex(genome_ind), 
 						lcb_list [i].starts [genome_ind]),
-						genome_ind,	lcb_list [i].starts [genome_ind],
-						lcb_list [i].ends [genome_ind]) + "");
+						genome_ind);
 				lcb.put(GAP_FILE_END, (gap_file_pos - 1) + "");
+				lcbs.put(lcb.get(ID), lcb);
 			}
 		}
 	}
@@ -141,42 +141,39 @@ public class AlignmentConverter implements MauveStoreConstants {
 	}
 	
 	/**
-	 * Assumes key lengths fit within an int value; ie, assumes, like biojava,
-	 * sequence length is und
+	 * Stores key lengths as ints if they'll fit, otherwise as longs, and stores gap
+	 * keys as negative numbers so they can be told apart.
 	 * @param interval
 	 * @param genome
 	 * @param start
 	 * @return			True if the first key is a gap key
 	 */
-	protected boolean writeGapData (int interval, int genome, long start, long end) {
+	protected void writeGapData (int interval, int genome) {
 		try {
 			GISTree tree = model.getXmfa().getGISTree (interval, 
 					model.getGenomeBySourceIndex(genome));
-			long column = tree.seqPosToColumn(start);
+			long column = 0;
 			int index = tree.find(column);
 			Key key = tree.getKey(index);
-			boolean gap = key instanceof GapKey;
 			int k = 0;
-			long last_column = tree.seqPosToColumn(end);
-			while (column <= last_column) {
-				if (k < 1000)
+			//assumes that coordinates start at 0 and go to length - 1
+			while (column < tree.length()) {
+				/*if (k < 1000)
 					System.out.println (index + " " + column + " " + key.getLength () + " " + last_column);
-				k++;
+				k++;*/
+				long length = key instanceof GapKey ? -key.getLength() : key.getLength();
 				if (use_ints)
-					gap_out.writeInt ((int) key.getLength());
+					gap_out.writeInt ((int) length);
 				else
-					gap_out.writeLong(key.getLength());
+					gap_out.writeLong(length);
 				column += key.getLength();
-				index = tree.find((int)(Math.random () * 5000000));
+				index = tree.find(column);
 				key = tree.getKey(index);
 				gap_file_pos++;
 			}
-			System.out.println ("done w/ loop");
-			return gap;
 		}
 		catch (Exception e) {
 			e.printStackTrace();
-			return false;
 		}
 	}
 	
