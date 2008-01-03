@@ -2,14 +2,14 @@ package org.gel.mauve;
 
 import java.io.Serializable;
 
-import org.gel.mauve.tree.FileKey;
+import org.gel.mauve.tree.SequenceKey;
 import org.gel.mauve.tree.GISTree;
 import org.gel.mauve.tree.GapKey;
 import org.gel.mauve.tree.TreeStore;
 
 
-//TODO Should also make a superclass of FileKey that is a Sequence or segment 
-//key also independent of a file, and pass this into method that takes FileKeys 
+//TODO Should also make a superclass of SequenceKey that is a Sequence or segment 
+//key also independent of a file, and pass this into method that takes SequenceKeys 
 //in MauveAlignment.
 abstract public class MauveAlignment implements Serializable {
 	
@@ -139,7 +139,7 @@ abstract public class MauveAlignment implements Serializable {
 
 		int l_iter = gis_tree[ivI][seqI].find (left_col);
 		int r_iter = gis_tree[ivI][seqI].find (left_col + length - 1);
-		FileKey l_fk, r_fk;
+		SequenceKey l_fk, r_fk;
 
 		// if the requested region contains nothing but gap then just return a
 		// buffer of gaps
@@ -170,22 +170,22 @@ abstract public class MauveAlignment implements Serializable {
 			return bb;
 		}
 
-		if (gis_tree[ivI][seqI].getKey (l_iter) instanceof FileKey) {
-			l_fk = (FileKey) gis_tree[ivI][seqI].getKey (l_iter);
+		if (gis_tree[ivI][seqI].getKey (l_iter) instanceof SequenceKey) {
+			l_fk = (SequenceKey) gis_tree[ivI][seqI].getKey (l_iter);
 		} else {
-			// if we started in a gap the next one should be a FileKey
+			// if we started in a gap the next one should be a SequenceKey
 			seq_off = gis_tree[ivI][seqI].getSequenceStart (l_iter);
 			l_iter = gis_tree[ivI][seqI].find_seqindex (seq_off);
-			l_fk = (FileKey) gis_tree[ivI][seqI].getKey (l_iter);
+			l_fk = (SequenceKey) gis_tree[ivI][seqI].getKey (l_iter);
 		}
 
-		if (gis_tree[ivI][seqI].getKey (r_iter) instanceof FileKey) {
-			r_fk = (FileKey) gis_tree[ivI][seqI].getKey (r_iter);
+		if (gis_tree[ivI][seqI].getKey (r_iter) instanceof SequenceKey) {
+			r_fk = (SequenceKey) gis_tree[ivI][seqI].getKey (r_iter);
 		} else {
-			// if we started in a gap the next one should be a FileKey
+			// if we started in a gap the next one should be a SequenceKey
 			seq_off = gis_tree[ivI][seqI].getSequenceStart (r_iter) - 1;
 			r_iter = gis_tree[ivI][seqI].find_seqindex (seq_off);
-			r_fk = (FileKey) gis_tree[ivI][seqI].getKey (r_iter);
+			r_fk = (SequenceKey) gis_tree[ivI][seqI].getKey (r_iter);
 		}
 		
 		return readSequenceFromKeys (l_fk, r_fk, left_col, length, ivI, 
@@ -325,7 +325,7 @@ abstract public class MauveAlignment implements Serializable {
 		return gis_tree [interval][genome.getSourceIndex()];
 	}
 	
-	abstract protected byte [] readSequenceFromKeys (FileKey l_fk, FileKey r_fk, 
+	abstract protected byte [] readSequenceFromKeys (SequenceKey l_fk, SequenceKey r_fk, 
 			long left_col, long length, int ivI, int seqI, int l_iter, int r_iter);
 
 }

@@ -9,6 +9,7 @@ import java.util.Vector;
 import org.gel.mauve.tree.FileKey;
 import org.gel.mauve.tree.GISTree;
 import org.gel.mauve.tree.GapKey;
+import org.gel.mauve.tree.SequenceKey;
 
 /**
  * XMFA file class A technical cross-product of insomnia and indulgence
@@ -470,7 +471,7 @@ public class XMFAAlignment extends MauveAlignment implements Serializable {
 	}
 
 	@Override
-	protected byte [] readSequenceFromKeys (FileKey l_fk, FileKey r_fk, 
+	protected byte [] readSequenceFromKeys (SequenceKey l_fk, SequenceKey r_fk, 
 			long left_col, long length, int ivI, int seqI, int l_iter, int r_iter) {
 		long l_gaps = 0;
 		// should have l_fk and r_fk now.
@@ -489,11 +490,11 @@ public class XMFAAlignment extends MauveAlignment implements Serializable {
 			l_newlines = 0;
 			l_off = 0;
 		}
-		l_off += l_fk.getOffset () + l_newlines;
+		l_off += ((FileKey) l_fk).getOffset () + l_newlines;
 
 		long r_key_col = gis_tree[ivI][seqI].getStart (r_iter) % line_width;
 		long r_newlines = ((r_key_col + r_off) / line_width) * newline_size;
-		r_off += r_fk.getOffset () + r_newlines;
+		r_off += ((FileKey) r_fk).getOffset () + r_newlines;
 
 		// now that the exact file offsets of the desired sequence have been
 		// calculated, read it from the XMFA.
