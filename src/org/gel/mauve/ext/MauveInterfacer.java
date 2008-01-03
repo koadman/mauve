@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 import org.biojavax.bio.seq.RichSequence;
+import org.gel.air.ja.stash.StashLoader;
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MauveHelperFunctions;
 import org.gel.mauve.SimilarityIndex;
@@ -16,12 +17,15 @@ import org.gel.mauve.gui.MauveFrame;
 import org.gel.mauve.module.MauveModule;
 import org.gel.mauve.module.ModuleListener;
 
-public class MauveInterfacer implements ModuleListener, MauveConstants {
+public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 	
 	protected MauveModule mauve;
+	protected StashLoader loader;
+	protected static String data_root_dir;
 	
 	public MauveInterfacer (String [] args) {
 		mauve = new MauveModule (this);
+		loader = new StashLoader (null, null);
 		Mauve.mainHook(args, mauve);
 	}
 	
@@ -70,15 +74,32 @@ public class MauveInterfacer implements ModuleListener, MauveConstants {
 		//convertToINSD (frame);
 		new Thread (new Runnable () {
 			public void run () {
-				new AlignmentConverter ((XmfaViewerModel) frame.getModel());		
+				//loader.loadAll(new File (data_root_dir, "mauve_defaults.xml"));
+				new AlignmentConverter ((XmfaViewerModel) frame.getModel(), loader);		
 			}
 		}).start ();
 	}
+	
+	public static void makeDataDirs () {
+		File dir = new File (data_root_dir);
+		String [] subs = new String [] {GENOME_CLASS, ALIGNED_GENOME_CLASS, 
+				ALIGNMENT_CLASS, FEATURE_INDEX_CLASS};
+		for (int i = 0; i < subs.length; i++) {
+			File sub = new File (dir, subs [i]);
+			if (!sub.exists())
+				sub.mkdir();
+		}
+	}
 
+	public static String getStashDir () {
+		return data_root_dir;
+	}
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		data_root_dir = "c:\\mauve3data\\DataStore";
+		makeDataDirs ();
 		new MauveInterfacer (args);
 	}
 

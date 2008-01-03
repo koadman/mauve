@@ -28,8 +28,6 @@ public interface MauveStoreConstants extends StashConstants, MauveConstants {
 	public static final String FEATURE_LABELS = "feature_labels";
 	public static final String FEATURE_TYPE = "feature_type";
 	public static final String BACKBONE_IDS = "backbone_ids";
-	public static final String GAP_FILE = "gap_file";
-	public static final String BACKBONE_FILE = "backbone_file";
 	public static final String GENOMES = "genomes";
 	public static final String LCBS = "lcbs";
 	public static final String GENOME = "genome";

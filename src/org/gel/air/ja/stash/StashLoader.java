@@ -160,6 +160,10 @@ public class StashLoader extends DefaultHandler implements StashConstants {
 			start = start.substring (1, start.length () - 1);
 		return start;
 	}
+	
+	public void writeXMLFile (Stash data, File file) {
+		writeXMLFile (data, file.getAbsolutePath());
+	}
 
 
 	public synchronized void writeXMLFile (Stash data, String file_name) {
@@ -307,8 +311,7 @@ public class StashLoader extends DefaultHandler implements StashConstants {
 			try {
 				if (f [i].isDirectory ())
 					loadAll (f [i]);
-				else {
-					
+				else if (f [i].getName().endsWith(".xml")) {				
 					System.out.println (f[i]);
 					parser.parse (f [i].getAbsolutePath ());
 				}

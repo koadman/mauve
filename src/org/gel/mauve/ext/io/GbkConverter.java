@@ -1,5 +1,6 @@
 package org.gel.mauve.ext.io;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,6 +21,7 @@ import org.gel.air.ja.stash.Stash;
 import org.gel.air.ja.stash.StashLoader;
 import org.gel.mauve.Genome;
 import org.gel.mauve.MauveHelperFunctions;
+import org.gel.mauve.ext.MauveInterfacer;
 import org.gel.mauve.ext.MauveStoreConstants;
 
 public class GbkConverter implements MauveStoreConstants {
@@ -53,7 +55,7 @@ public class GbkConverter implements MauveStoreConstants {
 		Iterator <ComponentFeature> itty = seq.features();
 		long time = System.currentTimeMillis();
 		System.out.println ("time: " + (System.currentTimeMillis() - time));
-		genome.put(URI, makeSequenceFile (seq));
+		makeSequenceFile (seq);
 		System.out.println ("time: " + (System.currentTimeMillis() - time));
 		Stash c_labels = new Stash (LIST_CLASS, CONTIG_INDEX);
 		genome.put(CONTIG_INDEX, c_labels);
@@ -80,8 +82,10 @@ public class GbkConverter implements MauveStoreConstants {
 			addLocation (contig_label, feat, 0);
 			makeContigStash (feat, contig_label);
 		}
-		loader.writeXMLFile(genome, "c:\\genome.xml");
-		loader.writeXMLFile(features, "c:\\features.xml");
+		loader.writeXMLFile(genome, new File (MauveInterfacer.getStashDir (),
+				genome.getString(ID) + ".xml"));
+		loader.writeXMLFile(features, new File (MauveInterfacer.getStashDir (),
+				features.getString(ID) + ".xml"));
 		//load.writeCompressedFile(features, "c:\\features.xxml");
 		System.out.println ("all written");
 	}
@@ -150,9 +154,10 @@ public class GbkConverter implements MauveStoreConstants {
 		feature.put(RIGHT_STRING, (loc.getMax() + offset) + "");
 	}
 	
-	public String makeSequenceFile (Sequence sequence) {
+	public void makeSequenceFile (Sequence sequence) {
 		try {
-			String file = "c:\\sequence.sba";
+			File file = new File (MauveInterfacer.getStashDir(), 
+					genome.getString(ID) + ".sba");
 			FileOutputStream out = new FileOutputStream (file);
 			Iterator <ComponentFeature> itty = seq.features();
 			while (itty.hasNext()) {
@@ -161,10 +166,8 @@ public class GbkConverter implements MauveStoreConstants {
 						c.getMax()).getBytes());
 			}
 			out.close();
-			return file;
 		} catch (Exception e) {
 			e.printStackTrace();
-			return null;
 		}
 	}
 	

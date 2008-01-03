@@ -3,6 +3,7 @@ package org.gel.mauve.ext.io;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.PrintStream;
@@ -14,6 +15,7 @@ import org.gel.mauve.LCB;
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.backbone.Backbone;
 import org.gel.mauve.backbone.BackboneListBuilder;
+import org.gel.mauve.ext.MauveInterfacer;
 import org.gel.mauve.ext.MauveStoreConstants;
 import org.gel.mauve.tree.GISTree;
 import org.gel.mauve.tree.GapKey;
@@ -37,11 +39,12 @@ public class AlignmentConverter implements MauveStoreConstants {
 	protected boolean use_ints;
 	protected StashLoader loader;
 
-	public AlignmentConverter (XmfaViewerModel mod) {
+	public AlignmentConverter (XmfaViewerModel mod, StashLoader load) {
+		loader = load;
 		model = mod;
-		loader = new StashLoader (null, null);
 		convertToStash ();
-		loader.writeXMLFile (align, "c:\\align.xml");
+		loader.writeXMLFile (align, new File (MauveInterfacer.getStashDir (),
+				align.getString (ID) + ".xml"));
 	}
 	
 	protected void convertToStash () {
@@ -50,8 +53,7 @@ public class AlignmentConverter implements MauveStoreConstants {
 		lcb_list = model.getFullLcbList();
 		bb_list = model.getBackboneList().getBackboneArray();
 		align.put(LCB_COUNT, lcb_list.length + "");
-		String bb_file = "c:\\bb.bbcols";
-		align.put(BACKBONE_FILE, bb_file);
+		String bb_file = align.getString(ID) + ".bbcols";
 		writeBbcolsFile (bb_file);
 		//SegmentWriter.getSegmentWriter("c:\\lcbs.txt", model);
 		Stash genome_list = new Stash (LIST_CLASS, GENOMES);
@@ -61,13 +63,12 @@ public class AlignmentConverter implements MauveStoreConstants {
 			genome_list.put(genome.get (ID), genome.get (ID));
 			genome.put(GENOME, new GbkConverter (
 					model.getGenomeBySourceIndex(i), ASAP, loader).genome.get(ID));
-			String gap_file = "c:\\" + genome.get(ID) + ".gaps";
-			genome.put(GAP_FILE, gap_file);
 			if (model.getGenomeBySourceIndex(i).getLength() < Integer.MAX_VALUE)
 				use_ints = true;
 			try {
 				gap_out = new DataOutputStream (new BufferedOutputStream (
-						new FileOutputStream (gap_file)));
+						new FileOutputStream (new File (MauveInterfacer.getStashDir (),
+								genome.get(ID) + ".gaps"))));
 				gap_file_pos = 0;
 				gap_out.writeBoolean(use_ints);
 			} catch (Exception e) {
@@ -81,7 +82,8 @@ public class AlignmentConverter implements MauveStoreConstants {
 			convertBackbone (backbone, i);
 			try {
 				gap_out.close();
-				loader.writeXMLFile(genome, "c:\\" + genome.getString (ID) + ".xml");
+				loader.writeXMLFile(genome, new File (MauveInterfacer.getStashDir(),
+						genome.getString (ID) + ".xml"));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -93,7 +95,8 @@ public class AlignmentConverter implements MauveStoreConstants {
 			BufferedReader in = new BufferedReader (new FileReader (
 					BackboneListBuilder.getBbFile(model, model.getXmfa())));
 			PrintStream out = new PrintStream (new BufferedOutputStream (
-					new FileOutputStream (file)));
+					new FileOutputStream (new File (MauveInterfacer.getStashDir (),
+							file))));
 			String input = in.readLine();
 			while (input != null) {
 				StringTokenizer toke = new StringTokenizer (input);
