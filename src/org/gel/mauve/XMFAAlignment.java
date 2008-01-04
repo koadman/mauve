@@ -474,10 +474,10 @@ public class XMFAAlignment extends MauveAlignment implements Serializable {
 	protected byte [] readSequenceFromKeys (SequenceKey l_fk, SequenceKey r_fk, 
 			long left_col, long length, int ivI, int seqI, int l_iter, int r_iter) {
 		long l_gaps = 0;
-		// should have l_fk and r_fk now.
 		// get the file offsets to read from these
 		long l_off = left_col - gis_tree[ivI][seqI].getStart (l_iter);
-		//how much of right key is needed; last needed index
+		//how much of right key is needed, or how many gaps passed right key are
+		//needed if r_off is greater then the right filekey's length.
 		long r_off = left_col + length - 1 - gis_tree[ivI][seqI].getStart (r_iter);
 		// calculate the number of newlines in the space between the first
 		// desired

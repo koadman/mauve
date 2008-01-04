@@ -15,6 +15,11 @@ public interface MauveStoreConstants extends StashConstants, MauveConstants {
 	public static final String HIST_VALS = "histogram_values";
 	
 	/**
+	 * for reading alignments
+	 */
+	public static final String FORMAT_VERSION = "FormatVersion";
+	
+	/**
 	 * for stash
 	 */
 	public static final String FEATURES = "features";
@@ -49,5 +54,6 @@ public interface MauveStoreConstants extends StashConstants, MauveConstants {
 	public static final String FORWARD_SYMBOL = "+";
 	public static final String COMPLEMENT_SYMBOL = "-";
 	public static final String REVERSE_SYMBOL = "-";
+	public static final String MAUVE_COMMENT_SYMBOL = "#";
 
 }

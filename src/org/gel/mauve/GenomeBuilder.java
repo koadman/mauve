@@ -31,11 +31,12 @@ public class GenomeBuilder
         int adjustedIndex = sequenceIndex + 1;
 
         long length = model.getXmfa().seq_length[sequenceIndex];
-        String annotationFilename = model.getXmfa().getName(sequenceIndex);
+        String annotationFilename = ((XMFAAlignment) model.getXmfa()).getName(
+        		sequenceIndex);
         SupportedFormat annotationFormat = SupportedFormatFactory.guessFormatFromFilename(annotationFilename);
         int restrictedIndex = -1;
 
-        Properties meta = model.getXmfa().metadata;
+        Properties meta = ((XMFAAlignment) model.getXmfa()).metadata;
         // See if we are in a file with multisequences here
         if (meta.containsKey("Sequence" + adjustedIndex + "Entry"))
         {

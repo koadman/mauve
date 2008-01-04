@@ -3,8 +3,12 @@ package org.gel.mauve.ext;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Hashtable;
 
 import org.biojavax.bio.seq.RichSequence;
+import org.gel.air.ja.stash.Stash;
 import org.gel.air.ja.stash.StashLoader;
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MauveHelperFunctions;
@@ -22,13 +26,40 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 	protected MauveModule mauve;
 	protected StashLoader loader;
 	protected static String data_root_dir;
+	protected Hashtable loaded_alignments;
 	
 	public MauveInterfacer (String [] args) {
 		mauve = new MauveModule (this);
+		loaded_alignments = new Hashtable ();
 		loader = new StashLoader (null, null);
+		loader.loadAll(new File (data_root_dir, "mauve_defaults.xml"));
+		if (args.length > 0)
+			args [0] = loadAlignment (args [0]);
 		Mauve.mainHook(args, mauve);
 	}
 	
+	/**
+	 * 
+	 * @param align_id
+	 * @return		A reference to the wrapper file it makes for loading in Mauve
+	 */
+	public String loadAlignment (String align_id) {
+		try {
+			Stash alignment = loader.getStash (align_id);
+			File dir = File.createTempFile("a", "z");
+			dir.delete();
+			dir.mkdir();
+			dir = new File (dir, alignment.getString(NAME));
+			PrintStream out = new PrintStream (new FileOutputStream (dir));
+			out.println (MAUVE_COMMENT_SYMBOL + FORMAT_VERSION + "\t-2");
+			out.println (MAUVE_COMMENT_SYMBOL + ALIGNMENT_CLASS + "\t" + align_id);
+			out.close();
+			return dir.getAbsolutePath();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 	
 	//doesn't work; doesn't finish writing; doesn't return; don't know why
 	public void convertToINSD (MauveFrame frame) {
@@ -74,8 +105,7 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 		//convertToINSD (frame);
 		new Thread (new Runnable () {
 			public void run () {
-				//loader.loadAll(new File (data_root_dir, "mauve_defaults.xml"));
-				new AlignmentConverter ((XmfaViewerModel) frame.getModel(), loader);		
+				//new AlignmentConverter ((XmfaViewerModel) frame.getModel(), loader);		
 			}
 		}).start ();
 	}

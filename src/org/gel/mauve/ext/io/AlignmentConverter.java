@@ -12,6 +12,7 @@ import java.util.StringTokenizer;
 import org.gel.air.ja.stash.Stash;
 import org.gel.air.ja.stash.StashLoader;
 import org.gel.mauve.LCB;
+import org.gel.mauve.XMFAAlignment;
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.backbone.Backbone;
 import org.gel.mauve.backbone.BackboneListBuilder;
@@ -93,7 +94,8 @@ public class AlignmentConverter implements MauveStoreConstants {
 	protected void writeBbcolsFile (String file) {
 		try {
 			BufferedReader in = new BufferedReader (new FileReader (
-					BackboneListBuilder.getBbFile(model, model.getXmfa())));
+					BackboneListBuilder.getBbFile(model, ((XMFAAlignment) 
+							model.getXmfa()))));
 			PrintStream out = new PrintStream (new BufferedOutputStream (
 					new FileOutputStream (new File (MauveInterfacer.getStashDir (),
 							file))));

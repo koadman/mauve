@@ -40,7 +40,7 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 	long seq_length;
 
 
-	SimilarityIndex (Genome g, XMFAAlignment xmfa, BackboneList bb_list)
+	SimilarityIndex (Genome g, MauveAlignment xmfa, BackboneList bb_list)
 			throws IOException {
 		this.seq_length = g.getLength ();
 		allocateIndex ();
@@ -137,7 +137,7 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 	/**
 	 * Calculates index values
 	 */
-	public void calculateIndex (Genome g, XMFAAlignment alignment,
+	public void calculateIndex (Genome g, MauveAlignment alignment,
 			BackboneList bb_list) {
 		// for each nucleotide in the window, calculate its column's entropy,
 		// considering gaps as non-matching alignment characters

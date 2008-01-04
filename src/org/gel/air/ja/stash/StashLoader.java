@@ -88,7 +88,6 @@ public class StashLoader extends DefaultHandler implements StashConstants {
 	}
 
 
-	@Override
 	public void startElement(String uri, String localpart, String rawname, Attributes attributes) {
 		try {
 //			localpart = localpart.substring (localpart.indexOf (':'), localpart.length ());
@@ -267,6 +266,12 @@ public class StashLoader extends DefaultHandler implements StashConstants {
 		writeXMLFile (noo, root + "\\" + noo.getString (ID));
 		defaults.getHashtable (type).put (makeKey (noo.getString (ID)), noo);
 		return noo;
+	}
+	
+	public Stash getStash (String id) {
+		String ct = id.substring(0, id.indexOf("\\"));
+		id = makeKey (id);
+		return defaults.getHashtable(ct).getHashtable(id);
 	}
 		
 
