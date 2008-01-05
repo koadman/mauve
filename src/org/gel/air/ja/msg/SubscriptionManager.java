@@ -22,12 +22,8 @@ import org.gel.air.ja.msg.node.ConnectedHub;
   *For example, the following calls would result in MessageHandler foo receiving messages
   *published to both the "arthur" and "dent" namespaces:<p>
   *
-  *<code>
-  *event_cs_client.addGroup ("arthur", foo);<br>
-  *event_cs_client.addGroup ("dent", foo);<br>
-  *</code><p>
-  *
-  *@author the twins (twins@isx.com)
+  *event_cs_client.addGroup ("arthur", foo);
+  *event_cs_client.addGroup ("dent", foo);
 **/
 public class SubscriptionManager extends ConnectedHub {
 

@@ -7,10 +7,8 @@ import org.gel.air.ja.msg.*;
 import org.gel.air.ja.msg.hub.*;
 
 /**
-  *Server-side representation of a client connection.  Handles socket communications
-  *for one client connection.<p>
-  *
-  *@author the twins (twins@isx.com)
+  *This class is instantiated for each client side
+  *connections
 **/
 public class ConnectedNodeManager extends ConnectedNode {
 

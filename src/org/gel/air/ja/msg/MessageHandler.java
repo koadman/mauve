@@ -1,10 +1,7 @@
 package org.gel.air.ja.msg;
 
-/**
-  *Interface for handling incoming messages.<p>
-  *
-  *@author  the twins (twins@isx.com)
-**/
+
+
 public interface MessageHandler {
 
 	/**

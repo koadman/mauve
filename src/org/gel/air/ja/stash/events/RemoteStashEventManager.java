@@ -20,12 +20,6 @@ public class RemoteStashEventManager extends AbstractStashEventManager implement
 	public static SubscriptionManager event_client;
 
 
-	/**
-	  *Constructor initialized the connection to the server.
-	  *@param starter  The TipcProcessCb that will handle incoming events.  If this is null, a default
-	  *  method will be used that merely prints out the event.
-	  *@param enclave  The enclave to receive events for
-	**/
 	public RemoteStashEventManager (MessageHandler starter) {
 		if (starter == null)
 			starter = this;
@@ -34,12 +28,6 @@ public class RemoteStashEventManager extends AbstractStashEventManager implement
 
 	}
 
-	/**
-	  *connects to RTServer and initializes appropriate variables.  Starts the loop that
-	  *waits for incoming messages.
-	  *@param host  the host to connect to
-	  *param port the port to use - only used if the event services is the ISX router
-	**/
 	public void init (String host) {
 		try {
 			if (event_client == null)

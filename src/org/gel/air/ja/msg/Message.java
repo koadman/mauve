@@ -4,11 +4,10 @@ import java.util.*;
 
 
 /**
-  *This class represents a message, composed of a namespace and some text.
+  *This class represents a message, including its namespace and text
   *Note that ASCII character 172 is used as an internal delimeter and should
   *not be used in either namespaces or messages.<p>
   *
-  *@author the twins (twins@isx.com)
 **/
 public class Message {
 

@@ -7,10 +7,9 @@ import org.gel.air.ja.msg.hub.*;
 import org.gel.air.ja.threadpool.*;
 
 /**
-  *This class acts a server for publish-subscribe messaging.  It manages client connections,
-  *receives messages from them, and sends them to interested clients.<p>
+  *This class acts a server for messaging, receiving and passing
+  *along messages to subscribed clients
   *
-  *@author the twins (twins@isx.com)
 **/
 public class SubscriptionServer extends Hub {
 

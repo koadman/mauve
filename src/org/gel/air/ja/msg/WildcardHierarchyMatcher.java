@@ -28,10 +28,7 @@ import java.util.Random;
   *<li>'frog\...\parakeet\' would match 'frog\denture\albino\parakeet\' or 'frog\parakeet\',
   *     but would not match 'froggy\parakeet\' or '\foo\frog\blah\parakeet\'
   *<li>'*lunacy*\...\' would match 'rutabaga*calamity\' or 'endlesslunacyabounds\this\that\the other thing\',
-	  but would not match 'dogs\this\that\'
-  *</ul><p>
-  *
-  *@author the twins (twins@isx.com)
+  *	  but would not match 'dogs\this\that\'
 **/
 public class WildcardHierarchyMatcher implements SubscriptionMatcher {
 

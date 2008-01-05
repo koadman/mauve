@@ -2,8 +2,7 @@ package org.gel.air.ja.msg;
 
 /**
   *Interface for matching wildcarded namespaces.<p>
-  *
-  *@author the twins (twins@isx.com)	
+  *	
 **/
 public interface SubscriptionMatcher {
 

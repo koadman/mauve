@@ -6,11 +6,7 @@ import java.awt.Point;
 
 
 /**
-  *This class handles distributing messages based on namespace.  It contains data
-  *structures for keeping track of what parties are subscribed to what namespaces.
-  *This class is used both on the client and server sides for distribution, and thus
-  *can distribute messages to either EventSSClients or MessageHandlers.  This also
-  *allows one application to act as both a server and a client, if necessary.<p>
+  *This class handles message distribution for both the client and server side.
   *
   *Wildcarded and non-wildcarded namespaces are stored separately within this class
   *for efficiency.  The matchSubjects method in the matcher object is only used for
@@ -33,8 +29,6 @@ import java.awt.Point;
   *to two namespaces that match the message's namespace (e.g., "*ah" and "..."), it will
   *receive the message once, with the subject of the message set to "blah".
   *</ul><p>
-  *
-  *@author  the twins (twins@isx.com)
 **/
 public class SubscriptionLists {
 
