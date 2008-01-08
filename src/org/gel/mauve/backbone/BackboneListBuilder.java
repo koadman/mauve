@@ -9,32 +9,18 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.gel.mauve.Genome;
+import org.gel.mauve.MauveAlignment;
+import org.gel.mauve.MauveAlignmentViewerModel;
 import org.gel.mauve.XMFAAlignment;
 import org.gel.mauve.XmfaViewerModel;
 
 public class BackboneListBuilder {
-	public static File getBbFile (XmfaViewerModel model, XMFAAlignment xmfa) {
-		Properties meta = xmfa.metadata;
-		// Find the backbone data
-		String bb_fname;
-		if (meta.containsKey ("BackboneFile")) {
-			bb_fname = meta.getProperty ("BackboneFile");
-		} else {
-			return null; // no backbone information
-		}
-		File src = new File (bb_fname);
-		if (!src.canRead ()) {
-			bb_fname = model.getSrc ().getParent () + File.separatorChar
-					+ src.getName ();
-		}
-		src = new File (bb_fname);
-		if (!src.canRead ()) {
-			return null; // can't read the backbone file
-		}
-		return src;
+	public static File getBbFile (MauveAlignmentViewerModel model, MauveAlignment xmfa) {
+		return model.getBbFile ();
 	}
 
-	public static BackboneList build (XmfaViewerModel model, XMFAAlignment xmfa)
+	public static BackboneList build (MauveAlignmentViewerModel model, 
+			MauveAlignment xmfa)
 			throws IOException {
 		int sequenceCount = model.getSequenceCount ();
 		File src = getBbFile (model, xmfa);
@@ -62,36 +48,13 @@ public class BackboneListBuilder {
 				int seq = Integer.parseInt (tok);
 				seqs[seq] = true;
 			}
-			Backbone bb = new Backbone ();
-			bb.setLcbIndex (lcb_id);
-			bb.setLeftColumn (left_col);
-			bb.setLength (length);
-			bb.setSeqs (seqs);
-			long lends[] = new long [seqs.length];
-			boolean lend_gaps[] = new boolean [seqs.length];
-			xmfa.getColumnCoordinates (model, lcb_id, left_col, lends,
-					lend_gaps);
-			long rends[] = new long [seqs.length];
-			boolean rend_gaps[] = new boolean [seqs.length];
-			xmfa.getColumnCoordinates (model, lcb_id, left_col + length - 1,
-					rends, rend_gaps);
-			for (int sI = 0; sI < seqs.length; ++sI) {
-				if (!seqs[sI]) {
-					lends[sI] = 0;
-					rends[sI] = 0;
-				} else {
-					if (rends[sI] < lends[sI]) {
-						long tmp = lends[sI];
-						lends[sI] = rends[sI];
-						rends[sI] = tmp;
-					}
-				}
-			}
-			bb.setLeftEnd (lends);
-			bb.setRightEnd (rends);
-
-			bbvect.addElement (bb);
+			bbvect.addElement (makeBbSegment (lcb_id, left_col, length, model, seqs));			
 		}
+		return makeBbList (model, bbvect);
+	}
+	
+	public static BackboneList makeBbList (MauveAlignmentViewerModel model,
+			Vector bbvect) {
 		Backbone [] bb_array = new Backbone [bbvect.size ()];
 		bb_array = (Backbone []) bbvect.toArray (bb_array);
 
@@ -116,9 +79,46 @@ public class BackboneListBuilder {
 			seq_bb_vect.addElement (seq_bb);
 		}
 		BackboneList bb_list = new BackboneList ();
-		bb_list.setXmfa (xmfa);
+		bb_list.setXmfa (model.getAlignment ());
 		bb_list.setBackbone (bb_array);
 		bb_list.setSeqBackbone (seq_bb_vect);
 		return bb_list;
+
+	}
+	
+	public static Backbone makeBbSegment (int lcb_id, long left_col, long length,
+			MauveAlignmentViewerModel model, boolean [] seqs) {
+		MauveAlignment xmfa = model.getAlignment ();
+		Backbone bb = new Backbone ();
+		bb.setLcbIndex (lcb_id);
+		bb.setLeftColumn (left_col);
+		bb.setLength (length);
+		int seq_count = model.getSequenceCount ();
+		long lends[] = new long [seq_count];
+		boolean lend_gaps[] = new boolean [seq_count];
+		xmfa.getColumnCoordinates (model, lcb_id, left_col, lends,
+				lend_gaps);
+		long rends[] = new long [seq_count];
+		boolean rend_gaps[] = new boolean [seq_count];
+		xmfa.getColumnCoordinates (model, lcb_id, left_col + length - 1,
+				rends, rend_gaps);
+		for (int sI = 0; sI < seq_count; ++sI) {
+			// changed this test--was checking seqs[sI]--need to make sure it works
+			if (lends[sI] == rends[sI]) {
+				lends[sI] = 0;
+				rends[sI] = 0;
+			} else {
+				if (rends[sI] < lends[sI]) {
+					long tmp = lends[sI];
+					lends[sI] = rends[sI];
+					rends[sI] = tmp;
+					seqs [sI] = true;
+				}
+			}
+		}
+		bb.setLeftEnd (lends);
+		bb.setRightEnd (rends);
+		bb.setSeqs (seqs);
+		return bb;
 	}
 }
