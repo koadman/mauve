@@ -338,9 +338,9 @@ public class XMFAAlignment extends MauveAlignment implements Serializable {
 						if (seq_count == 0)
 							seq_count = lend.size ();
 						// create a new Match element
-						Match m = new Match (seq_count);
+						Match m = new Match (seq_count, true);
 						// copy file offsets
-						Match f_off_m = new Match (seq_count);
+						Match f_off_m = new Match (seq_count, true);
 						// copy left ends into start
 						int aligned_count = 0;
 						// only set values for sequence numbers that were
@@ -355,13 +355,13 @@ public class XMFAAlignment extends MauveAlignment implements Serializable {
 											.longValue ());
 							if (m.getStart (seqI) != 0)
 								aligned_count++;
-							m.setLength (seqI, ((Long) rend
+							m.setEnd (seqI, ((Long) rend
 									.elementAt (seq_numI)).longValue ());
 							m.setReverse (seqI, ((Boolean) reverse
 									.elementAt (seq_numI)).booleanValue ());
 							f_off_m.setStart (seqI, ((Long) f_offset
 									.elementAt (seq_numI)).longValue ());
-							f_off_m.setLength (seqI, ((Long) f_end_offset
+							f_off_m.setEnd (seqI, ((Long) f_end_offset
 									.elementAt (seq_numI)).longValue ());
 						}
 						// if this interval contains alignment of more than one
@@ -417,8 +417,8 @@ public class XMFAAlignment extends MauveAlignment implements Serializable {
 			long seq_len = 0;
 			int treeI = 0;
 			for (int ivI = 0; ivI < intervals.length; ivI++) {
-				if (intervals[ivI].getLength (seqI) > seq_len) {
-					seq_len = intervals[ivI].getLength (seqI);
+				if (intervals[ivI].getSegmentEnd (seqI) > seq_len) {
+					seq_len = intervals[ivI].getSegmentEnd (seqI);
 				}
 				if (gis_tree[ivI][seqI] == null) {
 					gis_tree[ivI][seqI] = new GISTree (ts);

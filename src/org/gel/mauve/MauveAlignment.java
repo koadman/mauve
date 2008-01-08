@@ -62,8 +62,8 @@ abstract public class MauveAlignment implements Serializable {
 			// determine the file offset of the left end of this sequence
 			// read a bunch o' columns
 			long cur_iv_lend = intervals[ivI].getStart (g);
-			long read_size = intervals[ivI].getLength (g) - rend > 0 ? rend
-					- cur_offset + 1 : intervals[ivI].getLength (g)
+			long read_size = intervals[ivI].getEnd (g) - rend > 0 ? rend
+					- cur_offset + 1 : intervals[ivI].getEnd (g)
 					- cur_offset + 1;
 			while (read_size > 0) {
 				// assume forward orientation
@@ -72,7 +72,7 @@ abstract public class MauveAlignment implements Serializable {
 				// reverse the sequences if necessary
 				long lcb_offset = cur_offset - cur_iv_lend;
 				long lcb_right_offset = intervals[ivI].getReverse (g) ? intervals[ivI]
-						.getLength (g)
+						.getEnd (g)
 						- intervals[ivI].getStart (g) - lcb_offset + 1
 						: lcb_offset + read_size;
 				lcb_offset = intervals[ivI].getReverse (g) ? lcb_right_offset
@@ -232,7 +232,7 @@ abstract public class MauveAlignment implements Serializable {
 		int ivI = 0;
 		for (; ivI < intervals.length; ivI++) {
 			if (intervals[ivI].getStart (g) <= position
-					&& position <= intervals[ivI].getLength (g))
+					&& position <= intervals[ivI].getEnd (g))
 				break; // found the starting interval -- remember lengths array
 			// contains r_end
 		}
@@ -246,7 +246,7 @@ abstract public class MauveAlignment implements Serializable {
 	// FIXME: get rev. comp right in these two functions!
 	long revCompify (long position, Genome g, int ivI) {
 		try {
-			return intervals[ivI].getReverse (g) ? intervals[ivI].getLength (g)
+			return intervals[ivI].getReverse (g) ? intervals[ivI].getEnd (g)
 					- intervals[ivI].getStart (g) - position : position;
 		} catch (Exception e) {
 			e.printStackTrace ();
@@ -298,7 +298,7 @@ abstract public class MauveAlignment implements Serializable {
 	 * @param gap
 	 *            True whenever a given sequence has a gap in the query column
 	 */
-	public void getColumnCoordinates (XmfaViewerModel model, int lcb,
+	public void getColumnCoordinates (MauveAlignmentViewerModel model, int lcb,
 			long column, long [] seq_offsets, boolean [] gap) {
 		for (int seqI = 0; seqI < seq_count; seqI++) {
 			Genome g = model.getGenomeBySourceIndex (seqI);

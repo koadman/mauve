@@ -28,21 +28,21 @@ public class Match extends Segment //implements Serializable
     //private long[] ends;
     // The direction of each match. false is forward, true is reverse
     //private boolean[] reverse;
-
-    public Match(int sequenceCount)
+    //end is true if this match has start ands ends, and false if it
+    //contains starts and lengths
+    public Match(int sequenceCount, boolean end)
     {
-        starts = new long[sequenceCount];
-        lengths = new long[sequenceCount];
-        reverse = new boolean[sequenceCount];
+    	super (sequenceCount, false, end);
     }
 
-    public Match(Match m)
+    public Match(Match m, boolean end)
     {
-        starts = new long[m.starts.length];
-        lengths = new long[m.lengths.length];
-        reverse = new boolean[m.reverse.length];
+        this (m.starts.length, end);
         System.arraycopy(m.starts, 0, starts, 0, starts.length);
-        System.arraycopy(m.lengths, 0, lengths, 0, lengths.length);
+        if (end)
+        	System.arraycopy(m.ends, 0, ends, 0, ends.length);
+        else
+        	System.arraycopy(m.lengths, 0, lengths, 0, lengths.length);
         System.arraycopy(m.reverse, 0, reverse, 0, reverse.length);
 
         color = m.color;
@@ -80,7 +80,7 @@ public class Match extends Segment //implements Serializable
     
     public long getLength(Genome g)
     {
-        return lengths[g.getSourceIndex()];
+       return super.getSegmentLength(g.getSourceIndex ());
     }
     
     /**
@@ -90,12 +90,20 @@ public class Match extends Segment //implements Serializable
      */
     public long getLength(int sourceIndex)
     {
-        return lengths[sourceIndex];
+        return super.getSegmentLength(sourceIndex);
     }
     
     public void setLength(Genome g, long length)
     {
         lengths[g.getSourceIndex()] = length;
+    }
+    
+    public long getEnd (Genome g) {
+    	return super.getSegmentEnd(g.getSourceIndex ());
+    }
+    
+    public void setEnd (int sourceInd, long length) {
+    	setEndOrLength (length, true, sourceInd);
     }
     
     /**
@@ -105,7 +113,7 @@ public class Match extends Segment //implements Serializable
      */
     public void setLength(int sourceIndex, long length)
     {
-        lengths[sourceIndex] = length;
+        setEndOrLength (length, false, sourceIndex);
     }
     
     public boolean getReverse(Genome g)
@@ -161,10 +169,12 @@ public class Match extends Segment //implements Serializable
         return g_offset;
     }
 
-    public void copyArrays(LCB lcb, long[] starts, long[] lengths, boolean[] reverse, int seq_count)
+    public void copyArrays(LCB lcb, long[] starts, long[] lengths_or_ends, 
+    		boolean[] reverse, int seq_count)
     {
         System.arraycopy(this.starts, 0, starts, 0, seq_count);
-        System.arraycopy(this.lengths, 0, lengths, 0, seq_count);
+        System.arraycopy(lengths == null ? this.ends : this.lengths, 0, 
+        		lengths_or_ends, 0, seq_count);
         System.arraycopy(this.reverse, 0, reverse, 0, seq_count);
     }
 

@@ -59,6 +59,13 @@ public class Segment implements Serializable {
 	protected Segment () {
 	}
 	
+	protected void setEndOrLength (long val, boolean end, int genome) {
+		if (end)
+			ends [genome] = val;
+		else
+			lengths [genome] = val;
+	}
+	
 	protected void setEndOrLength (long [] data, boolean end) {
 		if (end)
 			ends = data;

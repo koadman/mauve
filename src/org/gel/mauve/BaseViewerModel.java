@@ -27,7 +27,7 @@ public class BaseViewerModel {
 	protected Genome [] genomes;
 
 	// Genomes, stored in the order in which they appear in the source file.
-	private Genome [] sourceGenomes;
+	protected Genome [] sourceGenomes;
 
 	// Current viewer mode.
 	private ViewerMode mode = ViewerMode.NORMAL;
@@ -576,7 +576,8 @@ public class BaseViewerModel {
 		}
 
 		MatchStartComparator matchComparator = new MatchStartComparator (g);
-		Match f_match = new Match ((Match) sortedMatches.get (0));
+		Match match = (Match) sortedMatches.get (0);
+		Match f_match = new Match (match, match.lengths == null);
 
 		f_match.setStart (g, start_coord);
 		if (f_match.getStart (g) < 1)
