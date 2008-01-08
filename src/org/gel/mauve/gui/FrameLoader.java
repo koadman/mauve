@@ -27,6 +27,16 @@ public class FrameLoader implements Runnable {
 	private String auth_token;
 	
 	private String contig;
+	
+	private String factory;
+	
+	private Object source;
+	
+	public FrameLoader (MauveFrame frame, Object src, String fact_id) {
+		this.frame = frame;
+		source = src;
+		factory = fact_id;
+	}
 
 	public FrameLoader (MauveFrame frame, URL url) {
 		this.frame = frame;
@@ -53,9 +63,11 @@ public class FrameLoader implements Runnable {
 	public void run () {
 		if (url != null) {
 			loadURL ();
-		} else {
+		} else if (file != null){
 			loadFile ();
 		}
+		else 
+			loadObject ();
 	}
 
 	private void loadURL () {
@@ -97,6 +109,16 @@ public class FrameLoader implements Runnable {
 			JOptionPane.showMessageDialog(null, "An error occurred when reading the alignment file.\n" + e.getMessage(), "An error occurred", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace ();
 		}
+	}
+	
+	private void loadObject () {
+		final BaseViewerModel model = ModelBuilder.buildModel (frame, 
+				source, factory);
+		SwingUtilities.invokeLater (new Runnable () {
+			public void run () {
+				frame.setModel (model);
+			}
+		});
 	}
 
 }
