@@ -16,6 +16,10 @@ public class SequenceKey implements Key, Cloneable, Serializable {
 	public long getLength () {
 		return length;
 	}
+	
+	public void setLength (long len) {
+		length = len;
+	}
 
 	public void incrementLength () {
 		length++;
