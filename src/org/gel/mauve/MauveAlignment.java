@@ -224,6 +224,10 @@ abstract public class MauveAlignment implements Serializable {
 		return col_offset;
 	}
 	
+	public int getIntervalCount () {
+		return intervals.length;
+	}
+	
 	/**
 	 * return the LCB index that contains the given position of the given
 	 * sequence.  this is relative to the intervals array, not the lcb ids or array.
