@@ -10,6 +10,7 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.jar.JarEntry;
@@ -20,6 +21,7 @@ import java.util.prefs.Preferences;
 
 import org.gel.mauve.color.LCBColorScheme;
 import org.gel.mauve.color.NormalizedOffsetColorScheme;
+import org.gel.mauve.ext.ModelFactory;
 
 /**
  * 
@@ -28,6 +30,9 @@ import org.gel.mauve.color.NormalizedOffsetColorScheme;
  */
 public class ModelBuilder
 {
+	
+	protected static Hashtable <String, ModelFactory> registered_models = 
+		new Hashtable <String, ModelFactory> ();
 
     // Delimiter for headers
     private final static String DELIMS = "\t";
@@ -242,6 +247,40 @@ public class ModelBuilder
         return newChild;
     }
     
+    public static BaseViewerModel buildModel (ModelProgressListener listener,
+    		Object src, String model_type) {
+        if (listener != null)
+        {
+            listener.buildStart();
+            listener.alignmentStart();
+        }
+        ModelFactory factory = registered_models.get(model_type);
+    	BaseViewerModel model = factory.createModel(src, listener);
+        if (listener != null)
+        {
+            listener.done();
+        }
+        model.setReference(model.getGenomeBySourceIndex(0));
+    	return model;
+    }
+    
+    /**
+     * Registers a model by an identifying string if there isn't already a 
+     * ModelFactory registered under that string.  Returns true if it registers
+     * the factory, and false if one was already registered.
+     * 
+     * @param factory
+     * @param model_type
+     * @return
+     */
+    public static boolean registerModel (ModelFactory factory) {
+    	if (registered_models.get(factory.getUniqueName()) == null) {
+    		registered_models.put(factory.getUniqueName(), factory);
+    		return true;
+    	}
+    	else
+    		return false;
+    }
     /**
      * @throws IOException
      * @throws MauveFormatException
@@ -395,7 +434,7 @@ public class ModelBuilder
         while ((inputLine = inputFile.readLine()) != null)
         {
 
-            Match new_match = new Match(model.getSequenceCount());
+            Match new_match = new Match(model.getSequenceCount(), false);
             long m_length = 0;
             int tokenI = 0;
             StringTokenizer st = new StringTokenizer(inputLine, DELIMS);
@@ -472,7 +511,7 @@ public class ModelBuilder
                 continue;
             }
 
-            Match new_match = new Match(model.getSequenceCount());
+            Match new_match = new Match(model.getSequenceCount(), false);
             new_match.lcb = cur_lcb;
             long m_length = 0;
             int tokenI = 0;
