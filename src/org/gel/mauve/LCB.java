@@ -53,11 +53,7 @@ public class LCB extends Segment {
 		m.copyArrays (this, starts, ends, reverse, seq_count);
 
 		// set weight to average lcb length for now...
-		long len_sum = 0;
-		for (int seqI = 0; seqI < seq_count; seqI++) {
-			len_sum += ends[seqI] - starts[seqI];
-		}
-		weight = len_sum / seq_count;
+		calculateWeight ();
 		keep = false;
 	}
 
@@ -79,6 +75,14 @@ public class LCB extends Segment {
 		System.arraycopy (l.left_adjacency, 0, left_adjacency, 0, seq_count);
 		System.arraycopy (l.right_adjacency, 0, right_adjacency, 0, seq_count);
 		System.arraycopy (l.reverse, 0, reverse, 0, seq_count);
+	}
+	
+	public void calculateWeight () {
+		long len_sum = 0;
+		for (int seqI = 0; seqI < starts.length; seqI++) {
+			len_sum += ends[seqI] - starts[seqI];
+		}
+		weight = len_sum / starts.length;
 	}
 
 	public long midpoint (Genome g) {
