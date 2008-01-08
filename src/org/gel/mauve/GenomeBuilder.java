@@ -128,7 +128,7 @@ public class GenomeBuilder
     }
 
     // Left package-visible for testing.
-    static Genome buildGenome(long length, File annotationFile, SupportedFormat annotationFormat, BaseViewerModel model, int restrictedIndex, int sequenceIndex)
+    public static Genome buildGenome(long length, File annotationFile, SupportedFormat annotationFormat, BaseViewerModel model, int restrictedIndex, int sequenceIndex)
     {
         Genome g = new Genome(length, model, sequenceIndex);
 
@@ -149,7 +149,7 @@ public class GenomeBuilder
         // We will also build chromosome list simultaneously.
         chromo = new ArrayList();
 
-        if /*(true)*/ (!annotationFile.exists())
+        if (!annotationFile.exists())
         {
             return g;
         }
