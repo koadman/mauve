@@ -1,4 +1,4 @@
-package org.gel.mauve.contigs;
+package org.gel.mauve.bioj;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -8,7 +8,7 @@ import org.biojava.bio.BioException;
 import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.seq.SequenceIterator;
 
-public class ListSequenceIterator extends LinkedList implements
+public class ListSequenceIterator extends LinkedList <Sequence> implements
 		SequenceIterator {
 
 	protected Iterator iterator;

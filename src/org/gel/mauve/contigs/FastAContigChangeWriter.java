@@ -24,6 +24,7 @@ import org.gel.mauve.Genome;
 import org.gel.mauve.LcbViewerModel;
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MauveHelperFunctions;
+import org.gel.mauve.bioj.ListSequenceIterator;
 
 public class FastAContigChangeWriter implements MauveConstants {
 	
