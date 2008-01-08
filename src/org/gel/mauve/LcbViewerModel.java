@@ -142,7 +142,7 @@ public class LcbViewerModel extends BaseViewerModel {
 	 * @param fullLcbList
 	 *            sequence coordinates of the complete set of LCB boundaries.
 	 */
-	void setFullLcbList (LCB [] fullLcbList) {
+	protected void setFullLcbList (LCB [] fullLcbList) {
 		this.fullLcbList = fullLcbList;
 	}
 
