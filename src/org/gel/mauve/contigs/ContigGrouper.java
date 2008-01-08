@@ -10,7 +10,7 @@ import org.gel.mauve.Chromosome;
 import org.gel.mauve.Genome;
 import org.gel.mauve.LCB;
 import org.gel.mauve.MauveConstants;
-import org.gel.mauve.XmfaViewerModel;
+import org.gel.mauve.MauveAlignmentViewerModel;
 import org.gel.mauve.ZoomHistogram;
 import org.gel.mauve.analysis.SegmentComparator;
 import org.gel.mauve.backbone.Backbone;
@@ -38,7 +38,7 @@ public class ContigGrouper implements MauveConstants {
 		fix = central.fix;
 		genome_ind = fix.getSourceIndex ();
 		groups = new Hashtable ();
-		XmfaViewerModel model = (XmfaViewerModel) central.model;
+		MauveAlignmentViewerModel model = (MauveAlignmentViewerModel) central.model;
 		how_similar = model.getSim (fix);
 		bb = model.getBackboneList ();
 		min_edge_bp = bp;

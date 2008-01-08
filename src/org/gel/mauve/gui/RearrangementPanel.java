@@ -1,15 +1,11 @@
 package org.gel.mauve.gui;
 
 import java.awt.Color;
-import java.awt.ComponentOrientation;
-import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
@@ -29,14 +25,10 @@ import javax.print.PrintService;
 import javax.print.attribute.standard.PrinterResolution;
 import javax.swing.AbstractAction;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
-import javax.swing.JMenu;
 import javax.swing.JPanel;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
@@ -48,22 +40,12 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
 import org.gel.mauve.BaseViewerModel;
-import org.gel.mauve.ColorScheme;
-import org.gel.mauve.HighlightListener;
 import org.gel.mauve.LcbViewerModel;
 import org.gel.mauve.ModelEvent;
 import org.gel.mauve.ModelListener;
 import org.gel.mauve.MyConsole;
 import org.gel.mauve.ViewerMode;
-import org.gel.mauve.XmfaViewerModel;
-import org.gel.mauve.color.BackboneLcbColor;
-import org.gel.mauve.color.BackboneMultiplicityColor;
-import org.gel.mauve.color.LCBColorScheme;
-import org.gel.mauve.color.MultiplicityColorScheme;
-import org.gel.mauve.color.MultiplicityTypeColorScheme;
-import org.gel.mauve.color.NormalizedMultiplicityTypeColorScheme;
-import org.gel.mauve.color.NormalizedOffsetColorScheme;
-import org.gel.mauve.color.OffsetColorScheme;
+import org.gel.mauve.MauveAlignmentViewerModel;
 import org.gel.mauve.gui.sequence.RRSequencePanel;
 import org.gel.mauve.gui.sequence.SeqPanel;
 
@@ -298,9 +280,9 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     	{
     		LcbViewerModel lm = (LcbViewerModel)model;
         	return lm.isNwayLcbList();
-    	}else if (model instanceof XmfaViewerModel)
+    	}else if (model instanceof MauveAlignmentViewerModel)
         {
-        	XmfaViewerModel xmfa = (XmfaViewerModel)model;
+        	MauveAlignmentViewerModel xmfa = (MauveAlignmentViewerModel)model;
         	return xmfa.isNwayLcbList();
         }
         return false;
@@ -308,9 +290,9 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     
     private boolean haveBackboneData()
     {
-        if (model instanceof XmfaViewerModel)
+        if (model instanceof MauveAlignmentViewerModel)
         {
-        	XmfaViewerModel xmfa = (XmfaViewerModel)model;
+        	MauveAlignmentViewerModel xmfa = (MauveAlignmentViewerModel)model;
         	if(xmfa.getBackboneList() != null)
         		return true;
         }

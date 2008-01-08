@@ -4,15 +4,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.gel.mauve.Genome;
 import org.gel.mauve.MauveAlignment;
 import org.gel.mauve.MauveAlignmentViewerModel;
-import org.gel.mauve.XMFAAlignment;
-import org.gel.mauve.XmfaViewerModel;
 
 public class BackboneListBuilder {
 	public static File getBbFile (MauveAlignmentViewerModel model, MauveAlignment xmfa) {

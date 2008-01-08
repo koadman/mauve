@@ -8,7 +8,7 @@ import javax.swing.JMenu;
 
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.LcbViewerModel;
-import org.gel.mauve.XmfaViewerModel;
+import org.gel.mauve.MauveAlignmentViewerModel;
 
 public class StyleMenu extends JMenu implements ActionListener {
 
@@ -85,7 +85,7 @@ public class StyleMenu extends JMenu implements ActionListener {
     {
     	this.model = model;
     	this.rrpanel = rrpanel;
-    	if( model instanceof LcbViewerModel || model instanceof XmfaViewerModel )
+    	if( model instanceof LcbViewerModel || model instanceof MauveAlignmentViewerModel )
     	{
     		setEnabled(true);
             rrpanel.addKeyMapping("typed r", "ToggleStrikethrough", this);

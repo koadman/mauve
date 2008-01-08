@@ -47,9 +47,6 @@ public class Mauve {
 	}
 	
 	public static void mainHook (String args [], final Mauve mv) {
-		MyConsole.setUseSwing (true);
-		MyConsole.showConsole ();
-		ModelBuilder.setUseDiskCache (false);
 		if (args.length >= 1) {
 			final String filename = args[0];
 			javax.swing.SwingUtilities.invokeLater (new Runnable () {

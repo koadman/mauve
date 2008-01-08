@@ -1,5 +1,9 @@
 package org.gel.mauve.ext;
 
+import java.util.Comparator;
+
+import org.gel.air.ja.stash.IDStashComparator;
+import org.gel.air.ja.stash.StashComparator;
 import org.gel.air.ja.stash.StashConstants;
 import org.gel.mauve.MauveConstants;
 
@@ -18,6 +22,7 @@ public interface MauveStoreConstants extends StashConstants, MauveConstants {
 	 * for reading alignments
 	 */
 	public static final String FORMAT_VERSION = "FormatVersion";
+	public static final String LOADER = "loader";
 	
 	/**
 	 * for stash
@@ -35,11 +40,15 @@ public interface MauveStoreConstants extends StashConstants, MauveConstants {
 	public static final String BACKBONE_IDS = "backbone_ids";
 	public static final String GENOMES = "genomes";
 	public static final String LCBS = "lcbs";
+	public static final String LENGTH = "length";
 	public static final String GENOME = "genome";
 	public static final String GAP_FILE_START = "gap_file_start";
-	public static final String GAP_FILE_END = "gap_file_end";
 	public static final String REVERSE = "reverse";
 	public static final String LCB_COUNT = "lcb_count";
+	public static final String ALIGNMENT_ID = "alignment_id";
+	public static final String ALIGNMENT = "alignment";
+	public static final String GENOME_COUNT = "genome_count";
+	public static final String INTERVAL_COUNT = "interval_count";
 	
 	public static final String GENOME_CLASS = "Genome";
 	public static final String CONTIG_CLASS = "Contig";
@@ -55,5 +64,10 @@ public interface MauveStoreConstants extends StashConstants, MauveConstants {
 	public static final String COMPLEMENT_SYMBOL = "-";
 	public static final String REVERSE_SYMBOL = "-";
 	public static final String MAUVE_COMMENT_SYMBOL = "#";
+	
+	//comparators for Stashes
+	public static final IDStashComparator ID_COMP = new IDStashComparator (true);
+	public static final StashComparator START_COMP = new StashComparator (
+			LEFT_STRING, true);
 
 }

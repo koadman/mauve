@@ -25,7 +25,6 @@ import java.util.prefs.BackingStoreException;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -40,12 +39,10 @@ import javax.swing.WindowConstants;
 
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.BrowserLauncher;
-import org.gel.mauve.LcbViewerModel;
 import org.gel.mauve.ModelBuilder;
 import org.gel.mauve.ModelProgressListener;
 import org.gel.mauve.MyConsole;
 import org.gel.mauve.SeqFeatureData;
-import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.color.ColorMenu;
 import org.gel.mauve.gui.dnd.FileDrop;
 import org.gel.mauve.gui.sequence.FeatureFilterer;

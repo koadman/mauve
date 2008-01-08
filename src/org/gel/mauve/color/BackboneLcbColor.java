@@ -6,15 +6,15 @@ import java.util.Arrays;
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.ColorScheme;
 import org.gel.mauve.LCB;
-import org.gel.mauve.XmfaViewerModel;
+import org.gel.mauve.MauveAlignmentViewerModel;
 import org.gel.mauve.backbone.Backbone;
 import org.gel.mauve.backbone.BackboneList;
 
 public class BackboneLcbColor implements ColorScheme {
 	public void apply (BaseViewerModel model) {
-		if (!(model instanceof XmfaViewerModel))
+		if (!(model instanceof MauveAlignmentViewerModel))
 			return;
-		XmfaViewerModel xmfa = (XmfaViewerModel) model;
+		MauveAlignmentViewerModel xmfa = (MauveAlignmentViewerModel) model;
 		BackboneList bb_list = xmfa.getBackboneList ();
 		if (bb_list == null)
 			return;

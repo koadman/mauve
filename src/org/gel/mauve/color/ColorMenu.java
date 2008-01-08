@@ -9,7 +9,7 @@ import javax.swing.JRadioButtonMenuItem;
 
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.LcbViewerModel;
-import org.gel.mauve.XmfaViewerModel;
+import org.gel.mauve.MauveAlignmentViewerModel;
 
 public class ColorMenu extends JMenu implements ActionListener {
 
@@ -70,9 +70,9 @@ public class ColorMenu extends JMenu implements ActionListener {
         this.removeAll();
 
         this.model = model;
-        if (model instanceof XmfaViewerModel)
+        if (model instanceof MauveAlignmentViewerModel)
         {
-        	boolean have_bb = ((XmfaViewerModel)model).getBackboneList() != null;
+        	boolean have_bb = ((MauveAlignmentViewerModel)model).getBackboneList() != null;
         	if(have_bb)
         	{
         		add(bbLcbColor);

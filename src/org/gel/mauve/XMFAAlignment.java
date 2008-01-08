@@ -445,6 +445,9 @@ public class XMFAAlignment extends MauveAlignment implements Serializable {
 
 		// Prune the arrays.
 		ts.pruneArrays ();
+		for (int i = 0; i < lcb_list.length; i++) {
+			System.out.println (lcb_list [i].getSegmentLength (1));
+		}
 	}
 
 	/**

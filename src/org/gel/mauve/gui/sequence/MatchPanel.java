@@ -30,6 +30,7 @@ import org.gel.mauve.HighlightListener;
 import org.gel.mauve.LCB;
 import org.gel.mauve.LcbViewerModel;
 import org.gel.mauve.Match;
+import org.gel.mauve.MauveAlignmentViewerModel;
 import org.gel.mauve.ModelEvent;
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.backbone.Backbone;
@@ -80,7 +81,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
         super(model, genome);
         this.rrpanel = rrpanel;
         viewEnd = getGenome().getViewStart() + getGenome().getViewLength() - 1;
-        if (! (model instanceof XmfaViewerModel))
+        if (! (model instanceof MauveAlignmentViewerModel))
         {
             model.addHighlightListener(this);            
         }
@@ -139,9 +140,9 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
                     model.clearMatchHighlights();
                 }
 
-                if (model instanceof XmfaViewerModel)
+                if (model instanceof MauveAlignmentViewerModel)
                 {
-                    XmfaViewerModel xm = (XmfaViewerModel) model;
+                    MauveAlignmentViewerModel xm = (MauveAlignmentViewerModel) model;
                     if (xm.getSim(getGenome()) != null)
                     {
                         long seqX = pixelToCenterSequenceCoordinate(e.getX());
@@ -265,7 +266,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
 		public JMenuItem[] getItem(MouseEvent evt, final RearrangementPanel rrpanel, final BaseViewerModel model, final Genome g)
 		{
 			JMenuItem[] itemArray = new JMenuItem[0];
-	        if( !(model instanceof LcbViewerModel) && !(model instanceof XmfaViewerModel))
+	        if( !(model instanceof LcbViewerModel) && !(model instanceof MauveAlignmentViewerModel))
 	        {
 	        	Vector items = new Vector();
 	            int[] match_range = new int[2];
@@ -471,7 +472,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
         
         g2.translate(0, boxTop() + 1);
         
-        if (model instanceof XmfaViewerModel)
+        if (model instanceof MauveAlignmentViewerModel)
         {
             drawXmfa(half_height, g2, similarityIncrement);
         }
@@ -732,7 +733,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
      */
     private void drawXmfa(int half_height, Graphics2D g, double increment)
     {
-        XmfaViewerModel xm = ((XmfaViewerModel) model);
+        MauveAlignmentViewerModel xm = ((MauveAlignmentViewerModel) model);
         g.setStroke(new BasicStroke((float) LCB_BOUNDARY_WIDTH));
         double sim_height = half_height - LCB_BOUNDARY_WIDTH;
         Color sim_color = Color.GRAY;
@@ -900,7 +901,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
                         g.setClip(r);
                     }
                     boolean reverse = lcb.getReverse(getGenome());
-                    double s = ((XmfaViewerModel) model).getSim(getGenome()).getValueForRange(seq_left, seq_right);
+                    double s = xm.getSim(getGenome()).getValueForRange(seq_left, seq_right);
                     // normalize to a box_height
                     double height = (((double) s + 127d) / 256d * sim_height);
                     double match_top = reverse ? half_height + HALF_PEN_WIDTH : HALF_PEN_WIDTH + sim_height - height;

@@ -3,12 +3,11 @@ package org.gel.mauve.color;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.ColorScheme;
-import org.gel.mauve.XmfaViewerModel;
+import org.gel.mauve.MauveAlignmentViewerModel;
 import org.gel.mauve.backbone.Backbone;
 import org.gel.mauve.backbone.BackboneList;
 
@@ -119,9 +118,9 @@ public class BackboneMultiplicityColor implements ColorScheme {
     public void apply(BaseViewerModel model)
     {
 
-    	if( ! (model instanceof XmfaViewerModel))
+    	if( ! (model instanceof MauveAlignmentViewerModel))
     		return;
-    	XmfaViewerModel xmfa = (XmfaViewerModel)model;
+    	MauveAlignmentViewerModel xmfa = (MauveAlignmentViewerModel)model;
     	BackboneList bb_list = xmfa.getBackboneList();
     	if( bb_list == null )
     		return;

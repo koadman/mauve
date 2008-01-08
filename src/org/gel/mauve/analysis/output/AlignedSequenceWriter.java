@@ -6,10 +6,8 @@ import java.io.PrintStream;
 import java.util.Collections;
 import java.util.Vector;
 
-import org.biojava.bio.seq.io.StreamWriter;
-import org.gel.mauve.BaseViewerModel;
+import org.gel.mauve.MauveAlignmentViewerModel;
 import org.gel.mauve.MauveHelperFunctions;
-import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.analysis.ProcessBackboneFile;
 import org.gel.mauve.analysis.Segment;
 import org.gel.mauve.analysis.SegmentComparator;
@@ -35,7 +33,7 @@ public class AlignedSequenceWriter implements ModuleListener {
 	/**
 	 * reference to model that describes alignment
 	 */
-	XmfaViewerModel model;
+	MauveAlignmentViewerModel model;
 	
 	/**
 	 * the directory to output the fastas to
@@ -58,9 +56,9 @@ public class AlignedSequenceWriter implements ModuleListener {
 	 * called when MauveFrame and model are instantiated, starts write process.
 	 */
 	public void startModule(MauveFrame frame) {
-		model = (XmfaViewerModel) frame.getModel ();
+		model = (MauveAlignmentViewerModel) frame.getModel ();
 		backbone = new ProcessBackboneFile (BackboneListBuilder.getBbFile(model, 
-				model.getXmfa()).getAbsolutePath()).getBackboneSegments();
+				model.getAlignment()).getAbsolutePath()).getBackboneSegments();
 		pareContigs ();
 		for (int i = 0; i < model.getSequenceCount(); i++) {
 			SegmentComparator comp = new SegmentComparator (i);

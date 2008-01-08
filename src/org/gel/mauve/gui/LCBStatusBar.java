@@ -18,7 +18,7 @@ import org.gel.mauve.LCB;
 import org.gel.mauve.LcbViewerModel;
 import org.gel.mauve.Match;
 import org.gel.mauve.ModelEvent;
-import org.gel.mauve.XmfaViewerModel;
+import org.gel.mauve.MauveAlignmentViewerModel;
 
 
 /**
@@ -154,7 +154,7 @@ public class LCBStatusBar extends JPanel implements HighlightListener, HintMessa
         {
             Genome highlight = model.getHighlightGenome();
             
-            if (!(model instanceof XmfaViewerModel) && (model instanceof LcbViewerModel))
+            if (!(model instanceof MauveAlignmentViewerModel) && (model instanceof LcbViewerModel))
             {
                 LcbViewerModel lm = (LcbViewerModel) model;
                 Match lastMatch = lm.lastMatchHighlight();

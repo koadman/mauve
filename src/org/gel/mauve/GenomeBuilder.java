@@ -14,6 +14,7 @@ import org.biojava.bio.seq.io.SimpleAssemblyBuilder;
 import org.biojava.bio.symbol.RangeLocation;
 import org.biojava.utils.ChangeVetoException;
 import org.biojavax.bio.seq.RichSequenceIterator;
+import org.gel.mauve.ext.lazy.LazyFormat;
 import org.gel.mauve.format.FastaFormat;
 import org.gel.mauve.format.SupportedFormatFactory;
 
@@ -148,8 +149,8 @@ public class GenomeBuilder
 
         // We will also build chromosome list simultaneously.
         chromo = new ArrayList();
-
-        if (!annotationFile.exists())
+        //hack for now.
+        if (!(annotationFormat instanceof LazyFormat) && !annotationFile.exists())
         {
             return g;
         }

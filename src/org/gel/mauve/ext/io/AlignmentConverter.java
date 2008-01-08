@@ -12,6 +12,7 @@ import java.util.StringTokenizer;
 import org.gel.air.ja.stash.Stash;
 import org.gel.air.ja.stash.StashLoader;
 import org.gel.mauve.LCB;
+import org.gel.mauve.Match;
 import org.gel.mauve.XMFAAlignment;
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.backbone.Backbone;
@@ -44,8 +45,7 @@ public class AlignmentConverter implements MauveStoreConstants {
 		loader = load;
 		model = mod;
 		convertToStash ();
-		loader.writeXMLFile (align, new File (MauveInterfacer.getStashDir (),
-				align.getString (ID) + ".xml"));
+		loader.writeXMLFile (align, loader.getFileByID (align.getString (ID) + ".xml"));
 	}
 	
 	protected void convertToStash () {
@@ -57,33 +57,36 @@ public class AlignmentConverter implements MauveStoreConstants {
 		String bb_file = align.getString(ID) + ".bbcols";
 		writeBbcolsFile (bb_file);
 		//SegmentWriter.getSegmentWriter("c:\\lcbs.txt", model);
-		Stash genome_list = new Stash (LIST_CLASS, GENOMES);
+		Stash genome_list = loader.makeList (ALIGNED_GENOME_CLASS, GENOMES);
 		align.put(GENOMES, genome_list);
+		align.put(NAME, model.getSrc().getName());
+		align.put(GENOME_COUNT, model.getSequenceCount() + "");
 		for (int i = 0; i < model.getSequenceCount(); i++) {
 			Stash genome = new Stash (ALIGNED_GENOME_CLASS);
-			genome_list.put(genome.get (ID), genome.get (ID));
+			genome_list.put("x" + i, genome.get (ID));
 			genome.put(GENOME, new GbkConverter (
 					model.getGenomeBySourceIndex(i), ASAP, loader).genome.get(ID));
 			if (model.getGenomeBySourceIndex(i).getLength() < Integer.MAX_VALUE)
 				use_ints = true;
 			try {
 				gap_out = new DataOutputStream (new BufferedOutputStream (
-						new FileOutputStream (new File (MauveInterfacer.getStashDir (),
+						new FileOutputStream (loader.getFileByID (
 								genome.get(ID) + ".gaps"))));
 				gap_file_pos = 0;
 				gap_out.writeBoolean(use_ints);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			Stash lcbs = new Stash (LIST_CLASS, LCBS);
+			Stash lcbs = loader.makeList (GENOME_LABEL_CLASS, LCBS);
 			genome.put(LCBS, lcbs);
 			convertLCBs (lcbs, i);
-			Stash backbone = new Stash (LIST_CLASS, BACKBONE_IDS);
+			/*Stash backbone = new Stash (LIST_CLASS, BACKBONE_IDS);
 			genome.put(BACKBONE, backbone);
-			convertBackbone (backbone, i);
+			convertBackbone (backbone, i);*/
+			MauveInterfacer.writeSimilarity(model, genome, i);
 			try {
 				gap_out.close();
-				loader.writeXMLFile(genome, new File (MauveInterfacer.getStashDir(),
+				loader.writeXMLFile(genome, loader.getFileByID(
 						genome.getString (ID) + ".xml"));
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -97,8 +100,7 @@ public class AlignmentConverter implements MauveStoreConstants {
 					BackboneListBuilder.getBbFile(model, ((XMFAAlignment) 
 							model.getXmfa()))));
 			PrintStream out = new PrintStream (new BufferedOutputStream (
-					new FileOutputStream (new File (MauveInterfacer.getStashDir (),
-							file))));
+					new FileOutputStream (loader.getFileByID (file))));
 			String input = in.readLine();
 			while (input != null) {
 				StringTokenizer toke = new StringTokenizer (input);
@@ -115,22 +117,25 @@ public class AlignmentConverter implements MauveStoreConstants {
 	}
 	
 	protected void convertLCBs (Stash lcbs, int genome_ind) {
+		int next_interval = 0;
 		for (int i = 0; i < lcb_list.length; i++) {
 			if (lcb_list [i].starts [genome_ind] != 0) {
-				Stash lcb = new Stash (LCB_CLASS, lcb_list [i].id + "");
+				Stash lcb = new Stash (GENOME_LABEL_CLASS, 
+						GENOME_LABEL_CLASS + "\\" + lcb_list [i].id);
 				addLocation (lcb, lcb_list [i].starts [genome_ind],
 						lcb_list [i].ends [genome_ind]);
 				lcb.put(REVERSE, lcb_list [i].reverse [genome_ind] ? REVERSE_SYMBOL : 
 						FORWARD_SYMBOL);
+				int interval = model.getXmfa().getLCB (model.getGenomeBySourceIndex(
+						genome_ind), lcb_list [i].starts [genome_ind]);
 				lcb.put(GAP_FILE_START, gap_file_pos + "");
-				writeGapData (model.getXmfa().getLCB (
-						model.getGenomeBySourceIndex(genome_ind), 
-						lcb_list [i].starts [genome_ind]),
-						genome_ind);
-				lcb.put(GAP_FILE_END, (gap_file_pos - 1) + "");
+				writeGapData (next_interval++, genome_ind);
+				//lcb.put(GAP_FILE_END, (gap_file_pos - 1) + "");
+				//System.out.println (lcb.get(GAP_FILE_START) + " " + lcb.get(GAP_FILE_END));
 				lcbs.put(lcb.get(ID), lcb);
 			}
 		}
+		align.put(INTERVAL_COUNT, model.getXmfa().getIntervalCount() + "");
 	}
 	
 	protected void convertBackbone (Stash backbone, int genome_ind) {

@@ -12,7 +12,7 @@ import org.gel.mauve.HighlightListener;
 import org.gel.mauve.LcbViewerModel;
 import org.gel.mauve.Match;
 import org.gel.mauve.ModelEvent;
-import org.gel.mauve.XmfaViewerModel;
+import org.gel.mauve.MauveAlignmentViewerModel;
 
 public class HighlightPanel extends AbstractSequencePanel implements
 		MouseMotionListener, HighlightListener {
@@ -20,8 +20,8 @@ public class HighlightPanel extends AbstractSequencePanel implements
 		super (model, genome);
 		setOpaque (false);
 
-		if (model instanceof XmfaViewerModel) {
-			((XmfaViewerModel) model).addHighlightListener (this);
+		if (model instanceof MauveAlignmentViewerModel) {
+			((MauveAlignmentViewerModel) model).addHighlightListener (this);
 		} else if (model instanceof LcbViewerModel) {
 			((LcbViewerModel) model).addHighlightListener (this);
 		}
@@ -38,7 +38,7 @@ public class HighlightPanel extends AbstractSequencePanel implements
 		int box_height = (int) (AbstractSequencePanel.BOX_FILL * getHeight ());
 		int box_top = (getHeight () - box_height) / 2;
 		if (e.getY () >= box_top && e.getY () <= box_top + box_height) {
-			if (model instanceof XmfaViewerModel) {
+			if (model instanceof MauveAlignmentViewerModel) {
 				long seqX = pixelToCenterSequenceCoordinate (e.getX ());
 				if (seqX >= 0 && seqX < getGenome ().getLength ()) {
 					model.updateHighlight (getGenome (), seqX);
@@ -67,8 +67,8 @@ public class HighlightPanel extends AbstractSequencePanel implements
 	public void paintComponent (Graphics graphics) {
 		long highlightCoord = Match.NO_MATCH;
 		// get the highlighted coordinate in this genome
-		if (model instanceof XmfaViewerModel)
-			highlightCoord = ((XmfaViewerModel) model)
+		if (model instanceof MauveAlignmentViewerModel)
+			highlightCoord = ((MauveAlignmentViewerModel) model)
 					.getHighlight (getGenome ());
 		else if (model instanceof LcbViewerModel) {
 			long highlightArray[] = ((LcbViewerModel) model)
