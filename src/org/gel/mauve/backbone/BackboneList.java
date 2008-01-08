@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.Vector;
 
 import org.gel.mauve.Genome;
+import org.gel.mauve.MauveAlignment;
 import org.gel.mauve.XMFAAlignment;
 
 /**
@@ -70,9 +71,9 @@ public class BackboneList {
 
 	protected Backbone [] bb_array;
 
-	protected XMFAAlignment xmfa;
+	protected MauveAlignment xmfa;
 
-	public void setXmfa (XMFAAlignment xmfa) {
+	public void setXmfa (MauveAlignment xmfa) {
 		this.xmfa = xmfa;
 	}
 
