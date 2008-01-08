@@ -40,6 +40,12 @@ public class Stash extends Hashtable <Object, Object> implements
 			if (s.indexOf ("\\") > -1 || s.indexOf("/") > -1)
 				throw new Error ("Invalid ID--contains \\ or /");
 		}
+		else {
+			if (key instanceof Number)
+				key = key.toString();
+			if (val instanceof Number)
+				val = val.toString();
+		}
 		return super.put (key, val);
 	}
 
@@ -74,7 +80,13 @@ public class Stash extends Hashtable <Object, Object> implements
 		}
 		return (Stash) value;
 	}
-
+		
+	public Object get (Object key) {
+		if (key instanceof Number)
+			key = key.toString ();
+		return super.get(key);
+	}
+	
 	public String toString () {
 		return getString (NAME);
 	}

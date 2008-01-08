@@ -82,7 +82,6 @@ public class StashEvents implements MessageHandler, StashConstants {
 				else
 					ephemeral.put (key, value);
 			}
-			//System.out.println ("doofy");
 			itty = callbacks == null ? EMPTY : callbacks.iterator ();
 			Stash changes = new Stash ();
 			changes.putAll (props);
@@ -91,7 +90,6 @@ public class StashEvents implements MessageHandler, StashConstants {
 				StashChangeListener callback = (StashChangeListener) itty.next ();
 				callback.dataChanged (changes);
 			}
-			//System.out.println ("bugzilla!");
 		}
 		catch (Exception e) {
 			e.printStackTrace ();

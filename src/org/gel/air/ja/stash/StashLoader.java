@@ -1,8 +1,12 @@
 package org.gel.air.ja.stash;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
@@ -86,8 +90,18 @@ public class StashLoader extends DefaultHandler implements StashConstants {
 		parser.setContentHandler (this);
 		char_buffer = new StringBuffer ();
 	}
+	
+	public File getFileByID (String id) {
+		id = id.replace('\\', '/');
+		int ind = id.indexOf('/');
+		File file = new File (new File (root, id.substring(0, ind)), 
+				id.substring(ind + 1));
+		return file;
+	}
 
-
+	public File getFileForStash (Stash stash) {
+		return getFileByID (stash.getString(ID) + ".xml");
+	}
 	public void startElement(String uri, String localpart, String rawname, Attributes attributes) {
 		try {
 //			localpart = localpart.substring (localpart.indexOf (':'), localpart.length ());
@@ -300,8 +314,10 @@ public class StashLoader extends DefaultHandler implements StashConstants {
 	 */
 	public void loadAll (String file_base, String defaults) {
 		try {
-			parser.parse (file_base +"\\DataStore\\" + defaults);
-			loadAll (new File (file_base + "\\DataStore"));
+			long millis = System.currentTimeMillis();
+			parser.parse (new File (file_base, defaults).getAbsolutePath ());
+			loadAll (new File (file_base));
+			System.out.println ("time: " + (System.currentTimeMillis() - millis));
 		}
 		catch (Exception e) {
 			e.printStackTrace ();
@@ -310,15 +326,20 @@ public class StashLoader extends DefaultHandler implements StashConstants {
 
 
 	public void loadAll (File path) {
+		File root_dir = new File (root);
 		hash_stack.push (defaults.getHashtable (path.getName ()));
 		File [] f = path.listFiles ();
 		for (int i = 0; i < f.length; i++) {
 			try {
 				if (f [i].isDirectory ())
 					loadAll (f [i]);
-				else if (f [i].getName().endsWith(".xml")) {				
+				else if (f [i].getName().endsWith(".xml") && !path.equals(root_dir)) {				
 					System.out.println (f[i]);
-					parser.parse (f [i].getAbsolutePath ());
+					/*BufferedReader buf = new BufferedReader (
+							new FileReader (f [i].getAbsolutePath ()));
+					parser.parse (new InputSource (buf));
+					buf.close();*/
+					parser.parse(f [i].getAbsolutePath());
 				}
 			}
 			catch (Exception e) {
@@ -328,6 +349,13 @@ public class StashLoader extends DefaultHandler implements StashConstants {
 		hash_stack.pop ();
 	}
 
+	/**
+	 * Make a list into an open vector.  
+	 * @param source
+	 * @param clazz		True if the list is a list of instances of a top-level
+	 * 					class being loaded from defaults.
+	 * @return
+	 */
 	public StashList populateVector (Stash source, boolean clazz) {
 		StashList vector = new StashList ();
 		while (vector.size () > 0)
@@ -340,18 +368,20 @@ public class StashLoader extends DefaultHandler implements StashConstants {
 		for (Iterator keys = source.keySet ().iterator (); keys.hasNext ();) {
 			Stash value = source.getHashtable (keys.next ());
 			if (value != null && ((Stash) value).getString (ID).startsWith
-					(class_type + "\\")) {
-				System.out.println ("value: " + value.getString (ID));
+					(class_type + "\\"))
 				vector.addElement (value);
-			}
 		}
-		Collections.sort (vector);
-		if (vector instanceof StashList)
+		//Collections.sort (vector);
+		if (data_handler != null)
 			data_handler.addCallbackTo (source, (StashList) vector);
 		return vector;
 	}
 
-
+	public Stash makeList (String list_class, String id) {
+		Stash list = new Stash (LIST_CLASS, id);
+		list.put (LIST_CLASS_FIELD, list_class);
+		return list;
+	}
 
 	public StashEvents getNoCastHashEvents () {
 		return data_handler;

@@ -2,71 +2,60 @@ package org.gel.air.ja.msg;
 
 
 import java.awt.Point;
-import java.util.Random;
 
 
 
 /**
-  *Class for matching wildcarded hierarchical namespaces.  The namespace strings should
-  *use the following syntax:<p>
+  *Matches hierarchical namespaces with two types of allowed wildcard.
   *
-  *<ul>
-  *<li>Backslashes ('\') or forward slashes ('/') may be used to separate hierarchy levels.
-  *    Note that when makeSubjectAbsolute is called, backslashes will be resolved to forward
-  *    slashes, and all subject spaces will end with a forward slash.
-  *<li>Asterisks ('*') may be used to match zero or more character within one hierarchy level.
-  *    They may never be used to replace back or forward slashes.
-  *<li>Ellipses ('...') may be used to match zero or more entire levels of hierarchy.
-  *</ul><p>
   *
-  *Examples (we used '\' instead of '/' to keep the java compiler from interpreting our examples as the end of the documentation):
-  *<ul>
-  *<li>'...\' would match absolutely anthing.
-  *<li>'stuff*\bill*bob\' would match 'stuff\billbob\', 'stuffy\billy joe bob\', or
-  *    'stuffed in a can\bill threw a brick at bob\', but would not match
-  *    'estuffy\billbob\' or 'stuffie\'
-  *<li>'frog\...\parakeet\' would match 'frog\denture\albino\parakeet\' or 'frog\parakeet\',
-  *     but would not match 'froggy\parakeet\' or '\foo\frog\blah\parakeet\'
-  *<li>'*lunacy*\...\' would match 'rutabaga*calamity\' or 'endlesslunacyabounds\this\that\the other thing\',
-  *	  but would not match 'dogs\this\that\'
+  *    Both types of slashes ('\' or '/') may be used to separate hierarchy levels.
+  *    When matching, backslashes replaced with forward,
+  *    and all namespaces will end with a slash.
+  *	   The first wildcard ('*') matches zero or more characters in one level.
+  *    Asterisks can therefore not replace slashes.
+  *    Ellipses ('...') match zero or more hierarchy levels.  This should be used
+  *    with care (see examples below), and if an exact number of levels are meant
+  *    to be skipped, use the right number of asterisks separated by slashes.
+  *
+  *
+  *Example
+  *
+  *    'alpha*\beta*gamma\' would match 'alpha\betagamma\', 'alphay\betay joe gamma\', or
+  *    'alpha is alpha\beta cannot be gamma\', but would not match
+  *    'ealphay\betagamma\' or 'alphaie\'
+  *    
+  * 	'...\' matches all namespaces.
+  * 
+  *		'aleph\...\bet\' would match 'aleph\gimmel\dalet\bet\' or 'aleph\bet\',
+  *     but would not match 'alephgy\bet\' or '\hey\aleph\vav\bet\'
+  *     
+  *		'*not there*\...\' would match 'here*yes\' or 'here not there not\this\that\the other thing\',
+  *	  but would not match 'wildcardless\this\that\'
 **/
 public class WildcardHierarchyMatcher implements SubscriptionMatcher {
 
 	/**
-	  *Converts all backslashes to forward slashes, and ensures that
-	  *the string ends with a forward slash.
-	  *@param name  the subject namespace to make fully qualified
+	  *Changes '\' to '/', and string ends with slash
+	  *@param name  namespace to format
 	  *@return String  the fully qualified namespace
 	**/
-	public String makePathAbsolute (String name) {
-		//name = name.replace ('\\', '/');
+	public String makeSubjectAbsolute (String name) {
+		name = name.replace ('\\', '/');
 		if (name.charAt (0) == '/')
 			name = name.substring (1);
 		if (name.charAt (name.length () - 1) != '/')
 			name += '/';
 		return name;
-	}//method makePathAbsolute
-
-	/**
-	  *Converts all backslashes to forward slashes, and ensures that
-	  *the string ends with a forward slash.  This method implements the
-	  *Matcher interface method, and is equivalent to makePathAbsolute.
-	  *@param name  the subject namespace to make fully qualified
-	  *@return String  the fully qualified namespace
-	**/
-	public String makeSubjectAbsolute (String name) {
-		return makePathAbsolute (name);
 	}
 
 	/**
-	  *Returns true if the string contains an asterisk ('*') or ellipsis ('...').
-	  *This method implements the Matcher interface method.
-	  *@param subject  the namespace to check for wildcards
-	  *@return boolean  true if the namespace contained wildcards
+	  *True if subject contains wildcard
+	  *
 	**/
 	public boolean hasWildcards (String subject) {
 		return subject.indexOf ("*") != -1 || subject.indexOf ("...") != -1;
-	}//method hasWildcards
+	}
 
 	/**
 	  *Compares two namespaces to see if messages sent to one should be received by
@@ -118,7 +107,7 @@ public class WildcardHierarchyMatcher implements SubscriptionMatcher {
 				return false;
 		}
 		return true;
-	}//method matchSubjects
+	}
 
 
 	/**

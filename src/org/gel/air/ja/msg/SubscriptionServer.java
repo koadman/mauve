@@ -14,39 +14,37 @@ import org.gel.air.ja.threadpool.*;
 public class SubscriptionServer extends Hub {
 
 	/**
-	  *Manages message distribution to various and sundry clients.
+	  *Manages all subscriptions for one subscription distributor
 	**/
 	protected SubscriptionLists lists;
 
 	/**
-	  *thread pool for accepting new connections
+	  *new connections accepted in these threads
 	**/
 	protected Pool pool;
 
 	/**
-	  *Creates a new event server.  The port the server runs on is
-	  *specified in the file hub.props.  The server is
-	  *automatically started.
+	  *Constructor
 	**/
-	public SubscriptionServer () {
-		lists = new SubscriptionLists (getMatcher ());
+	public SubscriptionServer (int port, int max) {
+		super (port, max);
+		lists = new SubscriptionLists (createMatcher ());
 		pool = new Pool (4);
-	}//constructor
+	}
 
 	/**
-	  *Creates the matcher to use for deciding if wildcarded subject namespaces match, i.e.,
-	  *messages sent to one should be received by the other.  If this method is overridden,
-	  *all clients connecting to this server should be using the same class of object
-	  *as this method returns.
+	  *Creates the matcher to use for deciding which namespaces should receive a message.
+	  *Both receivers and senders should use a matcher that follows the same
+	  *matching conventions.
+	  *
 	  *@return Matcher  the string matcher to use
 	**/
-	protected SubscriptionMatcher getMatcher () {
+	protected SubscriptionMatcher createMatcher () {
 		return new WildcardHierarchyMatcher ();
-	}//method getMatcher
+	}
 
 	/**
-	  *Accepts and handles new connections to the event server.  Should not
-	  *be called directly.
+	  *Called for each new connection; don't call directly.
 	**/
 	public void run () {
 		while (GlobalInit.run) {
@@ -70,14 +68,14 @@ public class SubscriptionServer extends Hub {
 				GlobalInit.error ("A security error has occurred with this connection");
 			}
 		}
-	}//method run
+	}
 
 	/**
-	  *Creates a new event server.
+	  *For testing.
 	  *@param args  ignored
 	**/
 	public static void main (String [] args) {
-		new SubscriptionServer ();
+		//new SubscriptionServer ();
 	}
 
-}//class EventServer
+}

@@ -16,7 +16,7 @@ public class GlobalInit {
 	public static final String THREE = TWO + ONE;
 	public static final String CONNECT_STRING = "|capture_meklajd83247923dsd38d|";
 	
-	static {
+	/*static {
 		try {
 			FileInputStream in = new FileInputStream (PROP_FILE_NAME);
 			props = new Properties ();
@@ -29,7 +29,7 @@ public class GlobalInit {
 			error ("Properties file unreadable");
 			System.exit (0);
 		}
-	}
+	}*/
 
 	public static final String DONE = "|release_me18e9jdflle9492|";
 

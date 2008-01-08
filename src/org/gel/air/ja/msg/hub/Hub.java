@@ -13,11 +13,9 @@ public class Hub extends Thread{
 	protected ServerSocket sock;
 	protected static int seconds;
 
-	public Hub () {
+	public Hub (int port, int max) {
 		try {
-			sock = new ServerSocket (Integer.parseInt (GlobalInit.props.getProperty (
-					"port")), Integer.parseInt (GlobalInit.props.getProperty (
-					"max_connections")));
+			sock = new ServerSocket (port, max);
 			start ();
 		} catch (Exception e) {
 			GlobalInit.error ("Couldn't create socket");
@@ -60,7 +58,7 @@ public class Hub extends Thread{
 
 
 	public static void main (String [] args) {
-		final Hub snervy = new Hub ();
+		/*final Hub snervy = new Hub ();
 		seconds = 0;
 		javax.swing.Timer time = new javax.swing.Timer (30000, new ActionListener () {
 			public void actionPerformed (ActionEvent e) {
@@ -68,7 +66,7 @@ public class Hub extends Thread{
 				System.out.println (seconds + " seconds: " + ConnectionThread.number);
 			}
 		});
-		time.start ();
+		time.start ();*/
 	}//method main
 
 }//class Snerver

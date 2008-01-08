@@ -11,7 +11,8 @@ import org.gel.air.ja.stash.events.*;
  *  methods notify listeners.
 **/
 
-public class StashList extends Vector implements StashConstants, StashChangeListener {
+public class StashList extends Vector <Stash> implements StashConstants, 
+StashChangeListener {
 
 	private Vector listeners;
 	private boolean enabled = true;
@@ -43,7 +44,7 @@ public class StashList extends Vector implements StashConstants, StashChangeList
 	// The rest of these methods call their corresponding methods in Vector,
 	// and then notify their listeners.
 
-	public void addElement (Object what) {
+	public void addElement (Stash what) {
 		super.addElement (what);
 		if (enabled) {
 			int size = listeners.size ();
@@ -104,14 +105,14 @@ public class StashList extends Vector implements StashConstants, StashChangeList
 				Object value = changes.get (key);
 				if (REMOVE_VALUE.equals (value)) {
 					for (int i = 0; i < size (); i++) {
-						if (((Stash) get (i)).get (ID).equals (key)) {
+						if (get (i).get (ID).equals (key)) {
 							removeElementAt (i);
 							break;
 						}
 					}
 				}
 				else
-					addElement (value);
+					addElement ((Stash) value);
 			}
 		}
 	}//method dataChanged
