@@ -65,15 +65,15 @@ public class Stash extends Hashtable <Object, Object> implements
 	}
 
 	public Stash getHashtable (Object key) {
-		Object value = super.get (StashLoader.makeKey ((String) key));
+		Object value = super.get (StashXMLLoader.makeKey ((String) key));
 		if (value instanceof String) {
 			int index = ((String) value).indexOf ('\\');
 			if (index < 0)
-				value = StashLoader.getDefaults ().getHashtable (value);
+				value = StashXMLLoader.getDefaults ().getHashtable (value);
 			else {
 				String class_type = ((String) value).substring (0, index);
 				String val = (String) value;
-				value = StashLoader.getDefaults ().getHashtable (class_type);
+				value = StashXMLLoader.getDefaults ().getHashtable (class_type);
 				if (value != null)
 					value = ((Stash) value).getHashtable (val);
 			}

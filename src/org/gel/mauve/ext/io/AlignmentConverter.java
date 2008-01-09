@@ -10,7 +10,7 @@ import java.io.PrintStream;
 import java.util.StringTokenizer;
 
 import org.gel.air.ja.stash.Stash;
-import org.gel.air.ja.stash.StashLoader;
+import org.gel.air.ja.stash.StashXMLLoader;
 import org.gel.mauve.LCB;
 import org.gel.mauve.Match;
 import org.gel.mauve.XMFAAlignment;
@@ -39,9 +39,9 @@ public class AlignmentConverter implements MauveStoreConstants {
 	protected long gap_file_pos;
 	protected DataOutputStream gap_out;
 	protected boolean use_ints;
-	protected StashLoader loader;
+	protected StashXMLLoader loader;
 
-	public AlignmentConverter (XmfaViewerModel mod, StashLoader load) {
+	public AlignmentConverter (XmfaViewerModel mod, StashXMLLoader load) {
 		loader = load;
 		model = mod;
 		convertToStash ();

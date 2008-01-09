@@ -18,7 +18,7 @@ import java.util.zip.DeflaterOutputStream;
 
 import org.apache.xerces.parsers.SAXParser;
 import org.gel.air.ja.stash.events.StashEvents;
-import org.gel.air.ja.stash.events.XMLUpdateEvents;
+import org.gel.air.ja.stash.events.StashUpdateEvents;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
@@ -61,21 +61,20 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author Anna I Rissman/James Lowden
  *
  */
-public class StashLoader extends DefaultHandler implements StashConstants {
+public class StashXMLLoader extends DefaultHandler implements StashConstants {
 
 	protected Stack hash_stack;
 	protected static Stash defaults;
 	protected SAXParser parser;
 	protected StringBuffer char_buffer;
 	protected String root;
-	protected XMLUpdateEvents events;
+	protected StashUpdateEvents events;
 	protected StashEvents data_handler;
 
-	public StashLoader (String root_dir, XMLUpdateEvents eve) {
+	public StashXMLLoader (String root_dir, StashUpdateEvents eve) {
 		events = eve;
 		defaults = new Stash ();
-		//TODO uncomment this; did it for convenient writing
-		//data_handler = new StashEvents (events, this);
+		data_handler = new StashEvents (events, this);
 		root = root_dir;
 		hash_stack = new Stack ();
  		// construct parser; set features

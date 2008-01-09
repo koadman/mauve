@@ -13,7 +13,7 @@ import java.util.Vector;
 import org.gel.air.ja.stash.Stash;
 import org.gel.air.ja.stash.StashComparator;
 import org.gel.air.ja.stash.StashList;
-import org.gel.air.ja.stash.StashLoader;
+import org.gel.air.ja.stash.StashXMLLoader;
 import org.gel.mauve.LCB;
 import org.gel.mauve.LCBLeftComparator;
 import org.gel.mauve.LCBlist;

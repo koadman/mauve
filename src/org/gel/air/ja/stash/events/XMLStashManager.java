@@ -12,14 +12,14 @@ import java.net.InetAddress;
 import java.util.*;
 
 
-public class StashChangeWriter implements MessageHandler, StashConstants {
+public class XMLStashManager implements MessageHandler, StashConstants {
 
-	protected AbstractStashEventManager events;
+	protected AbstractMessageManager events;
 	protected File root_dir;
-	protected StashLoader loader;
+	protected StashXMLLoader loader;
 
 
-	public StashChangeWriter (AbstractStashEventManager ev, File root_dir, StashLoader load) {
+	public XMLStashManager (AbstractMessageManager ev, File root_dir, StashXMLLoader load) {
 		events = ev;
 		this.root_dir = root_dir;
 		loader = load;
@@ -32,10 +32,10 @@ public class StashChangeWriter implements MessageHandler, StashConstants {
 		System.out.println ("dest: " + dest);
 		if (dest.startsWith ("update/"))
 			update (msg, dest.substring (7, dest.length ()));
-		/*else if (dest.startsWith ("get/"))
+		else if (dest.startsWith ("get/"))
 			get (msg, dest.substring (4, dest.length ()));
 		else if (dest.startsWith ("getAll/"))
-			getAll (msg, dest.substring (7, dest.length ()));*/
+			getAll (msg, dest.substring (7, dest.length ()));
 	}
 
 
@@ -47,14 +47,13 @@ public class StashChangeWriter implements MessageHandler, StashConstants {
 			File file = new File (root_dir, obj_id);
 			String file_name = file.getAbsolutePath ();
 			String cl = dest.substring (0, slash);
-			/*if (file.exists ())
+			if (file.exists ())
 				loader.readInto (loader.getDefaults ().getHashtable (cl), file_name);
 			else
-				loader.getDefaults ().getHashtable (cl).put (obj_id, new NoCastHash ());*/
+				loader.getDefaults ().getHashtable (cl).put (obj_id, new Stash ());
 			Stash current = loader.getDefaults ().getHashtable (cl
-					).getHashtable (StashLoader.makeKey (obj_id));
+					).getHashtable (StashXMLLoader.makeKey (obj_id));
 			synchronized (current) {
-				//loader.getDefaults ().remove (obj_id);
 				Properties props = SystemUtils.stringToProps (msg.getMessage ());
 				Iterator itty = props.keySet ().iterator ();
 				while (itty.hasNext ()) {
@@ -104,7 +103,7 @@ public class StashChangeWriter implements MessageHandler, StashConstants {
 	}
 
 
-/*	protected void get (Message msg, String dest) {
+	protected void get (Message msg, String dest) {
 		try {
 			File f = new File (root_dir, dest);
 			BufferedReader in = new BufferedReader (new FileReader (f));
@@ -138,7 +137,7 @@ public class StashChangeWriter implements MessageHandler, StashConstants {
 		catch (Exception e) {
 			e.printStackTrace ();
 		}
-	}*/
+	}
 		
 	/*public static void main (String [] args) throws Exception {
 		Events ev = Events.createEvents (EasyBunny.props.getProperty ("server"));

@@ -8,7 +8,7 @@ import java.util.Hashtable;
 
 import org.gel.air.ja.stash.Stash;
 import org.gel.air.ja.stash.StashList;
-import org.gel.air.ja.stash.StashLoader;
+import org.gel.air.ja.stash.StashXMLLoader;
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.Chromosome;
 import org.gel.mauve.Genome;
@@ -27,7 +27,7 @@ public class StashViewerModel extends MauveAlignmentViewerModel implements
 	public static final ModelFactory factory = new StashFactory ();
 	
 	
-	protected StashLoader loader;
+	protected StashXMLLoader loader;
 	protected Stash alignment;
 	protected StashList aligned_genomes;
 	
@@ -40,7 +40,7 @@ public class StashViewerModel extends MauveAlignmentViewerModel implements
 	protected void init (ModelProgressListener listener, 
 			boolean reloading, Hashtable args) 
 			throws IOException {
-		loader = (StashLoader) args.get (LOADER);
+		loader = (StashXMLLoader) args.get (LOADER);
 		alignment = (Stash) args.get(ALIGNMENT);
 		ModelBuilder.setUseDiskCache(false);
 		super.init (listener, reloading, args);
@@ -113,7 +113,7 @@ public class StashViewerModel extends MauveAlignmentViewerModel implements
 		}
 	}
 	
-	public StashLoader getLoader () {
+	public StashXMLLoader getLoader () {
 		return loader;
 	}
     

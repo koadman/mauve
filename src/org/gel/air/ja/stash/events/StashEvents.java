@@ -14,21 +14,29 @@ import java.util.*;
 
 public class StashEvents implements MessageHandler, StashConstants {
 
-	protected AbstractStashEventManager events;
-	protected StashLoader loader;
+	protected AbstractMessageManager events;
+	protected StashXMLLoader loader;
 	protected Stash callback_map;
 
 	protected static final Iterator EMPTY = new LinkedList ().iterator ();
 
 
-	public StashEvents (AbstractStashEventManager ev, StashLoader l) {
+	public StashEvents (AbstractMessageManager ev, StashXMLLoader l) {
 		events = ev;
 		loader = l;
 		callback_map = new Stash ();
 		ev.add ("update/...", this);
 	}
 
-
+	public Stash getStash (String id) {
+		String ret = SystemUtils.makeUniqueString ();
+		Message msg = new Message ("get/" + id + ".xml", ret);
+		msg = (Message) events.getReply (msg, ret);
+		Stash stash = new Stash ();
+		loader.readStringInto (stash, msg.getMessage ());
+		return stash;
+	}
+	
 	public void addCallbackTo (Stash hash, StashChangeListener callback) {
 		LinkedList callbacks = (LinkedList) callback_map.get (hash);
 		if (callbacks == null) {

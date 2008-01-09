@@ -1,4 +1,4 @@
-package org.gel.air.ja.stash.events;
+package org.gel.air.ja.msg;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,14 +13,14 @@ import java.util.Hashtable;
   *can be used to hook up to an RTServer and specify the subject space to subscribe to.
 **/
 
-public class RemoteStashEventManager extends AbstractStashEventManager implements MessageHandler {
+public class RemoteMessageManager extends AbstractMessageManager implements MessageHandler {
 
 
 	public MessageHandler receiver;
 	public static SubscriptionManager event_client;
 
 
-	public RemoteStashEventManager (MessageHandler starter) {
+	public RemoteMessageManager (MessageHandler starter) {
 		if (starter == null)
 			starter = this;
 		receiver = starter;

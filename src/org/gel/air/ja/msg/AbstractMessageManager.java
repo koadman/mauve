@@ -1,16 +1,17 @@
-package org.gel.air.ja.stash.events;
+package org.gel.air.ja.msg;
 
 
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+
 /**
   *abstract class for registering handler based on group being subscribed to
 **/
 //TODO move gui stuff to another class if useful or remove
 //to keep different for lockheed reasons
-public abstract class AbstractStashEventManager implements ActionListener {
+public abstract class AbstractMessageManager implements ActionListener {
 
 
 	private JDialog messenger;
@@ -19,10 +20,10 @@ public abstract class AbstractStashEventManager implements ActionListener {
 
 
 
-	public static AbstractStashEventManager createEvents (String host)  throws Exception {
-		AbstractStashEventManager ev = null;
+	public static AbstractMessageManager createEvents (String host)  throws Exception {
+		AbstractMessageManager ev = null;
 		int port = 0;
-		ev = new RemoteStashEventManager (null);
+		ev = new RemoteMessageManager (null);
 		ev.init (host);
 		ev.makeGUI ();
 		return ev;

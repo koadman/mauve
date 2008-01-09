@@ -7,8 +7,8 @@ import java.util.Hashtable;
 
 import org.biojavax.bio.seq.RichSequence;
 import org.gel.air.ja.stash.Stash;
-import org.gel.air.ja.stash.StashLoader;
-import org.gel.air.ja.stash.events.XMLUpdateEvents;
+import org.gel.air.ja.stash.StashXMLLoader;
+import org.gel.air.ja.stash.events.StashUpdateEvents;
 import org.gel.mauve.MauveAlignmentViewerModel;
 import org.gel.mauve.ModelBuilder;
 import org.gel.mauve.SimilarityIndex;
@@ -21,7 +21,7 @@ import org.gel.mauve.module.ModuleListener;
 public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 	
 	protected MauveModule mauve;
-	protected static StashLoader loader;
+	protected static StashXMLLoader loader;
 	protected static String data_root_dir;
 	protected Hashtable loaded_alignments;
 	protected String alignment_id;
@@ -84,7 +84,7 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 		return loader.getFileByID(aligned_genome.getString (ID) + ".sim").getAbsolutePath();
 	}
 	
-	public static StashLoader getLoader () {
+	public static StashXMLLoader getLoader () {
 		return loader;
 	}
 
@@ -118,7 +118,7 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 		ModelBuilder.setUseDiskCache(false);
 		data_root_dir = "c:\\mauve3data\\DataStore";
 		makeDataDirs ();
-		loader = new StashLoader (data_root_dir, new XMLUpdateEvents ());
+		loader = new StashXMLLoader (data_root_dir, new StashUpdateEvents ());
 		new MauveInterfacer (args);
 	}
 

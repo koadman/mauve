@@ -2,13 +2,14 @@ package org.gel.air.ja.stash.events;
 
 import java.util.Properties;
 
+import org.gel.air.ja.msg.LocalMessageManager;
+import org.gel.air.ja.msg.RemoteMessageManager;
 import org.gel.air.ja.stash.Stash;
-import org.gel.air.ja.stash.events.RemoteStashEventManager;
 import org.gel.air.util.SystemUtils;
 
-public class XMLUpdateEvents extends LocalStashEventManager {
+public class StashUpdateEvents extends LocalMessageManager {
 
-	public XMLUpdateEvents () {
+	public StashUpdateEvents () {
 		super ();
 	}
 

@@ -8,7 +8,7 @@ import java.io.FileNotFoundException;
 import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.seq.SequenceIterator;
 import org.gel.air.ja.stash.Stash;
-import org.gel.air.ja.stash.StashLoader;
+import org.gel.air.ja.stash.StashXMLLoader;
 import org.gel.air.util.IOUtils;
 import org.gel.mauve.FilterCacheSpec;
 import org.gel.mauve.bioj.ListSequenceIterator;
@@ -20,7 +20,7 @@ public class LazyFormat extends BaseFormat implements MauveStoreConstants {
 	
 	protected Stash genome_data;
 	public static final String STASH_FORMAT = "st_format";
-	protected StashLoader loader = MauveInterfacer.getLoader();
+	protected StashXMLLoader loader = MauveInterfacer.getLoader();
 	protected static final FilterCacheSpec [] specs = new FilterCacheSpec [0];
 	protected ListSequenceIterator iter;
 	

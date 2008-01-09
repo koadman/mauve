@@ -18,7 +18,7 @@ import org.biojava.bio.seq.StrandedFeature.Strand;
 import org.biojava.bio.seq.io.GenbankProcessor;
 import org.biojava.bio.symbol.Location;
 import org.gel.air.ja.stash.Stash;
-import org.gel.air.ja.stash.StashLoader;
+import org.gel.air.ja.stash.StashXMLLoader;
 import org.gel.mauve.Genome;
 import org.gel.mauve.MauveHelperFunctions;
 import org.gel.mauve.ext.MauveInterfacer;
@@ -41,9 +41,9 @@ public class GbkConverter implements MauveStoreConstants {
 	protected Genome src;
 	protected Stash feature_labels;
 	protected String db_header;
-	protected StashLoader loader;
+	protected StashXMLLoader loader;
 	
-	public GbkConverter (Genome gen, String db_head, StashLoader load) {
+	public GbkConverter (Genome gen, String db_head, StashXMLLoader load) {
 		loader = load;
 		seq = gen.getAnnotationSequence();
 		db_header = db_head;
