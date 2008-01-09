@@ -1,19 +1,11 @@
 package org.gel.mauve.ext.lazy;
 
-import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.zip.DataFormatException;
 
 import org.biojava.bio.symbol.Location;
-import org.biojava.bio.symbol.LocationTools;
-import org.biojava.bio.symbol.RangeLocation;
 import org.gel.air.util.IOUtils;
 import org.gel.mauve.SimilarityIndex;
 import org.gel.mauve.ZoomHistogram;
@@ -41,7 +33,7 @@ public class StashedZHistogram extends ZoomHistogram implements
 	protected void init (String file, String mode) throws Exception {
 		try {
 			lock = new Object ();
-			cache = IOUtils.getDataInputStream(file);
+			cache = IOUtils.getDataInputStream(file, IOUtils.BUFFER_SIZE);
 			int num_level = cache.readInt();
 			int res = cache.readInt();
 			long [] levels = IOUtils.readLongArray(cache, num_level);
@@ -78,7 +70,7 @@ public class StashedZHistogram extends ZoomHistogram implements
 				skip = start;
 			}
 			if (skip > 0)
-				cache.skipBytes(skip);
+				IOUtils.guaranteedSkip(cache, skip);
 			int length = end - start + 1;
 			if (current == null || current.length < length)
 				current = new byte [length];

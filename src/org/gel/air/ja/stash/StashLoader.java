@@ -335,11 +335,11 @@ public class StashLoader extends DefaultHandler implements StashConstants {
 					loadAll (f [i]);
 				else if (f [i].getName().endsWith(".xml") && !path.equals(root_dir)) {				
 					System.out.println (f[i]);
-					/*BufferedReader buf = new BufferedReader (
-							new FileReader (f [i].getAbsolutePath ()));
+					BufferedInputStream buf = new BufferedInputStream (
+							new FileInputStream (f [i].getAbsolutePath ()));
 					parser.parse (new InputSource (buf));
-					buf.close();*/
-					parser.parse(f [i].getAbsolutePath());
+					buf.close();
+					//parser.parse(f [i].getAbsolutePath());
 				}
 			}
 			catch (Exception e) {

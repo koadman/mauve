@@ -12,25 +12,25 @@ import org.biojava.bio.symbol.Alphabet;
 import org.biojava.bio.symbol.FiniteAlphabet;
 import org.biojava.bio.symbol.IllegalSymbolException;
 import org.biojava.bio.symbol.Symbol;
+import org.biojava.bio.symbol.SymbolList;
+import org.gel.air.util.IOUtils;
+import org.gel.mauve.ext.MauveStoreConstants;
 
-public class LazySymbolList extends AbstractSymbolList {
+public class LazySymbolList extends AbstractSymbolList implements MauveStoreConstants {
 	
 	protected BufferedInputStream dna;
 	protected FiniteAlphabet alphabet;
 	protected long start;
 	protected long end;
-	protected int dna_length;
 	
 	protected static Hashtable <BufferedInputStream, Integer> open_streams = 
 			new Hashtable <BufferedInputStream, Integer> ();
 	//use rangeloadtracker for lazyloading from server as well as file
 	
-	public LazySymbolList (BufferedInputStream data, long start, long end, 
-			int full_length) {
+	public LazySymbolList (BufferedInputStream data, long start, long end) {
 		this.start = start;
 		this.end = end;
 		dna = data;
-		dna_length = full_length;
 		alphabet = DNATools.getDNA();
 		synchronized (dna) {
 			if (open_streams.get(dna) == null) {
@@ -48,27 +48,35 @@ public class LazySymbolList extends AbstractSymbolList {
 	}
 
 	public Symbol symbolAt(int arg0) throws IndexOutOfBoundsException {
-		int symbol = ((int) start) + arg0 - 2;
-		if (symbol >= end - 1)
-			throw new IndexOutOfBoundsException ("Symbol " + arg0 + " out of range.");
+		int symbol = arg0 - 1;
+		if (symbol > end - 1 || symbol < 0)
+			return alphabet.getGapSymbol();
 		else {
 			synchronized (dna) {
 				try {
 					int pos = open_streams.get(dna);
 					if (pos > symbol) {
 						dna.reset();
-						dna.mark(dna_length);
+						dna.mark((int) end);
 						pos = 0;
 					}
-					dna.skip(symbol - pos);
+					if (symbol != pos)
+						IOUtils.guaranteedSkip(dna, symbol - pos);
 					open_streams.put(dna, symbol + 1);
-					return DNATools.forSymbol((char) dna.read());
+					char which = (char) dna.read();
+					return DNATools.forSymbol(which);
 				} catch (Exception e) {
 					e.printStackTrace();
 					return null;
 				}
 			}
 		}
+	}
+	
+	public SymbolList subList (int start, int end) {
+		System.out.println ("sublist: " + start + ", " + end);
+		//new Exception ().printStackTrace();
+		return super.subList (start, end);
 	}
 
 }

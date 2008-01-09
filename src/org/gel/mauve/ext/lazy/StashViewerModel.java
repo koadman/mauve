@@ -2,12 +2,15 @@ package org.gel.mauve.ext.lazy;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
 
 import org.gel.air.ja.stash.Stash;
 import org.gel.air.ja.stash.StashList;
 import org.gel.air.ja.stash.StashLoader;
 import org.gel.mauve.BaseViewerModel;
+import org.gel.mauve.Chromosome;
 import org.gel.mauve.Genome;
 import org.gel.mauve.GenomeBuilder;
 import org.gel.mauve.MauveAlignmentViewerModel;
@@ -60,7 +63,21 @@ public class StashViewerModel extends MauveAlignmentViewerModel implements
 		Genome genome = GenomeBuilder.buildGenome(genome_data.getLong (LENGTH), 
 				new File (genome_data.getString(ID).substring(GENOME_CLASS.length() + 1)),
 				new LazyFormat (genome_data), this, -1, index);
+		makeContigs (genome_data, genome);
 		return genome;
+	}
+	
+	protected void makeContigs (Stash genome_data, Genome genome) {
+		StashList contigs = MauveInterfacer.getLoader ().populateVector (
+				genome_data.getHashtable (CONTIG_INDEX), false);
+		Collections.sort(contigs, START_COMP);
+		ArrayList <Chromosome> conts = new ArrayList <Chromosome> ();
+		for (int i = 0; i < contigs.size(); i++) {
+			Stash contig = contigs.get(i);
+			conts.add(new Chromosome (contig.getLong(LEFT_STRING), 
+					contig.getLong(RIGHT_STRING), contig.getString(NAME), true));
+		}
+		genome.setChromosomes(conts);
 	}
 	
 	public void setSequenceCount (int sequenceCount) {

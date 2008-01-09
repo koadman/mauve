@@ -9,11 +9,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
 public class IOUtils {
-	
+
+	public static int BUFFER_SIZE = 100000;
 	public static void copyFile (File source, File dest) throws IOException {
 	     FileChannel in = null, out = null;
 	     try {          
@@ -29,6 +31,13 @@ public class IOUtils {
 	          if (in != null)          in.close();
 	          if (out != null)     out.close();
 	     }
+	}
+	
+	public static long guaranteedSkip (InputStream in, long amount) throws IOException {
+		long read = 0;
+		while (read < amount && read > -1)
+			read += in.skip(amount - read);
+		return read;
 	}
 	
 	public static void deleteDir (File dir) {
@@ -66,9 +75,10 @@ public class IOUtils {
 		}
 	}
 	
-	public static DataInputStream getDataInputStream (String file) {
+	public static DataInputStream getDataInputStream (String file, int buffer) {
 		try {
-			return new DataInputStream (new BufferedInputStream (new FileInputStream (file)));
+			return new DataInputStream (new BufferedInputStream (
+					new FileInputStream (file), buffer));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return null;

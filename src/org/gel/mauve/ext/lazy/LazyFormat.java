@@ -4,17 +4,13 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.Collections;
-import java.util.Iterator;
 
 import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.seq.SequenceIterator;
 import org.gel.air.ja.stash.Stash;
-import org.gel.air.ja.stash.StashList;
 import org.gel.air.ja.stash.StashLoader;
-import org.gel.mauve.Chromosome;
+import org.gel.air.util.IOUtils;
 import org.gel.mauve.FilterCacheSpec;
-import org.gel.mauve.Genome;
 import org.gel.mauve.bioj.ListSequenceIterator;
 import org.gel.mauve.ext.MauveInterfacer;
 import org.gel.mauve.ext.MauveStoreConstants;
@@ -26,9 +22,29 @@ public class LazyFormat extends BaseFormat implements MauveStoreConstants {
 	public static final String STASH_FORMAT = "st_format";
 	protected StashLoader loader = MauveInterfacer.getLoader();
 	protected static final FilterCacheSpec [] specs = new FilterCacheSpec [0];
+	protected ListSequenceIterator iter;
 	
 	public LazyFormat (Stash data) {
 		genome_data = data;
+		makeSequenceIterator ();
+	}
+	
+	protected void makeSequenceIterator () {
+		try {
+			iter = new ListSequenceIterator ();
+			BufferedInputStream in = new BufferedInputStream (new FileInputStream (
+					loader.getFileByID (genome_data.getString (ID) + ".sba")), 
+					IOUtils.BUFFER_SIZE);
+			int genome_length = genome_data.getInt(LENGTH);
+			in.mark(genome_length);
+			LazySymbolList list = new LazySymbolList (in, 1, genome_length);
+			LazySequence seq = new LazySequence (list);
+			seq.setName(genome_data.getString(NAME));
+			iter.add(seq);	
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	public String getChromosomeName(Sequence s) {
@@ -52,15 +68,21 @@ public class LazyFormat extends BaseFormat implements MauveStoreConstants {
 	}
 
 	public SequenceIterator readFile (File file) {
+		ListSequenceIterator ret = new ListSequenceIterator ();
+		ret.addAll(iter);
+		return ret;
+	}
+	
+	/*public SequenceIterator makeSequenceIterator () {
 		try {
 			ListSequenceIterator iter = new ListSequenceIterator ();
 			StashList contigs = MauveInterfacer.getLoader ().populateVector (
 					genome_data.getHashtable (CONTIG_INDEX), false);
-			System.out.println ("contigs: " + contigs.size());
 			Collections.sort(contigs, START_COMP);
 			BufferedInputStream in = new BufferedInputStream (new FileInputStream (
 					loader.getFileByID (genome_data.getString (ID) + ".sba")));
 			int genome_length = genome_data.getInt(LENGTH);
+			System.out.println ("length: " + genome_length);
 			in.mark(genome_length);
 			for (int i = 0; i < contigs.size(); i++) {
 				Stash contig = contigs.get(i);
@@ -75,6 +97,6 @@ public class LazyFormat extends BaseFormat implements MauveStoreConstants {
 			e.printStackTrace();
 			return null;
 		}
-	}
+	}*/
 
 }
