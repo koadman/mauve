@@ -69,4 +69,4 @@ public class Hub extends Thread{
 		time.start ();*/
 	}//method main
 
-}//class Snerver
+}

@@ -15,26 +15,15 @@ import java.util.*;
 public class StashEvents implements MessageHandler, StashConstants {
 
 	protected AbstractMessageManager events;
-	protected StashXMLLoader loader;
 	protected Stash callback_map;
 
 	protected static final Iterator EMPTY = new LinkedList ().iterator ();
 
 
-	public StashEvents (AbstractMessageManager ev, StashXMLLoader l) {
+	public StashEvents (AbstractMessageManager ev) {
 		events = ev;
-		loader = l;
 		callback_map = new Stash ();
 		ev.add ("update/...", this);
-	}
-
-	public Stash getStash (String id) {
-		String ret = SystemUtils.makeUniqueString ();
-		Message msg = new Message ("get/" + id + ".xml", ret);
-		msg = (Message) events.getReply (msg, ret);
-		Stash stash = new Stash ();
-		loader.readStringInto (stash, msg.getMessage ());
-		return stash;
 	}
 	
 	public void addCallbackTo (Stash hash, StashChangeListener callback) {
@@ -64,7 +53,7 @@ public class StashEvents implements MessageHandler, StashConstants {
 		try {
 			int slash = dest.indexOf ('/');
 			System.out.println ("dest: " + dest);
-			Stash current = loader.getDefaults ().getHashtable (
+			Stash current = Stash.getDefaults ().getHashtable (
 					dest.substring (0, slash)).getHashtable (dest.substring
 					(slash + 1,	dest.length ()));
 			Properties props = SystemUtils.stringToProps (msg.getMessage ());

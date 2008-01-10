@@ -1,15 +1,29 @@
 package org.gel.air.ja.stash.events;
 
 
-import org.xml.sax.*;
-import org.apache.xerces.parsers.SAXParser;
-import org.gel.air.ja.msg.*;
-import org.gel.air.ja.stash.*;
-import org.gel.air.util.SystemUtils;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Properties;
 
-import java.io.*;
-import java.net.InetAddress;
-import java.util.*;
+import javax.swing.Timer;
+
+import org.gel.air.ja.msg.AbstractMessageManager;
+import org.gel.air.ja.msg.Message;
+import org.gel.air.ja.msg.MessageHandler;
+import org.gel.air.ja.stash.Stash;
+import org.gel.air.ja.stash.StashConstants;
+import org.gel.air.ja.stash.StashXMLLoader;
+import org.gel.air.util.SystemUtils;
 
 
 public class XMLStashManager implements MessageHandler, StashConstants {
@@ -17,7 +31,6 @@ public class XMLStashManager implements MessageHandler, StashConstants {
 	protected AbstractMessageManager events;
 	protected File root_dir;
 	protected StashXMLLoader loader;
-
 
 	public XMLStashManager (AbstractMessageManager ev, File root_dir, StashXMLLoader load) {
 		events = ev;
@@ -40,11 +53,10 @@ public class XMLStashManager implements MessageHandler, StashConstants {
 
 
 	protected void update (Message msg, String dest) {
-		PrintStream out = null;
 		try {
 			int slash = dest.indexOf ('/');
 			String obj_id = dest.substring (slash + 1, dest.length () - 1);
-			File file = new File (root_dir, obj_id);
+			File file = loader.getFileByID (obj_id + ".xml");
 			String file_name = file.getAbsolutePath ();
 			String cl = dest.substring (0, slash);
 			if (file.exists ())
@@ -85,27 +97,19 @@ public class XMLStashManager implements MessageHandler, StashConstants {
 					else
 						temp.put (object_path, value);
 				}
-				out = new PrintStream (new BufferedOutputStream (
-						new FileOutputStream (file_name)));
-				loader.writeXMLFile (current, out);
-				out.close ();
+				loader.stashChanged (current);
 			}
 		}
 		catch (Exception e) {
 			e.printStackTrace ();
-			try {
-				out.close ();
-			}
-			catch (Exception f) {
-				f.printStackTrace ();
-			}
 		}
 	}
 
 
 	protected void get (Message msg, String dest) {
 		try {
-			File f = new File (root_dir, dest);
+			File f = loader.getFileByID (dest);
+			Stash stash = loader.getStash (dest);
 			BufferedReader in = new BufferedReader (new FileReader (f));
 			String s = null;
 			StringBuffer buf = new StringBuffer ();
@@ -118,6 +122,7 @@ public class XMLStashManager implements MessageHandler, StashConstants {
 		}
 		catch (Exception e) {
 			e.printStackTrace ();
+			events.sendString ("", msg.getMessage ());
 		}
 	}
 
@@ -138,9 +143,9 @@ public class XMLStashManager implements MessageHandler, StashConstants {
 			e.printStackTrace ();
 		}
 	}
-		
+
 	/*public static void main (String [] args) throws Exception {
-		Events ev = Events.createEvents (EasyBunny.props.getProperty ("server"));
+		AbstractMessageManager ev = AbstractMessageManager.createEvents ();
 		ev.add (InetAddress.getLocalHost ().getHostAddress () + ":" +
 				EasyBunny.props.getProperty ("port") + "/...",
 				new FileWriterEvents (ev, new File (args [0])));

@@ -1,26 +1,38 @@
 package org.gel.air.ja.stash;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.zip.DeflaterOutputStream;
 
+import javax.swing.Timer;
+
 import org.apache.xerces.parsers.SAXParser;
+import org.gel.air.ja.msg.AbstractMessageManager;
+import org.gel.air.ja.msg.Message;
 import org.gel.air.ja.stash.events.StashEvents;
 import org.gel.air.ja.stash.events.StashUpdateEvents;
+import org.gel.air.util.IOUtils;
+import org.gel.air.util.SystemUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
@@ -61,22 +73,31 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author Anna I Rissman/James Lowden
  *
  */
-public class StashXMLLoader extends DefaultHandler implements StashConstants {
+public class StashXMLLoader extends DefaultHandler implements StashConstants, 
+		ActionListener {
 
+	public static int DELAY = 30000000;
 	protected Stack hash_stack;
 	protected static Stash defaults;
 	protected SAXParser parser;
 	protected StringBuffer char_buffer;
 	protected String root;
-	protected StashUpdateEvents events;
+	protected AbstractMessageManager events;
 	protected StashEvents data_handler;
+	protected HashSet <Stash> changed;
+	protected Timer timer;
 
-	public StashXMLLoader (String root_dir, StashUpdateEvents eve) {
-		events = eve;
+	static {
 		defaults = new Stash ();
-		data_handler = new StashEvents (events, this);
-		root = root_dir;
+		Stash.defaults = defaults;
+	}
+	public StashXMLLoader (String root_dir, AbstractMessageManager eve) {
+		events = eve;
+		data_handler = new StashEvents (events);
+		root = new File (root_dir).getAbsolutePath();
 		hash_stack = new Stack ();
+		changed = new HashSet ();
+		timer = new Timer (DELAY, this);
  		// construct parser; set features
 		parser = new SAXParser();
 		try {
@@ -88,6 +109,17 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants {
    		// set handlers
 		parser.setContentHandler (this);
 		char_buffer = new StringBuffer ();
+	}
+	
+	public void stashChanged (Stash current) {
+		synchronized (changed) {
+			changed.add (current);
+		}
+	}
+	
+	public void writeIfChanged (Stash stash) {
+		if (stash != null && changed.contains (stash))
+			writeFile (stash);
 	}
 	
 	public File getFileByID (String id) {
@@ -276,17 +308,47 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants {
 
 	public Stash createNew (String type) {
 		Stash noo = defaults.getHashtable (type).replicate ();
-		writeXMLFile (noo, root + "\\" + noo.getString (ID));
+		writeXMLFile (noo, new File (root, noo.getString (ID)));
 		defaults.getHashtable (type).put (makeKey (noo.getString (ID)), noo);
 		return noo;
 	}
 	
-	public Stash getStash (String id) {
-		String ct = id.substring(0, id.indexOf("\\"));
-		id = makeKey (id);
-		return defaults.getHashtable(ct).getHashtable(id);
+	/**
+	 * use this method to get a Stash that may or may not be loaded.
+	 * @param id
+	 * @return
+	 */
+	public Stash getStash (String obj_id) {
+		String ct = obj_id.substring(0, obj_id.indexOf("\\"));
+		String id = makeKey (obj_id);
+		Stash stash = defaults.getHashtable(ct).getHashtable(id);
+		if (stash == null) {
+			File file = getFileByID (obj_id + ".xml");
+			if (!file.exists ()) {
+				stash = getRemoteStash (obj_id);
+				stashChanged (stash);
+			}
+			else {
+				loadFile (file);
+				stash = defaults.getHashtable(ct).getHashtable(id);
+			}
+		}	
+		return stash;
 	}
-		
+	
+	public Stash getRemoteStash (String id) {
+		String ret = SystemUtils.makeUniqueString ();
+		Message msg = new Message ("get/" + id + ".xml", ret);
+		msg = (Message) events.getReply (msg, ret);
+		String data = msg.getMessage ();
+		if (data.length () == 0)
+			return null;
+		else {
+			Stash stash = new Stash ();
+			readStringInto (stash, data);
+			return stash;
+		}
+	}	
 
 	public static Stash getDefaults () {
 		return defaults;
@@ -322,6 +384,10 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants {
 			e.printStackTrace ();
 		}
 	}
+	
+	public void loadDefaults (String defaults) throws Exception {
+		parser.parse (new File (root, defaults).getAbsolutePath ());
+	}
 
 
 	public void loadAll (File path) {
@@ -333,12 +399,7 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants {
 				if (f [i].isDirectory ())
 					loadAll (f [i]);
 				else if (f [i].getName().endsWith(".xml") && !path.equals(root_dir)) {				
-					System.out.println (f[i]);
-					BufferedInputStream buf = new BufferedInputStream (
-							new FileInputStream (f [i].getAbsolutePath ()));
-					parser.parse (new InputSource (buf));
-					buf.close();
-					//parser.parse(f [i].getAbsolutePath());
+					loadFile (f [i]);
 				}
 			}
 			catch (Exception e) {
@@ -346,6 +407,57 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants {
 			}
 		}
 		hash_stack.pop ();
+	}
+	
+	/**
+	 * file 
+	 * @param file
+	 */
+	public void loadFile (File file) {
+		try {
+			String path = file.getAbsolutePath();
+			if (!path.startsWith(root) || !path.endsWith(".xml"))
+				return;
+			BufferedInputStream buf = new BufferedInputStream (
+					new FileInputStream (file.getAbsolutePath ()),
+					IOUtils.BUFFER_SIZE);
+			parser.parse (new InputSource (buf));
+			buf.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	protected void writeFile (Stash stash) {
+		try {
+			synchronized (stash) {
+				File file = getFileByID (stash.getString (ID) + ".xml");
+				String file_name = file.getAbsolutePath ();
+				PrintStream out = new PrintStream (new BufferedOutputStream (
+						new FileOutputStream (file_name)));
+				writeXMLFile (stash, out);
+				out.close ();
+				synchronized (changed) {
+					changed.remove (stash);
+				}
+			}
+		}
+		catch (IOException e) {
+			e.printStackTrace ();
+		}
+	}
+	
+	public void actionPerformed (ActionEvent e) {
+		Stash [] items;
+		synchronized (changed) {
+			items = new Stash [changed.size ()];
+			changed.toArray (items);
+		}
+		for (int i = 0; i < items.length; i++) {
+			synchronized (items [i]) {
+				writeFile (items [i]);
+			}
+		}
 	}
 
 	/**
@@ -365,7 +477,15 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants {
 		else
 			class_type = source.getString (LIST_CLASS_FIELD);
 		for (Iterator keys = source.keySet ().iterator (); keys.hasNext ();) {
-			Stash value = source.getHashtable (keys.next ());
+			String key = (String) keys.next ();
+			Stash value = source.getHashtable (key);
+			if (value == null) {
+				if (key.startsWith (ITEM)) {
+					key = key.substring(ITEM.length());
+					key = class_type + "\\" + key;
+				}
+				value = getStash (key);
+			}
 			if (value != null && ((Stash) value).getString (ID).startsWith
 					(class_type + "\\"))
 				vector.addElement (value);

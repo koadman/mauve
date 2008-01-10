@@ -19,19 +19,23 @@ public class RemoteMessageManager extends AbstractMessageManager implements Mess
 	public MessageHandler receiver;
 	public static SubscriptionManager event_client;
 
-
-	public RemoteMessageManager (MessageHandler starter) {
+	//for subclass
+	protected RemoteMessageManager (MessageHandler starter) {
 		if (starter == null)
 			starter = this;
 		receiver = starter;
-		init (null);
+		init (null, 0);
 
 	}
+	
+	protected RemoteMessageManager () {
+		
+	}
 
-	public void init (String host) {
+	public void init (String host, int port) {
 		try {
 			if (event_client == null)
-				event_client = SubscriptionManager.create (host);
+				event_client = SubscriptionManager.create (host, port);
 		}
 		catch (Exception e) {
 			e.printStackTrace ();

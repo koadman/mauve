@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.util.Hashtable;
 
 import org.biojavax.bio.seq.RichSequence;
+import org.gel.air.ja.msg.AbstractMessageManager;
+import org.gel.air.ja.msg.GlobalInit;
 import org.gel.air.ja.stash.Stash;
 import org.gel.air.ja.stash.StashXMLLoader;
 import org.gel.air.ja.stash.events.StashUpdateEvents;
@@ -29,7 +31,7 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 	public MauveInterfacer (String [] args) {
 		mauve = new MauveModule (this);
 		loaded_alignments = new Hashtable ();
-		loader.loadAll(data_root_dir, "mauve_defaults.xml");
+		//loader.loadAll(data_root_dir, "mauve_defaults.xml");
 		Stash stash = loader.getStash("Alignment\\66.188.103.18711998221257340");
 		System.out.println ("null? " + (stash == null));
 		if (args.length > 0) {
@@ -114,11 +116,13 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		ModelBuilder.setUseDiskCache(false);
 		data_root_dir = "c:\\mauve3data\\DataStore";
 		makeDataDirs ();
-		loader = new StashXMLLoader (data_root_dir, new StashUpdateEvents ());
+		loader = new StashXMLLoader (data_root_dir, 
+				AbstractMessageManager.createEvents ("127.0.0.1", GlobalInit.PORT));
+		loader.loadDefaults ("mauve_defaults.xml");
 		new MauveInterfacer (args);
 	}
 

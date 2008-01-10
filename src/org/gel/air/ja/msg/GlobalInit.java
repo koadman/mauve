@@ -8,8 +8,10 @@ import org.gel.air.ja.msg.hub.ConnectionThread;
 
 public class GlobalInit {
 
-	public static Properties props;
-	public static final String PROP_FILE_NAME = "hub.props";
+	/*public static Properties props;
+	public static final String PROP_FILE_NAME = "hub.props";*/
+	public static int PORT = 23517;
+	public static int MAX_CONNECTIONS = 100;
 	public static boolean run = true;
 	public static final String ONE = "" + (char) 172;
 	public static final String TWO = ONE + ONE;
@@ -35,6 +37,6 @@ public class GlobalInit {
 
 	public static void error (String msg) {
 		JOptionPane.showMessageDialog (null, msg, "Error", JOptionPane.ERROR_MESSAGE);
-	}//method error
+	}
 
-}//class EasyBunny
+}

@@ -17,6 +17,8 @@ import org.gel.air.util.SystemUtils;
 public class Stash extends Hashtable <Object, Object> implements 
 		Comparable <Object>, StashConstants {
 	
+	protected static Stash defaults;
+	
 	public Stash (String class_type) {
 		this (class_type, class_type + '\\' + SystemUtils.makeUniqueString());
 	}
@@ -32,7 +34,7 @@ public class Stash extends Hashtable <Object, Object> implements
 	}
 	
 	public Object put (Object key, Object val) {
-		if (key.equals (ID)) {
+		if (key instanceof String && key.equals (ID)) {
 			String s = (String) val;
 			String ct = getString (CLASS_TYPE_STRING) + "\\";
 			if (s.startsWith (ct))
@@ -64,16 +66,22 @@ public class Stash extends Hashtable <Object, Object> implements
 		return ((String) get (key)).toLowerCase ().equals ("true");
 	}
 
+	/**
+	 * will return null if Stash isn't loaded
+	 * 
+	 * @param key
+	 * @return
+	 */
 	public Stash getHashtable (Object key) {
 		Object value = super.get (StashXMLLoader.makeKey ((String) key));
 		if (value instanceof String) {
 			int index = ((String) value).indexOf ('\\');
 			if (index < 0)
-				value = StashXMLLoader.getDefaults ().getHashtable (value);
+				value = defaults.getHashtable (value);
 			else {
 				String class_type = ((String) value).substring (0, index);
 				String val = (String) value;
-				value = StashXMLLoader.getDefaults ().getHashtable (class_type);
+				value = defaults.getHashtable (class_type);
 				if (value != null)
 					value = ((Stash) value).getHashtable (val);
 			}
@@ -121,6 +129,10 @@ public class Stash extends Hashtable <Object, Object> implements
 		noo.put (ID, noo.getString (CLASS_TYPE_STRING) + "\\" + SystemUtils.makeUniqueString () +
 				".xml");
 		return noo;
+	}
+	
+	public static Stash getDefaults () {
+		return defaults;
 	}
 
 }

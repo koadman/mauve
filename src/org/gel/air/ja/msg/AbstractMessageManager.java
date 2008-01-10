@@ -20,11 +20,10 @@ public abstract class AbstractMessageManager implements ActionListener {
 
 
 
-	public static AbstractMessageManager createEvents (String host)  throws Exception {
+	public static AbstractMessageManager createEvents (String host, int port)  throws Exception {
 		AbstractMessageManager ev = null;
-		int port = 0;
-		ev = new RemoteMessageManager (null);
-		ev.init (host);
+		ev = new RemoteMessageManager ();
+		ev.init (host, port);
 		ev.makeGUI ();
 		return ev;
 	}
@@ -52,7 +51,7 @@ public abstract class AbstractMessageManager implements ActionListener {
 
 
 
-	protected abstract void init (String host) throws Exception;
+	protected abstract void init (String host, int port) throws Exception;
 
 
 	/**

@@ -70,12 +70,4 @@ public class SubscriptionServer extends Hub {
 		}
 	}
 
-	/**
-	  *For testing.
-	  *@param args  ignored
-	**/
-	public static void main (String [] args) {
-		//new SubscriptionServer ();
-	}
-
 }

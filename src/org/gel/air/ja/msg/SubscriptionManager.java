@@ -121,9 +121,8 @@ public class SubscriptionManager extends ConnectedHub {
 	  *@param server  the host name (or the IP address) of the server to connect to
 	  *@return EventCSClient  the properly configured client connection
 	**/
-	public static SubscriptionManager create (String server) {
-		return create (new String [0], null, Integer.parseInt (
-				GlobalInit.props.getProperty ("port")), server);
+	public static SubscriptionManager create (String server, int port) {
+		return create (new String [0], null, port, server);
 	}//method create
 
 

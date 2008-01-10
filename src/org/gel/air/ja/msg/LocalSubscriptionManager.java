@@ -15,6 +15,6 @@ public class LocalSubscriptionManager extends SubscriptionManager {
 		catch (Exception e) {
 			e.printStackTrace ();
 		}
-	}//constructor
+	}
 
-}//class SameJVMRouter
+}
