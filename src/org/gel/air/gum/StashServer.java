@@ -13,6 +13,7 @@ public class StashServer {
 		AbstractMessageManager manager = AbstractMessageManager.createEvents (
 				"127.0.0.1", GlobalInit.PORT);
 		StashXMLLoader loader = new StashXMLLoader (args [0], manager);
+		loader.loadDefaults(new File (args [0], args [1]));
 		new XMLStashManager (manager, new File (args [0]), loader);
 	}
 	

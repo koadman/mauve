@@ -14,10 +14,10 @@ public class IDStashComparator implements Comparator <Stash>, StashConstants {
 		String val1 = o1.getString(ID);
 		String val2 = o2.getString(ID);
 		if (is_number) {
-			int ind = val1.indexOf("\\");
+			int ind = val1.indexOf(KEY_SEPARATOR);
 			if (ind > -1)
 				val1 = val1.substring (ind + 1);
-			ind = val2.indexOf("\\");
+			ind = val2.indexOf(KEY_SEPARATOR);
 			if (ind > -1)
 				val2 = val2.substring (ind + 1);
 			return (int) (2 * Math.signum (Double.parseDouble (val1)

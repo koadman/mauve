@@ -73,10 +73,5 @@ public class LazySymbolList extends AbstractSymbolList implements MauveStoreCons
 		}
 	}
 	
-	public SymbolList subList (int start, int end) {
-		System.out.println ("sublist: " + start + ", " + end);
-		//new Exception ().printStackTrace();
-		return super.subList (start, end);
-	}
 
 }

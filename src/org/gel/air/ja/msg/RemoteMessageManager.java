@@ -40,7 +40,7 @@ public class RemoteMessageManager extends AbstractMessageManager implements Mess
 		catch (Exception e) {
 			e.printStackTrace ();
 		}
-	}//method init
+	}
 
 
 	/**
@@ -49,7 +49,7 @@ public class RemoteMessageManager extends AbstractMessageManager implements Mess
 	**/
 	public void setDefaultCallback (Object cb) {
 		receiver = (MessageHandler) cb;
-	}//method setDefaultCallback
+	}
 
 	/**
 	  *Returns the default callback

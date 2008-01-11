@@ -36,19 +36,19 @@ public class XMLStashManager implements MessageHandler, StashConstants {
 		events = ev;
 		this.root_dir = root_dir;
 		loader = load;
-		ev.add ("update/...", this);
+		ev.add ("stash/...", this);
 	}
 
 
 	public void process (Message msg) {
 		String dest = msg.getDest ();
 		System.out.println ("dest: " + dest);
-		if (dest.startsWith ("update/"))
-			update (msg, dest.substring (7, dest.length ()));
-		else if (dest.startsWith ("get/"))
-			get (msg, dest.substring (4, dest.length ()));
-		else if (dest.startsWith ("getAll/"))
-			getAll (msg, dest.substring (7, dest.length ()));
+		if (dest.startsWith (UPDATE_NS))
+			update (msg, dest.substring (UPDATE_NS.length (), dest.length ()));
+		else if (dest.startsWith (GET_NS))
+			get (msg, dest.substring (GET_NS.length(), dest.length ()));
+		/*else if (dest.startsWith ("getAll/"))
+			getAll (msg, dest.substring (7, dest.length ()));*/
 	}
 
 
@@ -56,7 +56,7 @@ public class XMLStashManager implements MessageHandler, StashConstants {
 		try {
 			int slash = dest.indexOf ('/');
 			String obj_id = dest.substring (slash + 1, dest.length () - 1);
-			File file = loader.getFileByID (obj_id + ".xml");
+			File file = loader.getFileForStash (obj_id);
 			String file_name = file.getAbsolutePath ();
 			String cl = dest.substring (0, slash);
 			if (file.exists ())
@@ -108,7 +108,8 @@ public class XMLStashManager implements MessageHandler, StashConstants {
 
 	protected void get (Message msg, String dest) {
 		try {
-			File f = loader.getFileByID (dest);
+			dest = dest.substring (0, dest.lastIndexOf ("/"));
+			File f = loader.getFileForStash (dest);
 			Stash stash = loader.getStash (dest);
 			BufferedReader in = new BufferedReader (new FileReader (f));
 			String s = null;

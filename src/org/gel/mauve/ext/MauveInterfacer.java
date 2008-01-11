@@ -14,6 +14,8 @@ import org.gel.air.ja.stash.events.StashUpdateEvents;
 import org.gel.mauve.MauveAlignmentViewerModel;
 import org.gel.mauve.ModelBuilder;
 import org.gel.mauve.SimilarityIndex;
+import org.gel.mauve.XmfaViewerModel;
+import org.gel.mauve.ext.io.AlignmentConverter;
 import org.gel.mauve.ext.lazy.StashViewerModel;
 import org.gel.mauve.ext.lazy.StashedZHistogram;
 import org.gel.mauve.gui.MauveFrame;
@@ -32,7 +34,7 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 		mauve = new MauveModule (this);
 		loaded_alignments = new Hashtable ();
 		//loader.loadAll(data_root_dir, "mauve_defaults.xml");
-		Stash stash = loader.getStash("Alignment\\66.188.103.18711998221257340");
+		Stash stash = loader.getStash("Alignment/66.188.103.18712000240629530");
 		System.out.println ("null? " + (stash == null));
 		if (args.length > 0) {
 			alignment_id = args [0];
@@ -83,7 +85,7 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 	}
 	
 	public static String makeSimFile (Stash aligned_genome, int genome) {
-		return loader.getFileByID(aligned_genome.getString (ID) + ".sim").getAbsolutePath();
+		return loader.getAssociatedFile (aligned_genome.getString (ID), ".sim").getAbsolutePath();
 	}
 	
 	public static StashXMLLoader getLoader () {
@@ -118,11 +120,11 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 	 */
 	public static void main(String[] args) throws Exception {
 		ModelBuilder.setUseDiskCache(false);
-		data_root_dir = "c:\\mauve3data\\DataStore";
+		data_root_dir = "c:\\mauve3data";
 		makeDataDirs ();
 		loader = new StashXMLLoader (data_root_dir, 
 				AbstractMessageManager.createEvents ("127.0.0.1", GlobalInit.PORT));
-		loader.loadDefaults ("mauve_defaults.xml");
+		loader.loadDefaults (new File (data_root_dir, "mauve_defaults.xml"));
 		new MauveInterfacer (args);
 	}
 

@@ -84,15 +84,15 @@ public class ConnectedHub extends Thread {
 
 	public void sendString (String group, String what) {
 		out.println (group + GlobalInit.ONE + what);
-	}//method sendString
+	}
 
 	public void addGroup (String group) {
 		out.println (GlobalInit.TWO + "add " + group);
-	}//method addGroup
+	}
 
 	public void removeGroup (String group) {
 		out.println (GlobalInit.TWO + "remove " + group);
-	}//method removeGroup
+	}
 
 	public void run () {
 		try {

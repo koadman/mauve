@@ -103,7 +103,7 @@ public class StashViewerModel extends MauveAlignmentViewerModel implements
 	}
 
 	public File getBbFile() {
-		return loader.getFileByID(alignment.getString(ID) + ".bbcols");
+		return loader.getAssociatedFile (alignment.getString(ID), ".bbcols");
 	}
 
 	protected void makeSimilarityIndex () {

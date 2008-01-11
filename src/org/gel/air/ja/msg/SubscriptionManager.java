@@ -78,7 +78,7 @@ public class SubscriptionManager extends ConnectedHub {
 	**/
 	protected SubscriptionMatcher getMatcher () {
 		return new WildcardHierarchyMatcher ();
-	}//method getMatcher
+	}
 
 
 	/**
@@ -139,7 +139,7 @@ public class SubscriptionManager extends ConnectedHub {
 		} catch (Exception e) {
 			e.printStackTrace ();
 		}
-	}//method run
+	}
 
 
 	/**
@@ -148,9 +148,9 @@ public class SubscriptionManager extends ConnectedHub {
 	  *@param handler  the message handler to receive messages from the specified namespace
 	**/
 	public void addGroup (String group, MessageHandler handler) {
-		//super.addGroup (group);
+		super.addGroup (group);
 		lists.addSubject (group, handler);	
-	}//method addGroup
+	}
 
 	/**
 	  *Stops the specified message handler from receiving further messages from the specified
@@ -160,9 +160,9 @@ public class SubscriptionManager extends ConnectedHub {
 	  *@param handler  the messages handler that is to stop receiving messages from the specified namespace
 	**/
 	public void removeGroup (String group, MessageHandler handler) {
-		//super.removeGroup (group);
+		super.removeGroup (group);
 		lists.removeSubject (group, handler);
-	}//method removeGroup
+	}
 
 	/**
 	  *Sends a string to a specified namespace.

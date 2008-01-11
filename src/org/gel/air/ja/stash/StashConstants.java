@@ -13,6 +13,10 @@ public interface StashConstants {
 	public static final String Q = "?";
 	public static final String ITEM = "item";
 	public static final String OPTIONAL = "[]"; 
+	public static final String UPDATE_NS = "stash/update/";
+	public static final String GET_NS = "stash/get/";
+	public static final String CREATE_NS = "stash/create/";
+	public static final String KEY_SEPARATOR = "/";
 
 	public static final String REMOVE_VALUE = "!_@#$dkfas@#8345)*__7";
 

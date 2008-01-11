@@ -33,7 +33,7 @@ public class LazyFormat extends BaseFormat implements MauveStoreConstants {
 		try {
 			iter = new ListSequenceIterator ();
 			BufferedInputStream in = new BufferedInputStream (new FileInputStream (
-					loader.getFileByID (genome_data.getString (ID) + ".sba")), 
+					loader.getAssociatedFile (genome_data.getString (ID), ".sba")), 
 					IOUtils.BUFFER_SIZE);
 			int genome_length = genome_data.getInt(LENGTH);
 			in.mark(genome_length);

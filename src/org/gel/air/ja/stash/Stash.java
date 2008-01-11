@@ -20,13 +20,13 @@ public class Stash extends Hashtable <Object, Object> implements
 	protected static Stash defaults;
 	
 	public Stash (String class_type) {
-		this (class_type, class_type + '\\' + SystemUtils.makeUniqueString());
+		this (class_type, class_type + KEY_SEPARATOR + SystemUtils.makeUniqueString());
 	}
 	
 	public Stash (String class_type, String id) {
 		put (CLASS_TYPE_STRING, class_type);
 		if (id == null)
-			id = class_type + '\\' + SystemUtils.makeUniqueString();
+			id = class_type + KEY_SEPARATOR + SystemUtils.makeUniqueString();
 		put (ID, id);
 	}
 	
@@ -34,13 +34,17 @@ public class Stash extends Hashtable <Object, Object> implements
 	}
 	
 	public Object put (Object key, Object val) {
-		if (key instanceof String && key.equals (ID)) {
-			String s = (String) val;
-			String ct = getString (CLASS_TYPE_STRING) + "\\";
-			if (s.startsWith (ct))
-				s = s.substring (ct.length ());
-			if (s.indexOf ("\\") > -1 || s.indexOf("/") > -1)
-				throw new Error ("Invalid ID--contains \\ or /");
+		if (key instanceof String) {
+			if (key.equals (ID)) {
+				String s = (String) val;
+				String ct = getString (CLASS_TYPE_STRING) + KEY_SEPARATOR;
+				if (s.startsWith (ct))
+					s = s.substring (ct.length ());
+				if (s.indexOf ("\\") > -1 || s.indexOf("/") > -1)
+					throw new Error ("Invalid ID--contains \\ or /");
+			}
+			else
+				key = StashXMLLoader.makeKey ((String) key);		
 		}
 		else {
 			if (key instanceof Number)
@@ -75,7 +79,7 @@ public class Stash extends Hashtable <Object, Object> implements
 	public Stash getHashtable (Object key) {
 		Object value = super.get (StashXMLLoader.makeKey ((String) key));
 		if (value instanceof String) {
-			int index = ((String) value).indexOf ('\\');
+			int index = ((String) value).indexOf (KEY_SEPARATOR);
 			if (index < 0)
 				value = defaults.getHashtable (value);
 			else {
@@ -126,8 +130,7 @@ public class Stash extends Hashtable <Object, Object> implements
 			else if (!key.startsWith (ITEM))
 				noo.put (key, ((Stash) value).replicate ());
 		}
-		noo.put (ID, noo.getString (CLASS_TYPE_STRING) + "\\" + SystemUtils.makeUniqueString () +
-				".xml");
+		noo.put (ID, noo.getString (CLASS_TYPE_STRING) + KEY_SEPARATOR + SystemUtils.makeUniqueString ());
 		return noo;
 	}
 	

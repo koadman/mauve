@@ -23,7 +23,7 @@ public class StashEvents implements MessageHandler, StashConstants {
 	public StashEvents (AbstractMessageManager ev) {
 		events = ev;
 		callback_map = new Stash ();
-		ev.add ("update/...", this);
+		ev.add (UPDATE_NS + "...", this);
 	}
 	
 	public void addCallbackTo (Stash hash, StashChangeListener callback) {
@@ -44,8 +44,8 @@ public class StashEvents implements MessageHandler, StashConstants {
 
 	public void process (Message msg) {
 		String dest = msg.getDest ();
-		if (dest.startsWith ("update/"))
-			update (msg, dest.substring (7, dest.length () - 1));
+		if (dest.startsWith (UPDATE_NS))
+			update (msg, dest.substring (UPDATE_NS.length(), dest.length () - 1));
 	}
 
 

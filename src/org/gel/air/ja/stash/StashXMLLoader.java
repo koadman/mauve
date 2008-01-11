@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
@@ -122,17 +123,21 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants,
 			writeFile (stash);
 	}
 	
-	public File getFileByID (String id) {
-		id = id.replace('\\', '/');
-		int ind = id.indexOf('/');
+	public File getAssociatedFile (String id, String suffix) {
+		int ind = id.indexOf (KEY_SEPARATOR);
+		if (suffix.length () > 0 && !suffix.startsWith ("."))
+			suffix = "." + suffix;
+		if (!id.endsWith (suffix))
+			id += suffix;
 		File file = new File (new File (root, id.substring(0, ind)), 
 				id.substring(ind + 1));
 		return file;
 	}
 
-	public File getFileForStash (Stash stash) {
-		return getFileByID (stash.getString(ID) + ".xml");
+	public File getFileForStash (String id) {
+		return getAssociatedFile (id, ".xml");
 	}
+
 	public void startElement(String uri, String localpart, String rawname, Attributes attributes) {
 		try {
 //			localpart = localpart.substring (localpart.indexOf (':'), localpart.length ());
@@ -274,11 +279,27 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants,
 		}
 	}
 
+	//TODO the stash passed in was a new empty one, think we need parent, so
+	//changed call
 	public synchronized void readStringInto (Stash hash, String str) {
 		readInto (hash, new StringReader (str));
 	}
 
 	public synchronized void readInto (Stash hash, Reader in) {
+		try {
+			if (hash == null)
+				hash = defaults;
+			hash_stack.push (hash);
+			parser.parse(new InputSource (in));
+			hash_stack.pop ();
+			in.close ();
+		}
+		catch (Exception e) {
+			e.printStackTrace ();
+		}
+	}
+	
+	public synchronized void readInto (Stash hash, InputStream in) {
 		try {
 			if (hash == null)
 				hash = defaults;
@@ -319,17 +340,18 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants,
 	 * @return
 	 */
 	public Stash getStash (String obj_id) {
-		String ct = obj_id.substring(0, obj_id.indexOf("\\"));
+		System.out.println ("obj: " + obj_id);
+		String ct = obj_id.substring(0, obj_id.indexOf(KEY_SEPARATOR));
 		String id = makeKey (obj_id);
 		Stash stash = defaults.getHashtable(ct).getHashtable(id);
 		if (stash == null) {
-			File file = getFileByID (obj_id + ".xml");
+			File file = getFileForStash (obj_id);
 			if (!file.exists ()) {
 				stash = getRemoteStash (obj_id);
 				stashChanged (stash);
 			}
 			else {
-				loadFile (file);
+				loadFile (defaults.getHashtable(ct), file);
 				stash = defaults.getHashtable(ct).getHashtable(id);
 			}
 		}	
@@ -338,15 +360,15 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants,
 	
 	public Stash getRemoteStash (String id) {
 		String ret = SystemUtils.makeUniqueString ();
-		Message msg = new Message ("get/" + id + ".xml", ret);
+		Message msg = new Message (ret, GET_NS + id);
 		msg = (Message) events.getReply (msg, ret);
 		String data = msg.getMessage ();
 		if (data.length () == 0)
 			return null;
 		else {
-			Stash stash = new Stash ();
-			readStringInto (stash, data);
-			return stash;
+			readStringInto (defaults.getHashtable(id.substring(0, 
+					id.indexOf(KEY_SEPARATOR))), data);
+			return getStash (id);
 		}
 	}	
 
@@ -355,7 +377,7 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants,
 	}
 
 	public static String makeKey (String id) {
-		int ind = id.indexOf ("\\");
+		int ind = id.indexOf (KEY_SEPARATOR);
 		if (ind > -1)
 			id = ITEM + id.substring (ind + 1, id.length ());
 		return id;
@@ -385,44 +407,42 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants,
 		}
 	}
 	
-	public void loadDefaults (String defaults) throws Exception {
-		parser.parse (new File (root, defaults).getAbsolutePath ());
+	public void loadDefaults (File defaults) throws Exception {
+		parser.parse (defaults.getAbsolutePath ());
 	}
 
 
 	public void loadAll (File path) {
 		File root_dir = new File (root);
-		hash_stack.push (defaults.getHashtable (path.getName ()));
+		Stash clazz = defaults.getHashtable (path.getName ());
 		File [] f = path.listFiles ();
 		for (int i = 0; i < f.length; i++) {
 			try {
 				if (f [i].isDirectory ())
 					loadAll (f [i]);
-				else if (f [i].getName().endsWith(".xml") && !path.equals(root_dir)) {				
-					loadFile (f [i]);
-				}
+				else				
+					loadFile (clazz, f [i]);
 			}
 			catch (Exception e) {
 				e.printStackTrace ();
 			}
 		}
-		hash_stack.pop ();
 	}
 	
 	/**
 	 * file 
 	 * @param file
 	 */
-	public void loadFile (File file) {
+	public void loadFile (Stash clazz, File file) {
 		try {
 			String path = file.getAbsolutePath();
-			if (!path.startsWith(root) || !path.endsWith(".xml"))
+			if (!path.startsWith(root) || !path.endsWith(".xml") ||
+					!(path.indexOf(clazz.getString(ID)) > -1))
 				return;
 			BufferedInputStream buf = new BufferedInputStream (
 					new FileInputStream (file.getAbsolutePath ()),
 					IOUtils.BUFFER_SIZE);
-			parser.parse (new InputSource (buf));
-			buf.close();
+			readInto (clazz, buf);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -431,7 +451,7 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants,
 	protected void writeFile (Stash stash) {
 		try {
 			synchronized (stash) {
-				File file = getFileByID (stash.getString (ID) + ".xml");
+				File file = getFileForStash (stash.getString (ID));
 				String file_name = file.getAbsolutePath ();
 				PrintStream out = new PrintStream (new BufferedOutputStream (
 						new FileOutputStream (file_name)));
@@ -482,12 +502,13 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants,
 			if (value == null) {
 				if (key.startsWith (ITEM)) {
 					key = key.substring(ITEM.length());
-					key = class_type + "\\" + key;
+					key = class_type + KEY_SEPARATOR + key;
+					System.out.println (key);
+					value = getStash (key);
 				}
-				value = getStash (key);
 			}
 			if (value != null && ((Stash) value).getString (ID).startsWith
-					(class_type + "\\"))
+					(class_type + KEY_SEPARATOR))
 				vector.addElement (value);
 		}
 		//Collections.sort (vector);

@@ -117,7 +117,7 @@ public class SubscriptionLists {
 		if (wrapper == null)
 			wrapper = new ReceiverWrapper (interested_party);
 		addSubscription (subject, wrapper);
-	}//method addSubject
+	}
 
 	/**
 	  *Stops the specified receiver from getting further messages to the specified namespace.
@@ -129,6 +129,7 @@ public class SubscriptionLists {
 	  *EventSSClient or MessageHandler, or a subclass of one of them
 	**/
 	public void removeSubject (String subject, Object disinterested_party) {
+		System.out.println (new Date () + " remove: " + subject + " " + disinterested_party);
 		ReceiverWrapper wrapper = (ReceiverWrapper) receiver_wrappers.get (disinterested_party);
 		if (wrapper == null)
 			return;
@@ -188,7 +189,7 @@ public class SubscriptionLists {
 				node.receivers.add (receiver);
 			}
 		}
-	}//method addSubscription
+	}
 
 	/**
 	  *Stops the specified receiver from getting further messages to the specified namespace

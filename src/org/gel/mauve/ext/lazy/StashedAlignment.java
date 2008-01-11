@@ -68,7 +68,7 @@ public class StashedAlignment extends MauveAlignment implements MauveStoreConsta
 			pos = 0;
 			iv = 0;
 			key_data = new DataInputStream (new BufferedInputStream (new 
-					FileInputStream (model.loader.getFileByID(aligned_gen.getString(ID) +
+					FileInputStream (model.loader.getAssociatedFile (aligned_gen.getString(ID),
 							".gaps"))));
 			ints = key_data.readBoolean();
 			StashList lcb_data = model.getLoader ().populateVector(

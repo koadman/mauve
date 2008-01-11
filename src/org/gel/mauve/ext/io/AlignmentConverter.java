@@ -45,7 +45,7 @@ public class AlignmentConverter implements MauveStoreConstants {
 		loader = load;
 		model = mod;
 		convertToStash ();
-		loader.writeXMLFile (align, loader.getFileByID (align.getString (ID) + ".xml"));
+		loader.writeXMLFile (align, loader.getFileForStash (align.getString (ID)));
 	}
 	
 	protected void convertToStash () {
@@ -54,8 +54,7 @@ public class AlignmentConverter implements MauveStoreConstants {
 		lcb_list = model.getFullLcbList();
 		bb_list = model.getBackboneList().getBackboneArray();
 		align.put(LCB_COUNT, lcb_list.length + "");
-		String bb_file = align.getString(ID) + ".bbcols";
-		writeBbcolsFile (bb_file);
+		writeBbcolsFile (align.getString(ID));
 		//SegmentWriter.getSegmentWriter("c:\\lcbs.txt", model);
 		Stash genome_list = loader.makeList (ALIGNED_GENOME_CLASS, GENOMES);
 		align.put(GENOMES, genome_list);
@@ -63,15 +62,15 @@ public class AlignmentConverter implements MauveStoreConstants {
 		align.put(GENOME_COUNT, model.getSequenceCount() + "");
 		for (int i = 0; i < model.getSequenceCount(); i++) {
 			Stash genome = new Stash (ALIGNED_GENOME_CLASS);
-			genome_list.put("x" + i, genome.get (ID));
+			genome_list.put(genome.get (ID), genome.get (ID));
 			genome.put(GENOME, new GbkConverter (
 					model.getGenomeBySourceIndex(i), ASAP, loader).genome.get(ID));
 			if (model.getGenomeBySourceIndex(i).getLength() < Integer.MAX_VALUE)
 				use_ints = true;
 			try {
 				gap_out = new DataOutputStream (new BufferedOutputStream (
-						new FileOutputStream (loader.getFileByID (
-								genome.get(ID) + ".gaps"))));
+						new FileOutputStream (loader.getAssociatedFile (
+								genome.getString (ID), ".gaps"))));
 				gap_file_pos = 0;
 				gap_out.writeBoolean(use_ints);
 			} catch (Exception e) {
@@ -86,8 +85,8 @@ public class AlignmentConverter implements MauveStoreConstants {
 			MauveInterfacer.writeSimilarity(model, genome, i);
 			try {
 				gap_out.close();
-				loader.writeXMLFile(genome, loader.getFileByID(
-						genome.getString (ID) + ".xml"));
+				loader.writeXMLFile(genome, loader.getFileForStash (
+						genome.getString (ID)));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -100,7 +99,7 @@ public class AlignmentConverter implements MauveStoreConstants {
 					BackboneListBuilder.getBbFile(model, ((XMFAAlignment) 
 							model.getXmfa()))));
 			PrintStream out = new PrintStream (new BufferedOutputStream (
-					new FileOutputStream (loader.getFileByID (file))));
+					new FileOutputStream (loader.getAssociatedFile (file, "bbcols"))));
 			String input = in.readLine();
 			while (input != null) {
 				StringTokenizer toke = new StringTokenizer (input);
@@ -121,7 +120,7 @@ public class AlignmentConverter implements MauveStoreConstants {
 		for (int i = 0; i < lcb_list.length; i++) {
 			if (lcb_list [i].starts [genome_ind] != 0) {
 				Stash lcb = new Stash (GENOME_LABEL_CLASS, 
-						GENOME_LABEL_CLASS + "\\" + lcb_list [i].id);
+						GENOME_LABEL_CLASS + KEY_SEPARATOR + lcb_list [i].id);
 				addLocation (lcb, lcb_list [i].starts [genome_ind],
 						lcb_list [i].ends [genome_ind]);
 				lcb.put(REVERSE, lcb_list [i].reverse [genome_ind] ? REVERSE_SYMBOL : 

@@ -79,17 +79,17 @@ public class GbkConverter implements MauveStoreConstants {
 			Iterator <Feature> itty2 = hold.features();
 			Stash contig_label = new Stash (GENOME_LABEL_CLASS,
 					itty2.hasNext () ?
-					GENOME_LABEL_CLASS +  "\\" + MauveHelperFunctions.getDBXrefID (
+					GENOME_LABEL_CLASS +  KEY_SEPARATOR + MauveHelperFunctions.getDBXrefID (
 							itty2.next (), db_header) : null);
 			c_labels.put(count++ + "", contig_label);
 			contig_label.put(NAME, src.getChromosomeAt(feat.getLocation().getMin()).getName());
 			addLocation (contig_label, feat, 0);
 			makeContigStash (feat, contig_label);
 		}
-		loader.writeXMLFile(genome, loader.getFileByID (
-				genome.getString(ID) + ".xml"));
-		loader.writeXMLFile(features, loader.getFileByID (
-				features.getString(ID) + ".xml"));
+		loader.writeXMLFile(genome, loader.getFileForStash (
+				genome.getString(ID)));
+		loader.writeXMLFile(features, loader.getFileForStash (
+				features.getString(ID)));
 		//load.writeCompressedFile(features, "c:\\features.xxml");
 		System.out.println ("all written");
 	}
@@ -161,7 +161,7 @@ public class GbkConverter implements MauveStoreConstants {
 	
 	public void makeSequenceFile (Sequence sequence) {
 		try {
-			File file = loader.getFileByID (genome.getString(ID) + ".sba");
+			File file = loader.getAssociatedFile (genome.getString(ID), ".sba");
 			FileOutputStream out = new FileOutputStream (file);
 			Iterator <ComponentFeature> itty = seq.features();
 			while (itty.hasNext()) {
