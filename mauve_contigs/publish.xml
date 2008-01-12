@@ -1,0 +1,77 @@
+<project name="PublishMauve" default="publish">
+	<description>
+		This ant script publishes a Mauve release to the freshmeat web site.
+    </description>
+	
+	<!-- set the release version -->
+	<property name="release.version" value="2.0.0"/>
+
+	<!-- set global properties for this build -->
+	<property name="support" location="build_support"/>
+
+
+	<taskdef name="freshmeat"
+		classname="de.frewert.ant.freshmeat.Announcement">
+	    <classpath>
+			<pathelement path="${support}/xmlrpc-1.2-b1.jar"/>
+			<pathelement path="${support}/antmeat.jar"/>
+	    </classpath>
+	</taskdef>
+
+	<target name="publish" description="Publish a release to freshmeat">
+
+		<freshmeat xmlrpcserver="http://freshmeat.net/xmlrpc/"
+		      username="darling"
+		      password="darling">
+	
+			<publish projectName="Mauve"
+				branchName="Default"
+				version="${release.version}"
+				focus="majorEnhancements"
+				hidden="false">
+	
+			<!-- focus can be one of 	
+			1	initialAnnouncement	
+			2	documentation	
+			3	cleanup	
+			4	minorEnhancements	
+			5	majorEnhancements	
+			6	minorBugfixes	
+			7	majorBugfixes	
+			8	minorSecurityFixes	
+			9	majorSecurityFixes
+			 -->
+	
+				<!-- Changes are an english prose summary of changes, 
+				     limited to 300 characters -->
+				<changes>
+Mauve 2.0 includes a new accurate and sensitive genome alignment algorithm called progressiveMauve.  Hundreds of genomes can now be aligned, and rearranged segments conserved in subsets of the genomes can be identified.  A new annotation search can find features by things like gene name and others.
+				</changes>
+		 
+				<urlBlock
+				    homepage="http://genome-alignment.org/mauve/"
+				    tgz="http://gel.ahabs.wisc.edu/mauve/downloads/mauve_linux_${release.version}.tar.gz"
+				    osx="http://gel.ahabs.wisc.edu/mauve/downloads/Mauve-${release.version}.dmg"
+				    changelog="http://asap.ahabs.wisc.edu/mauve-aligner/mauve-user-guide/mauve-version-history.html"
+				    mailinglist="http://sourceforge.net/mail/?group_id=181544"
+				/>
+			</publish>
+		</freshmeat>
+	</target>
+
+
+	<target name="withdraw" description="Withdraw a release from freshmeat">
+		<freshmeat xmlrpcserver="http://freshmeat.net/xmlrpc/"
+		      username=""
+		      password="">
+		      
+			<withdraw
+				projectName="Mauve"
+				branchName="Default"
+				version="${release.version}"
+			/>
+	
+		</freshmeat>
+	</target>
+
+</project>

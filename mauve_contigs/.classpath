@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="var" path="JUNIT_HOME/junit.jar" sourcepath="ECLIPSE_HOME/plugins/org.eclipse.jdt.source_3.0.0/src/org.junit_3.8.1/junitsrc.zip"/>
+	<classpathentry kind="lib" path="ext/bytecode.jar"/>
+	<classpathentry kind="lib" path="ext/commons-cli.jar"/>
+	<classpathentry kind="lib" path="ext/commons-collections-2.1.jar"/>
+	<classpathentry kind="lib" path="ext/commons-dbcp-1.1.jar"/>
+	<classpathentry kind="lib" path="ext/commons-pool-1.1.jar"/>
+	<classpathentry kind="lib" path="ext/biojava-1.5.jar"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="lib" path="ext/zeus-jscl.jar"/>
+	<classpathentry kind="lib" path="ext/jakarta-regexp.jar"/>
+	<classpathentry kind="lib" path="ext/xerces.jar"/>
+	<classpathentry kind="lib" path="ext/cinema-app_support.jar"/>
+	<classpathentry kind="lib" path="ext/cinema-gui.jar" sourcepath="C:/cinema-3_0_23/src"/>
+	<classpathentry kind="lib" path="ext/cinema-mxc.jar" sourcepath="C:/cinema-3_0_23/src"/>
+	<classpathentry kind="lib" path="ext/cinema-sequence.jar" sourcepath="C:/cinema-3_0_23/src"/>
+	<classpathentry kind="lib" path="ext/cinema-util.jar" sourcepath="C:/cinema-3_0_23/src"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
