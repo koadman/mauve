@@ -139,13 +139,15 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 	}
 
 
-	public static String getAsapID (Feature feat) {
+	/**
+	 * returns asap dbxref if exists, then any other dbxref, then label or gene
+	 * annotation if one exists.
+	 * 
+	 * @param feat
+	 * @return
+	 */
+	public static String getUniqueId (Feature feat) {
 		String id = null;
-		if (feat.getAnnotation ().containsProperty (LABEL_STRING)) {
-			String label = (String) feat.getAnnotation ().getProperty (LABEL_STRING);
-			if (label.toLowerCase ().startsWith ("asap"))
-					return label;
-		}
 		Object val = feat.getAnnotation ().getProperty (DB_XREF);
 		if (val != null) {
 			if (val instanceof Collection) {
@@ -154,16 +156,22 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 				while (itty.hasNext ()) {
 					id = (String) itty.next ();
 					if (id.toLowerCase ().indexOf (ASAP) > -1)
-						return id;
+						break;
 				}
 			}
 			else if (val instanceof String) {
 				id = (String) val;
-				if (id.toLowerCase ().indexOf (ASAP) > -1)
-					return id;
 			}
 			else
 				System.out.println ("class " + val.getClass ());
+		}
+		else {
+			if (feat.getAnnotation ().containsProperty (LABEL_STRING)) {
+				return (String) feat.getAnnotation ().getProperty (LABEL_STRING);
+			}
+			else if (feat.getAnnotation ().containsProperty ("gene")) {
+				return (String) feat.getAnnotation ().getProperty ("gene");
+			}
 		}
 		return null;
 	}

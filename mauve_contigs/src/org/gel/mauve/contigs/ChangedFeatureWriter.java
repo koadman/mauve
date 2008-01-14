@@ -66,7 +66,7 @@ public class ChangedFeatureWriter extends AbstractTabbedDataWriter
 			case CONT_IND:
 				return chrom.getName ();
 			case LAB_IND:
-				return MauveHelperFunctions.getAsapID (feature);
+				return MauveHelperFunctions.getUniqueId (feature);
 			case STR_IND:
 				return ((StrandedFeature) feature).getStrand () == (changed ?
 					StrandedFeature.NEGATIVE : StrandedFeature.POSITIVE) ? FORWARD : COMPLEMENT;
