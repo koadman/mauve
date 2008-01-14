@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Class-Path: ext/biojava-1.5.jar ext/bytecode.jar ext/cinema-app_suppor
+ t.jar ext/cinema-gui.jar ext/cinema-mxc.jar ext/cinema-sequence.jar e
+ xt/cinema-util.jar ext/commons-cli.jar ext/commons-collections-2.1.ja
+ r ext/commons-dbcp-1.1.jar ext/commons-pool-1.1.jar ext/gnu-getopt.ja
+ r ext/jakarta-regexp.jar ext/xerces.jar ext/zeus-jscl.jar
+Built-By: koadman
+Created-By: 1.5.0_06-b05 (Sun Microsystems Inc.)
+Ant-Version: Apache Ant 1.6.5
+Main-Class: org.gel.mauve.contigs.ContigOrderer
+
+Name: common
+Specification-Title: Mauve
+Implementation-Title: Mauve
+Specification-Version: ${version}
+Specification-Vendor: Genome Evolution Laboratory
+Implementation-Version: ${version} May 24 2006
+Implementation-Vendor: Genome Evolution Laboratory
+
