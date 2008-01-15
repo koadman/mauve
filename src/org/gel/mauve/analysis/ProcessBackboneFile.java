@@ -2,6 +2,7 @@ package org.gel.mauve.analysis;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Hashtable;
@@ -153,18 +154,24 @@ public class ProcessBackboneFile implements MauveConstants {
 		return backbone;
 	}
 	
-	public static void startProcessor (String file, Hashtable spec_args) {
+	public static void startProcessor (String f_name, Hashtable spec_args) {
 		try {
-			spec_args.put (INPUT_FILE, file + ".backbone");
+			File file = new File (f_name);
+			if (!new File (file.getAbsolutePath() + ".backbone").exists()) {
+				int end = file.getName ().lastIndexOf ('.');
+				if (end > -1)
+					file = new File (file.getParentFile (), 
+							file.getName ().substring (0, end));
+				if (!new File (file.getAbsolutePath() + ".backbone").exists())
+					throw new FileNotFoundException ("Couldn't find backbone file");
+			}
+			spec_args.put (INPUT_FILE, file.getAbsolutePath() + ".backbone");
 			System.out.println ("file: " + file);
-			spec_args.put (SegmentDataProcessor.FILE_STUB, file);
+			spec_args.put (SegmentDataProcessor.FILE_STUB, file.getAbsolutePath());
 			spec_args.put (SegmentDataProcessor.BACKBONE,
 					new ProcessBackboneFile (spec_args).getBackboneSegments ());
 			new SegmentDataProcessor (spec_args);
 		} catch (Exception e) {
-			System.out
-					.println ("Wrong arguments.  First should be the name of the backbone"
-							+ "file, second, the number of the sequence to sort by.");
 			e.printStackTrace ();
 		}
 	}

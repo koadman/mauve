@@ -146,16 +146,27 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 
 	//I'm not sure the first if statement is safe. . .
 	public static String getAsapID (Feature feat) {
-		return getDBXrefID (feat, ASAP);
+		String val = getDBXrefID (feat, ASAP);
+		if (val == null)
+			val = getDBXrefID (feat, ERIC);
+		if (val == null)
+			val = getDBXrefID (feat, "");
+		if (val == null) {
+			if (feat.getAnnotation ().containsProperty (LABEL_STRING)) {
+				val = (String) feat.getAnnotation ().getProperty (LABEL_STRING);
+			}
+			else if (feat.getAnnotation ().containsProperty ("gene")) {
+				val = (String) feat.getAnnotation ().getProperty ("gene");
+			}
+			else if (feat.getAnnotation().containsProperty("locus_tag"))
+				val = (String) feat.getAnnotation ().getProperty ("locus_tag");
+		}
+		return val;
 	}
+	
 	
 	public static String getDBXrefID (Feature feat, String header) {
 		String id = null;
-		/*if (feat.getAnnotation ().containsProperty (LABEL_STRING)) {
-			String label = (String) feat.getAnnotation ().getProperty (LABEL_STRING);
-			if (label.toLowerCase ().startsWith (header))
-					return label;
-		}*/
 		Object val = feat.getAnnotation ().getProperty (DB_XREF);
 		if (val != null) {
 			if (val instanceof Collection) {

@@ -189,6 +189,8 @@ public interface MauveConstants {
 	 */
 	public static final String ASAP = "asap";
 	
+	public static final String ERIC = "eric";
+	
 	/**
 	 * Strings representing supported mauve formats; ie those extending
 	 * org.gel.mauve.SupportedFormat

@@ -255,7 +255,6 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 		int seq = genome.getSourceIndex ();
 		try {
 			filterer.addCheckBox (type);
-			Color orange = new Color (255, 128, 0, 128);
 			MultiGenomeRectangularBeadRenderer renderer = new MultiGenomeRectangularBeadRenderer (
 					10.0, 10.0, Color.BLACK, Color.WHITE, new BasicStroke (), model);
 			renderer.setOffset (genome, offset [seq]);
@@ -271,7 +270,7 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 						spec);
 			}
 			renderer = new MultiGenomeRectangularBeadRenderer (10.0, 0, Color.BLACK,
-					orange, new BasicStroke (), model);
+					Color.white, new BasicStroke (), model);
 			renderer.setOffset (genome, offset [seq]);
 			offset [seq] += MauveConstants.FEATURE_HEIGHT;
 			mauve.getRearrangementPanel ().getNewPanel (genome.getViewIndex ()).

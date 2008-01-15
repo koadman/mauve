@@ -31,12 +31,6 @@ public class AnalysisModuleFrame extends MauveFrame implements FlatFileFeatureCo
 			contig_handler = new DefaultContigHandler (model);
 			final Hashtable args = new Hashtable ();
 			File file = model.getSrc ();
-			System.out.println ("name: " + file.getName ());
-			int end = file.getName ().lastIndexOf ('.');
-			if (end > -1)
-				file = new File (file.getParentFile (), 
-						file.getName ().substring (0, end));
-			System.out.println ("name: " + file.getName ());
 			args.put (ProcessBackboneFile.INPUT_FILE, file.toString ());
 			args.put (MODEL, model);
 			args.put (CONTIG_HANDLER, this);
