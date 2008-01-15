@@ -89,7 +89,7 @@ public class ProcessBackboneFile implements MauveConstants {
 	}
 
 	protected void storeRow () {
-		Segment segment = new Segment (count, true);
+		Segment segment = new Segment (count, true, true);
 		for (int i = 0, j = 0; j < count; i++, j++) {
 			segment.starts[j] = Long.parseLong (current_row[i]);
 			segment.ends[j] = Long.parseLong (current_row[++i]);

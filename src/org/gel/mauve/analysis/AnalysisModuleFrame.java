@@ -90,7 +90,7 @@ public class AnalysisModuleFrame extends MauveFrame implements FlatFileFeatureCo
 		//System.out.println ("original: " + segment);
 		int part = 1;
 		while (one != end) {
-			Segment piece = new Segment (segment.starts.length, true);
+			Segment piece = new Segment (segment.starts.length, true, true);
 			piece.starts [sequence] = segment.starts [sequence];
 			piece.ends [sequence] = one.getEnd ();
 			segment.starts [sequence] = one.getEnd () + 1;

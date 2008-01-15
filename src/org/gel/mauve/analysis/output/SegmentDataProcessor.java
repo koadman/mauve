@@ -157,7 +157,7 @@ public class SegmentDataProcessor extends Hashtable implements MauveConstants {
 		for (int i = 0; i < count; i++) {
 			Segment prev = firsts[i];
 			if (prev.starts[i] != 1) {
-				Segment seg = new Segment (count, true);
+				Segment seg = new Segment (count, true, true);
 				seg.ends[i] = prev.starts[i] - 1;
 				seg.starts[i] = 1;
 				firsts[i] = seg;
@@ -172,7 +172,7 @@ public class SegmentDataProcessor extends Hashtable implements MauveConstants {
 						System.out.println ("segment: " + cur + " prev: "
 								+ prev);*/;
 					} else {
-						Segment island = new Segment (count, true);
+						Segment island = new Segment (count, true, true);
 						island.starts[i] = prev.ends[i] + 1;
 						island.ends[i] = cur.starts[i] - 1;
 						prev.nexts[i] = island;
@@ -184,7 +184,7 @@ public class SegmentDataProcessor extends Hashtable implements MauveConstants {
 				prev = cur;
 				if (sizes != null && cur.nexts [i] == Segment.END &&
 						cur.ends [i] < sizes [i]) {
-					Segment island = new Segment (count, true);
+					Segment island = new Segment (count, true, true);
 					island.starts[i] = cur.ends[i] + 1;
 					island.ends[i] = sizes [i];
 					cur.nexts[i] = island;
