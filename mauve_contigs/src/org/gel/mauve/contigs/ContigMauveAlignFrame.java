@@ -36,9 +36,10 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 				" draft second.");
 		seq_label.setLocation(new Point(30, 184));
 		seq_label.setVisible(true);
-		seq_label.setSize(new Dimension (290, 45));
+		seq_label.setSize(new Dimension (290, 25));
 		outputFileText.setLocation(new Point (85, 240));
 		outputButton.setLocation(new Point (310, 240));
+		outputLabel.setText("Output: ");
 		outputLabel.setLocation(new Point (10, 240));
 		alignButton.setText("Start");
 		sequencesPanel.add(seq_label);
@@ -98,6 +99,16 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 		setOutput (current_dir.getAbsolutePath());
 		super.alignButtonActionPerformed(e);
 		setOutput (current_dir.getParentFile().getParentFile().getAbsolutePath());
+	}
+	
+	public void addButtonActionPerformed (ActionEvent e) {
+		fc.setFileSelectionMode(fc.FILES_ONLY);
+		super.addButtonActionPerformed(e);
+	}
+	
+	public void outputButtonActionPerformed (ActionEvent e) {
+		fc.setFileSelectionMode(fc.DIRECTORIES_ONLY);
+		super.outputButtonActionPerformed(e);
 	}
 	
 }

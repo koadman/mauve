@@ -148,7 +148,9 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 	 */
 	public static String getUniqueId (Feature feat) {
 		String id = null;
-		Object val = feat.getAnnotation ().getProperty (DB_XREF);
+		Object val = null;
+		if (feat.getAnnotation().containsProperty(DB_XREF))
+			val =feat.getAnnotation ().getProperty (DB_XREF);
 		if (val != null) {
 			if (val instanceof Collection) {
 				Collection ids = (Collection) val;
@@ -165,15 +167,17 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 			else
 				System.out.println ("class " + val.getClass ());
 		}
-		else {
+		if (id == null) {
 			if (feat.getAnnotation ().containsProperty (LABEL_STRING)) {
-				return (String) feat.getAnnotation ().getProperty (LABEL_STRING);
+				id = (String) feat.getAnnotation ().getProperty (LABEL_STRING);
 			}
 			else if (feat.getAnnotation ().containsProperty ("gene")) {
-				return (String) feat.getAnnotation ().getProperty ("gene");
+				id = (String) feat.getAnnotation ().getProperty ("gene");
 			}
+			else if (feat.getAnnotation().containsProperty("locus_tag"))
+				id = (String) feat.getAnnotation ().getProperty("locus_tag");
 		}
-		return null;
+		return id;
 	}
 
 	public static Hashtable getContigFeatures (Genome genome) {

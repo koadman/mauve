@@ -67,7 +67,7 @@ public class AlignFrame extends java.awt.Frame
     JTabbedPane alignmentOptionPane = new JTabbedPane();
     /** < contains the various parameter panels */
 
-    final JFileChooser fc = new JFileChooser();
+    protected final JFileChooser fc = new JFileChooser();
     protected JScrollPane listScrollPane = new JScrollPane();
     protected DefaultListModel sequenceListModel = new DefaultListModel();
     Dimension d;
