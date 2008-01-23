@@ -21,11 +21,12 @@ import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.taxa.NCBITaxon;
 import org.biojavax.ontology.ComparableTerm;
 import org.gel.mauve.FilterCacheSpec;
+import org.gel.mauve.MauveConstants;
 import org.gel.mauve.gui.navigation.AnnotationContainsFilter;
 import org.gel.mauve.gui.sequence.ZiggyRectangularBeadRenderer;
 
 public abstract class GenbankEmblFormat extends BaseFormat {
-	private static FilterCacheSpec [] specs = new FilterCacheSpec [10];
+	private static FilterCacheSpec [] specs = new FilterCacheSpec [11];
 	static {
 		RectangularBeadRenderer renderer = null;
 		ZiggyRectangularBeadRenderer zrenderer;
@@ -101,7 +102,7 @@ public abstract class GenbankEmblFormat extends BaseFormat {
 					renderer);
 
 			// for repeats
-			renderer = new RectangularBeadRenderer (6.0, 20.0, Color.BLACK,
+			renderer = new RectangularBeadRenderer (6.0, 26.0, Color.BLACK,
 					Color.PINK, new BasicStroke ());
 			renderer.setHeightScaling (false);
 			specs[8] = new FilterCacheSpec (new FeatureFilter.And (
@@ -110,7 +111,15 @@ public abstract class GenbankEmblFormat extends BaseFormat {
 					new String [] {"gene", "locus_tag", "product", "db_xref"},
 					renderer);
 			renderer.setHeightScaling (false);
-			specs[9] = new FilterCacheSpec (
+			renderer = new RectangularBeadRenderer (6.0, 20.0, Color.BLACK,
+					Color.PINK, new BasicStroke ());
+			specs[9] = new FilterCacheSpec (new FeatureFilter.And (
+					new FeatureFilter.ByType ("repeat_region"),
+					new FeatureFilter.StrandFilter (StrandedFeature.POSITIVE)),
+					new String [] {"gene", "locus_tag", "product", "db_xref"},
+					renderer);
+			renderer.setHeightScaling (false);
+			specs[10] = new FilterCacheSpec (
 					new FeatureFilter.ByType ("source"),
 					new String [] {FilterCacheSpec.ALL_ANNOTATIONS});
 		} catch (ChangeVetoException e) {
@@ -145,11 +154,19 @@ public abstract class GenbankEmblFormat extends BaseFormat {
             	name = (String) a.getProperty("biojavax:plasmid");
             }
 		}
-        if (name == null || name.trim().equals("") && 
+        if (name != null) {
+        	name = name.trim();
+        	if (name.length() == 0)
+        		name = null;
+        }
+        if (name == null && s.getAnnotation() != null) {
+        	name = (String) s.getAnnotation().getProperty(MauveConstants.LOCUS);
+        }
+        if (name == null && 
         		AnnotationContainsFilter.getKeyIgnoreCase ("definition",
-				s.getAnnotation()) != null) {
-			name = getChromNameFromDescription (s);
-		}
+        				s.getAnnotation()) != null) {
+        	name = getChromNameFromDescription (s);
+        }
 		return name;
 	}
 
