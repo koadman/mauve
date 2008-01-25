@@ -20,6 +20,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
 import javax.swing.event.EventListenerList;
 
+import org.biojava.bio.gui.sequence.AbstractBeadRenderer;
 import org.biojava.bio.gui.sequence.FeatureBlockSequenceRenderer;
 import org.biojava.bio.gui.sequence.FilteringRenderer;
 import org.biojava.bio.gui.sequence.MultiLineRenderer;
@@ -423,7 +424,21 @@ public class FeaturePanel extends AbstractSequencePanel
             }
             else if (t instanceof FeatureHolder)
             {
+            	if (sve.getSource() instanceof FeatureBlockSequenceRenderer) {
+            		AbstractBeadRenderer renderer = (AbstractBeadRenderer) 
+            				((FeatureBlockSequenceRenderer) sve.getSource()
+            				).getFeatureRenderer();
+            		int y = sve.getMouseEvent().getY();
+            		//System.out.println ("y: " + y + "   start: " + renderer.getBeadDisplacement () + "   end: " + renderer.getBeadDepth());
+            		if (y < renderer.getBeadDisplacement() ||
+            				y > renderer.getBeadDepth() + renderer.getBeadDisplacement())
+            			return;
+            		
+            	}
                 FeatureHolder fh = (FeatureHolder) t;
+                /*System.out.println ("source: " + ((FeatureBlockSequenceRenderer) sve.getSource()).getDepth (sve));
+                System.out.println ("target: " + sve.getTarget());*/
+                System.out.println ("me: " + sve.getMouseEvent ());
                 StringBuffer msg = new StringBuffer("<HTML>");
                 for (Iterator fi = fh.features(); fi.hasNext();)
                 {
