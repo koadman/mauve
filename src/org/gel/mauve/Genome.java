@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Vector;
 
 import org.biojava.bio.seq.Sequence;
+import org.gel.mauve.ext.RangeReverser;
 
 public class Genome {
 	private long length;
@@ -33,6 +34,8 @@ public class Genome {
 	
 	private String uri;
 
+	protected boolean reversed;
+
 	private int sourceIndex;
 	private boolean visible = true;
 	public Genome (long length, BaseViewerModel model, int sourceIndex) {
@@ -47,6 +50,10 @@ public class Genome {
 
 	public long getLength () {
 		return length;
+	}
+	
+	public boolean genomeReversed () {
+		return reversed;
 	}
 
 	public void setAnnotationSequence (Sequence annotationSequence,

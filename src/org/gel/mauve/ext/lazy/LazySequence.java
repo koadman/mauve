@@ -25,5 +25,6 @@ public class LazySequence extends SimpleSequence {
 	public LazySequence (SymbolList list) {
 		super (list, null, null, null);
 	}
+	
 
 }

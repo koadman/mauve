@@ -14,6 +14,7 @@ import org.biojava.bio.symbol.IllegalSymbolException;
 import org.biojava.bio.symbol.Symbol;
 import org.biojava.bio.symbol.SymbolList;
 import org.gel.air.util.IOUtils;
+import org.gel.mauve.Genome;
 import org.gel.mauve.ext.MauveStoreConstants;
 
 public class LazySymbolList extends AbstractSymbolList implements MauveStoreConstants {
@@ -22,16 +23,19 @@ public class LazySymbolList extends AbstractSymbolList implements MauveStoreCons
 	protected FiniteAlphabet alphabet;
 	protected long start;
 	protected long end;
+	protected Genome genome;
 	
 	protected static Hashtable <BufferedInputStream, Integer> open_streams = 
 			new Hashtable <BufferedInputStream, Integer> ();
 	//use rangeloadtracker for lazyloading from server as well as file
 	
-	public LazySymbolList (BufferedInputStream data, long start, long end) {
+	public LazySymbolList (BufferedInputStream data, long start, long end, 
+			Genome gen) {
 		this.start = start;
 		this.end = end;
 		dna = data;
 		alphabet = DNATools.getDNA();
+		genome = gen;
 		synchronized (dna) {
 			if (open_streams.get(dna) == null) {
 				open_streams.put(dna, 0);
@@ -52,6 +56,8 @@ public class LazySymbolList extends AbstractSymbolList implements MauveStoreCons
 		if (symbol > end - 1 || symbol < 0)
 			return alphabet.getGapSymbol();
 		else {
+			if (genome.genomeReversed())
+				symbol = ((int) end - 1) - symbol;
 			synchronized (dna) {
 				try {
 					int pos = open_streams.get(dna);

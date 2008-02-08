@@ -38,6 +38,10 @@ public class RangeReverser {
 	private void unreverse () {
 	}
 	
+	public RangeLocation getReversed () {
+		return reversed;
+	}
+	
 	public synchronized void resetReversed () {
 		unreverse ();
 		//put repaint code here

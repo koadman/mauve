@@ -11,6 +11,7 @@ import org.gel.air.ja.stash.Stash;
 import org.gel.air.ja.stash.StashXMLLoader;
 import org.gel.air.util.IOUtils;
 import org.gel.mauve.FilterCacheSpec;
+import org.gel.mauve.Genome;
 import org.gel.mauve.bioj.ListSequenceIterator;
 import org.gel.mauve.ext.MauveInterfacer;
 import org.gel.mauve.ext.MauveStoreConstants;
@@ -23,6 +24,7 @@ public class LazyFormat extends BaseFormat implements MauveStoreConstants {
 	protected StashXMLLoader loader = MauveInterfacer.getLoader();
 	protected static final FilterCacheSpec [] specs = new FilterCacheSpec [0];
 	protected ListSequenceIterator iter;
+	protected Genome genome;
 	
 	public LazyFormat (Stash data) {
 		genome_data = data;
@@ -37,7 +39,7 @@ public class LazyFormat extends BaseFormat implements MauveStoreConstants {
 					IOUtils.BUFFER_SIZE);
 			int genome_length = genome_data.getInt(LENGTH);
 			in.mark(genome_length);
-			LazySymbolList list = new LazySymbolList (in, 1, genome_length);
+			LazySymbolList list = new LazySymbolList (in, 1, genome.getLength(), genome);
 			LazySequence seq = new LazySequence (list);
 			seq.setName(genome_data.getString(NAME));
 			iter.add(seq);	
