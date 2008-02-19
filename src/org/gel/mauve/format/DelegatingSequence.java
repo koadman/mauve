@@ -214,13 +214,16 @@ class DelegatingSequence implements Sequence {
 		// if this is of the form And(SomeFilter,OverlapsLocation)
 		// used by TranslatedSequencePanels, see if we have
 		// data corresponding to SomeFilter in one of the cache entries
+		format.getRangeRev ().fixRange (fc);
 		if (fc instanceof FeatureFilter.And
 				&& ((FeatureFilter.And) fc).getChild2 () instanceof FeatureFilter.OverlapsLocation) {
 			fh = getCachedFilterResults (((FeatureFilter.And) fc).getChild1 ());
 		} else {
 			fh = format.readInnerSequence (source, sequenceIndex);
 		}
-		return fh.filter (fc, recurse);
+		FeatureHolder ret = fh.filter (fc, recurse);
+		format.getRangeRev ().fixFeatures (ret);
+		return ret;
 	}
 
 	private FeatureHolder getCachedFilterResults (FeatureFilter ff) {

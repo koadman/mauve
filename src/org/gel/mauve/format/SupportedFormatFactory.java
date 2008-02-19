@@ -5,13 +5,10 @@ import java.io.File;
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.SupportedFormat;
 
-public class SupportedFormatFactory implements MauveConstants
-{
-    final static SupportedFormat GENBANK = new GenbankFileFormat();
-    final static SupportedFormat EMBL = new EmblFormat();
-    final static SupportedFormat FASTA = new FastaFormat();
-    final static SupportedFormat RAW = new RawFormat();
-    final static SupportedFormat INSDSEQ = new INSDseqFormat();
+//changed so creates new instance each time called; is lightweight
+//and all formats share one cache, not all of one type
+//allows genome specific access in delegating sequences
+public class SupportedFormatFactory implements MauveConstants {
 
     public static SupportedFormat guessFormatFromFilename(String filename)
     {
@@ -20,27 +17,27 @@ public class SupportedFormatFactory implements MauveConstants
 
         if (name.endsWith(".gbk"))
         {
-            return SupportedFormatFactory.GENBANK;
+            return new GenbankFileFormat();
         }
         else if (name.endsWith(".raw"))
         {
-            return SupportedFormatFactory.RAW;
+            return new RawFormat();
         }
         else if (name.endsWith(".seq"))
         {
-            return SupportedFormatFactory.GENBANK;
+            return new GenbankFileFormat();
         }
         else if (name.endsWith(".embl"))
         {
-            return SupportedFormatFactory.EMBL;
+            return new EmblFormat();
         }
         else if (name.endsWith(".xml"))
         {
-            return SupportedFormatFactory.INSDSEQ;
+            return new INSDseqFormat();
         }
         else
         {
-            return SupportedFormatFactory.FASTA;
+            return new FastaFormat();
         }
     }
 
@@ -48,23 +45,23 @@ public class SupportedFormatFactory implements MauveConstants
     {
         if (name.equals(GENBANK_FORMAT))
         {
-            return SupportedFormatFactory.GENBANK;
+            return new GenbankFileFormat();
         }
         else if (name.equals(FASTA_FORMAT))
         {
-            return SupportedFormatFactory.FASTA;
+            return new FastaFormat();
         }
         else if (name.equals(RAW_FORMAT))
         {
-            return SupportedFormatFactory.RAW;
+            return new RawFormat();
         }
         else if (name.equals(EMBL_FORMAT))
         {
-            return SupportedFormatFactory.EMBL;
+            return new EmblFormat();
         }
         else if (name.equals(INSD_FORMAT))
         {
-            return SupportedFormatFactory.INSDSEQ;
+            return new INSDseqFormat();
         }
 
         throw new RuntimeException("Unexpected format: " + name);

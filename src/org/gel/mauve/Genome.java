@@ -59,6 +59,7 @@ public class Genome {
 	public void setAnnotationSequence (Sequence annotationSequence,
 			SupportedFormat format) {
 		this.format = format;
+		format.setRangeRev (new RangeReverser (this));
 		this.annotationSequence = annotationSequence;
 	}
 

@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 
 import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.seq.SequenceIterator;
+import org.gel.mauve.ext.RangeReverser;
 
 /**
  * A definition of a format supported for annotation/feature reading. All
@@ -91,6 +92,18 @@ public interface SupportedFormat {
      * @return
      */
     public String getFormatName ();
+    
+    /**
+     * returns an object representing which, if any,  part of the genome
+     */
+    public RangeReverser getRangeRev ();
+    
+    /**
+     * sets range reverser when this format is associated with a genome
+     * @param rev
+     *
+     **/
+    public void setRangeRev (RangeReverser rev);
 
     FilterCacheSpec[] getFilterCacheSpecs();
 }

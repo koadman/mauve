@@ -18,6 +18,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
+import javax.swing.ToolTipManager;
 import javax.swing.event.EventListenerList;
 
 import org.biojava.bio.gui.sequence.AbstractBeadRenderer;
@@ -197,6 +198,7 @@ public class FeaturePanel extends AbstractSequencePanel
     public DbXrefMenuItemBuilder getDbXrefMenuItemBuilder(){ return dmib; }
     public GenbankMenuItemBuilder getGenbankMenuItemBuilder(){ return gmib; }
     
+    //not being called
     private SequenceRenderer barRenderer(String type, Color innerColor, double depth, StrandedFeature.Strand strand) throws ChangeVetoException
     {
     	FeatureFilter filter = new FeatureFilter.And(new FeatureFilter.ByType(type),new FeatureFilter.StrandFilter(strand));
@@ -416,29 +418,12 @@ public class FeaturePanel extends AbstractSequencePanel
 
         public void mouseMoved(SequenceViewerEvent sve)
         {
-            Object t = sve.getTarget();
+        	Object t = sve.getTarget();
 
-            if (t == null)
-            {
-                trans.setToolTipText(null);
-            }
-            else if (t instanceof FeatureHolder)
-            {
-            	if (sve.getSource() instanceof FeatureBlockSequenceRenderer) {
-            		AbstractBeadRenderer renderer = (AbstractBeadRenderer) 
-            				((FeatureBlockSequenceRenderer) sve.getSource()
-            				).getFeatureRenderer();
-            		int y = sve.getMouseEvent().getY();
-            		//System.out.println ("y: " + y + "   start: " + renderer.getBeadDisplacement () + "   end: " + renderer.getBeadDepth());
-            		if (y < renderer.getBeadDisplacement() ||
-            				y > renderer.getBeadDepth() + renderer.getBeadDisplacement())
-            			return;
-            		
-            	}
+            if (t != null && t instanceof FeatureHolder && 
+            		((FeatureHolder) t).countFeatures() > 0) {
                 FeatureHolder fh = (FeatureHolder) t;
-                /*System.out.println ("source: " + ((FeatureBlockSequenceRenderer) sve.getSource()).getDepth (sve));
-                System.out.println ("target: " + sve.getTarget());*/
-                System.out.println ("me: " + sve.getMouseEvent ());
+                ToolTipManager.sharedInstance().registerComponent (trans);
                 StringBuffer msg = new StringBuffer("<HTML>");
                 for (Iterator fi = fh.features(); fi.hasNext();)
                 {
@@ -478,6 +463,7 @@ public class FeaturePanel extends AbstractSequencePanel
             else
             {
                 trans.setToolTipText(null);
+                ToolTipManager.sharedInstance().unregisterComponent (trans);
             }
         }
     }

@@ -2,6 +2,7 @@ package org.gel.mauve.format;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Hashtable;
 import java.util.NoSuchElementException;
 
 import org.biojava.bio.BioException;
@@ -12,15 +13,19 @@ import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.RichSequenceIterator;
 import org.gel.mauve.SupportedFormat;
 import org.gel.mauve.ext.LoadedSequenceIteratorCache;
+import org.gel.mauve.ext.RangeReverser;
 
 public abstract class BaseFormat implements SupportedFormat
 {
 	
-	public SequenceIteratorCache iterator_cache;
+	public static SequenceIteratorCache iterator_cache = 
+			new LoadedSequenceIteratorCache ();
+	
+	protected RangeReverser range_rev;
 	
 	public BaseFormat () {
-		iterator_cache = new LoadedSequenceIteratorCache ();
 	}
+	
     public void validate(Sequence s, File source, int index) throws FileNotFoundException
     {
         if (!source.exists())
@@ -60,6 +65,21 @@ public abstract class BaseFormat implements SupportedFormat
     public SequenceIterator makeIterator(final File file)
     {
     	return iterator_cache.makeIterator (this, file);
+    }
+    
+    /**
+     * returns an object representing which, if any,  part of the genome
+     */
+    public RangeReverser getRangeRev () {
+    	return range_rev;
+    }
+    
+    /**
+     * sets range reverser when this format is associated with a genome
+     * @param rev
+     */
+    public void setRangeRev (RangeReverser rev) {
+    	range_rev = rev;
     }
 
 }

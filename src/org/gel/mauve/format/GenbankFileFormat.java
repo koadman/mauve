@@ -10,6 +10,10 @@ import org.biojava.bio.seq.io.SeqIOTools;
 import org.gel.mauve.MauveConstants;
 
 class GenbankFileFormat extends GenbankEmblFormat {
+	
+	public GenbankFileFormat () {
+		
+	}
 	public SequenceIterator readFile (File file) {
 		BufferedReader reader;
 		try {
