@@ -114,6 +114,10 @@ public abstract class AbstractMessageManager implements ActionListener {
 	public void actionPerformed (ActionEvent e) {
 		messenger.setVisible (false);
 	}//method actionPerformed
+	
+	public static void main (String [] args) throws Exception {
+		createEvents ("gel.ahabs.wisc.edu", 1337);
+	}
 
 
 }//class Events

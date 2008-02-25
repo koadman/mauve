@@ -34,8 +34,8 @@ public class Hub extends Thread{
 	public void run () {
 		while (GlobalInit.run) {
 			try {
-				Socket billious = sock.accept ();
-				new ConnectedNode (billious);
+				Socket one_socket = sock.accept ();
+				new ConnectedNode (one_socket);
 				
 			}
 			catch (IOException e) {

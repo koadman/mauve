@@ -10,7 +10,7 @@ public class GlobalInit {
 
 	/*public static Properties props;
 	public static final String PROP_FILE_NAME = "hub.props";*/
-	public static int PORT = 23517;
+	public static int PORT = 1337;
 	public static int MAX_CONNECTIONS = 100;
 	public static boolean run = true;
 	public static final String ONE = "" + (char) 172;
