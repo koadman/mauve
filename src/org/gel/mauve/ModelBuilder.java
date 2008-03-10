@@ -124,7 +124,7 @@ public class ModelBuilder
         }
         
         // Find alignment file and other data in manifest.
-        Manifest mf = new Manifest(new FileInputStream(new File(dir, "meta-inf/manifest.mf")));
+        Manifest mf = new Manifest(new FileInputStream(new File(dir, "META-INF/MANIFEST.MF")));
         String alignmentName = mf.getMainAttributes().getValue("Mauve-Alignment");
         File alignmentFile = new File(dir, alignmentName);
         BaseViewerModel model = buildModel(alignmentFile, listener);
