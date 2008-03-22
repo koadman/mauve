@@ -138,7 +138,8 @@ public class ContigOrderer implements MauveConstants {
 		File file = new File (align_dir,
 				reorderer.file + ContigReorderer.FEATURE_EXT);
 		if (file.exists ())
-			parent.getFeatureImporter ().importAnnotationFile (file, reorderer.fix);
+			parent.getPanel ().getFeatureImporter ().importAnnotationFile (
+					file, reorderer.fix);
 		//iterations = 0;
 	}
 	

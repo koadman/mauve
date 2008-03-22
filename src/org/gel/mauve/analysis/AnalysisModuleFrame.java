@@ -37,7 +37,7 @@ public class AnalysisModuleFrame extends MauveFrame implements FlatFileFeatureCo
 			Iterator itty = MauveInterfacer.feat_files.iterator (); 
 			while (itty.hasNext ()) {
 				Object [] data = (Object []) itty.next (); 
-				importer.importAnnotationFile ((File) data [0], 
+				mauve_panel.getFeatureImporter ().importAnnotationFile ((File) data [0], 
 						model.getGenomeBySourceIndex (((Integer) data [1]).intValue ()));
 			}
 			long [] lengths = new long [model.getSequenceCount ()];

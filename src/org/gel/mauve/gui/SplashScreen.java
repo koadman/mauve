@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.InvocationTargetException;
@@ -29,8 +30,9 @@ import org.gel.mauve.MyConsole;
  * 
  */
 class SplashScreen extends JWindow {
-	public SplashScreen (String filename, String message, Frame f, int waitTime) {
-		super (f);
+	//changed from Frame to Window to accommodate all containers
+	public SplashScreen (String filename, String message, Window win, int waitTime) {
+		super (win);
 		JPanel bg_panel = new JPanel ();
 		Border panel_border = BorderFactory.createLineBorder (Color.gray, 4);
 		bg_panel.setBackground (Color.white);

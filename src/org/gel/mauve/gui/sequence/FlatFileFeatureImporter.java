@@ -44,6 +44,7 @@ import org.gel.mauve.Genome;
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.gui.GenomeCellRenderer;
 import org.gel.mauve.gui.MauveFrame;
+import org.gel.mauve.gui.MauvePanel;
 
 public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 		Comparator, FlatFileFeatureConstants {
@@ -64,7 +65,7 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 	/**
 	 * parent MauveFrame
 	 */
-	protected MauveFrame mauve;
+	protected MauvePanel mauve;
 	
 	protected BaseViewerModel model;
 
@@ -77,9 +78,9 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 	 * 
 	 * @param mauve_frame
 	 */
-	public FlatFileFeatureImporter (MauveFrame mauve_frame) {
+	public FlatFileFeatureImporter (MauvePanel mauve_panel) {
 		super ("Import Annotation File");
-		mauve = mauve_frame;
+		mauve = mauve_panel;
 		model = mauve.getModel ();
 		offset = new double [model.getSequenceCount ()];
 		for (int i = 0; i < offset.length; i++)
@@ -87,6 +88,10 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 		req_fields = new Vector ();
 		req_fields.add (LABEL_STRING);
 		initGUI ();
+	}
+	
+	public FlatFileFeatureImporter (MauveFrame frame) {
+		this (frame.getPanel ());
 	}
 
 	/**

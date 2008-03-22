@@ -125,7 +125,8 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 		id_compare = new LcbIdComparator ();
 		grouper =  new ContigGrouper (this, MAX_IGNORABLE_DIST, MIN_LENGTH_RATIO);
 		if (feature_file != null)
-			frame.getFeatureImporter ().importAnnotationFile (new File (feature_file), fix);
+			frame.getPanel ().getFeatureImporter ().importAnnotationFile (
+					new File (feature_file), fix);
 		args.put (ContigFeatureWriter.REVERSES, inverters);
 		args.put (ContigFeatureWriter.ORDERED_CONTIGS, ordered);
 		args.put (ContigFeatureWriter.CONFLICTED_CONTIGS, conflicts);

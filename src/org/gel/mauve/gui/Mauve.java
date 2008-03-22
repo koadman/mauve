@@ -252,7 +252,7 @@ public class Mauve {
 			if (frame.model != null
 					&& alignURL.equals (frame.model.getSourceURL ())) {
 				frame.model.setFocus (sequenceID, start, end, contig);
-				frame.toFront ();
+				frame.getFocus ();
 				return;
 			}
 		}
@@ -287,9 +287,7 @@ public class Mauve {
 
 	synchronized public void closeFrame (MauveFrame frame) {
 		if (frames.size () > 1 || frame.rrpanel == null) {
-			frame.setVisible (false);
 			frames.remove (frame);
-			frame.dispose ();
 		} else {
 			frame.reset ();
 			availableFrame = frame;

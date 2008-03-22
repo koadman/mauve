@@ -31,6 +31,7 @@ import org.gel.mauve.ext.ModelFactory;
 public class ModelBuilder
 {
 	
+	//to accommodate building of currently unknown types of models - anna
 	protected static Hashtable <String, ModelFactory> registered_models = 
 		new Hashtable <String, ModelFactory> ();
 
@@ -129,7 +130,7 @@ public class ModelBuilder
         }
         
         // Find alignment file and other data in manifest.
-        Manifest mf = new Manifest(new FileInputStream(new File(dir, "meta-inf/manifest.mf")));
+        Manifest mf = new Manifest(new FileInputStream(new File(dir, "META-INF/MANIFEST.MF")));
         String alignmentName = mf.getMainAttributes().getValue("Mauve-Alignment");
         File alignmentFile = new File(dir, alignmentName);
         BaseViewerModel model = buildModel(alignmentFile, listener);
@@ -301,6 +302,7 @@ public class ModelBuilder
         int versionNumber;
         RandomAccessFile inputFile = null;
         
+        //added for new type of data - anna
         if (src.isDirectory())
         	versionNumber = -2;
         else {
@@ -323,6 +325,7 @@ public class ModelBuilder
         	}
         }
 
+        //changed so can also be XMLish format - anna
         if (versionNumber <= -1) // XMFA file
         {
             XmfaViewerModel model = new XmfaViewerModel(src, listener);
