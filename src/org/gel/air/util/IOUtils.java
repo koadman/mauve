@@ -40,6 +40,14 @@ public class IOUtils {
 		return read;
 	}
 	
+	public static long guaranteedRead (InputStream in, byte [] ret) throws IOException {
+		int read = 0;
+		while (read < ret.length && read > -1) {
+			read += in.read(ret, read, ret.length - read);
+		}
+		return read;
+	}
+	
 	public static void deleteDir (File dir) {
 		try {
 			File files [] = dir.listFiles();
