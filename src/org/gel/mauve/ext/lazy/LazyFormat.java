@@ -25,21 +25,28 @@ public class LazyFormat extends BaseFormat implements MauveStoreConstants {
 	protected static final FilterCacheSpec [] specs = new FilterCacheSpec [0];
 	protected ListSequenceIterator iter;
 	protected Genome genome;
+	protected LazySymbolList list;
 	
 	public LazyFormat (Stash data) {
 		genome_data = data;
 		makeSequenceIterator ();
 	}
 	
+	protected void setGenome (Genome g) {
+		genome = g;
+		list.genome = genome;
+	}
+	
 	protected void makeSequenceIterator () {
 		try {
+			File file = loader.getAssociatedFile (
+					genome_data.getString (ID), ".sba");
 			iter = new ListSequenceIterator ();
 			BufferedInputStream in = new BufferedInputStream (new FileInputStream (
-					loader.getAssociatedFile (genome_data.getString (ID), ".sba")), 
-					IOUtils.BUFFER_SIZE);
+					file), IOUtils.BUFFER_SIZE);
 			int genome_length = genome_data.getInt(LENGTH);
 			in.mark(genome_length);
-			LazySymbolList list = new LazySymbolList (in, 1, genome.getLength(), genome);
+			list = new LazySymbolList (in, 1, genome_length);
 			LazySequence seq = new LazySequence (list);
 			seq.setName(genome_data.getString(NAME));
 			iter.add(seq);	

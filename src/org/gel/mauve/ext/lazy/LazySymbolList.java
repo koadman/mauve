@@ -29,13 +29,11 @@ public class LazySymbolList extends AbstractSymbolList implements MauveStoreCons
 			new Hashtable <BufferedInputStream, Integer> ();
 	//use rangeloadtracker for lazyloading from server as well as file
 	
-	public LazySymbolList (BufferedInputStream data, long start, long end, 
-			Genome gen) {
+	public LazySymbolList (BufferedInputStream data, long start, long end) {
 		this.start = start;
 		this.end = end;
 		dna = data;
 		alphabet = DNATools.getDNA();
-		genome = gen;
 		synchronized (dna) {
 			if (open_streams.get(dna) == null) {
 				open_streams.put(dna, 0);

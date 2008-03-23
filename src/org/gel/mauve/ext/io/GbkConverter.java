@@ -161,7 +161,7 @@ public class GbkConverter implements MauveStoreConstants {
 	
 	public void makeSequenceFile (Sequence sequence) {
 		try {
-			File file = loader.getAssociatedFile (genome.getString(ID), ".sba");
+			File file = loader.getAssociatedFilePath (genome.getString(ID), ".sba");
 			FileOutputStream out = new FileOutputStream (file);
 			Iterator <ComponentFeature> itty = seq.features();
 			while (itty.hasNext()) {

@@ -64,7 +64,7 @@ public class StashViewerModel extends MauveAlignmentViewerModel implements
 		Genome genome = GenomeBuilder.buildGenome(genome_data.getLong (LENGTH), 
 				new File (genome_data.getString(ID).substring(GENOME_CLASS.length() + 1)),
 				format, this, -1, index);
-		format.genome = genome;
+		format.setGenome (genome);
 		makeContigs (genome_data, genome);
 		return genome;
 	}

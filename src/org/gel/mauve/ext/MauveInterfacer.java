@@ -1,21 +1,26 @@
 package org.gel.mauve.ext;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Hashtable;
 
 import org.biojavax.bio.seq.RichSequence;
 import org.gel.air.ja.msg.AbstractMessageManager;
 import org.gel.air.ja.msg.GlobalInit;
+import org.gel.air.ja.msg.RemoteMessageManager;
 import org.gel.air.ja.stash.Stash;
 import org.gel.air.ja.stash.StashXMLLoader;
 import org.gel.air.ja.stash.events.StashUpdateEvents;
+import org.gel.air.util.IOUtils;
 import org.gel.mauve.MauveAlignmentViewerModel;
 import org.gel.mauve.ModelBuilder;
 import org.gel.mauve.SimilarityIndex;
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.ext.io.AlignmentConverter;
+import org.gel.mauve.ext.io.LoadManager;
 import org.gel.mauve.ext.lazy.StashViewerModel;
 import org.gel.mauve.ext.lazy.StashedZHistogram;
 import org.gel.mauve.gui.MauveFrame;
@@ -27,6 +32,7 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 	protected MauveModule mauve;
 	protected static StashXMLLoader loader;
 	protected static String data_root_dir;
+	protected static LoadManager file_manager;
 	protected Hashtable loaded_alignments;
 	protected String alignment_id;
 	
@@ -34,7 +40,7 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 		mauve = new MauveModule (this);
 		loaded_alignments = new Hashtable ();
 		//loader.loadAll(data_root_dir, "mauve_defaults.xml");
-		Stash stash = loader.getStash("Alignment/66.188.103.18712000240629530");
+		Stash stash = loader.getStash("Alignment/66.168.25.16012061546014680");
 		System.out.println ("null? " + (stash == null));
 		if (args.length > 0) {
 			alignment_id = args [0];
@@ -120,12 +126,18 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 	 */
 	public static void main(String[] args) throws Exception {
 		ModelBuilder.setUseDiskCache(false);
-		data_root_dir = "c:\\mauve3data";
+		data_root_dir = "c:\\blah";
 		makeDataDirs ();
 		loader = new StashXMLLoader (data_root_dir, 
 				AbstractMessageManager.createEvents ("127.0.0.1", GlobalInit.PORT));
 		loader.loadDefaults (new File (data_root_dir, "mauve_defaults.xml"));
+		file_manager = new LoadManager ((RemoteMessageManager) loader.getEvents (),
+				data_root_dir);
 		new MauveInterfacer (args);
+	}
+
+	public static LoadManager getFileManager() {
+		return file_manager;
 	}
 
 }

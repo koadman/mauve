@@ -69,7 +69,7 @@ public class AlignmentConverter implements MauveStoreConstants {
 				use_ints = true;
 			try {
 				gap_out = new DataOutputStream (new BufferedOutputStream (
-						new FileOutputStream (loader.getAssociatedFile (
+						new FileOutputStream (loader.getAssociatedFilePath (
 								genome.getString (ID), ".gaps"))));
 				gap_file_pos = 0;
 				gap_out.writeBoolean(use_ints);
@@ -99,7 +99,7 @@ public class AlignmentConverter implements MauveStoreConstants {
 					BackboneListBuilder.getBbFile(model, ((XMFAAlignment) 
 							model.getXmfa()))));
 			PrintStream out = new PrintStream (new BufferedOutputStream (
-					new FileOutputStream (loader.getAssociatedFile (file, "bbcols"))));
+					new FileOutputStream (loader.getAssociatedFilePath (file, "bbcols"))));
 			String input = in.readLine();
 			while (input != null) {
 				StringTokenizer toke = new StringTokenizer (input);
