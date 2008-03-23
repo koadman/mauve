@@ -133,7 +133,7 @@ public class SubscriptionManager extends ConnectedHub {
 		try {
 			while (GlobalInit.run) {
 				String msg = in.readLine ();
-				System.out.println ("mess: " + msg);
+				//System.out.println ("mess: " + msg);
 				lists.handleSocketString (msg, null);
 			}
 		} catch (Exception e) {

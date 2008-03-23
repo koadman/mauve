@@ -15,6 +15,9 @@ public interface StashConstants {
 	public static final String OPTIONAL = "[]"; 
 	public static final String UPDATE_NS = "stash/update/";
 	public static final String GET_NS = "stash/get/";
+	public static final String GET_OBJ_NS = "stash/get/obj/";
+	public static final String GET_FILE_NS = "stash/get/file/";
+	public static final String GET_FILE_LENGTH_NS = "stash/get/file/length/";	
 	public static final String CREATE_NS = "stash/create/";
 	public static final String KEY_SEPARATOR = "/";
 

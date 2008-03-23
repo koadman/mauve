@@ -26,7 +26,8 @@ public class Hub extends Thread{
 
 	public void sendString (String [] subjects, String message) {
 		StringBuffer buffy = new StringBuffer (message);
-		for (int i = 0; i < subjects.length; i++)
+		buffy.insert(0, subjects [0] + GlobalInit.ONE73);
+		for (int i = 1; i < subjects.length; i++)
 			buffy.insert (0, subjects [i] + GlobalInit.ONE);
 		ConnectionThread.runInThread (this, buffy.toString ());
 	}

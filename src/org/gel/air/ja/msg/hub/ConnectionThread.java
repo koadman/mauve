@@ -37,8 +37,11 @@ public class ConnectionThread extends Thread {
 		LinkedList <String> groups = new LinkedList ();
 		int i = 0;
 		int j = 0;
-		while (i != -1) {
+		int separator = msg.indexOf (GlobalInit.ONE73);
+		while (i != -1 && i < separator) {
 			i = msg.indexOf (GlobalInit.ONE, j);
+			if (i == -1)
+				i = separator;
 			if (i > 0)
 				groups.add (msg.substring (j, i));
 			j = i + 1;

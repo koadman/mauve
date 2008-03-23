@@ -83,7 +83,7 @@ public class ConnectedHub extends Thread {
 	}//constructor
 
 	public void sendString (String group, String what) {
-		out.println (group + GlobalInit.ONE + what);
+		out.println (group + GlobalInit.ONE73 + what);
 	}
 
 	public void addGroup (String group) {
@@ -98,7 +98,7 @@ public class ConnectedHub extends Thread {
 		try {
 			while (GlobalInit.run) {
 				String msg = in.readLine ();
-				int index = msg.lastIndexOf (GlobalInit.ONE);
+				int index = msg.indexOf (GlobalInit.ONE73);
 				listener.actionPerformed (new ActionEvent (msg.substring (0, index),
 						ActionEvent.ACTION_PERFORMED, msg.substring (index + 1)));
 			}

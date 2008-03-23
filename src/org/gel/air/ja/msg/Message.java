@@ -35,9 +35,11 @@ public class Message {
 		mess = message;
 		subject = namespace;
 		StringBuffer buf = new StringBuffer (mess);
+		replace (GlobalInit.THREE, GlobalInit.THREE + GlobalInit.ONE73, buf);
 		replace ("\n", GlobalInit.THREE + "n", buf);
 		replace ("\r", GlobalInit.THREE + "r", buf);
-		socket = subject + GlobalInit.ONE + buf.toString ();
+		System.out.println ("subject: " + subject);
+		socket = subject + GlobalInit.ONE73 + buf.toString ();
 	}
 
 	/**
@@ -53,22 +55,27 @@ public class Message {
 	  *@return Iterator  an iterator of created messages
 	**/
 	protected static Iterator createMessages (String socket_str, final SubscriptionMatcher matcher) {
+		System.out.println ("sock: " + socket_str.substring (0, socket_str.indexOf(GlobalInit.ONE73)));
 		StringBuffer buf = new StringBuffer (socket_str);
 		String temp = socket_str;
 		replace (GlobalInit.THREE + "n", "\n", buf);
 		replace (GlobalInit.THREE + "r", "\r", buf);
+		replace (GlobalInit.THREE + GlobalInit.ONE73, GlobalInit.THREE, buf);
 		socket_str = buf.toString ();
 		int ind = socket_str.indexOf (GlobalInit.ONE);
 		int start = 0;
 		LinkedList to = new LinkedList ();
-		while (ind > -1 && ind + 1 < socket_str.length () && socket_str.charAt (ind + 1) != GlobalInit.ONE.charAt (0)) {
+		int separator = socket_str.indexOf(GlobalInit.ONE73) + 1;
+		while (ind > -1 && ind + 1 < separator && socket_str.charAt (ind + 1) != GlobalInit.ONE.charAt (0)) {
 			to.add (socket_str.substring (start, ind));
 			start = ind + 1;
 			ind = socket_str.indexOf (GlobalInit.ONE, start);
 		}
+		to.add(socket_str.substring (start, separator - 1));
+		System.out.println ("ns: " + to);
 		final Message mess = new Message ();
-		mess.mess = socket_str.substring (start, socket_str.length ());
-		final String text  = temp.substring (start, temp.length ());
+		mess.mess = socket_str.substring (separator, socket_str.length ());
+		final String text  = temp.substring (separator, temp.length ());
 		final Iterator itty = to.iterator ();
 		return new Iterator () {
 			public boolean hasNext () {
@@ -77,7 +84,7 @@ public class Message {
 
 			public Object next () {
 				mess.subject = matcher.makeSubjectAbsolute ((String) itty.next ());
-				mess.socket = mess.subject + GlobalInit.ONE + text;
+				mess.socket = mess.subject + GlobalInit.ONE73 + text;
 				return mess;
 			}
 
@@ -137,14 +144,16 @@ public class Message {
 	**/
 	protected static void replace (String have, String want, StringBuffer buffy) {
 		for (int i = 0; i < buffy.length (); i++) {
+			int k = i;
 			if (buffy.charAt (i) == have.charAt (0)) {
 				int j = 1;
 				while (++i < buffy.length () && j < have.length () && buffy.charAt (i) == have.charAt (j++));
 				if (j == have.length () && buffy.charAt (i - 1) == have.charAt (j - 1)) {
 					buffy.replace (i - have.length (), i, want);
+					k += want.length () - 1;
 				}
-				i = i - j + want.length ();
 			}
+			i = k;
 		}
 	}
 }

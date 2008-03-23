@@ -31,6 +31,7 @@ import org.gel.air.ja.stash.events.StashEvents;
 import org.gel.air.ja.stash.events.StashUpdateEvents;
 import org.gel.air.util.IOUtils;
 import org.gel.air.util.SystemUtils;
+import org.gel.mauve.ext.MauveInterfacer;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -123,7 +124,24 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants,
 			writeFile (stash);
 	}
 	
+	//gets file and instantiates local copy of file; will not necessarily load file
 	public File getAssociatedFile (String id, String suffix) {
+		File file = getAssociatedFilePath (id, suffix);
+		if (!file.exists()) {
+			String f_name = file.getParentFile ().getName () + 
+					File.separatorChar + file.getName();
+			MauveInterfacer.getFileManager().loadFileSection(f_name, 0, 0);
+		}
+		return file;
+	}
+	
+	//returns a local path name for the file as if it were in the stash
+	/**
+	 * don't call directly if trying to load data remotely, use getAssociatedFile or
+	 *  getStash, which both access this convenience method.  Also used for writing
+	 *  data directly to the local datastore.
+	 */
+	public File getAssociatedFilePath (String id, String suffix) {
 		int ind = id.indexOf (KEY_SEPARATOR);
 		if (suffix.length () > 0 && !suffix.startsWith ("."))
 			suffix = "." + suffix;
@@ -134,8 +152,9 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants,
 		return file;
 	}
 
+	//returns a local path name for the file as if it were in the stash
 	public File getFileForStash (String id) {
-		return getAssociatedFile (id, ".xml");
+		return getAssociatedFilePath (id, ".xml");
 	}
 
 	public void startElement(String uri, String localpart, String rawname, Attributes attributes) {
@@ -360,7 +379,7 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants,
 	
 	public Stash getRemoteStash (String id) {
 		String ret = SystemUtils.makeUniqueString ();
-		Message msg = new Message (ret, GET_NS + id);
+		Message msg = new Message (ret, GET_OBJ_NS + id);
 		msg = (Message) events.getReply (msg, ret);
 		String data = msg.getMessage ();
 		if (data.length () == 0)
@@ -525,6 +544,10 @@ public class StashXMLLoader extends DefaultHandler implements StashConstants,
 
 	public StashEvents getNoCastHashEvents () {
 		return data_handler;
+	}
+
+	public AbstractMessageManager getEvents() {
+		return events;
 	}
 
 }

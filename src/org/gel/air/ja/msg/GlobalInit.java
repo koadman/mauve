@@ -16,6 +16,7 @@ public class GlobalInit {
 	public static final String ONE = "" + (char) 172;
 	public static final String TWO = ONE + ONE;
 	public static final String THREE = TWO + ONE;
+	public static final String ONE73 = "" + (char) 173;
 	public static final String CONNECT_STRING = "|capture_meklajd83247923dsd38d|";
 	
 	/*static {
