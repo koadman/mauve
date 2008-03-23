@@ -25,6 +25,7 @@ import javax.print.PrintService;
 import javax.print.attribute.standard.PrinterResolution;
 import javax.swing.AbstractAction;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
@@ -130,8 +131,8 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     private EventListenerList hintMessageListeners = new EventListenerList();
     
     /** variables controlling the display layout */
-    private GridBagLayout gbl = new GridBagLayout();
-    private GridBagConstraints gbc = new GridBagConstraints();
+    /*private GridBagLayout gbl = new GridBagLayout();
+    private GridBagConstraints gbc = new GridBagConstraints();*/
     static final double gbc_weighty = 5.0;
 
     /**
@@ -204,8 +205,8 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         	else
         		sp.setBackground(Color.WHITE);
             sequencePanel.add(sp);
-            gbc.weighty = model.getGenomeByViewingIndex(new_order[seqI]).getVisible() ? gbc_weighty : 0;
-            gbl.setConstraints(sp, gbc);
+           /* gbc.weighty = model.getGenomeByViewingIndex(new_order[seqI]).getVisible() ? gbc_weighty : 0;
+            gbl.setConstraints(sp, gbc);*/
         }
 
         // Reorder the underlying model (at some point, perhaps this
@@ -223,24 +224,14 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     protected void initMatchDisplay()
     {
         sequencePanel = new JPanel();
-        gbc.anchor = GridBagConstraints.CENTER;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.gridheight = 1;
-        gbc.gridwidth = 1;
-        gbc.gridx = 0;
-        gbc.insets = new Insets(0, 0, 0, 0);
-        gbc.ipadx = 0;
-        gbc.ipady = 0;
-        gbc.weightx = 1;
-        gbc.weighty = gbc_weighty;
-        gbc.gridy = GridBagConstraints.RELATIVE;
-        sequencePanel.setLayout(gbl);
+        
+        // changed to BoxLayout to allow for SeqPanels of varying height
+        sequencePanel.setLayout (new BoxLayout (sequencePanel, BoxLayout.Y_AXIS));
         add(sequencePanel, SEQ_PANEL);
         for (int seqI = 0; seqI < model.getSequenceCount(); seqI++)
         {
             SeqPanel seqPanel = new SeqPanel(model, model.getGenomeByViewingIndex(seqI), this);
             sequencePanel.add(seqPanel);
-            gbl.setConstraints(seqPanel, gbc);
             newPanels.add(seqPanel);
         }
         initKeyBindings();
@@ -845,8 +836,8 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     	// update constraints, setting invisible genomes to weighty 0
     	for(int i = 0; i < model.getSequenceCount(); i++)
     	{
-    		gbc.weighty = model.getGenomeByViewingIndex(i).getVisible() ? gbc_weighty : 0;
-    		gbl.setConstraints(getNewPanel(i), gbc);
+    		/*gbc.weighty = model.getGenomeByViewingIndex(i).getVisible() ? gbc_weighty : 0;
+    		gbl.setConstraints(getNewPanel(i), gbc);*/
     	}
 	}
 

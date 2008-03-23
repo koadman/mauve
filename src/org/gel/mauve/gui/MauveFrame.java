@@ -1,6 +1,7 @@
 package org.gel.mauve.gui;
 
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Toolkit;
 
@@ -43,7 +44,9 @@ public class MauveFrame extends JFrame implements ModelProgressListener {
         getContentPane ().add (mauve_panel);
 		setLocation(new java.awt.Point(0, 0));
 		mauve_panel.setPanelCloseListener(this);
-		pack();
+        Dimension dim = new java.awt.Dimension(791, 500);
+        setSize(dim);
+        setPreferredSize (dim);
 		setVisible (true);
 	}
 	
