@@ -17,6 +17,7 @@ import org.gel.air.ja.stash.events.StashUpdateEvents;
 import org.gel.air.util.IOUtils;
 import org.gel.mauve.MauveAlignmentViewerModel;
 import org.gel.mauve.ModelBuilder;
+import org.gel.mauve.MyConsole;
 import org.gel.mauve.SimilarityIndex;
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.ext.io.AlignmentConverter;
@@ -40,7 +41,7 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 		mauve = new MauveModule (this);
 		loaded_alignments = new Hashtable ();
 		//loader.loadAll(data_root_dir, "mauve_defaults.xml");
-		Stash stash = loader.getStash("Alignment/66.168.25.16012061546014680");
+		Stash stash = loader.getStash("Alignment/66.168.25.16012071020017650");
 		System.out.println ("null? " + (stash == null));
 		if (args.length > 0) {
 			alignment_id = args [0];
@@ -77,7 +78,8 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 	public static void readSimilarity (MauveAlignmentViewerModel model, 
 			Stash genome, int i) {
 		try {
-			StashedZHistogram sim = new StashedZHistogram ((makeSimFile (genome, i)));
+			StashedZHistogram sim = new StashedZHistogram ((loader.getAssociatedFile (
+					genome.getString (ID), ".sim").getAbsolutePath()));
 			model.setSim (model.getGenomeBySourceIndex(i), sim);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -87,11 +89,12 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 	public static boolean writeSimilarity (MauveAlignmentViewerModel model, 
 			Stash genome, int i) {
 		return StashedZHistogram.outputHistogram ((SimilarityIndex) 
-				model.getSim(model.getGenomeBySourceIndex(i)), makeSimFile (genome, i));
+				model.getSim(model.getGenomeBySourceIndex(i)), makeSimFile (genome));
 	}
 	
-	public static String makeSimFile (Stash aligned_genome, int genome) {
-		return loader.getAssociatedFile (aligned_genome.getString (ID), ".sim").getAbsolutePath();
+	public static String makeSimFile (Stash aligned_genome) {
+		return loader.getAssociatedFilePath (aligned_genome.getString (ID), 
+				".sim").getAbsolutePath();
 	}
 	
 	public static StashXMLLoader getLoader () {
@@ -102,6 +105,8 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 		//convertToINSD (frame);
 		new Thread (new Runnable () {
 			public void run () {
+				MyConsole.setUseSwing (true);
+				MyConsole.showConsole ();
 				//new AlignmentConverter ((XmfaViewerModel) frame.getModel(), loader);		
 			}
 		}).start ();

@@ -52,6 +52,9 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
 {
     // Default percentage of space for ruler in this panel
     static final float RULER_RATIO = .05f;
+    
+    //weighty for boxlayout for each layer of features
+    public static final float BOX_FEATURE_WEIGHT = .01f;
     private RRSequencePanel sequence;
     private RulerPanel ruler;
     protected FeaturePanel feature;
@@ -173,9 +176,7 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
 
         if (getGenome().getAnnotationSequence() != null)
         {
-            add(feature);
-            c.weighty = 0.1;
-            layoutManager.setConstraints(feature, c);
+            addFeatures (c);
         }
 
         // Add the name.
@@ -186,6 +187,13 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
         setMaximumSize(my_max_size);
         setMinimumSize(min_size);
         setSize(my_size);
+    }
+    
+    protected void addFeatures (GridBagConstraints c) {
+    	GridBagLayout layoutManager = (GridBagLayout) getLayout ();
+    	add(feature);
+        c.weighty = BOX_FEATURE_WEIGHT;
+        layoutManager.setConstraints(feature, c);
     }
 
     public void doInvisibleLayout()

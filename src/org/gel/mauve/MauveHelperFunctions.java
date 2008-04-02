@@ -144,7 +144,6 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 	}
 
 
-	//I'm not sure the first if statement is safe. . .
 	public static String getAsapID (Feature feat) {
 		String val = getDBXrefID (feat, ASAP);
 		if (val == null)
@@ -167,6 +166,8 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 	
 	public static String getDBXrefID (Feature feat, String header) {
 		String id = null;
+		if (!feat.getAnnotation().containsProperty(DB_XREF))
+			return null;
 		Object val = feat.getAnnotation ().getProperty (DB_XREF);
 		if (val != null) {
 			if (val instanceof Collection) {

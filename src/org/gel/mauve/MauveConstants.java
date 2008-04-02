@@ -201,6 +201,10 @@ public interface MauveConstants {
 	public static final String EMBL_FORMAT = "EMBL";
 	public static final String INSD_FORMAT = "INSDSeq";
 	
+	/**
+	 * accession property for GenBank files
+	 */
+	public static final String GBK_ACCESSION = "ACCESSION";
 	
 	public static final OptimizableFilter NULL_AVOIDER = new OptimizableFilter () {
 		public boolean accept (Feature f) {

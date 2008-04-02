@@ -49,6 +49,7 @@ public interface MauveStoreConstants extends StashConstants, MauveConstants {
 	public static final String ALIGNMENT = "alignment";
 	public static final String GENOME_COUNT = "genome_count";
 	public static final String INTERVAL_COUNT = "interval_count";
+	public static final String ACCESSION = "accession";
 	
 	public static final String GENOME_CLASS = "Genome";
 	public static final String CONTIG_CLASS = "Contig";

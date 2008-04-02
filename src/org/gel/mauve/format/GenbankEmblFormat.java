@@ -159,7 +159,8 @@ public abstract class GenbankEmblFormat extends BaseFormat {
         	if (name.length() == 0)
         		name = null;
         }
-        if (name == null && s.getAnnotation() != null) {
+        if (name == null && s.getAnnotation() != null && s.getAnnotation(
+        		).containsProperty(MauveConstants.LOCUS)) {
         	name = (String) s.getAnnotation().getProperty(MauveConstants.LOCUS);
         }
         if (name == null && 

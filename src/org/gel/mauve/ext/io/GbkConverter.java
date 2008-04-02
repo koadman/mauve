@@ -77,10 +77,22 @@ public class GbkConverter implements MauveStoreConstants {
 			ComponentFeature feat = itty.next();
 			FeatureHolder hold = feat.filter(new FeatureFilter.ByType ("source"));
 			Iterator <Feature> itty2 = hold.features();
-			Stash contig_label = new Stash (GENOME_LABEL_CLASS,
-					itty2.hasNext () ?
-					GENOME_LABEL_CLASS +  KEY_SEPARATOR + MauveHelperFunctions.getDBXrefID (
-							itty2.next (), db_header) : null);
+			
+			String id = null;
+			if (itty2.hasNext ()) {
+				id = MauveHelperFunctions.getDBXrefID (itty2.next (), db_header);
+				if (id != null)
+					id = GENOME_LABEL_CLASS + KEY_SEPARATOR + id;
+			}
+			Stash contig_label = new Stash (GENOME_LABEL_CLASS, id);
+			System.out.println ("anno: " + feat.getComponentSequence (
+					).getAnnotation ());
+			if (feat.getComponentSequence ().getAnnotation().containsProperty(
+					GBK_ACCESSION)) {
+				System.out.println ("has accession");
+				contig_label.put(ACCESSION, feat.getComponentSequence (
+						).getAnnotation().getProperty(GBK_ACCESSION));
+			}
 			c_labels.put(count++ + "", contig_label);
 			contig_label.put(NAME, src.getChromosomeAt(feat.getLocation().getMin()).getName());
 			addLocation (contig_label, feat, 0);
