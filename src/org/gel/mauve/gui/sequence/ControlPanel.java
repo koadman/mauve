@@ -34,7 +34,7 @@ public class ControlPanel extends AbstractSequencePanel implements org.gel.mauve
     static ImageIcon plus_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/plus16.png"));
     static ImageIcon plusRollover_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/plusRollover16.png"));
     static ImageIcon minus_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/minus16.png"));
-    static ImageIcon minusRollover_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/minusRollover16.png"));
+    static ImageIcon minusRollover_button_icon = new ImageIcon(MauveFrame.class.getResource("/images/minusRollover.png"));
 	JButton moveUpButton;
 	JButton moveDownButton;
 	JButton plusMinusButton;
@@ -194,8 +194,8 @@ public class ControlPanel extends AbstractSequencePanel implements org.gel.mauve
         layoutManager.setConstraints(plusMinusButton, c);
         add(setReferenceButton);
         layoutManager.setConstraints(setReferenceButton, c);
-//        add(loadFeaturesButton);
-//        layoutManager.setConstraints(loadFeaturesButton, c);
+        add(loadFeaturesButton);
+        layoutManager.setConstraints(loadFeaturesButton, c);
         add(moveDownButton);
         layoutManager.setConstraints(moveDownButton, c);
 
@@ -232,6 +232,7 @@ public class ControlPanel extends AbstractSequencePanel implements org.gel.mauve
         plusMinusButton.setIcon(plus_button_icon);
         plusMinusButton.setRolloverIcon(plusRollover_button_icon);
     	plusMinusButton.setToolTipText("Show this sequence in the display");
+        System.err.println("Setting + for genome " + genome.getViewIndex());
         invalidate();
         validate();
         revalidate();
