@@ -153,5 +153,13 @@ public class RRSequencePanel extends JLayeredPane implements ModelListener
     {
         // Ignored.
     }
+    public void printingStart(ModelEvent event)
+    {
+        // Ignored.
+    }
+    public void printingEnd(ModelEvent event)
+    {
+        // Ignored.
+    }
 } 
 

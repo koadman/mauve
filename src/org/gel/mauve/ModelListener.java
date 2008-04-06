@@ -13,6 +13,8 @@ public interface ModelListener extends EventListener
     public void viewableRangeChangeStart(ModelEvent event);
     public void viewableRangeChanged(ModelEvent event);
     public void viewableRangeChangeEnd(ModelEvent event);
+    public void printingStart(ModelEvent event);
+    public void printingEnd(ModelEvent event);
     public void genomesReordered(ModelEvent event);
     public void referenceChanged(ModelEvent event);
     public void genomeVisibilityChanged(ModelEvent event);
