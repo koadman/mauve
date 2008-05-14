@@ -210,7 +210,7 @@ Quit
 
 InstallJava:
   SetOutPath $TEMP
-  File "win32\jre-6u3-windows-i586-p-iftw.exe"
+  File "win32\jre-6u6-windows-i586-p-iftw.exe"
   ExecWait "$TEMP\jre-6u2-windows-i586-p-iftw.exe"
   Delete /REBOOTOK "$TEMP\jre-6u2-windows-i586-p-iftw.exe"
   Goto FindJava
@@ -223,20 +223,6 @@ pop $1
 pop $0
 
 
-;
-; Install the appropriate visual studio redistributables 
-;
-${If} ${RunningX64}
-  SetOutPath $TEMP
-  File "win64\vcredist_x64.exe"
-  ExecWait '"$TEMP\vcredist_x64.exe" /q:a /c:"VCREDI~1.EXE /q:a /c:""msiexec /i vcredist.msi /qb!"" "'
-  Delete /REBOOTOK "$TEMP\vcredist_x64.exe"
-${Else}
-  SetOutPath $TEMP
-  File "win32\vcredist_x86.exe"
-  ExecWait '"$TEMP\vcredist_x86.exe" /q:a /c:"VCREDI~1.EXE /q:a /c:""msiexec /i vcredist.msi /qb!"" "'
-  Delete /REBOOTOK "$TEMP\vcredist_x86.exe"
-${EndIf}
 
 
   ;Install Files
@@ -251,6 +237,9 @@ ${EndIf}
   File "README"
   File "win32\mauveAligner.exe"
   File "win32\progressiveMauve.exe"
+  File "win32\Microsoft.VC80.OpenMP\Microsoft.VC80.OpenMP.manifest"
+  File "win32\Microsoft.VC80.OpenMP\vcomp.dll"
+  File "win32\progressiveMauve.exe"
   File "Mauve.jar"
   File "win32\mauve.ico"
   File "win32\Mauve Online Documentation.url"
@@ -259,6 +248,8 @@ ${EndIf}
   SetOutPath "$INSTDIR\win64"
   File "win64\mauveAligner.exe"
   File "win64\progressiveMauve.exe"
+  File "win64\Microsoft.VC80.OpenMP\Microsoft.VC80.OpenMP.manifest"
+  File "win64\Microsoft.VC80.OpenMP\vcomp.dll"
 
   ; external dependencies
   SetOutPath "$INSTDIR\ext"
