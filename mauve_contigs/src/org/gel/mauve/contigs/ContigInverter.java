@@ -331,7 +331,6 @@ public class ContigInverter implements MauveConstants {
 						best_group = group2;
 					}
 				}
-				putNextTo (highest == 0 ? null : best_group, group, true);
 				Iterator placed = cur_lcbs [highest].iterator ();
 				LCB best = null;
 				while (placed.hasNext ()) {
@@ -341,6 +340,9 @@ public class ContigInverter implements MauveConstants {
 				}
 				//System.out.println ("not misplaced: " + best.getLeftEnd (central.fix));
 				group.weight = best.weight;
+				if (central.isReversed(best))
+					group.setReversed(true);
+				putNextTo (highest == 0 ? null : best_group, group, true);
 				misplaced.remove (best);
 				Arrays.fill(placements, 0);
 				Arrays.fill (cur_lcbs, null);
