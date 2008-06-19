@@ -122,7 +122,7 @@ class DelegatingSequence implements Sequence {
 	/**
 	 * @deprecated
 	 */
-	@Deprecated
+//	@Deprecated
 	public void addChangeListener (ChangeListener cl) {
 		ch.addChangeListener (cl);
 	}
@@ -134,7 +134,7 @@ class DelegatingSequence implements Sequence {
 	/**
 	 * @deprecated
 	 */
-	@Deprecated
+//	@Deprecated
 	public void removeChangeListener (ChangeListener cl) {
 		ch.removeChangeListener (cl);
 	}
@@ -398,7 +398,7 @@ class DelegatingSequence implements Sequence {
 		/**
 		 * @deprecated
 		 */
-		@Deprecated
+//		@Deprecated
 		public void addChangeListener (ChangeListener cl) {
 			ch.addChangeListener (cl);
 		}
@@ -410,7 +410,6 @@ class DelegatingSequence implements Sequence {
 		/**
 		 * @deprecated
 		 */
-		@Deprecated
 		public void removeChangeListener (ChangeListener cl) {
 			ch.removeChangeListener (cl);
 		}

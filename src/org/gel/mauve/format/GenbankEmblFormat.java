@@ -159,9 +159,9 @@ public abstract class GenbankEmblFormat extends BaseFormat {
         	if (name.length() == 0)
         		name = null;
         }
-        if (name == null && s.getAnnotation() != null) {
-        	name = (String) s.getAnnotation().getProperty(MauveConstants.LOCUS);
-        }
+//        if (name == null && s.getAnnotation() != null) {
+//        	name = (String) s.getAnnotation().getProperty(MauveConstants.LOCUS);
+//        }
         if (name == null && 
         		AnnotationContainsFilter.getKeyIgnoreCase ("definition",
         				s.getAnnotation()) != null) {
