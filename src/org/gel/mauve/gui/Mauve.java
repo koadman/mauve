@@ -119,12 +119,7 @@ public class Mauve {
 
         // check for updates in a separate thread so as not to
         // stall the GUI if the network is down
-        javax.swing.SwingUtilities.invokeLater(new Runnable()
-                {
-                    public void run(){
-                    	checkForUpdates();
-                    }
-                });
+        new UpdateCheck().start();
 
 		frames = new Vector ();
 		availableFrame = makeNewFrame ();
@@ -136,89 +131,90 @@ public class Mauve {
 	/**
 	 * Checks the Mauve web server for a newer version of this software
 	 */
-	public void checkForUpdates () {
-		if (!check_updates)
-			return;
-		try {
-			String os_type = System.getProperty ("os.name");
-			String build_date = props.getProperty ("build.timestamp");
-
-			if (build_date == null) {
-				MyConsole
-						.err ()
-						.println (
-								"Couldn't check version, build.timestamp property not found.");
+	class UpdateCheck extends Thread {
+		public void run() {
+			if (!check_updates)
 				return;
-			}
-			long local_version = Long.parseLong (build_date);
-
-			// default to checking the linux version since it's
-			// probably the least standardized OS currently
-			String os_suffix = "linux";
-			if (os_type.startsWith ("Windows"))
-				os_suffix = "windows";
-			else if (os_type.startsWith ("Mac"))
-				os_suffix = "mac";
-			URL hurl = new URL (
-					"http://gel.ahabs.wisc.edu/mauve/downloads/latest."
-							+ os_suffix);
-			BufferedReader latest_in = new BufferedReader (
-					new InputStreamReader (hurl.openStream ()));
-			long latest_version = Long.parseLong (latest_in.readLine ());
-
-			if (local_version < latest_version) {
-				// check the OS type since linux can't do an auto-update
-				if (!os_suffix.equals ("windows")) {
-					JOptionPane
-							.showMessageDialog (
-									null,
-									"<html>An updated version of Mauve is available.<br>See the Mauve web site at <a href=\"http://gel.ahabs.wisc.edu/mauve\">http://gel.ahabs.wisc.edu/mauve</a> for more details...",
-									"Updated Mauve available",
-									JOptionPane.INFORMATION_MESSAGE);
+			try {
+				String os_type = System.getProperty ("os.name");
+				String build_date = props.getProperty ("build.timestamp");
+	
+				if (build_date == null) {
+					MyConsole
+							.err ()
+							.println (
+									"Couldn't check version, build.timestamp property not found.");
 					return;
 				}
-
-                int dl_val = JOptionPane.showConfirmDialog(null, "An updated version of Mauve is available.\nWould you like to download and install it?", "Updated Mauve available", JOptionPane.YES_NO_OPTION);
-                if (dl_val == 0)
-                {
-                    //
-                    // download the installer to a temp file
-                    //
-                    MyConsole.out().println("Downloading installer...\n");
-                    String dl_location = "http://gel.ahabs.wisc.edu/mauve/downloads/mauve_installer_";
-                    dl_location += Long.toString(latest_version) + ".exe";
-                    URL dlurl = new URL(dl_location);
-                    InputStream is = dlurl.openStream();
-                    File ins_file = File.createTempFile("mauve_ins", ".exe");
-                    FileOutputStream output_file = new FileOutputStream(ins_file);
-                    byte[] buf = new byte[1024 * 1024];
-                    int read_chars = is.read(buf);
-                    while (read_chars >= 0)
-                    {
-                        output_file.write(buf, 0, read_chars);
-                        read_chars = is.read(buf);
-                    }
-                    // close the output file
-                    output_file.close();
-                    //
-                    // run the installer
-                    //
-                    String[] ins_cmd = new String[1];
-                    ins_cmd[0] = ins_file.getPath();
-                    Runtime.getRuntime().exec(ins_cmd);
-                    // delete the installer
-                    ins_file.delete();
-                    // exit this
-                    System.exit(0);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            MyConsole.err().println("Error checking for updates.");
-//            e.printStackTrace(MyConsole.err());
-        }
-    }
+				long local_version = Long.parseLong (build_date);
+	
+				// default to checking the linux version since it's
+				// probably the least standardized OS currently
+				String os_suffix = "linux";
+				if (os_type.startsWith ("Windows"))
+					os_suffix = "windows";
+				else if (os_type.startsWith ("Mac"))
+					os_suffix = "mac";
+				URL hurl = new URL (
+						"http://gel.ahabs.wisc.edu/mauve/downloads/latest."
+								+ os_suffix);
+				BufferedReader latest_in = new BufferedReader (
+						new InputStreamReader (hurl.openStream ()));
+				long latest_version = Long.parseLong (latest_in.readLine ());
+	
+				if (local_version < latest_version) {
+					// check the OS type since linux can't do an auto-update
+					if (!os_suffix.equals ("windows")) {
+						JOptionPane
+								.showMessageDialog (
+										null,
+										"<html>An updated version of Mauve is available.<br>See the Mauve web site at <a href=\"http://gel.ahabs.wisc.edu/mauve\">http://gel.ahabs.wisc.edu/mauve</a> for more details...",
+										"Updated Mauve available",
+										JOptionPane.INFORMATION_MESSAGE);
+						return;
+					}
+	
+	                int dl_val = JOptionPane.showConfirmDialog(null, "An updated version of Mauve is available.\nWould you like to download and install it?", "Updated Mauve available", JOptionPane.YES_NO_OPTION);
+	                if (dl_val == 0)
+	                {
+	                    //
+	                    // download the installer to a temp file
+	                    //
+	                    MyConsole.out().println("Downloading installer...\n");
+	                    String dl_location = "http://gel.ahabs.wisc.edu/mauve/downloads/mauve_installer_";
+	                    dl_location += Long.toString(latest_version) + ".exe";
+	                    URL dlurl = new URL(dl_location);
+	                    InputStream is = dlurl.openStream();
+	                    File ins_file = File.createTempFile("mauve_ins", ".exe");
+	                    FileOutputStream output_file = new FileOutputStream(ins_file);
+	                    byte[] buf = new byte[1024 * 1024];
+	                    int read_chars = is.read(buf);
+	                    while (read_chars >= 0)
+	                    {
+	                        output_file.write(buf, 0, read_chars);
+	                        read_chars = is.read(buf);
+	                    }
+	                    // close the output file
+	                    output_file.close();
+	                    //
+	                    // run the installer
+	                    //
+	                    String[] ins_cmd = new String[1];
+	                    ins_cmd[0] = ins_file.getPath();
+	                    Runtime.getRuntime().exec(ins_cmd);
+	                    // delete the installer
+	                    ins_file.delete();
+	                    // exit this
+	                    System.exit(0);
+	                }
+	            }
+	        }
+	        catch (Exception e)
+	        {
+	            MyConsole.err().println("Error checking for updates.");
+	        }
+	    }
+	}
 
 	private boolean hasRequiredJVM () {
 		String jvm_version = System.getProperty ("java.version");
