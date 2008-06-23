@@ -11,7 +11,6 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="lib" path="ext/zeus-jscl.jar"/>
 	<classpathentry kind="lib" path="ext/jakarta-regexp.jar"/>
-	<classpathentry kind="lib" path="ext/xerces.jar"/>
 	<classpathentry kind="lib" path="ext/cinema-app_support.jar"/>
 	<classpathentry kind="lib" path="ext/cinema-gui.jar" sourcepath="C:/cinema-3_0_23/src"/>
 	<classpathentry kind="lib" path="ext/cinema-mxc.jar" sourcepath="C:/cinema-3_0_23/src"/>
