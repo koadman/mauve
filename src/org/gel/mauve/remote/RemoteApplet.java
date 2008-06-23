@@ -169,12 +169,8 @@ public class RemoteApplet extends Applet {
 			public void run () {
 				try {
 					// Try to JWS it.
-					String codeBase = getCodeBase().toString();
-					if(!(codeBase.indexOf("http") >= 0))
-						codeBase = "https://" + codeBase;
-					codeBase += "/mauve.jnlp";
 					getAppletContext ().showDocument (
-							new URL (codeBase));
+							new URL (getCodeBase () + "/mauve.jnlp"));
 				} catch (MalformedURLException e1) {
 					e1.printStackTrace ();
 					return;
