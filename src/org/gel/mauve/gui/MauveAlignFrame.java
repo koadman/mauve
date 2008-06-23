@@ -225,6 +225,8 @@ public class MauveAlignFrame extends AlignFrame {
 			if (sequences.length > 1) {
 				cur_cmd = sequences[seqI] + ".sml";
 				cmd_vec.addElement (cur_cmd);
+	            File sml_file = new File(cur_cmd);
+	            if(sml_file.exists())  sml_file.delete();
 			}
 		}
 

@@ -466,16 +466,14 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         		cmd_vec.addElement("--gap-extend=" + getGapExtend());
         	}
         }
-        String musc_params = getMuscleParameters();
-        if(musc_params.length() > 0)
-        {
-        	cmd_vec.addElement("--muscle-args=" + musc_params);
-        }
 
         String[] sequences = getSequences();
         for (int seqI = 0; seqI < sequences.length; seqI++)
         {
             cmd_vec.addElement(sequences[seqI]);
+            // preemptively delete SMLs to avoid crashes
+            File sml_file = new File(sequences[seqI] + ".sml");
+            if(sml_file.exists())  sml_file.delete();
         }
 
         String[] mauve_cmd = new String[cmd_vec.size()];
