@@ -75,6 +75,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
     private final MatchDisplayMenuItemBuilder mdmib = new MatchDisplayMenuItemBuilder();
     private final EditLcbMenuItemBuilder elmib = new EditLcbMenuItemBuilder();
     private final SetReferenceMenuItemBuilder srmib = new SetReferenceMenuItemBuilder();
+    private final SetFeatureMenuItemBuilder frmib = new SetFeatureMenuItemBuilder();
     
     public MatchPanel(RearrangementPanel rrpanel, BaseViewerModel model, Genome genome)
     {
@@ -88,6 +89,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
         mpmb.addMenuItemBuilder(mdmib);
         mpmb.addMenuItemBuilder(elmib);
         mpmb.addMenuItemBuilder(srmib);
+        mpmb.addMenuItemBuilder(frmib);
     }
 
     public MatchPopupMenuBuilder getMatchPopupMenuBuilder(){ return mpmb; }
@@ -220,6 +222,16 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
                     model.setReference(g);
                 }});
         	return new JMenuItem[]{setReferenceItem};
+		}
+	}
+	
+	private class SetFeatureMenuItemBuilder implements MatchPopupMenuItemBuilder
+	{
+		public JMenuItem[] getItem(MouseEvent evt, final RearrangementPanel rrpanel, final BaseViewerModel model, final Genome g)
+		{
+        	JMenuItem features = new JMenuItem("Filter Features");
+        	features.addActionListener (FeatureFilterer.getFilterer (model));
+        	return new JMenuItem[]{features};
 		}
 	}
 
