@@ -194,8 +194,8 @@ public class ControlPanel extends AbstractSequencePanel implements org.gel.mauve
         layoutManager.setConstraints(plusMinusButton, c);
         add(setReferenceButton);
         layoutManager.setConstraints(setReferenceButton, c);
-//        add(loadFeaturesButton);
-//        layoutManager.setConstraints(loadFeaturesButton, c);
+        add(loadFeaturesButton);
+        layoutManager.setConstraints(loadFeaturesButton, c);
         add(moveDownButton);
         layoutManager.setConstraints(moveDownButton, c);
 
