@@ -19,6 +19,8 @@ public interface MauveConstants {
 	public final static String LABEL_STRING = "label";
 
 	public final static String CONTIG_STRING = "contig";
+	
+	public final static String OPERON_STRING = "operon";
 
 	public final static String STRAND_STRING = "strand";
 
@@ -98,6 +100,11 @@ public interface MauveConstants {
 	public static final String TOTALS = "totals";
 	
 	/**
+	 * Strings for operon functionality
+	 */
+	public static final String FIRST_OPERON = "first_operon";
+	
+	/**
 	 * Strings representing annotation types
 	 */
 	public static final String DB_XREF = "db_xref";
@@ -173,6 +180,11 @@ public interface MauveConstants {
 	 * represents subfolder similarity indexes are written to.
 	 */
 	public static final String SIMILARITY_OUTPUT = "sim_inds";
+	
+	/**
+	 * represents subfolder operon info is written to
+	 */
+	public static final String OPERON_OUTPUT = "operon";
 	
 	/**
 	 * extension for a similarity index file

@@ -67,7 +67,7 @@ public abstract class AbstractTabbedDataWriter {
 			initSubClassParticulars (args);
 			printHeaderInfoForFile ();
 		} catch (Exception e) {
-			System.out.println ("Can't open file");
+			System.out.println ("Can't open file: " + file_name);
 			e.printStackTrace ();
 		}
 	}

@@ -152,6 +152,22 @@ public class Segment implements Serializable {
 		else
 			return ends [sequence];
 	}
+	
+	public long getStart (int seq) {
+		return starts [seq];
+	}
+	
+	public long getEnd (int seq) {
+		return getSegmentEnd (seq);
+	}
+	
+	public Segment getNext (int seq) {
+		return nexts [seq];
+	}
+	
+	public Segment getPrev (int seq) {
+		return prevs [seq];
+	}
 
 	public double getAvgSegmentLength () {
 		long [] sizes = getSegmentLengths ();

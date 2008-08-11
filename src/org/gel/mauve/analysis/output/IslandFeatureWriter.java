@@ -16,12 +16,13 @@ public class IslandFeatureWriter extends AbstractIslandWriter implements
 	public static final String ISLAND = "island";
 
 	protected IslandFeatureWriter (SegmentDataProcessor processor) {
-		super (MauveHelperFunctions.getSeqPartOfFile (processor) + "islands", processor);
+		this ("islands", processor);
 	}
 	
-	protected IslandFeatureWriter (String file, SegmentDataProcessor processor) {
-		super (file, processor);
+	protected IslandFeatureWriter (String file_name, SegmentDataProcessor proc) {
+		super (MauveHelperFunctions.getSeqPartOfFile (proc) + file_name, proc);
 	}
+	
 
 	protected void initSubClassParticulars (Hashtable args) {
 		seq_index = ((Integer) args.get (SEQUENCE_INDEX)).intValue ();
@@ -70,7 +71,7 @@ public class IslandFeatureWriter extends AbstractIslandWriter implements
 	public static void printIslandsAsFeatures (SegmentDataProcessor processor) {
 		int count = ((Object []) processor.get (FIRSTS)).length;
 		for (int i = 0; i < count; i++) {
-			processor.put (SEQUENCE_INDEX, new Integer (i));
+			processor.setGenomeIndex(i);
 			new IslandFeatureWriter (processor);
 		}
 	}

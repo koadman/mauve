@@ -36,8 +36,12 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 	
 	
 	protected IslandGeneFeatureWriter (SegmentDataProcessor processor) {
-		super (MauveHelperFunctions.getSeqPartOfFile (processor) + (processor.get (
+		this ((processor.get (
 				BACKBONE_MASK) != null ? "backbone" : "island") + "_genes", processor);
+	}
+	
+	protected IslandGeneFeatureWriter (String file_part, SegmentDataProcessor proc) {
+		super (file_part, proc);
 	}
 	
 	protected void initSubClassParticulars (Hashtable args) {
@@ -50,6 +54,7 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 			minimum_percent = DEFAULT_MIN_PERCENT_CONTAINED;
 			args.put (MINIMUM_PERCENT_CONTAINED, new Double (minimum_percent));
 		}
+		System.out.println ("minPrc " + minimum_percent);
 		if (args.get (BACKBONE_MASK) != null)
 			backbone_instead = true;
 		num_per_multiplicity = ((int [][]) args.get (NUM_GENES_PER_MULT));
@@ -88,7 +93,7 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 				return ISLAND_GENE;
 			case LABEL:
 				String id = MauveHelperFunctions.getAsapID (cur_feat);
-				if (!backbone_instead && current.multiplicityType () < multiplicity << 1) {
+				if (id.length() > 5 && !backbone_instead && current.multiplicityType () < multiplicity << 1) {
 					buffer_count++;
 					ids.append (id.substring (5));
 					ids.append (',');
@@ -158,6 +163,7 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 					}
 				}
 				else {
+					System.out.println ("cur: " + cur_percent + " min: " + minimum_percent);
 					print = true;
 					num_per_multiplicity [seq_index][(int) current.multiplicityType () - 1] += 1;
 				}
@@ -191,10 +197,8 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 	}
 	
 	public static void printIslandsAsFeatures (SegmentDataProcessor processor) {
+		initializeVars (processor);
 		int count = ((Object []) processor.get (FIRSTS)).length;
-		long all_mult = ((Long) processor.get (ALL_MULTIPLICITY)).longValue ();
-		processor.put (NUM_GENES_PER_MULT, new int [count][(int) all_mult]);
-		processor.put (TOTAL_GENES, new int [count]);
 		for (int i = 0; i < count; i++) {
 			processor.put (SEQUENCE_INDEX, new Integer (i));
 			new IslandGeneFeatureWriter (processor);
@@ -203,6 +207,13 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 				i = -1;
 			}
 		}
+	}
+	
+	public static void initializeVars (SegmentDataProcessor processor) {
+		int count = ((Object []) processor.get (FIRSTS)).length;
+		long all_mult = ((Long) processor.get (ALL_MULTIPLICITY)).longValue ();
+		processor.put (NUM_GENES_PER_MULT, new int [count][(int) all_mult]);
+		processor.put (TOTAL_GENES, new int [count]);
 	}
 
 }

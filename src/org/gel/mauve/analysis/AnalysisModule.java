@@ -15,47 +15,54 @@ import org.gel.mauve.gui.Mauve;
 import org.gel.mauve.gui.MauveFrame;
 import org.gel.mauve.gui.sequence.FlatFileFeatureConstants;
 
-public class AnalysisModuleFrame extends MauveFrame implements FlatFileFeatureConstants,
+public class AnalysisModule implements FlatFileFeatureConstants,
 		ContigHandler {
 	
 	protected DefaultContigHandler contig_handler;
+	protected BaseViewerModel model;
+	protected MauveFrame frame;
 
-	public AnalysisModuleFrame (Mauve mauve) {
-		super (mauve);
-		
+	public AnalysisModule (BaseViewerModel model) {
+		this.model = model;
 	}
 	
-	public void setModel (BaseViewerModel model) {
+	public AnalysisModule (MauveFrame fr) {
+		this (fr.getModel ());
+		frame = fr;
+	}
+	
+	
+	
+	protected void doAnalysis () {
 		try {
-			super.setModel (model);
-			contig_handler = new DefaultContigHandler (model);
-			final Hashtable args = new Hashtable ();
-			File file = model.getSrc ();
-			args.put (ProcessBackboneFile.INPUT_FILE, file.toString ());
-			args.put (MODEL, model);
-			args.put (CONTIG_HANDLER, this);
-			Iterator itty = MauveInterfacer.feat_files.iterator (); 
-			while (itty.hasNext ()) {
-				Object [] data = (Object []) itty.next (); 
-				mauve_panel.getFeatureImporter ().importAnnotationFile ((File) data [0], 
-						model.getGenomeBySourceIndex (((Integer) data [1]).intValue ()));
-			}
-			long [] lengths = new long [model.getSequenceCount ()];
-			for (int i = 0; i < lengths.length; i++) {
-				lengths [i] = model.getGenomeBySourceIndex (i).getLength ();
-				System.out.println ("length: " + lengths [i]);
-			}
-			args.put (GENOME_LENGTHS, lengths);
+			final Hashtable args = getAnalysisArgs ();
 			new Thread (new Runnable () {
 				public void run () {
-					ProcessBackboneFile.startProcessor ((String) args.get (
-							ProcessBackboneFile.INPUT_FILE), args);
+					ProcessBackboneFile.getProcessor ((String) args.get (
+							ProcessBackboneFile.INPUT_FILE),
+							args).printAllAnalysisData ();
 				}
 			}).start ();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public Hashtable getAnalysisArgs () {
+		contig_handler = new DefaultContigHandler (model);
+		final Hashtable args = new Hashtable ();
+		File file = model.getSrc ();
+		args.put (ProcessBackboneFile.INPUT_FILE, file.toString ());
+		args.put (MODEL, model);
+		args.put (CONTIG_HANDLER, this);
+		long [] lengths = new long [model.getSequenceCount ()];
+		for (int i = 0; i < lengths.length; i++) {
+			lengths [i] = model.getGenomeBySourceIndex (i).getLength ();
+			System.out.println ("length: " + lengths [i]);
+		}
+		args.put (GENOME_LENGTHS, lengths);
+		return args;
 	}
 	
 	public long getContigCoord (int sequence, long loci) {

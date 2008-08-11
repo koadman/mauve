@@ -32,6 +32,9 @@ public class SegmentDataProcessor extends Hashtable implements MauveConstants {
 	public SegmentDataProcessor (Hashtable map) {
 		super (map);
 		init ();
+	}
+	
+	public void printAllAnalysisData () {
 		new IslandCoordinateWriter (this);
 		new TroubleMatchWriter (this);
 		IslandFeatureWriter.printIslandsAsFeatures (this);
@@ -60,6 +63,10 @@ public class SegmentDataProcessor extends Hashtable implements MauveConstants {
 		addUniques ();
 		//findContigsInUniques ();
 		assignIDs ();
+	}
+	
+	public void setGenomeIndex (int index) {
+		put (SEQUENCE_INDEX, index);
 	}
 	
 	protected void findContigsInUniques () {

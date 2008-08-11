@@ -154,7 +154,8 @@ public class ProcessBackboneFile implements MauveConstants {
 		return backbone;
 	}
 	
-	public static void startProcessor (String f_name, Hashtable spec_args) {
+	public static SegmentDataProcessor getProcessor (String f_name, 
+			Hashtable spec_args) {
 		try {
 			File file = new File (f_name);
 			if (!new File (file.getAbsolutePath() + ".backbone").exists()) {
@@ -170,9 +171,10 @@ public class ProcessBackboneFile implements MauveConstants {
 			spec_args.put (SegmentDataProcessor.FILE_STUB, file.getAbsolutePath());
 			spec_args.put (SegmentDataProcessor.BACKBONE,
 					new ProcessBackboneFile (spec_args).getBackboneSegments ());
-			new SegmentDataProcessor (spec_args);
+			return new SegmentDataProcessor (spec_args);
 		} catch (Exception e) {
 			e.printStackTrace ();
+			return null;
 		}
 	}
 
@@ -183,7 +185,7 @@ public class ProcessBackboneFile implements MauveConstants {
 	 *            The backbone file to read and create islands from
 	 */
 	public static void main (String [] args) {
-		startProcessor ((String) args [0], new Hashtable ());
+		getProcessor ((String) args [0], new Hashtable ());
 	}
 
 }
