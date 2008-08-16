@@ -138,25 +138,25 @@ public class ContigInverter implements MauveConstants {
 		boolean last = true;
 		boolean first = true;
 		for (int gen = 0; gen < central.ordered_genomes.length; gen++) {
-			System.out.println ("matching genome: " + gen);
+			//System.out.println ("matching genome: " + gen);
 			central.setReference(central.ordered_genomes [gen]);
 			for (int i = 0; i < central.lcbs.length - 1; i++) {
 				group1 = grouper.getContigGroup (central.lcbs [i]);
-				System.out.println ("match: " + group1.toString ());
+				//System.out.println ("match: " + group1.toString ());
 				do {
 					first = true;
 					reversed1 = central.isReversed (last ? group1.last : group1.first);
-					System.out.println ("last: " + last + " rev1: " + reversed1);
+					//System.out.println ("last: " + last + " rev1: " + reversed1);
 					if (last != reversed1 && !(last ? r_matched.contains (group1.last) :
 						l_matched.contains (group1.first)) && group1.matchedToEdge (reversed1)
 						&& central.containsEndOfLCB (group1, reversed1)) {
 						do {
 							group2 = grouper.getContigGroup (central.lcbs [i + 1]);
-							System.out.println ("i: " + group2);
+							//System.out.println ("i: " + group2);
 							reversed2 = central.isReversed (first ? group2.first : group2.last);
-							System.out.println ("first: " + first + " rev2: " + reversed2);
-							if (first == reversed2 || first ? l_matched.contains (group2.first)
-									: r_matched.contains (group2.last))
+							//System.out.println ("first: " + first + " rev2: " + reversed2);
+							if ((first == reversed2) || (first ? l_matched.contains (group2.first)
+									: r_matched.contains (group2.last)))
 								group2 = group1;
 							if (group2.start != group1.start && group2.matchedToEdge(!reversed2) &&
 									central.containsEndOfLCB (group2, !reversed2) &&
@@ -169,7 +169,7 @@ public class ContigInverter implements MauveConstants {
 									group2.start);
 								int ind2 = central.ordered.indexOf (group1.isReversed () ? 
 										group1.start : group1.end);
-								System.out.println ("ind1: " + ind +" ind2:"+ ind2);
+								//System.out.println ("ind1: " + ind +" ind2:"+ ind2);
 								if (ind != 0 && ind2 != 0) {
 									if (last)
 										r_matched.add (group1.last); 
@@ -180,7 +180,7 @@ public class ContigInverter implements MauveConstants {
 									else
 										r_matched.add (group2.last);
 									ind = ind - ind2;
-									System.out.println ("i: " + i);
+									//System.out.println ("i: " + i);
 									boolean after = group1.weight > group2.weight;
 									if (after)
 										group2.weight = group1.weight;
@@ -207,13 +207,13 @@ public class ContigInverter implements MauveConstants {
 										group2.isReversed ();
 										ContigGrouper.ContigGroup change = leader ? group2 : group1;
 										if (!rev) {
-											System.out.println ("not reversed");
+											//System.out.println ("not reversed");
 											reversed1 = false;
 										}
 										setReversed (change, rev);
 									}
 									if (reversed1 && last || !reversed1 && !last) {
-										System.out.println ("reversed");
+										//System.out.println ("reversed");
 										ContigGrouper.ContigGroup temp = group1;
 										group1 = group2;
 										group2 = temp;
@@ -403,7 +403,7 @@ public class ContigInverter implements MauveConstants {
 				//else
 					//System.out.println ("ordering: " + chrom + " prev: " + 
 					//		(index > 0 ? central.ordered.get (index - 1) : "first"));
-					central.ordered.add(index++, chrom);
+				central.ordered.add(index++, chrom);
 			}
 			else
 				MauveHelperFunctions.addChromByStart (central.conflicts, chrom);
