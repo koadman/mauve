@@ -29,10 +29,10 @@ public class ContigInverter implements MauveConstants {
 	}
 	
 	public ContigInverter (LcbViewerModel mod, ContigReorderer reorder, String file) {
-		System.out.println ("reading file");
+		System.out.println ("reading order file");
 		init (mod, reorder);
 		central.readOrdered (file);
-		invertContigs ();
+		//invertContigs ();
 		/*placeConflicts ();
 		groups.clear ();
 		matchEdges ();*/
@@ -41,6 +41,8 @@ public class ContigInverter implements MauveConstants {
 	protected void init (LcbViewerModel mod, ContigReorderer reorder) {
 		model = mod;
 		central = reorder;
+		befores = new Hashtable ();
+		afters = new Hashtable ();
 		groups = new HashSet ();
 		grouper = central.grouper;
 	}
@@ -129,8 +131,6 @@ public class ContigInverter implements MauveConstants {
 		System.out.println ("matching edges");
 		HashSet l_matched = new HashSet ();
 		HashSet r_matched = new HashSet ();
-		befores = new Hashtable ();
-		afters = new Hashtable ();
 		ContigGrouper.ContigGroup group1 = null;
 		ContigGrouper.ContigGroup group2 = null;
 		boolean reversed1 = false;
@@ -256,7 +256,8 @@ public class ContigInverter implements MauveConstants {
 	 * of the two hashtables befores and afters
 	 */
 	private void setReversed (ContigGrouper.ContigGroup group, boolean reverse) {
-		System.out.println ("setting: " + reverse + " was: " + group.isReversed ());
+		System.out.println ("setting: " + reverse + " was: " + group.isReversed () + " " +
+				group.start.getName());
 		if (group.isReversed () != reverse) {
 			Hashtable from = null;
 			Hashtable to = null;
@@ -340,8 +341,7 @@ public class ContigInverter implements MauveConstants {
 				}
 				//System.out.println ("not misplaced: " + best.getLeftEnd (central.fix));
 				group.weight = best.weight;
-				if (central.isReversed(best))
-					group.setReversed(true);
+				group.setReversed(central.isReversed(best));
 				putNextTo (highest == 0 ? null : best_group, group, true);
 				misplaced.remove (best);
 				Arrays.fill(placements, 0);

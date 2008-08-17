@@ -358,7 +358,7 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 			Iterator itty = fix.getChromosomes ().iterator ();
 			while (itty.hasNext ()) {
 				Chromosome chrom = (Chromosome) itty.next ();
-				System.out.println ("putting: " + chrom.getName ().trim ());
+				//System.out.println ("putting: " + chrom.getName ().trim ());
 				chroms.put (chrom.getName ().trim (), chrom);
 			}
 			BufferedReader in = new BufferedReader (new FileReader (file));
@@ -367,12 +367,12 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 				StringTokenizer toke = new StringTokenizer (input, "\t,", false);
 				String name = toke.nextToken ();
 				//for long named contigs separated by underscores
-				int under = name.indexOf ("_bp_");
+				/*int under = name.indexOf ("_bp_");
 				if (under > -1) {
 					name = name.substring (0, under);
 					name = name.substring (0, name.lastIndexOf ('_'));
-				}
-				System.out.println ("name: " + name + "mapped to: " + chroms.get (name));
+				}*/
+				//System.out.println ("name: " + name + "mapped to: " + chroms.get (name));
 				ordered.add (chroms.get (name));
 				input = in.readLine ();
 			}
@@ -412,9 +412,11 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 		Chromosome contig;
 		while (contigs.hasNext()) {
 			contig = (Chromosome) contigs.next();
-			MauveHelperFunctions.addChromByStart (inverters, 
-					contig);
-			switchOverallOrientation (contig);
+			if (MauveHelperFunctions.getChromByStart(inverters, contig) != null) {
+				MauveHelperFunctions.addChromByStart (inverters, 
+						contig);
+				switchOverallOrientation (contig);
+			}
 		}
 	}
 	
@@ -431,9 +433,9 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 		Chromosome contig;
 		while (contigs.hasNext()) {
 			contig = (Chromosome) contigs.next();
-			MauveHelperFunctions.removeChromByStart (inverters, 
-					contig);
-			switchOverallOrientation (contig);
+			if (MauveHelperFunctions.removeChromByStart (inverters, 
+					contig) != null)
+				switchOverallOrientation (contig);
 		}
 	}
 	

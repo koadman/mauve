@@ -227,7 +227,8 @@ public class ContigGrouper implements MauveConstants {
 			if (reversed != null)
 				return reversed.booleanValue ();
 			else
-				return central.isReversed (first) && central.isReversed (last);
+				return false;
+				//return central.isReversed (first) && central.isReversed (last);
 		}
 		
 		public void setReversed (boolean reverse) {
