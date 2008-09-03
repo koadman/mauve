@@ -48,7 +48,7 @@ import org.gel.mauve.gui.dnd.TransferableObject;
  * A panel that shows a ruler, sequence (and eventually features) for a genome
  * sequence.
  */
-public class SeqPanel extends AbstractSequencePanel implements DragGestureListener, DragSourceListener, DropTargetListener, MouseListener
+public class SeqPanel extends AbstractSequencePanel implements MouseListener
 {
     // Default percentage of space for ruler in this panel
     static final float RULER_RATIO = .05f;
@@ -93,12 +93,10 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
         invisible_size = this.getSize();
         invisible_size.width = 10000;
         invisible_size.height = 20;
-        this.setMinimumSize(invisible_size);
-        
+        this.setMinimumSize(invisible_size);        
         
         controls = new ControlPanel(model, genome, rearrangementPanel);
         controls.setOpaque(true);
-
 
         ruler = new RulerPanel(model, genome);
         ruler.setOpaque(true);
@@ -130,21 +128,12 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
         if(genome.getViewIndex() % 2 == 1)
         	setBackground(Color.WHITE);
         
-        if(genome.getVisible())
-        	doVisibleLayout();
-        else
-        	doInvisibleLayout();
+        configureLayout();
     }
     
-    protected void doVisibleLayout()
+    private GridBagConstraints getDefaultControlPanelGridBagConstraints()
     {
-    	removeAll();
-        GridBagLayout layoutManager = new GridBagLayout();
-        setLayout(layoutManager);
-        GridBagConstraints c = new GridBagConstraints();
-
-        // Add the ruler.
-        // add the control panel
+    	GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.WEST;
         c.fill = GridBagConstraints.VERTICAL;
         c.gridx=GridBagConstraints.RELATIVE;
@@ -156,87 +145,101 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
         c.ipady = 0;
         c.weighty=0;
         c.weightx=0;
-        add(controls);
-        layoutManager.setConstraints(controls, c);
-
-    	
+        return c;
+    }
+    
+    private GridBagConstraints getDefaultContentPanelGridBagConstraints()
+    {
+    	GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.CENTER;
         c.fill = GridBagConstraints.BOTH;
+        c.gridx=GridBagConstraints.RELATIVE;
+        c.gridy=GridBagConstraints.RELATIVE;
+        c.gridwidth = 1;
         c.gridheight = 1;
-        c.gridx = GridBagConstraints.RELATIVE;
+        c.insets = new Insets(0,0,0,0);
+        c.ipadx = 0;
+        c.ipady = 0;
+        c.weighty=0;
         c.weightx = 1.0;
+        return c;
+    }
 
-        c.weighty = RULER_RATIO;
-        add(ruler);
-        layoutManager.setConstraints(ruler, c);
+    /**
+     * Don't render the control panel when printing
+     */
+    protected void configureLayout()
+    {
+    	removeAll();
+        GridBagLayout layoutManager = new GridBagLayout();
+        setLayout(layoutManager);        
+        GridBagConstraints c = getDefaultControlPanelGridBagConstraints();
 
-        c.weighty = 2.0;
-        add(sequence);
-        layoutManager.setConstraints(sequence, c);
-
-        if (getGenome().getAnnotationSequence() != null)
+        // add the control panel only if we're not printing 
+        if(!printing)
         {
-            addFeatures (c);
+	        add(controls);
+	        layoutManager.setConstraints(controls, c);
         }
 
-        // Add the name.
-        c.weighty = 0.1;
-        add(label);
-        layoutManager.setConstraints(label, c);
-        setPreferredSize(my_size);
-        setMaximumSize(my_max_size);
-        setMinimumSize(min_size);
-        setSize(my_size);
+        c = getDefaultContentPanelGridBagConstraints();
+
+        if(printing)
+        {
+        	// treat the width differently if printing
+	        c.gridwidth = GridBagConstraints.REMAINDER;    	
+	        c.weightx = 1.0;
+	        c.gridx = 0;
+        }
+        
+        if( getGenome().getVisible() )
+        {
+        	c.weighty = RULER_RATIO;
+	        add(ruler);
+	        layoutManager.setConstraints(ruler, c);
+	
+	        c.weighty = 2.0;
+	        add(sequence);
+	        layoutManager.setConstraints(sequence, c);
+	
+	        if (getGenome().getAnnotationSequence() != null)
+	        {
+	            add(feature);
+	            c.weighty = 0.1;
+	            layoutManager.setConstraints(feature, c);
+	        }
+	
+	        // Add the name.
+	        c.weighty = 0.1;
+	        add(label);
+	        layoutManager.setConstraints(label, c);
+	        setPreferredSize(my_size);
+	        setMaximumSize(my_max_size);
+	        setMinimumSize(min_size);
+	        setSize(my_size);
+	    }else
+	    {
+	    	// genome not visible...
+	        // just add the name.
+	        c.weighty = 0.1;
+	        add(label);
+	        layoutManager.setConstraints(label, c);
+	        setAllSizes(invisible_size);
+	    }
     }
     
-    protected void addFeatures (GridBagConstraints c) {
-    	GridBagLayout layoutManager = (GridBagLayout) getLayout ();
-    	add(feature);
-        c.weighty = BOX_FEATURE_WEIGHT;
-        layoutManager.setConstraints(feature, c);
-    }
-
-    public void doInvisibleLayout()
+    /**
+     * Sets all current, preferred max and min sizes to d
+     * @param d
+     */
+    private void setAllSizes(Dimension d)
     {
-    	removeAll();
-        GridBagLayout layoutManager = new GridBagLayout();
-        setLayout(layoutManager);
-        GridBagConstraints c = new GridBagConstraints();
-
-        // Add the ruler.
-        // add the control panel
-        c.anchor = GridBagConstraints.WEST;
-        c.fill = GridBagConstraints.VERTICAL;
-        c.gridx=GridBagConstraints.RELATIVE;
-        c.gridy=GridBagConstraints.RELATIVE;
-        c.gridwidth = 1;
-        c.gridheight=GridBagConstraints.REMAINDER;
-        c.insets = new Insets(0,0,0,0);
-        c.ipadx = 0;
-        c.ipady = 0;
-        c.weighty=0;
-        c.weightx=0;
-        add(controls);
-        layoutManager.setConstraints(controls, c);
-
-    	
-        c.anchor = GridBagConstraints.CENTER;
-        c.fill = GridBagConstraints.BOTH;
-        c.gridheight = 1;
-        c.gridx = GridBagConstraints.RELATIVE;
-        c.weightx = 1.0;
-
-        // Add the name.
-        c.weighty = 0.1;
-        add(label);
-        layoutManager.setConstraints(label, c);
-
-        setPreferredSize(invisible_size);
-        setMaximumSize(invisible_size);    	
-        setMinimumSize(invisible_size);
-        setSize(invisible_size);
+        setPreferredSize(d);
+        setMaximumSize(d);    	
+        setMinimumSize(d);
+        setSize(d);
     }
-
+    
     public RRSequencePanel getSequencePanel()
     {
         return sequence;
@@ -252,178 +255,7 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
 
     public void genomeVisibilityChanged(ModelEvent me)
     {
-        if(getGenome().getVisible())
-        	doVisibleLayout();
-        else
-        	doInvisibleLayout();
-    }
-    /**
-     * @see java.awt.dnd.DragGestureListener#dragGestureRecognized(java.awt.dnd.DragGestureEvent)
-     */
-    public void dragGestureRecognized(DragGestureEvent event)
-    {
-        final Integer index = new Integer(getGenome().getViewIndex());
-        Transferable transfer = new TransferableObject(index.getClass(), new TransferableObject.Fetcher()
-        {
-            /**
-             * This will be called when the transfer data is requested at the
-             * very end. At this point we can remove the object from its
-             * original place in the list.
-             */
-            public Object getObject()
-            {
-                return index;
-            }
-        });
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.awt.dnd.DragSourceListener#dragEnter(java.awt.dnd.DragSourceDragEvent)
-     */
-    public void dragEnter(DragSourceDragEvent arg0)
-    {
-        // This space intentionally left blank.
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.awt.dnd.DragSourceListener#dragOver(java.awt.dnd.DragSourceDragEvent)
-     */
-    public void dragOver(DragSourceDragEvent arg0)
-    {
-        // This space intentionally left blank.
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.awt.dnd.DragSourceListener#dropActionChanged(java.awt.dnd.DragSourceDragEvent)
-     */
-    public void dropActionChanged(DragSourceDragEvent arg0)
-    {
-        // This space intentionally left blank.
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.awt.dnd.DragSourceListener#dragDropEnd(java.awt.dnd.DragSourceDropEvent)
-     */
-    public void dragDropEnd(DragSourceDropEvent arg0)
-    {
-        // This space intentionally left blank.
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.awt.dnd.DragSourceListener#dragExit(java.awt.dnd.DragSourceEvent)
-     */
-    public void dragExit(DragSourceEvent arg0)
-    {
-        // This space intentionally left blank.
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.awt.dnd.DropTargetListener#dragEnter(java.awt.dnd.DropTargetDragEvent)
-     */
-    public void dragEnter(DropTargetDragEvent evt)
-    {
-        evt.acceptDrag(DnDConstants.ACTION_MOVE);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.awt.dnd.DropTargetListener#dragOver(java.awt.dnd.DropTargetDragEvent)
-     */
-    public void dragOver(DropTargetDragEvent arg0)
-    {
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.awt.dnd.DropTargetListener#dropActionChanged(java.awt.dnd.DropTargetDragEvent)
-     */
-    public void dropActionChanged(DropTargetDragEvent evt)
-    {
-        evt.acceptDrag(DnDConstants.ACTION_MOVE);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.awt.dnd.DropTargetListener#drop(java.awt.dnd.DropTargetDropEvent)
-     */
-    public void drop(DropTargetDropEvent evt)
-    {
-        Transferable t = evt.getTransferable();
-
-        // If it's our native TransferableObject, use that
-        if (t.isDataFlavorSupported(REARRANGEMENT_FLAVOR))
-        {
-            evt.acceptDrop(DnDConstants.ACTION_MOVE);
-            Object obj = null;
-            try
-            {
-                obj = t.getTransferData(REARRANGEMENT_FLAVOR);
-            }
-            catch (UnsupportedFlavorException e)
-            {
-                // We just checked, so this is quite unexpected.
-                throw new RuntimeException(e);
-            }
-            catch (IOException e)
-            {
-                MyConsole.err().println("Drag and drop data no longer available.");
-                e.printStackTrace(MyConsole.err());
-                evt.rejectDrop();
-                return;
-            }
-
-            int sourceIndex = -1;
-
-            // See where in the list we dropped the element.
-            sourceIndex = ((Integer) obj).intValue();
-            if (getGenome().getViewIndex() != sourceIndex)
-            {
-                int[] new_order = new int[model.getSequenceCount()];
-                int seqI = 0, seqJ = 0;
-                for (; seqI < model.getSequenceCount();)
-                {
-                    if (seqI == getGenome().getViewIndex())
-                    {
-                        new_order[seqI] = sourceIndex;
-                        seqI++;
-                    }
-                    else if (seqJ == sourceIndex)
-                    {
-                        // skip this one
-                        seqJ++;
-                    }
-                    else
-                    {
-                        new_order[seqI] = seqJ;
-                        seqI++;
-                        seqJ++;
-                    }
-                }
-                rrPanel.reorderSequences(new_order);
-            }
-
-            evt.getDropTargetContext().dropComplete(true);
-        }
-        else
-        {
-            evt.rejectDrop();
-        }
+    	configureLayout();
     }
 
     public void setBackground(java.awt.Color bg)
@@ -436,39 +268,20 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
     	if(feature != null)
     		feature.setBackground(bg);
     }
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.awt.dnd.DropTargetListener#dragExit(java.awt.dnd.DropTargetEvent)
-     */
-    public void dragExit(DropTargetEvent arg0)
-    {
-    }
-
-    public void modeChanged(ModelEvent event)
-    {
-        // Hand mode toggles drag and drop.
-        if (model.getMode() == ViewerMode.NORMAL)
-        {
-            disableZoom();
-        }
-        else if (model.getMode() == ViewerMode.ZOOM)
-        {
-            enableZoom();
-        }
-    }
-
-    /***************** Zoom stuff ********************************/
-
-    private void disableZoom()
-    {
-        removeMouseListener(this);
-    }
     
-    private void enableZoom()
+    /******* Get rid of controls when printing ***************/
+    private boolean printing = false;
+    public void printingStart(ModelEvent event)
     {
-        addMouseListener(this);
+    	printing = true;
+    	configureLayout();
     }
+    public void printingEnd(ModelEvent event)
+    {
+    	printing = false;
+    	configureLayout();
+    }
+
     
     /****************** Mouse listener events ********************/
     

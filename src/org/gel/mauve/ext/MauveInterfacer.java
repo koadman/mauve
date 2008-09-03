@@ -40,6 +40,8 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 	public MauveInterfacer (String [] args) {
 		mauve = new MauveModule (this);
 		loaded_alignments = new Hashtable ();
+		MyConsole.setUseSwing (true);
+		MyConsole.showConsole ();
 		//loader.loadAll(data_root_dir, "mauve_defaults.xml");
 		Stash stash = loader.getStash("Alignment/66.168.25.16012071020017650");
 		System.out.println ("null? " + (stash == null));
@@ -105,8 +107,6 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 		//convertToINSD (frame);
 		new Thread (new Runnable () {
 			public void run () {
-				MyConsole.setUseSwing (true);
-				MyConsole.showConsole ();
 				//new AlignmentConverter ((XmfaViewerModel) frame.getModel(), loader);		
 			}
 		}).start ();
@@ -131,7 +131,7 @@ public class MauveInterfacer implements ModuleListener, MauveStoreConstants {
 	 */
 	public static void main(String[] args) throws Exception {
 		ModelBuilder.setUseDiskCache(false);
-		data_root_dir = "c:\\blah";
+		data_root_dir = "c:\\mauve3data\\LocalStore";
 		makeDataDirs ();
 		loader = new StashXMLLoader (data_root_dir, 
 				AbstractMessageManager.createEvents ("127.0.0.1", GlobalInit.PORT));
