@@ -619,7 +619,7 @@ public class XMFAAlignment implements Serializable {
 	 * @param length
 	 *            Length to read in columns (includes gaps)
 	 */
-	byte [] readRawSequence (int ivI, int seqI, long left_col, long length) {
+	public byte [] readRawSequence (int ivI, int seqI, long left_col, long length) {
 		// check boundary condition
 		if (gis_tree[ivI][seqI].length () == 0) {
 			if (length == 0)
@@ -719,7 +719,7 @@ public class XMFAAlignment implements Serializable {
 		return byte_buf;
 	}
 
-	byte [] filterNewlines (byte [] byte_buf) {
+	static public byte [] filterNewlines (byte [] byte_buf) {
 		// filter the newlines
 		int byte_off = 0;
 		for (int byteI = 0; byteI < byte_buf.length; byteI++) {
@@ -819,6 +819,16 @@ public class XMFAAlignment implements Serializable {
 			seq_offsets[seqI] = LCBToGlobal (seq_offsets[seqI], g, lcb);
 
 		}
+	}
+	
+	/**
+	 * Returns the length in alignment columns of a particular LCB
+	 * @param lcbId	The index of the LCB in question
+	 * @return	a long int with the length
+	 */
+	public long getLcbLength(int lcbId)
+	{
+		return gis_tree[lcbId][0].length();
 	}
 
 	/**

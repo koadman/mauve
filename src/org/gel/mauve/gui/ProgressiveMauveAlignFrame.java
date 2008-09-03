@@ -38,7 +38,7 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
     JTextField conservationWeightScaleText = new JTextField(5);
 
     
-    JPanel musclePanel = new JPanel();
+    JPanel scorePanel = new JPanel();
     JComboBox matrixChoice = new JComboBox(new String[] {"HOXD (default)", "Custom"});
     JLabel matrixChoiceLabel = new JLabel();
     JTextField[][] scoreText = new JTextField[4][4];
@@ -57,8 +57,6 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
     JLabel gapOpenLabel = new JLabel();
     JTextField gapExtendText = new JTextField();
     JLabel gapExtendLabel = new JLabel();
-    JTextField muscleParamsText = new JTextField();
-    JLabel muscleParamsLabel = new JLabel();
     
     public ProgressiveMauveAlignFrame(Mauve mauve)
     {
@@ -84,22 +82,22 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         //
         // add a panel to define MUSCLE behavior
         //
-        musclePanel.setSize(new java.awt.Dimension(350, 150));
-        musclePanel.setLocation(new java.awt.Point(0, 210));
-        musclePanel.setVisible(true);
-        musclePanel.setLayout(null);
+        scorePanel.setSize(new java.awt.Dimension(350, 150));
+        scorePanel.setLocation(new java.awt.Point(0, 210));
+        scorePanel.setVisible(true);
+        scorePanel.setLayout(null);
 
         d = matrixChoice.getPreferredSize();
         matrixChoice.setSize(d);
         matrixChoice.setLocation(new java.awt.Point(110, 10));
         matrixChoice.setVisible(true);
-    	musclePanel.add(matrixChoice);
+    	scorePanel.add(matrixChoice);
         matrixChoiceLabel.getPreferredSize();
         matrixChoiceLabel.setText("Scoring matrix:");
         matrixChoiceLabel.setSize(new Dimension(100, 15));
         matrixChoiceLabel.setLocation(10, 15);
         matrixChoiceLabel.setVisible(true);
-    	musclePanel.add(matrixChoiceLabel);
+    	scorePanel.add(matrixChoiceLabel);
         
         // layout substitution scoring matrix
         int score_matrix_left = 15;
@@ -129,7 +127,7 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
                                 scoreTextActionPerformed(e);
                             }
                         });
-            	musclePanel.add(scoreText[sI][sJ]);
+            	scorePanel.add(scoreText[sI][sJ]);
                 l += score_w_offset;
         	}
         	t += score_h_offset;
@@ -149,13 +147,13 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         	scoreLabelRow[sI].setLocation(new java.awt.Point(l, score_label_top + 5));
         	scoreLabelRow[sI].setVisible(true);
         	scoreLabelRow[sI].setText(scoreLabels[sI]);
-        	musclePanel.add(scoreLabelRow[sI]);
+        	scorePanel.add(scoreLabelRow[sI]);
         	scoreLabelCol[sI] = new JLabel();
         	scoreLabelCol[sI].setSize(new java.awt.Dimension(20, 20));
         	scoreLabelCol[sI].setLocation(new java.awt.Point(score_label_left + 10, t));
         	scoreLabelCol[sI].setVisible(true);
         	scoreLabelCol[sI].setText(scoreLabels[sI]);
-        	musclePanel.add(scoreLabelCol[sI]);
+        	scorePanel.add(scoreLabelCol[sI]);
         }
 
         gapOpenText.setVisible(true);
@@ -163,38 +161,27 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         gapOpenText.setLocation(new java.awt.Point(130, 160));
         gapOpenText.setText(hoxd_go);
         gapOpenText.setHorizontalAlignment(JTextField.RIGHT);
-    	musclePanel.add(gapOpenText);
+    	scorePanel.add(gapOpenText);
     	gapOpenLabel.setSize(new java.awt.Dimension(200, 20));
         gapOpenLabel.setLocation(new java.awt.Point(15, 160));
     	gapOpenLabel.setVisible(true);
     	gapOpenLabel.setText("Gap open score:");
-    	musclePanel.add(gapOpenLabel);
+    	scorePanel.add(gapOpenLabel);
 
         gapExtendText.setVisible(true);
         gapExtendText.setSize(new java.awt.Dimension(50, 20));
         gapExtendText.setLocation(new java.awt.Point(130, 185));
         gapExtendText.setText(hoxd_ge);
         gapExtendText.setHorizontalAlignment(JTextField.RIGHT);
-    	musclePanel.add(gapExtendText);
+    	scorePanel.add(gapExtendText);
     	gapExtendLabel.setSize(new java.awt.Dimension(200, 20));
         gapExtendLabel.setLocation(new java.awt.Point(15, 185));
     	gapExtendLabel.setVisible(true);
     	gapExtendLabel.setText("Gap extend score:");
-    	musclePanel.add(gapExtendLabel);
+    	scorePanel.add(gapExtendLabel);
 
-    	muscleParamsLabel.setSize(new java.awt.Dimension(200, 20));
-    	muscleParamsLabel.setLocation(new java.awt.Point(15, 210));
-    	muscleParamsLabel.setVisible(true);
-    	muscleParamsLabel.setText("Extra MUSCLE parameters:");
-    	musclePanel.add(muscleParamsLabel);
-    	muscleParamsText.setVisible(true);
-        muscleParamsText.setSize(new java.awt.Dimension(310, 50));
-        muscleParamsText.setLocation(new java.awt.Point(15, 230));
-        muscleParamsText.setText("-maxmb 900");
-    	musclePanel.add(muscleParamsText);
-
-    	// custom MUSCLE scoring matrices are currently broken in the aligner
-//        alignmentOptionPane.addTab("MUSCLE", musclePanel);
+    	// allow use of custom scoring matrices
+        alignmentOptionPane.addTab("Scoring", scorePanel);
 
         // initialize progressiveMauve-specific configuration options
         seedFamiliesCheckBox.setVisible(true);
@@ -423,8 +410,6 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         	try{
         		mat_file = File.createTempFile("scoremat", ".txt");
         		FileWriter outtie = new FileWriter(mat_file);
-//        		FileOutputStream mat_fos = new FileOutputStream(mat_file);
-//        		BufferedWriter outtie = new BufferedWriter(new OutputStreamWriter(mat_fos));
         		outtie.write("# user-defined scoring matrix\n");
         		for(int i = 0; i < 4; i++)
         		{
@@ -601,9 +586,5 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
     public String getGapExtend()
     {
     	return gapExtendText.getText();
-    }
-    public String getMuscleParameters()
-    {
-    	return muscleParamsText.getText();
     }
 }

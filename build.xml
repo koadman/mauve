@@ -327,7 +327,7 @@
 		<!-- Make timestamp and timestampdash for installer making -->
 		<property environment="env" />
 		<echo message="Program files: ${env.ProgramFiles}"/>
-		<exec executable="C:\Program Files (x86)\NSIS\makensis.exe" dir=".">
+		<exec executable="C:\Program Files\NSIS\makensis.exe" dir=".">
 			<arg line="/V2 /NOCD win32\mauve.nsi" />
 			<env key="release_version" value="${release.version}" />
 			<env key="datestamp" value="${datestamp}" />

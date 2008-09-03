@@ -28,8 +28,7 @@ public class MauveAlignFrame extends AlignFrame {
 	JTextField backboneSizeText = new JTextField ();
 
 	JCheckBox extendLcbsCheckBox = new JCheckBox ();
-	JComboBox alignerChoice = new JComboBox (new String [] {"Muscle 3.6",
-			"ClustalW 1.8.4"});
+	JComboBox alignerChoice = new JComboBox (new String [] {"Muscle 3.6"});
 
 	JLabel alignerChoiceLabel = new JLabel ("Aligner:", JLabel.RIGHT);
 

@@ -4,7 +4,7 @@
     </description>
 	
 	<!-- set the release version -->
-	<property name="release.version" value="2.1.1"/>
+	<property name="release.version" value="2.2.0"/>
 
 	<!-- set global properties for this build -->
 	<property name="support" location="build_support"/>
@@ -45,7 +45,7 @@
 				<!-- Changes are an english prose summary of changes, 
 				     limited to 300 characters -->
 				<changes>
-					The new release fixes a missing library problem on Mac OS X.  Other fixes include reduced memory usage in some cases, fix for the failure of the sequence navigator to highlight annotation search results, and a fixed divide-by-zero that rarely arose in progressiveMauve.
+					Fixes sensitivity problems in progressiveMauve.  Fixed 64-bit linux "waiting" bug.  Reduced memory usage of default config.
 				</changes>
 		 
 				<urlBlock
