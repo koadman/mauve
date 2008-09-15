@@ -253,6 +253,20 @@ public class ContigGrouper implements MauveConstants {
 				weight += ((LCB) itty.next ()).weight;
 		}
 		
+		public boolean mostWeightForward () {
+			Iterator itty = getLCBs ().iterator ();
+			int weight1 = 0;
+			int weight2 = 0;
+			while (itty.hasNext ()) {
+				LCB lcb = (LCB) itty.next ();
+				if (central.isReversed(lcb))
+					weight2 += lcb.weight;
+				else
+					weight1 += lcb.weight;
+			}
+			return weight1 > weight2;
+		}
+		
 		public LinkedList getNonEmpty () {
 			LinkedList contigs = new LinkedList ();
 			if (start == end) {

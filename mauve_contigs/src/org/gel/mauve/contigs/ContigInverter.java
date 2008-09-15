@@ -31,7 +31,7 @@ public class ContigInverter implements MauveConstants {
 	public ContigInverter (LcbViewerModel mod, ContigReorderer reorder, String file) {
 		System.out.println ("reading order file");
 		init (mod, reorder);
-		central.readOrdered (file);
+		central.readKeepers (file);
 		//invertContigs ();
 		/*placeConflicts ();
 		groups.clear ();
@@ -94,7 +94,9 @@ public class ContigInverter implements MauveConstants {
 			if (ordered_lcbs [i].getLeftEnd (central.ref) != 0 && 
 					ordered_lcbs [i].getLeftEnd (central.fix) != 0) {
 				ContigGrouper.ContigGroup group = grouper.getContigGroup (ordered_lcbs [i]);
-				if (!groups.contains (group.toString ()) && group.isReversed ()) {
+				if (!groups.contains (group.toString ()) && !group.isReversed() && 
+						!group.mostWeightForward()) {
+					group.setReversed(true);
 					if (group.start != group.end) {
 						System.out.println ("LCB spans reversible contig");
 						System.out.println ("chrom1: " + group.start);
@@ -107,6 +109,7 @@ public class ContigInverter implements MauveConstants {
 				}
 			}
 		}
+		System.out.println ("inverters: " + central.inverters.size());
 	}
 	
 	public boolean contigReversed (Chromosome contig, LCB lcb) {
@@ -375,7 +378,7 @@ public class ContigInverter implements MauveConstants {
 			boolean ok = locationUnique (group, lcb_index);
 			if (ok && !group.isReversed() && (group.first.getReverse (central.fix) ||
 					group.last.getReverse(central.fix)) && group.last.getLeftEnd(
-							central.ref) < group.first.getLeftEnd(central.ref))
+							central.ref) <= group.first.getLeftEnd(central.ref))
 				group.setReversed(true);
 			addContigGroup (group, ok, central.ordered.size ());
 		}

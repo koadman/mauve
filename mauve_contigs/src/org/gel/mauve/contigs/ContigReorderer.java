@@ -66,7 +66,7 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 	protected ContigOrderer orderer;
 	protected boolean active;
 	protected HashSet inverted_from_start;
-		
+	protected HashSet inverted_from_read;
 	
 	public ContigReorderer (ContigOrderer order) {
 		active = true;
@@ -362,21 +362,55 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 				chroms.put (chrom.getName ().trim (), chrom);
 			}
 			BufferedReader in = new BufferedReader (new FileReader (file));
-			String input = new String (in.readLine ());
-			while (input != null && !input.trim ().equals ("")) {
+			String input = new String (in.readLine ().trim());
+			while (input != null && !input.equals ("")) {
 				StringTokenizer toke = new StringTokenizer (input, "\t,", false);
-				String name = toke.nextToken ();
+				String name = toke.nextToken ().trim ();
 				//for long named contigs separated by underscores
 				/*int under = name.indexOf ("_bp_");
 				if (under > -1) {
 					name = name.substring (0, under);
 					name = name.substring (0, name.lastIndexOf ('_'));
 				}*/
-				//System.out.println ("name: " + name + "mapped to: " + chroms.get (name));
-				ordered.add (chroms.get (name));
+				if (chroms.containsKey (name))
+					ordered.add (chroms.get (name));
 				input = in.readLine ();
 			}
 			in.close ();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void readKeepers (String file) {
+		try {
+			System.out.println ("getting keepers");
+			HashSet <String> chroms = new HashSet <String> 
+					(fix.getChromosomes ().size ());
+			BufferedReader in = new BufferedReader (new FileReader (file));
+			String input = new String (in.readLine ().trim());
+			while (input != null && !input.equals ("")) {
+				StringTokenizer toke = new StringTokenizer (input, "\t,", false);
+				String name = toke.nextToken ().trim ();
+				//for long named contigs separated by underscores
+				/*int under = name.indexOf ("_bp_");
+				if (under > -1) {
+					name = name.substring (0, under);
+					name = name.substring (0, name.lastIndexOf ('_'));
+				}*/
+				chroms.add(name);
+				input = in.readLine ();
+			}
+			in.close ();
+
+			Iterator itty = fix.getChromosomes ().iterator ();
+			while (itty.hasNext ()) {
+				Chromosome chrom = (Chromosome) itty.next ();
+				//System.out.println ("putting: " + chrom.getName ().trim ());
+				if (chroms.contains(chrom.getName ().trim ()))
+					ordered.add(chrom);
+			}
+			System.out.println ("keepers: " + ordered.size());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -412,7 +446,7 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 		Chromosome contig;
 		while (contigs.hasNext()) {
 			contig = (Chromosome) contigs.next();
-			if (MauveHelperFunctions.getChromByStart(inverters, contig) != null) {
+			if (MauveHelperFunctions.getChromByStart(inverters, contig) == null) {
 				MauveHelperFunctions.addChromByStart (inverters, 
 						contig);
 				switchOverallOrientation (contig);
