@@ -18,6 +18,7 @@ import org.biojava.bio.symbol.LocationTools;
 import org.gel.mauve.Genome;
 import org.gel.mauve.GenomeBuilder;
 import org.gel.mauve.LCB;
+import org.gel.mauve.SimilarityIndex;
 import org.gel.mauve.XMFAAlignment;
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.backbone.Backbone;
@@ -251,6 +252,7 @@ public class OneToOneOrthologExporter {
 			Arrays.sort(cdsi);
 			allCds.add(cdsi);
 		}
+
 		// orthoPairs will contain a pairwise mapping of orthologs among each pair of genomes
 		// keys are CDS indexes and values are vectors of CDS indices
 		HashMap[][] orthoPairs = new HashMap[model.getSequenceCount()][model.getSequenceCount()];
@@ -263,8 +265,6 @@ public class OneToOneOrthologExporter {
 			CDS[] cdsi = (CDS[])allCds.elementAt(gI);
 			for(int cI = 0; cI < cdsi.length; cI++)
 			{
-				if(cdsi[cI].locus.equalsIgnoreCase("ESCAB7627_3518"))
-					System.err.println("watchme!");
 				// extract the alignment of the region in question
 				Quad[] bbs;
 				bbs = getBackboneSegs(model, g_i, cdsi[cI]);
@@ -340,8 +340,9 @@ public class OneToOneOrthologExporter {
 								cur++;
 								if(col < aln_gJ.length && aln_gJ[col] != '-' && aln_gJ[col] != '\n' && aln_gJ[col] != '\r')
 									tot++;
-								if(col < aln_gJ.length && aln_gI[col] == aln_gJ[col])
-									id++;	// FIXME: upper/lower case
+								if(col < aln_gJ.length && 
+										SimilarityIndex.char_map[(char)aln_gI[col]] == SimilarityIndex.char_map[(char)aln_gJ[col]])
+									id++;	// Use of char_map should fix upper/lowercase issues
 							}
 							col++;
 						}
@@ -364,8 +365,9 @@ public class OneToOneOrthologExporter {
 			}
 		}
 
+		// now that all pairwise orthology relationships have been identified,
+		// compute transitive homology
 		Vector orthologs = new Vector();
-		// then compute transitive homology
 		for(int gI = 0; gI < model.getSequenceCount(); gI++)
 		{
 			for(int gJ = 0; gJ < model.getSequenceCount(); gJ++)
@@ -419,6 +421,7 @@ public class OneToOneOrthologExporter {
 				}
 			}
 		}
+		
 		StringBuilder sb = new StringBuilder();
 		for(int oI = 0; oI < orthologs.size(); oI++)
 		{
@@ -445,6 +448,51 @@ public class OneToOneOrthologExporter {
 				}
 			}
 			sb.append("\n");
+		}
+		output.write(sb.toString());
+
+		// make a list of CDS that have no orthologs, since
+		// we will want to write these out too
+		Vector found = new Vector();
+		for(int sI = 0; sI < model.getSequenceCount(); sI++)
+		{
+			CDS[] cdsi = (CDS[])allCds.elementAt(sI);
+			found.add( new boolean[cdsi.length] );
+		}
+	
+		for(int oI = 0; oI < orthologs.size(); oI++)
+		{
+			HashSet[] ortho = (HashSet[])orthologs.elementAt(oI);			
+			for(int sI = 0; sI < ortho.length; sI++)
+			{
+				Iterator iter = ortho[sI].iterator();
+				while(iter.hasNext())
+				{
+					int osi = ((Integer)iter.next()).intValue();
+					boolean[] f = (boolean[])found.elementAt(sI);
+					f[osi] = true;
+				}
+			}
+		}
+		// now write out the singletons (not found)
+		sb = new StringBuilder();
+		for(int sI = 0; sI < model.getSequenceCount(); sI++)
+		{
+			boolean[] f = (boolean[])found.elementAt(sI);
+			CDS[] cdsi = (CDS[])allCds.elementAt(sI);
+			for(int fI = 0; fI < f.length; fI++)
+			{
+				if(f[fI])
+					continue;	// this one has orthologs, skip it
+				sb.append(sI);
+				sb.append(":");
+				sb.append(cdsi[fI].locus);
+				sb.append(":");
+				sb.append(cdsi[fI].left);
+				sb.append("-");
+				sb.append(cdsi[fI].right);
+				sb.append("\n");
+			}
 		}
 		output.write(sb.toString());
 	}
