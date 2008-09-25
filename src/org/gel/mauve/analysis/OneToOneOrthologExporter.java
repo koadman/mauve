@@ -69,7 +69,10 @@ public class OneToOneOrthologExporter {
 				continue;
 			int l = f.getLocation().getMin();
 			int r = f.getLocation().getMax();
-			Object ltag = f.getAnnotation().getProperty("locus_tag");
+			Object ltag = null;
+			try{
+				ltag = f.getAnnotation().getProperty("locus_tag");
+			}catch(Exception e){}
 			if(ltag==null) ltag = new String();
 			if(l > r)
 			{
@@ -134,13 +137,18 @@ public class OneToOneOrthologExporter {
 			if(bcur == null)
 			{	// check whether we've fallen outside backbone
 				bcur = bbl.getNextBackbone(g_i, cur);
-				cur = (int)(bcur.getLeftEnd(g_i));
+				if(bcur == null)
+					cur = max + 1;
+				else
+					cur = (int)(bcur.getLeftEnd(g_i));
 				continue;
 			}
 			Quad q = new Quad(bcur.starts, bcur.ends);
 			if(q.left[g_i.getSourceIndex()] < cds.left)
 			{
 				long[] leftPos = xmfa.getLCBAndColumn(g_i, cds.left);
+				if(leftPos == null)
+					System.err.println("Null leftpos!");
 				xmfa.getColumnCoordinates(model, (int)leftPos[0], leftPos[1], tmp, gap);
 				// check that it's still in-range
 				for(int ii = 0; ii < gap.length; ii++)
@@ -159,6 +167,8 @@ public class OneToOneOrthologExporter {
 			if(q.right[g_i.getSourceIndex()] > cds.right)
 			{
 				long[] rightPos = xmfa.getLCBAndColumn(g_i, cds.right);
+				if(rightPos == null)
+					System.err.println("Null rightpos!");
 				xmfa.getColumnCoordinates(model, (int)rightPos[0], rightPos[1], tmp, gap);
 				// check that it's still in-range
 				for(int ii = 0; ii < gap.length; ii++)
