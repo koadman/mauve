@@ -130,8 +130,8 @@ public class ContigGrouper implements MauveConstants {
 				if (amount > min_edge_bp)
 				System.out.println ("not enought overlap: " + chrom);
 			}
-			else if (amount > min_edge_bp)
-				System.out.println ("bad similarity: " + similarity + " " + chrom + "\n" + lcb.getRightEnd (fix));
+			/*else if (amount > min_edge_bp)
+				System.out.println ("bad similarity: " + similarity + " " + chrom + "\n" + lcb.getRightEnd (fix));*/
 			return false;
 		}
 		return true;

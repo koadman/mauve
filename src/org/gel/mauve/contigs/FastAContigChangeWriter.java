@@ -19,12 +19,12 @@ import org.biojava.bio.seq.io.FastaFormat;
 import org.biojava.bio.seq.io.SeqIOTools;
 import org.biojava.bio.seq.io.StreamWriter;
 import org.biojava.bio.symbol.IllegalAlphabetException;
+import org.gel.air.bioj.ListSequenceIterator;
 import org.gel.mauve.Chromosome;
 import org.gel.mauve.Genome;
 import org.gel.mauve.LcbViewerModel;
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MauveHelperFunctions;
-import org.gel.mauve.bioj.ListSequenceIterator;
 
 public class FastAContigChangeWriter implements MauveConstants {
 	

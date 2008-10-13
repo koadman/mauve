@@ -9,6 +9,7 @@ import java.util.Vector;
 import org.biojava.bio.seq.Feature;
 import org.biojava.bio.seq.StrandedFeature;
 import org.biojava.bio.symbol.Location;
+import org.gel.air.bioj.BioJavaUtils;
 import org.gel.air.util.MathUtils;
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.MauveHelperFunctions;
@@ -62,7 +63,7 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 		Vector vector = new Vector ();
 		while (itty.hasNext ())
 			vector.add (itty.next ());
-		Collections.sort (vector, MauveHelperFunctions.FEATURE_COMPARATOR);
+		Collections.sort (vector, BioJavaUtils.FEATURE_START_COMPARATOR);
 		num_features = (int []) args.get (TOTAL_GENES);
 		num_features [seq_index] = vector.size ();
 		System.out.println ("seq: " + seq_index + " features: " + num_features [seq_index]);
@@ -163,7 +164,6 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 					}
 				}
 				else {
-					System.out.println ("cur: " + cur_percent + " min: " + minimum_percent);
 					print = true;
 					num_per_multiplicity [seq_index][(int) current.multiplicityType () - 1] += 1;
 				}

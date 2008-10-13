@@ -7,12 +7,12 @@ import java.io.FileNotFoundException;
 
 import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.seq.SequenceIterator;
+import org.gel.air.bioj.ListSequenceIterator;
 import org.gel.air.ja.stash.Stash;
 import org.gel.air.ja.stash.StashXMLLoader;
 import org.gel.air.util.IOUtils;
 import org.gel.mauve.FilterCacheSpec;
 import org.gel.mauve.Genome;
-import org.gel.mauve.bioj.ListSequenceIterator;
 import org.gel.mauve.ext.MauveInterfacer;
 import org.gel.mauve.ext.MauveStoreConstants;
 import org.gel.mauve.format.BaseFormat;

@@ -1,4 +1,4 @@
-package org.gel.mauve.bioj;
+package org.gel.air.bioj;
 
 import java.io.IOException;
 

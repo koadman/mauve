@@ -15,7 +15,11 @@ public class MauveModuleFrame extends MauveFrame {
 
 	public void setModel(BaseViewerModel model) {
 		super.setModel(model);
-		module.mod_list.startModule(this);
+		new Thread ( new Runnable () {
+			public void run () {
+				module.mod_list.startModule(MauveModuleFrame.this);
+			}
+		}).start ();
 	}
 	
 	

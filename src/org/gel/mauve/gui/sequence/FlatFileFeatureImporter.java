@@ -252,6 +252,15 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 		}
 	}
 	
+	/**
+	 * this is called when a previously unseen type of feature is added.  Only 
+	 * certain types of features are displayed, so we have to tell it to 
+	 * display the new types.
+	 * 
+	 * @param type
+	 * @param filterer
+	 * @param genome
+	 */
 	protected void addFeatureType (String type, FeatureFilterer filterer, Genome genome) {
 		MultiLineRenderer [] multis = new MultiLineRenderer [filterer.multis
 		                                                     .size ()];

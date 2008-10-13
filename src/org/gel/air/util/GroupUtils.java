@@ -1,7 +1,10 @@
 package org.gel.air.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Hashtable;
 import java.util.Iterator;
 
 
@@ -11,6 +14,12 @@ import java.util.Iterator;
  *
  */
 public class GroupUtils {
+	
+	public static ArrayList sortedKeys (Hashtable hash) {
+		ArrayList keys = new ArrayList (hash.keySet());
+		Collections.sort (keys);
+		return keys;
+	}
 
 	public static void arrayToCollection (Collection group, Object [] data) {
 		for (int i = 0; i < data.length; i++)

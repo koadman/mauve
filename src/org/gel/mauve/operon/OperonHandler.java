@@ -17,6 +17,8 @@ import org.biojava.bio.Annotation;
 import org.biojava.bio.seq.ComponentFeature;
 import org.biojava.bio.seq.Feature;
 import org.biojava.bio.seq.StrandedFeature;
+import org.gel.air.bioj.BioJavaUtils;
+import org.gel.air.util.GroupUtils;
 import org.gel.air.util.MathUtils;
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.Genome;
@@ -35,7 +37,6 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 
 	protected Hashtable <StrandedFeature, Operon> maps;
 	protected Operon [] firsts;
-	protected ArrayList <Integer> [] sorted_features;
 	protected HashSet <Operon> not_fully_aligned;
 	protected LinkedList <Feature> [] non_aligned;
 	protected BaseViewerModel model;
@@ -67,7 +68,6 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 		model = mod;
 		maps = new Hashtable <StrandedFeature, Operon> ();
 		firsts = new Operon [model.getSequenceCount()];
-		sorted_features = new ArrayList [firsts.length];
 		operon_dir = MauveHelperFunctions.getChildOfRootDir(model,
 				OPERON_OUTPUT);
 		operon_dir.mkdir();
@@ -152,24 +152,8 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	}
 
 	protected void findOperons (int index, Hashtable data) {
-		Iterator <Feature> itty = model.getGenomeBySourceIndex(
-				index).getAnnotationSequence().features();
-		Hashtable <Integer, StrandedFeature> feats = new Hashtable (); 
-		while (itty.hasNext ()) {
-			Feature feat = itty.next();
-			if (feat instanceof ComponentFeature) {
-				Iterator <Feature> itty2 = feat.features();
-				while (itty2.hasNext ()) {
-					Feature feat2 = itty2.next();
-					if ( feat2 instanceof StrandedFeature)
-						feats.put(feat2.getLocation().getMin(), 
-								(StrandedFeature) feat2);
-				}
-			}
-			else if ( feat instanceof StrandedFeature)
-				feats.put(feat.getLocation().getMin(), (StrandedFeature) feat);
-		}
-		partition (feats, index);
+		partition (BioJavaUtils.getSortedStrandedFeatures(model.getGenomeBySourceIndex(
+				index).getAnnotationSequence()), index);
 		firsts [index] = Operon.first;
 		System.out.println ("operons: " + Operon.count);
 		Operon.reset ();
@@ -181,14 +165,10 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 				data);
 	}
 	
-	protected void partition (Hashtable <Integer, StrandedFeature> feats, int index) {
-		ArrayList keys = new ArrayList (feats.keySet());
-		Collections.sort (keys);
-		sorted_features [index] = keys;
-		Iterator <Integer> itty = keys.iterator();
+	protected void partition (ArrayList <StrandedFeature> feats, int index) {
 		System.out.println ("before loop");
-		while (itty.hasNext()) {
-			StrandedFeature feat = feats.get (itty.next ());
+		for (int i = 0; i < feats.size(); i++) {
+			StrandedFeature feat = feats.get (i);
 			Annotation note = feat.getAnnotation();
 			String type = feat.getType().toLowerCase();
 			if (note != null && (type.indexOf(GENE) > -1 || type.indexOf(CDS) > -1)) {

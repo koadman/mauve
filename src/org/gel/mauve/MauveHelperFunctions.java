@@ -3,8 +3,8 @@ package org.gel.mauve;
 import java.io.File;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Iterator;
 
@@ -14,9 +14,7 @@ import org.biojava.bio.seq.Feature;
 import org.biojava.bio.seq.FeatureFilter;
 import org.biojava.bio.seq.FeatureHolder;
 import org.biojava.bio.seq.Sequence;
-import org.biojava.bio.symbol.Location;
 import org.biojava.bio.symbol.SymbolList;
-import org.gel.air.util.MathUtils;
 import org.gel.mauve.analysis.Segment;
 import org.gel.mauve.analysis.output.AbstractTabbedDataWriter;
 import org.gel.mauve.analysis.output.SegmentDataProcessor;
@@ -31,15 +29,6 @@ import org.gel.mauve.gui.sequence.FlatFileFeatureConstants;
 public class MauveHelperFunctions implements FlatFileFeatureConstants {
 
 	
-	public static final Comparator FEATURE_COMPARATOR = new Comparator () {
-		public int compare (Object a, Object b) {
-			Location one = ((Feature) a).getLocation ();
-			Location two = ((Feature) b).getLocation ();
-			return MathUtils.compareByStartThenLength (one.getMin (), one.getMax (),
-					two.getMin (), two.getMax ());
-		}
-	};
-
 	public static String genomeNameToFasta (Genome genome) {
 		String file = genome.getDisplayName ();
 		if (file.toLowerCase ().indexOf (".fas") == -1) {
@@ -163,6 +152,11 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 		return val;
 	}
 	
+	public static String getTruncatedDBXrefID (Feature feat, String header) {
+		String val = getDBXrefID (feat, header);
+		return val.substring(val.indexOf(':') + 1);
+	}
+	
 	
 	public static String getDBXrefID (Feature feat, String header) {
 		String id = null;
@@ -188,6 +182,19 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 				System.out.println ("class " + val.getClass ());
 		}
 		return null;
+	}
+	
+	public static Collection getDBXrefCollection (Feature feat) {
+		Object val = feat.getAnnotation ().getProperty (DB_XREF);
+		if (val != null && val instanceof String) {
+			ArrayList temp = new ArrayList ();
+			temp.add(val);
+			val = temp;
+		}
+		if (!(val instanceof Collection))
+			return null;
+		else
+			return (Collection) val;
 	}
 
 	public static Hashtable getContigFeatures (Genome genome) {
