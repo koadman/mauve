@@ -54,8 +54,12 @@ public class AnnotationContainsFilter extends FeatureFilter.ByAnnotationType {
 				new PropertyConstraint () {
 
 					public boolean accept (Object value) {
-						if (!(value instanceof String))
+						if (!(value instanceof String)) {
 							value = value.toString ();
+							System.out.println (value);
+						}
+						if (((String) value).toLowerCase ().indexOf ("817") > -1)
+							System.out.println (value);
 						if (AnnotationContainsFilter.this.exact
 								&& ((String) value).length () != AnnotationContainsFilter.this.value
 										.length ())
@@ -67,6 +71,8 @@ public class AnnotationContainsFilter extends FeatureFilter.ByAnnotationType {
 									&& ((String) value).length () == AnnotationContainsFilter.this.value
 											.length ();
 						}
+						if (((String) value).toLowerCase ().indexOf ("817") > -1)
+							System.out.println (ret);
 						return ret;
 					}
 
@@ -75,7 +81,7 @@ public class AnnotationContainsFilter extends FeatureFilter.ByAnnotationType {
 						return false;
 					}
 
-				}, CardinalityConstraint.ONE));
+				}, CardinalityConstraint.ONE_OR_MORE));
 		super.setType (type);
 	}
 
