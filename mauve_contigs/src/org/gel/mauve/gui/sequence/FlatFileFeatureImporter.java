@@ -221,12 +221,14 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 			boolean resize = false;
 			while (itty2.hasNext ()) {
 				Object [] rends = (Object []) itty2.next ();
+/*				
 				MultiGenomeRectangularBeadRenderer rend = ((MultiGenomeRectangularBeadRenderer)
 						((FilterCacheSpec) rends [FILTER_SPEC_INDEX]).getFeatureRenderer ());
 				if (rend.getOffset (genome) == NO_OFFSET) {
 					rend.setOffset (genome, offset [seq]);
 					resize = true;
 				}
+*/
 				OverlayRendererWrapper over = (OverlayRendererWrapper) rends [OVERLAY_REND_INDEX];
 				filterer.addOrRemove (over, false);
 				filterer.addOrRemove (over, true);

@@ -34,8 +34,9 @@ public class ContigOrderer implements MauveConstants {
 	public static final String SEQ_START = "Start from sequence files.";
 	protected boolean align_start;
 	protected Vector past_orders;
+
 	
-	public ContigOrderer (String [] args) {
+	public ContigOrderer (String [] args, boolean child) {
 		past_orders = new Vector ();
 		iterations = 25;//DEFAULT_ITERATIONS;
 		if (args != null && args.length > 0) {
@@ -45,6 +46,7 @@ public class ContigOrderer implements MauveConstants {
 			}
 		}
 		reorderer = new ContigReorderer (this);
+		reorderer.skip_first_frame = child;
 		reorderer.ref_ind = 0;
 		reorderer.reorder_ind = 1;
 		reorderer.init();
@@ -223,10 +225,12 @@ public class ContigOrderer implements MauveConstants {
 	public File getAlignDir () {
 		return new File (directory.getAbsolutePath(), DIR_STUB + count);
 	}
+	
+	
 	public static void main (String [] args) {
 		MyConsole.setUseSwing (true);
 		MyConsole.showConsole ();
-		new ContigOrderer (args);
+		new ContigOrderer (args, false);
 	}
 
 }

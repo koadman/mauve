@@ -46,8 +46,6 @@ public class Mauve {
 	}
 	
 	public static void mainHook (String args [], final Mauve mv) {
-		MyConsole.setUseSwing (true);
-		MyConsole.showConsole ();
 		if (args.length >= 1) {
 			final String filename = args[0];
 			javax.swing.SwingUtilities.invokeLater (new Runnable () {
@@ -121,12 +119,7 @@ public class Mauve {
 
         // check for updates in a separate thread so as not to
         // stall the GUI if the network is down
-        javax.swing.SwingUtilities.invokeLater(new Runnable()
-                {
-                    public void run(){
-                    	checkForUpdates();
-                    }
-                });
+        new UpdateCheck().start();
 
 		frames = new Vector ();
 		availableFrame = makeNewFrame ();
@@ -138,7 +131,8 @@ public class Mauve {
 	/**
 	 * Checks the Mauve web server for a newer version of this software
 	 */
-	public void checkForUpdates () {
+	class UpdateCheck extends Thread {
+		public void run() {
 		if (!check_updates)
 			return;
 		try {
@@ -218,7 +212,7 @@ public class Mauve {
         catch (Exception e)
         {
             MyConsole.err().println("Error checking for updates.");
-//            e.printStackTrace(MyConsole.err());
+	        }
         }
     }
 

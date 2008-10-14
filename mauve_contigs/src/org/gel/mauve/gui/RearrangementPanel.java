@@ -745,12 +745,15 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
             {
                 printingScale = -1;
                 printingResolution = determineResolution(printJob);
+                model.firePrintingStartEvent();
+                validate();	// ensure that any layout changes get propagated
                 printJob.print();
             }
             catch (PrinterException pe)
             {
                 MyConsole.err().println("Error printing: " + pe);
             }
+            model.firePrintingEndEvent();
         }
     }
     
@@ -882,6 +885,16 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     {
         // TODO Auto-generated method stub
         
+    }
+
+    public void printingStart(ModelEvent event)
+    {
+        // Ignored.
+    }
+
+    public void printingEnd(ModelEvent event)
+    {
+        // Ignored.
     }
 
 }

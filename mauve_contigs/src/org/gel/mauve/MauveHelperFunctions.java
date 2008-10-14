@@ -17,7 +17,6 @@ import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.symbol.Location;
 import org.gel.air.util.MathUtils;
 import org.gel.mauve.analysis.Segment;
-import org.gel.mauve.analysis.output.AbstractTabbedDataWriter;
 import org.gel.mauve.analysis.output.SegmentDataProcessor;
 import org.gel.mauve.gui.sequence.FlatFileFeatureConstants;
 
@@ -53,9 +52,13 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 		return model.getSrc ().getParentFile ();
 	}
 	
+	public static File getChildOfRootDir (BaseViewerModel model, String child) {
+		return new File (getRootDirectory (model), child);
+	}
+	
 	public static String getFileStub (BaseViewerModel model) {
 		String name = model.getSrc().getName ();
-		if (!new File (getRootDirectory (model), name + ".backbone").exists())
+		if (!getChildOfRootDir (model, name + ".backbone").exists())
 			name = name.substring(0, name.indexOf(".alignment"));
 		return name;
 	}
@@ -80,7 +83,7 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 			System.out.println ("couldn't output genomes and indeces");
 		}
 	}
-
+/*
 	public static void printSegment (Segment segment,
 			AbstractTabbedDataWriter writer) {
 		String [] data = new String [segment.ends.length * 2];
@@ -91,7 +94,7 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 		}
 		writer.printRow (data);
 	}
-
+*/
 	public static String doubleToString (double number, int decimals) {
 		DecimalFormat format = new DecimalFormat ();
 		format.setMaximumFractionDigits (decimals);

@@ -67,7 +67,7 @@ public class GenomeBuilder
     private static String windowsPathHack(String p)
 	{
 		// only do this under Mac OS X, which has an inept java.io.File
-		if(!System.getProperty("os.name").contains("Mac"))
+		if(System.getProperty("os.name").indexOf("Mac") < 0)
 			return p;
 		// only operate on paths with backslashes and drive letter specs
 		if(p.length() < 3 || !((p.charAt(1) == ':' && p.charAt(2) == '\\') || p.startsWith("\\\\")))

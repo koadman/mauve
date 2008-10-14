@@ -10,7 +10,7 @@ import org.gel.mauve.Chromosome;
 import org.gel.mauve.Genome;
 import org.gel.mauve.LCB;
 import org.gel.mauve.MauveConstants;
-import org.gel.mauve.SimilarityIndex;
+import org.gel.mauve.ZoomHistogram;
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.analysis.SegmentComparator;
 import org.gel.mauve.backbone.Backbone;
@@ -24,7 +24,7 @@ public class ContigGrouper implements MauveConstants {
 	protected double min_percent;
 	protected double min_contig_ratio;
 	protected Genome fix;
-	protected SimilarityIndex how_similar;
+	protected ZoomHistogram how_similar;
 	protected Hashtable groups;
 	protected byte min_similarity;
 	protected byte med_similarity;
@@ -118,9 +118,9 @@ public class ContigGrouper implements MauveConstants {
 		long amount = left ? chrom.getEnd () - end + 1 : end - chrom.getStart () + 1;
 		byte similarity = -1;
 		if (left)
-			similarity = how_similar.getSimilarityByRange (end, chrom.getEnd ());
+			similarity = how_similar.getValueForRange (end, chrom.getEnd ());
 		else
-			similarity = how_similar.getSimilarityByRange (chrom.getStart (), end);
+			similarity = how_similar.getValueForRange (chrom.getStart (), end);
 		if (amount < min_contig_bp && amount > min_edge_bp && similarity > med_similarity)
 			return true;
 		if (similarity < min_similarity || amount < min_edge_bp || 
@@ -130,8 +130,8 @@ public class ContigGrouper implements MauveConstants {
 				if (amount > min_edge_bp)
 				System.out.println ("not enought overlap: " + chrom);
 			}
-			else if (amount > min_edge_bp)
-				System.out.println ("bad similarity: " + similarity + " " + chrom + "\n" + lcb.getRightEnd (fix));
+			/*else if (amount > min_edge_bp)
+				System.out.println ("bad similarity: " + similarity + " " + chrom + "\n" + lcb.getRightEnd (fix));*/
 			return false;
 		}
 		return true;
@@ -298,7 +298,7 @@ public class ContigGrouper implements MauveConstants {
 						long length = end - start;
 						if (((length / (double) current.getLength() > .51) ||
 								(length / (double) match_length) > min_percent) && 
-								how_similar.getSimilarityByRange (start, end) > min_similarity)
+								how_similar.getValueForRange (start, end) > min_similarity)
 							total += length;
 						boolean add = false;
 						if (total / (double) current.getLength () > min_contig_ratio) {

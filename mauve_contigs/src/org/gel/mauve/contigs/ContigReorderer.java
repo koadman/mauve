@@ -67,6 +67,7 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 	protected boolean active;
 	protected HashSet inverted_from_start;
 	protected HashSet inverted_from_read;
+	protected boolean skip_first_frame;
 	
 	public ContigReorderer (ContigOrderer order) {
 		active = true;
@@ -101,10 +102,14 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 	 * been set up.
 	 */
 	protected MauveFrame makeNewFrame () {
+		if (skip_first_frame) {
+			skip_first_frame = false;
+			return null;
+		}
 		if (active) {
-		frame = new ReordererMauveFrame (this);
-		frames.add (frame);
-		return frame;
+			frame = new ReordererMauveFrame (this);
+			frames.add (frame);
+			return frame;
 		}
 		else
 			return super.makeNewFrame ();
@@ -488,7 +493,7 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 		if (args.length > 0)
 			new ContigReorderer ().init (args);
 		else
-			new ContigOrderer (null);
+			new ContigOrderer (null, false);
 	}
 
 	 public class ReordererMauveFrame extends MauveFrame {

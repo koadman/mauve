@@ -18,8 +18,10 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
+import javax.swing.ToolTipManager;
 import javax.swing.event.EventListenerList;
 
+import org.biojava.bio.gui.sequence.AbstractBeadRenderer;
 import org.biojava.bio.gui.sequence.FeatureBlockSequenceRenderer;
 import org.biojava.bio.gui.sequence.FilteringRenderer;
 import org.biojava.bio.gui.sequence.MultiLineRenderer;
@@ -196,6 +198,7 @@ public class FeaturePanel extends AbstractSequencePanel
     public DbXrefMenuItemBuilder getDbXrefMenuItemBuilder(){ return dmib; }
     public GenbankMenuItemBuilder getGenbankMenuItemBuilder(){ return gmib; }
     
+    //not being called
     private SequenceRenderer barRenderer(String type, Color innerColor, double depth, StrandedFeature.Strand strand) throws ChangeVetoException
     {
     	FeatureFilter filter = new FeatureFilter.And(new FeatureFilter.ByType(type),new FeatureFilter.StrandFilter(strand));
@@ -417,13 +420,10 @@ public class FeaturePanel extends AbstractSequencePanel
         {
             Object t = sve.getTarget();
 
-            if (t == null)
-            {
-                trans.setToolTipText(null);
-            }
-            else if (t instanceof FeatureHolder)
-            {
+            if (t != null && t instanceof FeatureHolder && 
+            		((FeatureHolder) t).countFeatures() > 0) {
                 FeatureHolder fh = (FeatureHolder) t;
+                ToolTipManager.sharedInstance().registerComponent (trans);
                 StringBuffer msg = new StringBuffer("<HTML>");
                 for (Iterator fi = fh.features(); fi.hasNext();)
                 {
@@ -463,6 +463,7 @@ public class FeaturePanel extends AbstractSequencePanel
             else
             {
                 trans.setToolTipText(null);
+                ToolTipManager.sharedInstance().unregisterComponent (trans);
             }
         }
     }

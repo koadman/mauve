@@ -60,7 +60,6 @@ public class Genome {
 	// list must be in order by position in sequence!
 	public void setChromosomes (List list) {
 		this.chromosomes = list;
-		System.out.println ("chrom: " + list.size());
 	}
 
 	public Sequence getAnnotationSequence () {

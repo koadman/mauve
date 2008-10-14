@@ -39,7 +39,7 @@ public class DefaultContigHandler implements ContigHandler, MauveConstants {
 		Iterator chroms = model.getGenomeBySourceIndex(sequence).getChromosomes().iterator();
 		while (chroms.hasNext()) {
 			Chromosome chrom = (Chromosome) chroms.next ();
-			if (chrom.getName().indexOf(contig) > -1)
+			if (chrom.getName().toLowerCase().indexOf(contig.toLowerCase()) > -1)
 				return chrom;
 		}
 		return null;

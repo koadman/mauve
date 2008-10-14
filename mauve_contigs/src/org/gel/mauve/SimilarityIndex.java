@@ -1,7 +1,9 @@
 package org.gel.mauve;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 
 import org.gel.mauve.backbone.Backbone;
 import org.gel.mauve.backbone.BackboneList;
@@ -11,13 +13,10 @@ import org.gel.mauve.backbone.BackboneList;
  * a group of aligned sequences. This implementation uses the average entropy
  * over a sliding window of alignment columns
  */
-public class SimilarityIndex implements Serializable {
+public class SimilarityIndex extends ZoomHistogram implements Serializable {
 	/** object format version */
-	static final long serialVersionUID = 2;
+	static final long serialVersionUID = 3;
 
-	int max_resolution = 5;
-
-	/** < Never index fewer than this many alignment columns */
 	int index_factor = 8;
 
 	/** < Index granularity grows in multiples of this number */
@@ -31,28 +30,27 @@ public class SimilarityIndex implements Serializable {
 	int window_size = 100;
 
 	/** < Average the similarity using a sliding window over this many columns */
-
-	byte [] sim_index;
+	
+	
 
 	/** < The similarity index, similarity values are discretized to a byte value */
+	protected byte [] sim_index;
 
-	int levels;
-
-	/** < The number of resolution levels */
-	long [] resolutions;
-
-	/** < The number of characters covered by an index entry at each level */
-	long [] index_size;
-
-	/** < The number of index entries at each level */
 
 	long seq_length;
+
 
 	SimilarityIndex (Genome g, XMFAAlignment xmfa, BackboneList bb_list)
 			throws IOException {
 		this.seq_length = g.getLength ();
 		allocateIndex ();
 		calculateIndex (g, xmfa, bb_list);
+	}
+	
+	public SimilarityIndex(int level, int max_res, long[] sizes, long[] res,
+			byte [] sims) {
+		init (level, max_res, sizes, res);
+		sim_index = sims;
 	}
 
 	/** Change the sequence indexed to seqI */
@@ -77,14 +75,14 @@ public class SimilarityIndex implements Serializable {
 			return;
 
 		resolutions = new long [levels];
-		index_size = new long [levels];
+		level_sizes = new long [levels];
 		level_tmp = level_one;
 		long size_sum = 0;
 		int levelI;
 		long cur_resolution = max_resolution;
 		for (levelI = 0; levelI < levels; levelI++) {
 			resolutions[levelI] = cur_resolution;
-			index_size[levelI] = level_tmp;
+			level_sizes[levelI] = level_tmp;
 			size_sum += level_tmp;
 			level_tmp /= index_factor;
 			cur_resolution *= index_factor;
@@ -156,7 +154,7 @@ public class SimilarityIndex implements Serializable {
 		calculateFracTable ();
 		initCharMap ();
 
-		for (int indexI = 0; indexI < index_size[0]; indexI++) {
+		for (int indexI = 0; indexI < level_sizes[0]; indexI++) {
 			// calculate the left and right ends of the current sliding window
 			long lend = cur_offset + 1;
 			lend = lend < 1 ? 1 : lend;
@@ -290,7 +288,7 @@ public class SimilarityIndex implements Serializable {
 		for (int levelI = 1; levelI < levels; levelI++) {
 			int componentI = (int) getLevelOffset (levelI - 1);
 			int level_offset = (int) getLevelOffset (levelI);
-			for (int indexI = 0; indexI < index_size[levelI]; indexI++) {
+			for (int indexI = 0; indexI < level_sizes[levelI]; indexI++) {
 				int sim_sum = 0;
 				for (int subI = 0; subI < index_factor; subI++) {
 					sim_sum += sim_index[componentI];
@@ -301,127 +299,35 @@ public class SimilarityIndex implements Serializable {
 			}
 		}
 	}
-
+	
 	/**
-	 * Returns the distance into the similarity index where a particular
-	 * resolution level's data begins
+	 * Set an individual similarity value
 	 */
-	long getLevelOffset (int level) {
-		long level_offset = 0;
-		for (int levelI = 0; levelI < level; levelI++) {
-			level_offset += index_size[levelI];
-		}
-		return level_offset;
-	}
-
-	/**
-	 * get an individual similarity value
-	 */
-	byte getSimilarity (int level, int index) {
+	protected void setSimilarity (int level, int index, byte sim_value) {
 		int level_offset = 0;
 		for (int levelI = 0; levelI < level; levelI++) {
-			level_offset += index_size[levelI];
+			level_offset += level_sizes[levelI];
 		}
-		if (index >= index_size[level])
+		if (index > level_sizes[level])
+			throw new ArrayIndexOutOfBoundsException ();
+
+		sim_index[level_offset + index] = sim_value;
+	}
+	
+	/**
+	 * get an individual similarity
+	 */
+	public byte getSimilarity (int level, int index) {
+		int level_offset = 0;
+		for (int levelI = 0; levelI < level; levelI++) {
+			level_offset += level_sizes[levelI];
+		}
+		if (index >= level_sizes[level])
 			throw new ArrayIndexOutOfBoundsException ();
 
 		return sim_index[level_offset + index];
 	}
 
-	/**
-	 * Set an individual similarity value
-	 */
-	void setSimilarity (int level, int index, byte sim_value) {
-		int level_offset = 0;
-		for (int levelI = 0; levelI < level; levelI++) {
-			level_offset += index_size[levelI];
-		}
-		if (index > index_size[level])
-			throw new ArrayIndexOutOfBoundsException ();
-
-		sim_index[level_offset + index] = sim_value;
-	}
-
-	long getResolution (int level) {
-		return resolutions[level];
-	}
-
-	long getLevels () {
-		return levels;
-	}
-
-	// if asked for similarity of a range that spans beyond legal coordinates
-	// this function will return the average for the portion of the requested
-	// range that lies within bounds
-	public byte getSimilarityByRange (long left, long right) {
-		// never allow the range to be less than window_size--
-		// why not max_resolution * 2? with max_res * 2 we can ensure that at
-		// least
-		// one similarity value gets returned (in rare cases 2)
-		if (right - left + 1 < max_resolution * 2) {
-			long extra = (max_resolution * 2 - (right - left)) / 2;
-			left -= extra;
-			left = left < 0 ? 0 : left;
-			right = left + max_resolution * 2;
-		}
-
-		// find the highest resolution completely within a range of right - left
-		long range_size = right - left;
-		int levelI = resolutions.length - 1;
-		for (; levelI > 0; levelI--) {
-			if (resolutions[levelI] * 2 < range_size)
-				break; // this level must contain at least part of what we're
-			// looking for
-		}
-
-		// get the first resolution index at this level
-		long firstI = left / resolutions[levelI];
-		if (left % resolutions[levelI] != 0)
-			firstI++;
-		long lastI = right / resolutions[levelI];
-
-		// truncate them if they are out-of-range
-		firstI = firstI < index_size[levelI] ? firstI : index_size[levelI] - 1;
-		lastI = lastI < index_size[levelI] ? lastI : index_size[levelI] - 1;
-		firstI = firstI < 0 ? 0 : firstI;
-		lastI = lastI < 0 ? 0 : lastI;
-
-		lastI = lastI < firstI ? firstI : lastI;
-
-		long sim_sum = 0;
-		int indexI = 0;
-		for (; indexI <= lastI - firstI; indexI++) {
-			sim_sum += getSimilarity (levelI, (int) (firstI + indexI));
-		}
-		if (lastI < firstI) {
-			throw new RuntimeException ("Corrupt SimilarityIndex");
-		}
-		byte sim = (byte) (sim_sum / (indexI));
-
-		// recursively get the beginning and ending pieces
-		// only recurse if enough space remains on either side and we
-		// haven't already recursed down to the lowest resolution level
-		long left_size = firstI * resolutions[levelI] - left;
-		byte left_sim = 0;
-		if (left_size > resolutions[0] && levelI > 0)
-			left_sim = getSimilarityByRange (left, firstI * resolutions[levelI]);
-		else
-			left_sim = sim;
-		long right_size = right - (lastI + 1) * resolutions[levelI];
-		byte right_sim = 0;
-		if (right_size > resolutions[0] && levelI > 0)
-			right_sim = getSimilarityByRange (
-					(lastI + 1) * resolutions[levelI], right);
-		else
-			right_sim = sim;
-
-		// average the three together
-		double asim_singh = left_size * left_sim + right_size * right_sim + sim
-				* (range_size - left_size - right_size);
-		asim_singh /= range_size;
-		byte final_sim = (byte) asim_singh;
-		return final_sim;
-	}
 
 	int [] char_map = null;
 
@@ -527,5 +433,46 @@ public class SimilarityIndex implements Serializable {
 		// otherwise return the pre-computed value
 		return logs[numerator - 1][denominator - 1];
 	}
+	
+	
+	/**
+	 * Method for writing a range of indexes to an output stream
+	 * @param out
+	 * @param start_ind
+	 * @param end_ind
+	 * @return
+	 */
+	public boolean writeVals (OutputStream out, int start_ind, int end_ind) {
+		try {
+			out.write(sim_index, start_ind, end_ind - start_ind + 1);
+			return true;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	/**
+	 * For writing all similarity indeces to an output stream
+	 * 
+	 * @param out
+	 * @return
+	 */
+	public boolean writeAllVals (OutputStream out) {
+		return writeVals (out, 0, sim_index.length - 1);
+	}
+
+	/**
+	 * 
+	 */
+	public byte getValue(int index) {
+		return sim_index [index];
+	}
+	
+	
+	public boolean equals (Object compare) {
+		return Arrays.equals(sim_index, ((SimilarityIndex) compare).sim_index);
+	}
+
 
 }

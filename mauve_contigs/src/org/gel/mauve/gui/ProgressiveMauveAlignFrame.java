@@ -27,7 +27,7 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
     // member declarations
     Dimension d;
     protected JCheckBox refineCheckBox = new JCheckBox();
-    JCheckBox seedFamiliesCheckBox = new JCheckBox();
+    protected JCheckBox seedFamiliesCheckBox = new JCheckBox();
     
     JCheckBox sumOfPairsCheckBox = new JCheckBox();
     JSlider breakpointWeightScaleSlider = new JSlider();
@@ -200,7 +200,7 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         seedFamiliesCheckBox.setVisible(true);
         seedFamiliesCheckBox.setSize(new java.awt.Dimension(160, 20));
         seedFamiliesCheckBox.setText("Use seed families");
-        seedFamiliesCheckBox.setSelected(true);
+        seedFamiliesCheckBox.setSelected(false);
         seedFamiliesCheckBox.setLocation(new java.awt.Point(10, 30));
         seedFamiliesCheckBox.setToolTipText("<html>Uses multiple spaced seed patterns to identify potential homology.<br>Can substantially improve sensitivity and accuracy on divergent genomes.</html>");
 
@@ -466,16 +466,14 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         		cmd_vec.addElement("--gap-extend=" + getGapExtend());
         	}
         }
-        String musc_params = getMuscleParameters();
-        if(musc_params.length() > 0)
-        {
-        	cmd_vec.addElement("--muscle-args=" + musc_params);
-        }
 
         String[] sequences = getSequences();
         for (int seqI = 0; seqI < sequences.length; seqI++)
         {
             cmd_vec.addElement(sequences[seqI]);
+            // preemptively delete SMLs to avoid crashes
+            File sml_file = new File(sequences[seqI] + ".sml");
+            if(sml_file.exists())  sml_file.delete();
         }
 
         String[] mauve_cmd = new String[cmd_vec.size()];

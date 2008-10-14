@@ -379,6 +379,34 @@ public class BaseViewerModel {
 	}
 
 	/**
+	 * Invoke{@link ModelListener.printingStart(ModelEvent)} on this
+	 * model's collection of ModelListeners.
+	 */
+	public void firePrintingStartEvent() {
+		Object [] listeners = listenerList.getListenerList ();
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if (listeners[i] == ModelListener.class) {
+				((ModelListener) listeners[i + 1])
+						.printingStart (modelEvent);
+			}
+		}
+	}
+
+	/**
+	 * Invoke{@link ModelListener.printingEnd(ModelEvent)} on this
+	 * model's collection of ModelListeners.
+	 */
+	public void firePrintingEndEvent() {
+		Object [] listeners = listenerList.getListenerList ();
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if (listeners[i] == ModelListener.class) {
+				((ModelListener) listeners[i + 1])
+						.printingEnd (modelEvent);
+			}
+		}
+	}
+
+	/**
 	 * Invoke {@link ModelListener.viewableRangeChanged(ModelEvent)} on this
 	 * model's collection of ModelListeners.
 	 */

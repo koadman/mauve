@@ -47,6 +47,7 @@ import org.gel.mauve.MyConsole;
 import org.gel.mauve.SeqFeatureData;
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.color.ColorMenu;
+import org.gel.mauve.contigs.ContigOrderer;
 import org.gel.mauve.gui.dnd.FileDrop;
 import org.gel.mauve.gui.sequence.FeatureFilterer;
 import org.gel.mauve.gui.sequence.FlatFileFeatureImporter;
@@ -70,7 +71,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     JMenuItem jMenuFilePrint = new JMenuItem();
     JMenuItem jMenuFilePageSetup = new JMenuItem();
     JMenuItem jMenuFilePrintPreview = new JMenuItem();
-    JMenuItem jMenuFileImport = new JMenuItem();
+    //JMenuItem jMenuFileImport = new JMenuItem();
     JMenuItem jMenuFileExport = new JMenuItem();
     JMenuItem jMenuFileClose = new JMenuItem();
     JMenuItem jMenuFileQuit = new JMenuItem();
@@ -91,6 +92,9 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     JMenuItem jMenuGoToSeqPos = new JMenuItem ();
     JMenuItem jMenuGoToFeatName = new JMenuItem ();
     JMenuItem jMenuGoToSearchFeatures = new JMenuItem ();
+    
+    JMenu jMenuTools = new JMenu ();
+    JMenuItem jMenuToolsOrderContigs = new JMenuItem ();
     
     JFileChooser fc;
     RearrangementPanel rrpanel;
@@ -218,12 +222,12 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFileExport.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK));
         jMenuFileExport.setMnemonic('E');
         
-        jMenuFileImport.setToolTipText("Import annotation file...");
+        /*jMenuFileImport.setToolTipText("Import annotation file...");
         jMenuFileImport.setVisible(true);
         jMenuFileImport.setEnabled(false);
         jMenuFileImport.setText("Import Annotations");
         jMenuFileImport.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
-        jMenuFileImport.setMnemonic('s');
+        jMenuFileImport.setMnemonic('s');*/
         
         jMenuFileClose.setToolTipText("Close this alignment...");
         jMenuFileClose.setVisible(true);
@@ -305,6 +309,15 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuGoToSearchFeatures.setMnemonic('i');
         jMenuGoToSearchFeatures.setAccelerator(KeyStroke.getKeyStroke(
         		KeyEvent.VK_I, ActionEvent.CTRL_MASK));
+        
+        jMenuTools.setToolTipText("Additional Mauve Tools");
+        jMenuTools.setVisible(true);
+        jMenuTools.setText("Tools");
+        jMenuTools.setMnemonic('T');
+        jMenuToolsOrderContigs.setToolTipText("Order contigs of draft genome");
+        jMenuToolsOrderContigs.setVisible(true);
+        jMenuToolsOrderContigs.setText("Move Contigs");
+        jMenuToolsOrderContigs.setMnemonic('O');
 
         setJMenuBar(jMenuBar1);
 
@@ -315,7 +328,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFile.add(jMenuFilePrint);
         jMenuFile.add(jMenuFilePageSetup);
         jMenuFile.add(jMenuFilePrintPreview);
-        jMenuFile.add(jMenuFileImport);
+        //jMenuFile.add(jMenuFileImport);
         jMenuFile.add(jMenuFileExport);
         jMenuFile.add(jMenuFileClose);
         jMenuFile.add(jMenuFileSeparator1);
@@ -330,6 +343,9 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuGoTo.add (jMenuGoToSeqPos);
         jMenuGoTo.add (jMenuGoToFeatName);
         jMenuGoTo.add (jMenuGoToSearchFeatures);
+        
+        jMenuBar1.add(jMenuTools);
+        jMenuTools.add(jMenuToolsOrderContigs);
         
         jMenuBar1.add(jMenuHelp);
         jMenuHelp.add(jMenuHelpAbout);
@@ -350,7 +366,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFilePageSetup.addActionListener(this);
         jMenuFilePrintPreview.addActionListener(this);
         jMenuFileExport.addActionListener(this);
-        jMenuFileImport.addActionListener(this);
+        //jMenuFileImport.addActionListener(this);
         jMenuFileQuit.addActionListener(this);
         jMenuHelpAbout.addActionListener(this);
         jMenuHelpDocumentation.addActionListener(this);
@@ -359,6 +375,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuGoToSeqPos.addActionListener (this);
         jMenuGoToFeatName.addActionListener (this);
         jMenuGoToSearchFeatures.addActionListener (this);
+        jMenuToolsOrderContigs.addActionListener(this);
         
         // set up key bindings
         jMenuFilePrint.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl P"), "Print");
@@ -370,7 +387,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFilePrint.getActionMap().put("Print", new GenericAction(this, "Print"));
         jMenuFilePageSetup.getActionMap().put("PageSetup", new GenericAction(this, "PageSetup"));
         jMenuFilePrintPreview.getActionMap().put("PrintPreview", new GenericAction(this, "PrintPreview"));
-        jMenuFileImport.getActionMap().put("Import", new GenericAction(this, "Import"));
+        //jMenuFileImport.getActionMap().put("Import", new GenericAction(this, "Import"));
         jMenuFileExport.getActionMap().put("Export", new GenericAction(this, "Export"));
         jMenuFileOpen.getActionMap().put("Open", new GenericAction(this, "Open"));
         jMenuFileClose.getActionMap().put("Close", new GenericAction(this, "Close"));
@@ -385,6 +402,8 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         		this, jMenuGoToFeatName.getText ()));
         jMenuGoToSearchFeatures.getActionMap().put(jMenuGoToSearchFeatures.getText (), 
         		new GenericAction(this, jMenuGoToSearchFeatures.getText ()));
+        jMenuToolsOrderContigs.getActionMap().put(jMenuToolsOrderContigs.getText(), 
+        		new GenericAction(this, jMenuToolsOrderContigs.getText()));
     }
 
     class GenericAction extends AbstractAction
@@ -451,10 +470,10 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             		dialog.setVisible(true);
             	}
             }
-            if (source == jMenuFileImport || ae.getActionCommand().equals("Import"))
+            /*if (source == jMenuFileImport || ae.getActionCommand().equals("Import"))
             {
             	importer.setVisible (true);
-            }
+            }*/
             if (source == jMenuFileExport || ae.getActionCommand().equals("Export"))
             {
                 ExportFrame exportFrame = new ExportFrame(rrpanel);
@@ -498,6 +517,9 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             		jMenuGoToFeatName.getText ())) {
             	navigator.goToFeatureByName ();
             }
+            if (source == jMenuToolsOrderContigs || ae.getActionCommand().equals(
+            		jMenuToolsOrderContigs.getText()))
+            	new ContigOrderer (null, true);
         }
     }
 
@@ -552,7 +574,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFilePrint.setEnabled(false);
         jMenuFilePageSetup.setEnabled(false);
         jMenuFilePrintPreview.setEnabled(false);
-        jMenuFileImport.setEnabled(false);
+        //jMenuFileImport.setEnabled(false);
         jMenuFileExport.setEnabled(false);
         jMenuGoTo.setEnabled(false);
         jMenuFileClose.setEnabled(false);
@@ -617,7 +639,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             jMenuFilePrint.setEnabled(true);
             jMenuFilePageSetup.setEnabled(true);
             jMenuFilePrintPreview.setEnabled(true);
-            jMenuFileImport.setEnabled(true);
+            //jMenuFileImport.setEnabled(true);
             jMenuFileExport.setEnabled(true);
             jMenuFileClose.setEnabled(true);
             jMenuGoTo.setEnabled(true);
