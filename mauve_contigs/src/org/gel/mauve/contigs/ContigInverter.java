@@ -273,11 +273,17 @@ public class ContigInverter implements MauveConstants {
 				from = afters;
 				to = befores;
 			}
+			int already = central.ordered.indexOf(reverse ? 
+					group.start : group.end);
+			if (already > -1)
+				removeContigGroup (group);
 			if (!reverse)
 				central.removeGroupFromInverters (group);
 			else
 				central.addGroupToInverters (group);
 			group.setReversed (reverse);
+			if (already > -1)
+				addContigGroup (group, true, already);
 			if (from != null) {
 				ContigGrouper.ContigGroup group2 = (ContigGrouper.ContigGroup) from.get (key);
 				System.out.println ("accessing");
@@ -377,8 +383,9 @@ public class ContigInverter implements MauveConstants {
 		if (!groups.contains (group.toString ())) {
 			boolean ok = locationUnique (group, lcb_index);
 			if (ok && !group.isReversed() && (group.first.getReverse (central.fix) ||
-					group.last.getReverse(central.fix)) && group.last.getLeftEnd(
-							central.ref) <= group.first.getLeftEnd(central.ref))
+					group.last.getReverse(central.fix)) && (group.last.getLeftEnd(
+							central.ref) < group.first.getLeftEnd(central.ref) ||
+							group.first == group.last))
 				group.setReversed(true);
 			addContigGroup (group, ok, central.ordered.size ());
 		}

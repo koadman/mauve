@@ -41,7 +41,7 @@ public class ContigFeatureWriter extends AbstractTabbedDataWriter
 		printContigs ((LinkedList) args.get (ORDERED_CONTIGS), ORDERED_CONTIGS);
 		use = (Hashtable) args.get (CONFLICTED_CONTIGS);
 		if (use != null &&  use.size () > 0)
-		printContigs (use.keySet (), CONFLICTED_CONTIGS);
+			printContigs (use.keySet (), CONFLICTED_CONTIGS);
 		doneWritingFile ();
 	}
 	

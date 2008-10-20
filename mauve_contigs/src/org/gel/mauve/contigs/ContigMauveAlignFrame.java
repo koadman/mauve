@@ -66,6 +66,10 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 			current_dir = orderer.getAlignDir ();
 			//current_dir.mkdirs ();
 			setOutput(current_dir.getParentFile ().getAbsolutePath ());
+			if (first) {
+				outputFileText.setEditable(false);
+				outputFileText.setBackground(Color.white);
+			}
 			current_dir = new File (current_dir, orderer.DIR_STUB + orderer.count);
 			JScrollBar scroller = listScrollPane.getHorizontalScrollBar ();
 			scroller.setValue (scroller.getMaximum ());
@@ -91,8 +95,6 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 			sequencesPanel.remove (removeButton);
 			first = false;
 			orderer.directory = new File (getOutput ());
-			outputFileText.setEditable(false);
-			outputFileText.setBackground(Color.white);
 		}
 		model.clear();
 		model.addElement (orderer.reference.getAbsolutePath ());

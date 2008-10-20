@@ -36,7 +36,7 @@ public class ContigOrderer implements MauveConstants {
 	protected Vector past_orders;
 
 	
-	public ContigOrderer (String [] args, boolean child) {
+	public ContigOrderer (String [] args, Vector frames) {
 		past_orders = new Vector ();
 		iterations = 25;//DEFAULT_ITERATIONS;
 		if (args != null && args.length > 0) {
@@ -45,8 +45,7 @@ public class ContigOrderer implements MauveConstants {
 			} catch (NumberFormatException e) {
 			}
 		}
-		reorderer = new ContigReorderer (this);
-		reorderer.skip_first_frame = child;
+		reorderer = new ContigReorderer (this, frames);
 		reorderer.ref_ind = 0;
 		reorderer.reorder_ind = 1;
 		reorderer.init();
@@ -230,7 +229,7 @@ public class ContigOrderer implements MauveConstants {
 	public static void main (String [] args) {
 		MyConsole.setUseSwing (true);
 		MyConsole.showConsole ();
-		new ContigOrderer (args, false);
+		new ContigOrderer (args, null);
 	}
 
 }

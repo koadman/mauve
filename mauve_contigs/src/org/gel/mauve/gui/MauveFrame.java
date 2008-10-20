@@ -65,9 +65,9 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     
     // member declarations
     JMenuBar jMenuBar1 = new JMenuBar();
-    JMenuItem jMenuFileOpen = new JMenuItem();
-    JMenuItem jMenuFileAlign = new JMenuItem();
-    JMenuItem jMenuFileProgressiveAlign = new JMenuItem();
+    protected JMenuItem jMenuFileOpen = new JMenuItem();
+    protected JMenuItem jMenuFileAlign = new JMenuItem();
+    protected JMenuItem jMenuFileProgressiveAlign = new JMenuItem();
     JMenuItem jMenuFilePrint = new JMenuItem();
     JMenuItem jMenuFilePageSetup = new JMenuItem();
     JMenuItem jMenuFilePrintPreview = new JMenuItem();
@@ -519,7 +519,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             }
             if (source == jMenuToolsOrderContigs || ae.getActionCommand().equals(
             		jMenuToolsOrderContigs.getText()))
-            	new ContigOrderer (null, true);
+            	new ContigOrderer (null, mauve.frames);
         }
     }
 
@@ -553,8 +553,10 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         	navigator.dispose ();
         	navigator = null;
         }
-        importer.dispose ();
-        importer = null;
+        if (importer != null) {
+        	importer.dispose ();
+        	importer = null;
+        }
         System.gc ();
     }
     
@@ -667,7 +669,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
      * alignment
      */
     //TODO: Move out to Mauve (or some other class).
-    void doAlign()
+    public void doAlign()
     {
         if (alignFrame == null)
         {
@@ -685,7 +687,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         alignFrame.setVisible(true);
     }
     
-    void doProgressiveAlign()
+    public void doProgressiveAlign()
     {
         if (progressiveAlignFrame == null)
         {
@@ -697,7 +699,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     
     /** called when the user selects 'Open' from the file menu */
     //TODO: Move out to Mauve (or some other class).
-    void doFileOpen()
+   public void doFileOpen()
     {
         int returnVal = fc.showOpenDialog(this);
 

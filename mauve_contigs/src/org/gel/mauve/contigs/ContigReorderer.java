@@ -1,5 +1,6 @@
 package org.gel.mauve.contigs;
 
+import java.awt.event.ActionEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -11,6 +12,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
 import java.util.Vector;
+
+import javax.swing.JMenuItem;
 
 import org.gel.air.util.GroupHelpers;
 import org.gel.mauve.BaseViewerModel;
@@ -67,16 +70,18 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 	protected boolean active;
 	protected HashSet inverted_from_start;
 	protected HashSet inverted_from_read;
-	protected boolean skip_first_frame;
 	
-	public ContigReorderer (ContigOrderer order) {
+	public ContigReorderer (ContigOrderer order, Vector parent) {
 		active = true;
 		check_updates = false;
+		if (parent != null) {
+			frames = parent;
+		}
 		orderer = order;
 	}
 	
 	public ContigReorderer () {
-		this (null);
+		this (null, null);
 	}
 	
 	/**
@@ -97,15 +102,16 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 		super.init (args [0]);
 	}
 	
+	public void init () {
+		if (frames == null)
+			super.init();
+	}
+	
 	/**
 	 * Makes a new Mauve frame that calls fixContigs once the alignment has
 	 * been set up.
 	 */
 	protected MauveFrame makeNewFrame () {
-		if (skip_first_frame) {
-			skip_first_frame = false;
-			return null;
-		}
 		if (active) {
 			frame = new ReordererMauveFrame (this);
 			frames.add (frame);
@@ -493,14 +499,14 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 		if (args.length > 0)
 			new ContigReorderer ().init (args);
 		else
-			new ContigOrderer (null, false);
+			new ContigOrderer (null, null);
 	}
 
 	 public class ReordererMauveFrame extends MauveFrame {
 		 
 		 	public ReordererMauveFrame (ContigReorderer ord) {
 		 		super (ord);
-				if (orderer != null)
+		 		if (orderer != null)
 					orderer.parent = this;
 		 	}
 		 	
@@ -519,5 +525,24 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 					}
 				}).start ();				
 			}
-		}
+			
+			 public void actionPerformed (ActionEvent ae) {
+				 JMenuItem source = (JMenuItem) (ae.getSource());
+				 if (source == jMenuFileOpen || ae.getActionCommand().equals("Open"))
+				 {
+					 ((MauveFrame) frames.get(0)).doFileOpen();
+				 }
+				 else if (source == jMenuFileAlign)
+				 {
+					 ((MauveFrame) frames.get(0)).doAlign();
+				 }
+				 else if (source == jMenuFileProgressiveAlign)
+				 {
+					 ((MauveFrame) frames.get(0)).doProgressiveAlign();
+				 }
+				 else
+					 super.actionPerformed(ae);
+			 }
+	 }
+
 }
