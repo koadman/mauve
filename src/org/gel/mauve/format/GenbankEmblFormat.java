@@ -159,14 +159,14 @@ public abstract class GenbankEmblFormat extends BaseFormat {
         	if (name.length() == 0)
         		name = null;
         }
-//        if (name == null && s.getAnnotation() != null) {
-//        	name = (String) s.getAnnotation().getProperty(MauveConstants.LOCUS);
-//        }
+        if (name == null && s.getAnnotation() != null) {
+        	name = (String) s.getAnnotation().getProperty(MauveConstants.LOCUS);
+        }
         if (name == null && 
         		AnnotationContainsFilter.getKeyIgnoreCase ("definition",
-        				s.getAnnotation()) != null) {
-        	name = getChromNameFromDescription (s);
-        }
+				s.getAnnotation()) != null) {
+			name = getChromNameFromDescription (s);
+		}
 		return name;
 	}
 
@@ -179,7 +179,7 @@ public abstract class GenbankEmblFormat extends BaseFormat {
             desc = desc.toLowerCase();
         }
 
-        int ind = desc.indexOf ("contig");
+		int ind = desc.indexOf ("contig");
 		if (ind > -1) {
 			ind = desc.lastIndexOf (" ", ind);
 			if (ind < 0)

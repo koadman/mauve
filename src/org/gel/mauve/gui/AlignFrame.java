@@ -57,17 +57,17 @@ public class AlignFrame extends java.awt.Frame
     protected JPanel sequencesPanel = new JPanel();
     protected JButton addButton = new JButton();
     protected JButton removeButton = new JButton();
-    JTextField outputFileText = new JTextField();
-    JButton outputButton = new JButton();
+    protected JTextField outputFileText = new JTextField();
+    protected JButton outputButton = new JButton();
     protected DnDList sequenceList = new DnDList();
-    JLabel outputLabel = new JLabel();
+    protected JLabel outputLabel = new JLabel();
     JLabel sequencesLabel = new JLabel();
 
     JPanel parentPanel = new JPanel();
     JTabbedPane alignmentOptionPane = new JTabbedPane();
     /** < contains the various parameter panels */
 
-    final JFileChooser fc = new JFileChooser();
+    protected final JFileChooser fc = new JFileChooser();
     protected JScrollPane listScrollPane = new JScrollPane();
     protected DefaultListModel sequenceListModel = new DefaultListModel();
     Dimension d;
@@ -394,7 +394,6 @@ public class AlignFrame extends java.awt.Frame
         worker = new AlignWorker(this, mauve_cmd);
         worker.start();
         cancelButton.setEnabled(true);
-        toFront ();
     }
     
     public void completeAlignment(int retcode)

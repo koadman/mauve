@@ -3,7 +3,7 @@ package org.gel.mauve.backbone;
 import java.awt.Color;
 
 import org.gel.mauve.Genome;
-import org.gel.mauve.analysis.Segment;
+import org.gel.mauve.summary.Segment;
 
 public class Backbone extends Segment {
 

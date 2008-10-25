@@ -153,7 +153,7 @@ public class Genome {
     }
     public void setVisible(boolean v){
     	visible = v;
-    }
+	}
 
 	public String toString () {
 		return getDisplayName ();

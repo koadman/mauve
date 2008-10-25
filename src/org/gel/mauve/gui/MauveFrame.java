@@ -47,6 +47,7 @@ import org.gel.mauve.MyConsole;
 import org.gel.mauve.SeqFeatureData;
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.color.ColorMenu;
+import org.gel.mauve.contigs.ContigOrderer;
 import org.gel.mauve.gui.dnd.FileDrop;
 import org.gel.mauve.gui.sequence.FeatureFilterer;
 import org.gel.mauve.gui.sequence.FlatFileFeatureImporter;
@@ -61,11 +62,12 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     protected BaseViewerModel model;
     
     String documentation_url = "http://gel.ahabs.wisc.edu/mauve/mauve-user-guide";
+    
     // member declarations
     JMenuBar jMenuBar1 = new JMenuBar();
-    JMenuItem jMenuFileOpen = new JMenuItem();
-    JMenuItem jMenuFileAlign = new JMenuItem();
-    JMenuItem jMenuFileProgressiveAlign = new JMenuItem();
+    protected JMenuItem jMenuFileOpen = new JMenuItem();
+    protected JMenuItem jMenuFileAlign = new JMenuItem();
+    protected JMenuItem jMenuFileProgressiveAlign = new JMenuItem();
     JMenuItem jMenuFilePrint = new JMenuItem();
     JMenuItem jMenuFilePageSetup = new JMenuItem();
     JMenuItem jMenuFilePrintPreview = new JMenuItem();
@@ -91,6 +93,9 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     JMenuItem jMenuGoToFeatName = new JMenuItem ();
     JMenuItem jMenuGoToSearchFeatures = new JMenuItem ();
     
+    JMenu jMenuTools = new JMenu ();
+    JMenuItem jMenuToolsOrderContigs = new JMenuItem ();
+    
     JFileChooser fc;
     RearrangementPanel rrpanel;
     JToolBar toolbar;
@@ -100,7 +105,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     AlignFrame progressiveAlignFrame;
     JScrollPane scrollPane;
     SequenceNavigator navigator;
-    //protected FlatFileFeatureImporter importer;
+    protected FlatFileFeatureImporter importer;
     
     private int progressSequenceCount;
 
@@ -281,7 +286,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuViewStyle.setEnabled(false);
         jMenuViewStyle.setText("Style");
         jMenuViewStyle.setMnemonic('S');
-
+        
 //       jMenuGoTo.setToolTipText("Go to specific location in genome");
         jMenuGoTo.setVisible(true);
         jMenuGoTo.setEnabled(false);
@@ -304,6 +309,15 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuGoToSearchFeatures.setMnemonic('i');
         jMenuGoToSearchFeatures.setAccelerator(KeyStroke.getKeyStroke(
         		KeyEvent.VK_I, ActionEvent.CTRL_MASK));
+        
+        jMenuTools.setToolTipText("Additional Mauve Tools");
+        jMenuTools.setVisible(true);
+        jMenuTools.setText("Tools");
+        jMenuTools.setMnemonic('T');
+        jMenuToolsOrderContigs.setToolTipText("Order contigs of draft genome");
+        jMenuToolsOrderContigs.setVisible(true);
+        jMenuToolsOrderContigs.setText("Move Contigs");
+        jMenuToolsOrderContigs.setMnemonic('O');
 
         setJMenuBar(jMenuBar1);
 
@@ -329,6 +343,9 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuGoTo.add (jMenuGoToSeqPos);
         jMenuGoTo.add (jMenuGoToFeatName);
         jMenuGoTo.add (jMenuGoToSearchFeatures);
+        
+        jMenuBar1.add(jMenuTools);
+        jMenuTools.add(jMenuToolsOrderContigs);
         
         jMenuBar1.add(jMenuHelp);
         jMenuHelp.add(jMenuHelpAbout);
@@ -358,6 +375,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuGoToSeqPos.addActionListener (this);
         jMenuGoToFeatName.addActionListener (this);
         jMenuGoToSearchFeatures.addActionListener (this);
+        jMenuToolsOrderContigs.addActionListener(this);
         
         // set up key bindings
         jMenuFilePrint.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl P"), "Print");
@@ -384,6 +402,8 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         		this, jMenuGoToFeatName.getText ()));
         jMenuGoToSearchFeatures.getActionMap().put(jMenuGoToSearchFeatures.getText (), 
         		new GenericAction(this, jMenuGoToSearchFeatures.getText ()));
+        jMenuToolsOrderContigs.getActionMap().put(jMenuToolsOrderContigs.getText(), 
+        		new GenericAction(this, jMenuToolsOrderContigs.getText()));
     }
 
     class GenericAction extends AbstractAction
@@ -497,6 +517,9 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             		jMenuGoToFeatName.getText ())) {
             	navigator.goToFeatureByName ();
             }
+            if (source == jMenuToolsOrderContigs || ae.getActionCommand().equals(
+            		jMenuToolsOrderContigs.getText()))
+            	new ContigOrderer (null, mauve.frames);
         }
     }
 
@@ -523,15 +546,17 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     /** Close the window when the close box is clicked */
     void thisWindowClosing(java.awt.event.WindowEvent e)
     {
-    	if (model != null)
-    		FeatureFilterer.removeFilterer (model);
+    	/*if (model != null)
+    		FeatureFilterer.removeFilterer (model);*/
         mauve.closeFrame(this);
         if (navigator != null) {
         	navigator.dispose ();
         	navigator = null;
         }
-        /*importer.dispose ();
-        importer = null;*/
+        if (importer != null) {
+        	importer.dispose ();
+        	importer = null;
+        }
         System.gc ();
     }
     
@@ -567,9 +592,9 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         model = null;
     }
     
-	/*public FlatFileFeatureImporter getFeatureImporter () {
+	public FlatFileFeatureImporter getFeatureImporter () {
 		return importer;
-	}*/
+	}
 
     public BaseViewerModel getModel()
     {
@@ -634,7 +659,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             jMenuViewColorScheme.setEnabled(true);
             jMenuViewColorScheme.build(model);
             jMenuViewStyle.setTarget(model, rrpanel);
-            //importer = new FlatFileFeatureImporter (this);
+            importer = new FlatFileFeatureImporter (this);
             toFront();
         }
     }
@@ -644,7 +669,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
      * alignment
      */
     //TODO: Move out to Mauve (or some other class).
-    void doAlign()
+    public void doAlign()
     {
         if (alignFrame == null)
         {
@@ -662,7 +687,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         alignFrame.setVisible(true);
     }
     
-    void doProgressiveAlign()
+    public void doProgressiveAlign()
     {
         if (progressiveAlignFrame == null)
         {
@@ -674,7 +699,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     
     /** called when the user selects 'Open' from the file menu */
     //TODO: Move out to Mauve (or some other class).
-    void doFileOpen()
+   public void doFileOpen()
     {
         int returnVal = fc.showOpenDialog(this);
 

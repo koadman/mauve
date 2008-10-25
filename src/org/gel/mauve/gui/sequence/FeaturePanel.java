@@ -418,7 +418,7 @@ public class FeaturePanel extends AbstractSequencePanel
 
         public void mouseMoved(SequenceViewerEvent sve)
         {
-        	Object t = sve.getTarget();
+            Object t = sve.getTarget();
 
             if (t != null && t instanceof FeatureHolder && 
             		((FeatureHolder) t).countFeatures() > 0) {

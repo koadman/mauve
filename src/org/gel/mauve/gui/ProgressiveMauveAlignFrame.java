@@ -26,8 +26,8 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
 	
     // member declarations
     Dimension d;
-    JCheckBox refineCheckBox = new JCheckBox();
-    JCheckBox seedFamiliesCheckBox = new JCheckBox();
+    protected JCheckBox refineCheckBox = new JCheckBox();
+    protected JCheckBox seedFamiliesCheckBox = new JCheckBox();
     
     JCheckBox sumOfPairsCheckBox = new JCheckBox();
     JSlider breakpointWeightScaleSlider = new JSlider();

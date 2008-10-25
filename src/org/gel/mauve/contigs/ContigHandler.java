@@ -1,6 +1,6 @@
 package org.gel.mauve.contigs;
 
-import org.gel.mauve.analysis.Segment;
+import org.gel.mauve.summary.Segment;
 
 public interface ContigHandler {
 	

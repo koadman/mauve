@@ -377,7 +377,7 @@ public class BaseViewerModel {
 			}
 		}
 	}
-	
+
 	/**
 	 * Invoke{@link ModelListener.printingStart(ModelEvent)} on this
 	 * model's collection of ModelListeners.
@@ -537,7 +537,7 @@ public class BaseViewerModel {
 	protected void referenceUpdated () {
 		// Hook for subclasses.
 	}
-	
+
     public void setVisible(Genome g, boolean visible)
     {
     	if(g.getVisible() != visible )

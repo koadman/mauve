@@ -194,7 +194,7 @@ public class XmfaViewerModel extends LcbViewerModel {
             }
             // it didn't get read from the cache
             if(cache_instream == null)
-            	sim[seqI] = new SimilarityIndex (g, xmfa, bb_list);
+            	sim[seqI] = new SimilarityIndex(g, xmfa, bb_list);
         }
 
         // if cache_instream is null there must have been a problem

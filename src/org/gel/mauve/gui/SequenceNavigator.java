@@ -633,7 +633,7 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	public void showResultTree (final Genome [] nomes, final String [][] data) {
         SwingUtilities.invokeLater(new Runnable(){
             public void run(){
-                result_pane.displayFeatures (SeqFeatureData.findFeatures (nomes, data));
+		result_pane.displayFeatures (SeqFeatureData.findFeatures (nomes, data));
             }
         });
 	}

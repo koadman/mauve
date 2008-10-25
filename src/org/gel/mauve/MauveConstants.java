@@ -153,6 +153,13 @@ public interface MauveConstants {
 	 */
 	public static final String ASAP = "asap";
 	
+	public static final String ERIC = "eric";
+	
+	/**
+	 * Fields biojava uses as constants that are protected for some reason
+	 */
+	public static final String LOCUS = "LOCUS";
+	
 	public static final OptimizableFilter NULL_AVOIDER = new OptimizableFilter () {
 		public boolean accept (Feature f) {
 			return f.getAnnotation () != null;
