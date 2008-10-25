@@ -26,11 +26,11 @@ import org.gel.mauve.LcbIdComparator;
 import org.gel.mauve.LcbViewerModel;
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MauveHelperFunctions;
-import org.gel.mauve.analysis.Segment;
 import org.gel.mauve.backbone.BackboneList;
 import org.gel.mauve.contigs.ContigGrouper.ContigGroup;
 import org.gel.mauve.gui.Mauve;
 import org.gel.mauve.gui.MauveFrame;
+import org.gel.mauve.summary.Segment;
 
 public class ContigReorderer extends Mauve implements MauveConstants {
 

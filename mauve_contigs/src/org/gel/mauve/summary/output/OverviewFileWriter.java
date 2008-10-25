@@ -1,4 +1,4 @@
-package org.gel.mauve.analysis.output;
+package org.gel.mauve.summary.output;
 
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -6,7 +6,7 @@ import java.util.Vector;
 
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MauveHelperFunctions;
-import org.gel.mauve.analysis.Segment;
+import org.gel.mauve.summary.Segment;
 
 public class OverviewFileWriter extends AbstractTabbedDataWriter implements MauveConstants {
 	

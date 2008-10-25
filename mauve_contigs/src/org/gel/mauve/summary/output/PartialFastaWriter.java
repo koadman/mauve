@@ -1,4 +1,4 @@
-package org.gel.mauve.analysis.output;
+package org.gel.mauve.summary.output;
 
 import java.io.File;
 import java.io.FileOutputStream;

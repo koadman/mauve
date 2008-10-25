@@ -1,4 +1,4 @@
-package org.gel.mauve.analysis;
+package org.gel.mauve.summary;
 
 import java.io.File;
 import java.util.Hashtable;
@@ -6,9 +6,9 @@ import java.util.LinkedList;
 
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.MauveConstants;
-import org.gel.mauve.analysis.output.SegmentDataProcessor;
 import org.gel.mauve.gui.Mauve;
 import org.gel.mauve.gui.MauveFrame;
+import org.gel.mauve.summary.output.SegmentDataProcessor;
 
 /**
  * This class interfaces between Mauve's existing code and modules that may or

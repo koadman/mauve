@@ -1,4 +1,4 @@
-package org.gel.mauve.analysis;
+package org.gel.mauve.summary;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,7 +10,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.gel.mauve.MauveConstants;
-import org.gel.mauve.analysis.output.SegmentDataProcessor;
+import org.gel.mauve.summary.output.SegmentDataProcessor;
 
 public class ProcessBackboneFile implements MauveConstants {
 

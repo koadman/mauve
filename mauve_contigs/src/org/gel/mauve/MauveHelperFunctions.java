@@ -17,9 +17,9 @@ import org.biojava.bio.seq.FeatureHolder;
 import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.symbol.Location;
 import org.gel.air.util.MathUtils;
-import org.gel.mauve.analysis.Segment;
-import org.gel.mauve.analysis.output.SegmentDataProcessor;
 import org.gel.mauve.gui.sequence.FlatFileFeatureConstants;
+import org.gel.mauve.summary.Segment;
+import org.gel.mauve.summary.output.SegmentDataProcessor;
 
 /**
  * contains file writing routines and variables useful to multiple classes.

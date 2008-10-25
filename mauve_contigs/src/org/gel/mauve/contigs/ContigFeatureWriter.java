@@ -9,8 +9,8 @@ import java.util.LinkedList;
 import java.util.Vector;
 
 import org.gel.mauve.Chromosome;
-import org.gel.mauve.analysis.output.AbstractTabbedDataWriter;
 import org.gel.mauve.gui.sequence.FlatFileFeatureConstants;
+import org.gel.mauve.summary.output.AbstractTabbedDataWriter;
 
 public class ContigFeatureWriter extends AbstractTabbedDataWriter 
 		implements FlatFileFeatureConstants {

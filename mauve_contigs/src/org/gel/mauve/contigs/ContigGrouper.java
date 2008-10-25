@@ -12,9 +12,9 @@ import org.gel.mauve.LCB;
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.ZoomHistogram;
 import org.gel.mauve.XmfaViewerModel;
-import org.gel.mauve.analysis.SegmentComparator;
 import org.gel.mauve.backbone.Backbone;
 import org.gel.mauve.backbone.BackboneList;
+import org.gel.mauve.summary.SegmentComparator;
 
 public class ContigGrouper implements MauveConstants {
 	

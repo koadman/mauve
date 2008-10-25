@@ -3,7 +3,7 @@ package org.gel.mauve;
 import java.awt.Color;
 import java.io.Serializable;
 
-import org.gel.mauve.analysis.Segment;
+import org.gel.mauve.summary.Segment;
 
 /**
  * Records an ungapped local alignment among multiple sequences. Sequence

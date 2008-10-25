@@ -1,4 +1,4 @@
-package org.gel.mauve.analysis;
+package org.gel.mauve.summary;
 
 import java.util.Comparator;
 

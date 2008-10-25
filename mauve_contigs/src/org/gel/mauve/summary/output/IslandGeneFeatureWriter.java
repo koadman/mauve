@@ -1,4 +1,4 @@
-package org.gel.mauve.analysis.output;
+package org.gel.mauve.summary.output;
 
 import java.util.Collections;
 import java.util.Hashtable;
@@ -12,7 +12,7 @@ import org.biojava.bio.symbol.Location;
 import org.gel.air.util.MathUtils;
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.MauveHelperFunctions;
-import org.gel.mauve.analysis.Segment;
+import org.gel.mauve.summary.Segment;
 
 public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 	

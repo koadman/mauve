@@ -1,14 +1,14 @@
-package org.gel.mauve.analysis.output;
+package org.gel.mauve.summary.output;
 
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Vector;
 
 import org.gel.mauve.MauveConstants;
-import org.gel.mauve.analysis.Segment;
-import org.gel.mauve.analysis.SegmentComparator;
 import org.gel.mauve.contigs.ContigHandler;
 import org.gel.mauve.gui.sequence.FlatFileFeatureConstants;
+import org.gel.mauve.summary.Segment;
+import org.gel.mauve.summary.SegmentComparator;
 
 abstract public class AbstractMatchDataWriter extends AbstractTabbedDataWriter
 		implements FlatFileFeatureConstants, ContigHandler {
