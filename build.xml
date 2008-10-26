@@ -67,6 +67,13 @@
 			<pathelement path="${support}/ant-contrib-1.0b3.jar"/>
 		</classpath>
 	</taskdef>
+
+	<!-- retroweaver supports backporting 1.5 code to java 1.4 -->
+	<taskdef name="retroweaver" classname="net.sourceforge.retroweaver.ant.RetroWeaverTask">
+		<classpath>
+			<fileset dir="${support}/retroweaver" includes="**/*"/>
+		</classpath>
+	</taskdef>
 	
 	<target name="init">
 		<!-- Create the time stamp -->
@@ -112,8 +119,12 @@
 	<target name="rmic" depends="compile">
 		<rmic base="${build}" classname="org.gel.mauve.remote.RemoteControlImpl" />
 	</target>
+
+	<target name="weave" depends="rmic">
+		<retroweaver srcdir="${src}"/>
+	</target>
 	
-	<target name="jar" depends="rmic">
+	<target name="jar" depends="rmic,weave">
 		<!-- Make list of external dependencies -->
 		<fileset dir="${ext}" id="ext.jars">
 			<include name="**/*.jar"/>
@@ -149,7 +160,7 @@
 		 </jar>
 	</target>
 	
-	<target name="appletjar" depends="rmic">
+	<target name="appletjar" depends="rmic,weave">
 		<delete file="mauveApplet.jar" />
 		<jar jarfile="mauveApplet.jar">
 			<fileset dir="${build}">
