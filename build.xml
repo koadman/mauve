@@ -96,8 +96,8 @@
 				${ext}/jakarta-regexp.jar"
 			srcdir="${src}"
 			destdir="${build}"
-			target="1.4"
-			source="1.4"
+			target="1.5"
+			source="1.5"
 		/>
 		<mkdir dir="${build}/images"/>
 		<copy todir="${build}/images">
