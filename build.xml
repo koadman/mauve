@@ -4,8 +4,10 @@
 	visualization environment.
 	</description>
 	
-	<!-- set the release version -->
-	<property name="release.version" value="2.2.0"/>
+	<!-- set the release version, unless making a snapshot -->
+	<target name="release_properties" unless="env.MAUVE_SNAPSHOT">
+		<property name="release.version" value="2.2.1_beta"/>
+	</target>
 
 	<!-- deployment locations for production ASAP integration -->
 	<property name="deploy.asapdir" value="/srv/asap/htdocs/mauve" />
@@ -38,18 +40,13 @@
 	<tstamp>
 		<format property="datestamp" pattern="yyyyMMdd" />
 	</tstamp>
-
+	
 	<!-- increment the build number-->
 	<buildnumber/>
-	<!-- set the version number -->
-	<propertyfile 
-		file="${src}/version.properties"
-		comment="Stores version and build information">
-		<entry key="release.version" value="${release.version}"/>
-		<entry key="build.number" value="${build.number}"/>
-		<entry key="build.timestamp" value="${datestamp}"/>
-	</propertyfile>
 	
+	<!-- get any environment variables -->	
+	<property environment="env" />
+
 	<!-- jarbundler builds Mac OS X apps from jar files -->
 	<taskdef name="jarbundler"
 		classpath="${support}/jarbundler-1.4.jar"
@@ -72,8 +69,24 @@
 		<!-- Create the time stamp -->
 		<tstamp/>
 	</target>
-  
-	<target name="compile" depends="init" description="compile the java source">
+	
+	<!-- set the timestamp if building a snapshot -->
+	<target name="snapshot_properties" if="env.MAUVE_SNAPSHOT">
+		<property name="release.version" value="${datestamp}"/>
+	</target>
+
+	<!-- set the version number -->
+	<target name="create_properties" depends="snapshot_properties,release_properties">
+		<propertyfile 
+			file="${src}/version.properties"
+			comment="Stores version and build information">
+			<entry key="release.version" value="${release.version}"/>
+			<entry key="build.number" value="${build.number}"/>
+			<entry key="build.timestamp" value="${datestamp}"/>
+		</propertyfile>
+	</target>
+	  
+	<target name="compile" depends="init,create_properties" description="compile the java source">
 		<!-- Create the build directory structure used by compile -->
 		<mkdir dir="${build}" />
 				
