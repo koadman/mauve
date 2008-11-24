@@ -35,6 +35,7 @@ import javax.swing.JLabel;
 
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.Genome;
+import org.gel.mauve.MauveConstants;
 import org.gel.mauve.ModelEvent;
 import org.gel.mauve.MyConsole;
 import org.gel.mauve.ViewerMode;
@@ -70,12 +71,19 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
     private Dimension my_max_size;
     
     private Dimension invisible_size;
-
+    
+    ////my code
+    private Genome genome;
+    ////
+    
     public SeqPanel(BaseViewerModel model, Genome genome, RearrangementPanel rearrangementPanel)
     {
-        super(model, genome);
+    	super(model, genome);
         
-        this.rrPanel = rearrangementPanel;
+        ////my code
+        this.genome = genome;
+        ////
+        //this.rrPanel = rearrangementPanel;
         
         // set the minimum dimensions
         min_size = this.getSize();
@@ -94,6 +102,36 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
         invisible_size.width = 10000;
         invisible_size.height = 20;
         this.setMinimumSize(invisible_size);
+        
+        SeqPanelAux(model, genome, rearrangementPanel);
+    }
+    
+    public void SeqPanelAux(BaseViewerModel model, Genome genome, RearrangementPanel rearrangementPanel)
+    {
+        //super(model, genome);
+        
+        ////my code
+        //this.genome = genome;
+        ////
+        this.rrPanel = rearrangementPanel;
+        
+        // set the minimum dimensions
+        /*min_size = this.getSize();
+        min_size.height = 100;
+        this.setMinimumSize(min_size);
+
+        // calculate the preferred and maximum dimensions, set them below
+        my_size = this.getSize();
+        my_size.height = 115;	// start with 115, add more if a FeaturePanel is used
+        my_size.width = 10000;
+        my_max_size = this.getSize();
+        my_max_size.height = 175;	// start with 175, add more if a FeaturePanel is used
+        my_max_size.width = 10000;
+        
+        invisible_size = this.getSize();
+        invisible_size.width = 10000;
+        invisible_size.height = 20;
+        this.setMinimumSize(invisible_size);*/
         
         
         controls = new ControlPanel(model, genome, rearrangementPanel);
@@ -136,6 +174,24 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
         	doInvisibleLayout();
     }
     
+	public void resizeForMoreFeatures () {
+		
+		my_size.height += (MauveConstants.FEATURE_HEIGHT);
+		min_size.height += (MauveConstants.FEATURE_HEIGHT);
+		my_max_size.height += (MauveConstants.FEATURE_HEIGHT);
+        setPreferredSize(my_size);
+        setMaximumSize(my_max_size);
+        setMinimumSize(min_size);
+        setSize(my_size);
+		
+		feature.resizeForMoreFeatures();
+        
+		if(genome.getVisible())
+        	doVisibleLayout();
+        else
+        	doInvisibleLayout();		
+	}
+    
     protected void doVisibleLayout()
     {
     	removeAll();
@@ -174,6 +230,7 @@ public class SeqPanel extends AbstractSequencePanel implements DragGestureListen
         add(sequence);
         layoutManager.setConstraints(sequence, c);
 
+        
         if (getGenome().getAnnotationSequence() != null)
         {
             addFeatures (c);

@@ -4,10 +4,13 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.EventListener;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Hashtable;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -63,7 +66,15 @@ public class FeaturePanel extends AbstractSequencePanel
 	public static final int DEFAULT_WIDTH = 10000;
 	public static final int DEFAULT_HEIGHT = 40;
     public static final int MAX_FEATURE_DISPLAY_RANGE = 500000;
-    private TranslatedSequencePanel trans;
+    
+    ////my code
+    private Dimension my_size;
+    private MultiLineRenderer multi;
+    
+    //protected TranslatedSequenceContainer transContainer; // for the following trans's and multi's.
+    /////
+    
+    protected TranslatedSequencePanel trans;
     private Sequence seq;
     private final GenbankMenuItemBuilder gmib = new GenbankMenuItemBuilder();
     private final DbXrefMenuItemBuilder dmib = new DbXrefMenuItemBuilder();
@@ -73,6 +84,14 @@ public class FeaturePanel extends AbstractSequencePanel
     {
         super(model, genome);
         setLayout(new BorderLayout());
+        my_size = new Dimension();
+        my_size.height = DEFAULT_HEIGHT;
+        my_size.width = DEFAULT_WIDTH;
+        
+        ////my code
+        //transContainer = new TranslatedSequenceContainer(this, genome, model);
+        ////
+        
         init();
     }
 
@@ -84,7 +103,25 @@ public class FeaturePanel extends AbstractSequencePanel
 
         if (trans != null)
             adjustScaleAndTranslation();
+        
+        //transContainer.setBounds(arg0, arg1, arg2, arg3);
+        //transContainer.adjustScaleAndTranslation();
     }
+
+    ////my code
+    /**
+     * 
+     */
+    /*public TranslatedSequencePanel getTranslatedSequencePanel()
+    {
+    	return trans;
+    }
+    
+    public TranslatedSequenceContainer getTranslatedSequenceContainer()
+    {
+    	return transContainer;
+    }
+    ////*/
 
     private void clearTransPanel()
     {
@@ -112,6 +149,10 @@ public class FeaturePanel extends AbstractSequencePanel
         
         trans = new TranslatedSequencePanel();
         add(trans, BorderLayout.CENTER);
+        
+        ////my code
+       //add(transContainer, BorderLayout.SOUTH);
+        ////
 
         try
         {
@@ -121,7 +162,7 @@ public class FeaturePanel extends AbstractSequencePanel
             trans.addSequenceViewerMotionListener(new ToolTipMotionListener());
             trans.addSequenceViewerListener(new ClickListener());
 
-            MultiLineRenderer multi = new MultiLineRenderer();
+            multi = new MultiLineRenderer();
             FilterCacheSpec[] specs = getGenome().getAnnotationFormat().getFilterCacheSpecs();
             FeatureFilterer filterer = FeatureFilterer.getFilterer (model);
             MySymbolSequenceRenderer my_symbol = new MySymbolSequenceRenderer();
@@ -136,13 +177,12 @@ public class FeaturePanel extends AbstractSequencePanel
                 }
             }
             
+            System.out.println("ju ran get called");
+            
             multi.addRenderer(my_symbol);
             trans.setRenderer(multi);
             
             // set the size of this element
-            Dimension my_size = new Dimension();
-            my_size.height = DEFAULT_HEIGHT;
-            my_size.width = DEFAULT_WIDTH;
             setNewSize (my_size);
         }
         catch (ChangeVetoException e)
@@ -177,21 +217,47 @@ public class FeaturePanel extends AbstractSequencePanel
 		multi.addRenderer (over);
 	}
 	
+	////my code
+	/**
+	 * 
+	 */
+	/*protected void makeRenderer (FilterCacheSpec spec)
+	{
+		FeatureBlockSequenceRenderer fbr = new FeatureBlockSequenceRenderer ();
+		fbr.setFeatureRenderer (spec.getFeatureRenderer ());
+		fbr.setCollapsing (false);
+		OverlayRendererWrapper over = new OverlayRendererWrapper (
+				new FilteringRenderer (fbr, spec.getFilter (), true));
+		FeatureFilterer.getFilterer (model).addOverlayRenderer (multi, over);
+		multi.addRenderer (over);
+		//this.paintImmediately(new Rectangle(this.getSize()));
+	}*/
+	////
+	
 	public void resizeForMoreFeatures () {
 		Dimension my_size = getSize ();
-		my_size.height += MauveConstants.FEATURE_HEIGHT;
+		my_size.height += (MauveConstants.FEATURE_HEIGHT);
 		setNewSize (my_size);
+		
 	}
 	
 	private void setNewSize (Dimension my_size) {
-		setSize (my_size);
-		setPreferredSize (my_size);
-		setMaximumSize (my_size);
-		setMinimumSize (my_size);
+		
 		trans.setSize (my_size);
 		trans.setPreferredSize (my_size);
 		trans.setMaximumSize (my_size);
 		trans.setMinimumSize (my_size);
+		
+		setSize (my_size);
+		setPreferredSize (my_size);
+		setMaximumSize (my_size);
+		setMinimumSize (my_size);
+		
+		//this.paintImmediately(new Rectangle(this.getSize()));
+		
+		//System.out.println("trans.getHeight() : " + trans.getHeight());
+		//System.out.println("trans.getHeight() : " + trans.getHeight());
+		//trans.paintImmediately(new Rectangle(trans.getSize()));
 	}
 
     public FeaturePopupMenuBuilder getFeaturePopupMenuBuilder(){ return fpmb; }

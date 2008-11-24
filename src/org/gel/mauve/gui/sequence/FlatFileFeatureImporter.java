@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -18,6 +19,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -33,6 +35,7 @@ import org.biojava.bio.SimpleAnnotation;
 import org.biojava.bio.gui.sequence.MultiLineRenderer;
 import org.biojava.bio.gui.sequence.OverlayRendererWrapper;
 import org.biojava.bio.gui.sequence.RectangularBeadRenderer;
+import org.biojava.bio.gui.sequence.TranslatedSequencePanel;
 import org.biojava.bio.seq.FeatureFilter;
 import org.biojava.bio.seq.StrandedFeature;
 import org.biojava.bio.symbol.RangeLocation;
@@ -72,6 +75,10 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 	protected FeatureFilterer filterer;
 	
 	protected double [] offset;
+	
+	////my code
+	protected MultiGenomeRectangularBeadRenderer renderer;
+	////
 
 	/**
 	 * creates a FeatureImporter associated with the specified mauve frame
@@ -87,6 +94,12 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 			offset [i] = MauveConstants.FEATURE_HEIGHT + 5;
 		req_fields = new Vector ();
 		req_fields.add (LABEL_STRING);
+		
+		////my code
+		renderer = new MultiGenomeRectangularBeadRenderer (
+				10.0, 10.0, Color.BLACK, Color.WHITE, new BasicStroke (), model);
+		////
+		
 		initGUI ();
 	}
 	
@@ -135,10 +148,19 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 	public void importAnnotationFile (File file, Genome genome) {
 		try {
 			BufferedReader in = new BufferedReader (new FileReader (file));
+			//toke: tokens in one line
 			StringTokenizer toke = new StringTokenizer (in.readLine ().trim (),
 					"\t");
+			
+			//fields: fields in one line
 			String [] fields = new String [toke.countTokens ()];
+			
+			//vals: values in one line
 			String [] vals = new String [fields.length];
+			
+			//req: order of "lable	type	ontig	strand	left_end	right_end	note
+			//e.g. 0 = reg[2] means at column 0 stores "contig"
+			//     1 = reg[0] means at column 1 stores "label"
 			int [] req = new int [FLAT_FEATURE_REQ_INFO.length];
 			String s = null;
 			for (int i = 0; i < fields.length; i++) {
@@ -150,7 +172,12 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 					req[ind] = i;
 			}
 			s = in.readLine ();
+			
+			//template: template for creating new feature
 			StrandedFeature.Template template = new StrandedFeature.Template ();
+			
+			//sort the chromosomes
+			//list: un-sorted chromosomes in this genome
 			List list = new ArrayList (genome.getChromosomes ());
 			String [] contig_list = new String [list.size ()];
 			Collections.sort (list, this);
@@ -158,6 +185,8 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 				contig_list[i] = ((Chromosome) list.get (i)).getName ()
 						.toLowerCase ();
 			}
+			
+			//?? how does filterer works?
 			filterer = FeatureFilterer.getFilterer (model);
 			Set types = filterer.getFeatureTypes ();
 			HashSet new_types = new HashSet ();
@@ -171,10 +200,18 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 				else {
 					for (int i = 0; i < vals.length; i++)
 						vals[i] = toke.nextToken ().trim ();
+					
+					//ind: index position of chromosome specified by vals[req[CONTIG]]
+					//ind = -1 if contig_list does not contain vals[req[CONTIG]]
+					// e.g. val[req[CONTIG]] = "CHROMOSOME"
 					int ind = Arrays.binarySearch (contig_list,
 							vals[req[CONTIG]].toLowerCase ());
+					
+					//shift the feature position related to the chromosome if needed
 					int left = Integer.parseInt (vals[req[LEFT]]);
 					int right = Integer.parseInt (vals[req[RIGHT]]);
+					
+					//new feature on positive strand or negative strand
 					if (ind > -1) {
 						int shift = (int) ((Chromosome) list.get (ind))
 								.getStart () - 1;
@@ -187,12 +224,22 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 						template.strand = StrandedFeature.NEGATIVE;
 					template.location = new RangeLocation (left, right);
 					template.type = vals[req[TYPE]];
+					
+					//if the genome filterer does not contain the feature with imported type
+					//then add this feature to new_types and filterer
 					if (!types.contains (template.type)) {
 						new_types.add (template.type);
 						addFeatureType (template.type, filterer, genome);
 					}
+					//if the genome filterer contains the imported type but new_types not
+					//then add it to old_types
 					else if (!new_types.contains (template.type))
+					{
 						old_types.add (template.type);
+					}
+					
+					//anno: stores content in one line into hashtable
+					//key -> fields[i] = info, value -> vals[i] = column name
 					Hashtable anno = new Hashtable ();
 					anno.put (LABEL_STRING, vals[req[LABEL]]);
 					for (int i = 0; i < fields.length; i++) {
@@ -200,6 +247,8 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 							anno.put (fields[i], vals[i]);
 					}
 					template.annotation = new SimpleAnnotation (anno);
+					
+					//Sequence.createFeature(Map map): Create a new Feature, and add it to this FeatureHolder.
 					genome.getAnnotationSequence ().createFeature (template);
 				}
 				s = in.readLine ();
@@ -208,9 +257,16 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 			System.out.println ("new! " + new_types + "   old " + old_types);
 			//model.fireViewableRangeEvent ();
 			//mauve.getRearrangementPanel ().setVisible (false);
-			addedMoreOfTypes (old_types, filterer, genome);
+			//addedMoreOfTypes (old_types, filterer, genome);
+			addFeatureTypes(old_types, filterer, genome);
 			filterer.resetMultiRenderers ();
 			//mauve.getRearrangementPanel ().setVisible (true);//.getNewPanel (genome.getViewIndex ()).feature.updateTransPanel ();
+			
+			//TranslatedSequencePanel tmp = mauve.getRearrangementPanel ().getNewPanel (genome.getViewIndex ()).feature.getTranslatedSequencePanel();
+			//mauve.getRearrangementPanel ().getNewPanel (genome.getViewIndex ()).feature.remove(tmp);
+			//mauve.getRearrangementPanel ().getNewPanel (genome.getViewIndex ()).feature.add(tmp, BorderLayout.CENTER);
+			//mauve.getRearrangementPanel ().getNewPanel (genome.getViewIndex ()).feature.validate();
+			//tmp.setRenderer(multis[seq]);
 		} catch (Exception e) {
 			e.printStackTrace ();
 		}
@@ -226,15 +282,33 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 			boolean resize = false;
 			while (itty2.hasNext ()) {
 				Object [] rends = (Object []) itty2.next ();
-				MultiGenomeRectangularBeadRenderer rend = ((MultiGenomeRectangularBeadRenderer)
-						((FilterCacheSpec) rends [FILTER_SPEC_INDEX]).getFeatureRenderer ());
-				if (rend.getOffset (genome) == NO_OFFSET) {
-					rend.setOffset (genome, offset [seq]);
+				
+				//MultiGenomeRectangularBeadRenderer rend = ((MultiGenomeRectangularBeadRenderer)
+				//		((FilterCacheSpec) rends [FILTER_SPEC_INDEX]).getFeatureRenderer ());
+				RectangularBeadRenderer recRend = ((RectangularBeadRenderer)
+						((FilterCacheSpec) rends [FILTER_SPEC_INDEX]).getFeatureRenderer());
+				if (renderer.getOffset (genome) == NO_OFFSET) {
+					renderer.setOffset (genome, offset [seq]);
 					resize = true;
 				}
-				OverlayRendererWrapper over = (OverlayRendererWrapper) rends [OVERLAY_REND_INDEX];
-				filterer.addOrRemove (over, false);
-				filterer.addOrRemove (over, true);
+				
+				FilterCacheSpec spec = (FilterCacheSpec) rends[FILTER_SPEC_INDEX];
+				//recRend.setBeadDisplacement(recRend.getBeadDisplacement() + offset[seq]);
+
+				
+				//(bug???) over == null ?!
+				//OverlayRendererWrapper over = (OverlayRendererWrapper) rends [OVERLAY_REND_INDEX];
+				
+				//not matter over == null or not, add it.
+				//filterer.addOrRemove (over, false);
+				//filterer.addOrRemove (over, true);
+				////my code
+				MultiLineRenderer [] multis = new MultiLineRenderer [filterer.multis
+				                                                     .size ()];
+				filterer.multis.toArray (multis);
+				
+				FeaturePanel.makeRenderer(model, multis[seq], spec);
+				////
 				System.out.println ("there and back again");
 			}
 			if (resize) {
@@ -243,7 +317,41 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 						feature.resizeForMoreFeatures ();
 			}
 		}
-	}	
+	}
+	
+	protected void addOldFeatureType (String type, FeatureFilterer filterer, Genome genome)
+	{
+		MultiLineRenderer [] multis = new MultiLineRenderer [filterer.multis.size()];
+		filterer.multis.toArray(multis);
+		int seq = genome.getSourceIndex();
+		
+		try
+		{
+			mauve.getRearrangementPanel ().getNewPanel (genome.getViewIndex ()).resizeForMoreFeatures ();
+			
+			RectangularBeadRenderer positiveRecBeadRenderer = new RectangularBeadRenderer(10.0, 10.0 + offset[seq] - 10, Color.BLACK, Color.WHITE, new BasicStroke ());
+			RectangularBeadRenderer negativeRecBeadRenderer = new RectangularBeadRenderer(10.0, 10.0 + offset[seq], Color.BLACK, Color.ORANGE, new BasicStroke ());
+
+			renderer.addRendererToStrandList(positiveRecBeadRenderer, genome, MultiGenomeRectangularBeadRenderer.POSITIVE_STRAND);
+			renderer.addRendererToStrandList(negativeRecBeadRenderer, genome, MultiGenomeRectangularBeadRenderer.NEGATIVE_STRAND);
+			
+			renderer.setOffset (genome, offset [seq]);
+			
+			offset [seq] += (MauveConstants.FEATURE_HEIGHT);
+			renderer.setHeightScaling(genome, false);
+			
+			LinkedList vals = (LinkedList) filterer.filter_specs.get (type);
+			
+			//FilterCacheSpec [] specs = 
+			
+			//RectangularBeadRenderer recRend = ((RectangularBeadRenderer)
+			//		((FilterCacheSpec) rends [FILTER_SPEC_INDEX]).getFeatureRenderer());
+		}
+		catch (Exception e)
+		{
+			
+		}
+	}
 	
 	protected void addFeatureTypes (HashSet types, FeatureFilterer filterer, Genome genome) {
 		Iterator itty = types.iterator ();
@@ -259,38 +367,61 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 		//System.out.println ("another multi " + multis.length);
 		int seq = genome.getSourceIndex ();
 		try {
+			//resize the feature panel
+			mauve.getRearrangementPanel ().getNewPanel (genome.getViewIndex ()).
+						resizeForMoreFeatures ();
+			
 			filterer.addCheckBox (type);
-			MultiGenomeRectangularBeadRenderer renderer = new MultiGenomeRectangularBeadRenderer (
-					10.0, 10.0, Color.BLACK, Color.WHITE, new BasicStroke (), model);
+
+			RectangularBeadRenderer positiveRecBeadRenderer = new RectangularBeadRenderer(10.0, 10.0 + offset[seq] - 10, Color.BLACK, Color.WHITE, new BasicStroke ());
+			RectangularBeadRenderer negativeRecBeadRenderer = new RectangularBeadRenderer(10.0, 10.0 + offset[seq], Color.BLACK, Color.ORANGE, new BasicStroke ());
+			
+			//add renderers to multigen...
+			renderer.addRendererToStrandList(positiveRecBeadRenderer, genome, MultiGenomeRectangularBeadRenderer.POSITIVE_STRAND);
+			renderer.addRendererToStrandList(negativeRecBeadRenderer, genome, MultiGenomeRectangularBeadRenderer.NEGATIVE_STRAND);
+			
+			//offset: vertical coordinate of seq
 			renderer.setOffset (genome, offset [seq]);
-			renderer.setHeightScaling (false);
+			
+			//shift down for next add to this genome
+			offset [seq] += (MauveConstants.FEATURE_HEIGHT - 15);
+			
+			renderer.setHeightScaling(genome, false);
+			
+			
+			//positive strand
 			FilterCacheSpec spec = new FilterCacheSpec (
 					new FeatureFilter.And (new FeatureFilter.ByType (type),
 							new FeatureFilter.StrandFilter (
 									StrandedFeature.NEGATIVE)),
-									new String [] {LABEL_STRING}, renderer);
-			for (int i = 0; i < multis.length; i++) {
+									new String [] {LABEL_STRING}, negativeRecBeadRenderer); //used to be renderer instead of recRendererForThisGenome
+
+//			for (int i = 0; i < multis.length; i++) {
 				filterer.addSpecForType (spec);
-				FeaturePanel.makeRenderer (model, multis[i],
+				FeaturePanel.makeRenderer (model, multis[seq],
 						spec);
-			}
-			renderer = new MultiGenomeRectangularBeadRenderer (10.0, 0, Color.BLACK,
-					Color.white, new BasicStroke (), model);
-			renderer.setOffset (genome, offset [seq]);
-			offset [seq] += MauveConstants.FEATURE_HEIGHT;
-			mauve.getRearrangementPanel ().getNewPanel (genome.getViewIndex ()).
-					feature.resizeForMoreFeatures ();
-			renderer.setHeightScaling (false);
+			//mauve.getRearrangementPanel ().getNewPanel (genome.getViewIndex ()).feature.getTranslatedSequenceContainer().makeRendererForTranslatedSequence(new TranslatedSequencePanel(), spec);
+				//mauve.getRearrangementPanel ().getNewPanel (genome.getViewIndex ()).feature.makeRenderer(spec);
+//			}
+			
+			//negative strand			
 			spec = new FilterCacheSpec (new FeatureFilter.And (
 					new FeatureFilter.ByType (type),
 					new FeatureFilter.StrandFilter (
 							StrandedFeature.POSITIVE)),
-							new String [] {LABEL_STRING}, renderer);
-			for (int i = 0; i < multis.length; i++) {
+							new String [] {LABEL_STRING}, positiveRecBeadRenderer);//used to be renderer instead of recRendererForThisGenome
+//			for (int i = 0; i < multis.length; i++) {
 				filterer.addSpecForType (spec);
-				FeaturePanel.makeRenderer (model, multis[i],
+				FeaturePanel.makeRenderer (model, multis[seq],
 						spec);
-			}
+			//mauve.getRearrangementPanel ().getNewPanel (genome.getViewIndex ()).feature.getTranslatedSequenceContainer().makeRendererForTranslatedSequence(new TranslatedSequencePanel(), spec);
+
+//			}
+			//mauve.getRearrangementPanel ().getNewPanel (genome.getViewIndex ()).feature.makeRenderer(spec);
+
+				
+			//TranslatedSequencePanel tmp = mauve.getRearrangementPanel ().getNewPanel (genome.getViewIndex ()).feature.getTranslatedSequencePanel();
+			//tmp.setRenderer(multis[seq]);
 		} catch (ChangeVetoException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace ();

@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -15,6 +16,7 @@ import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -97,6 +99,7 @@ public class FeatureFilterer extends JFrame implements ActionListener {
 		multi_to_symbol = new Hashtable ();
 		initFeatureTypes ();
 		initGUI ();
+		//important! keep the connection between BaseViewModel and FeatureFilterer
 		FILTERERS.put (mod, this);
 	}
 
@@ -176,6 +179,8 @@ public class FeatureFilterer extends JFrame implements ActionListener {
 			vals = new LinkedList ();
 			filter_specs.put (type, vals);
 		}
+		//Object[0]: a FilterCacheSpec for this type
+		//Object[1]: OverlayRendererWrapper for this renderer and this type
 		vals.add (new Object [] {spec, null});
 	}
 
