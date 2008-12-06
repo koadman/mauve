@@ -35,7 +35,7 @@ public class OperonWriter extends AbstractTabbedDataWriter implements MauveConst
 			case 0:
 				return operon_count + "";
 			case 1:
-				return MauveHelperFunctions.getAsapID(gene);
+				return MauveHelperFunctions.getUniqueId(gene);
 			case 2:
 				return gene.getLocation().getMin() + "";
 			case 3:

@@ -133,7 +133,14 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 	}
 
 
-	public static String getAsapID (Feature feat) {
+	/**
+	 * returns asap dbxref if exists, then any other dbxref, then label or gene
+	 * annotation if one exists.
+	 * 
+	 * @param feat
+	 * @return
+	 */
+	public static String getUniqueId (Feature feat) {
 		String val = getDBXrefID (feat, ASAP);
 		if (val == null)
 			val = getDBXrefID (feat, ERIC);

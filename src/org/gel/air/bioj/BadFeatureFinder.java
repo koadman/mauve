@@ -251,7 +251,7 @@ public class BadFeatureFinder extends AbstractTabbedDataWriter
 	protected String getData(int column, int row) {
 		switch (column) {
 			case 0:
-				return MauveHelperFunctions.getAsapID(current.feat);
+				return MauveHelperFunctions.getUniqueId(current.feat);
 			case 1:
 				return current.blast + "";
 			case 2:

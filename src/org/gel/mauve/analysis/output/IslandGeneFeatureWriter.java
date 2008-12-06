@@ -93,7 +93,7 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 			case TYPE:
 				return ISLAND_GENE;
 			case LABEL:
-				String id = MauveHelperFunctions.getAsapID (cur_feat);
+				String id = MauveHelperFunctions.getUniqueId (cur_feat);
 				if (id.length() > 5 && !backbone_instead && current.multiplicityType () < multiplicity << 1) {
 					buffer_count++;
 					ids.append (id.substring (5));

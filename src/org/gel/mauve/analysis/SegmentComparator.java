@@ -9,7 +9,7 @@ public class SegmentComparator implements Comparator {
 	public boolean multiple;
 
 	public static final int BY_MULTIPLICITY = -1;
-
+	
 	public SegmentComparator (int index, boolean mult) {
 		this.index = index;
 		multiple = mult;
@@ -56,8 +56,9 @@ public class SegmentComparator implements Comparator {
 			else
 				ret = rval == 0 ? 0 : 1;
 			i++;
-			if (seg != null && i == seg.starts.length)
-				i = 0;
+			if (seg != null && i == seg.starts.length) {
+				i = index == BY_MULTIPLICITY ? BY_MULTIPLICITY : 0;
+			}
 		} while (multiple && ret == 0 && i != index);
 		return ret;
 	}
