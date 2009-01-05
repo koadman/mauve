@@ -58,8 +58,6 @@ public class AnnotationContainsFilter extends FeatureFilter.ByAnnotationType {
 							value = value.toString ();
 							System.out.println (value);
 						}
-						if (((String) value).toLowerCase ().indexOf ("817") > -1)
-							System.out.println (value);
 						if (AnnotationContainsFilter.this.exact
 								&& ((String) value).length () != AnnotationContainsFilter.this.value
 										.length ())
@@ -71,8 +69,6 @@ public class AnnotationContainsFilter extends FeatureFilter.ByAnnotationType {
 									&& ((String) value).length () == AnnotationContainsFilter.this.value
 											.length ();
 						}
-						if (((String) value).toLowerCase ().indexOf ("817") > -1)
-							System.out.println (ret);
 						return ret;
 					}
 
