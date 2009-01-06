@@ -137,7 +137,7 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 			super.printData();
 	}
 
-	public boolean shouldPrintRow (int row) {
+	/*public boolean shouldPrintRow (int row) {
 		Location loci = cur_feat.getLocation ();
 		boolean print = false;
 		while ((badType (cur_feat) || loci.getMax () <= current.starts [seq_index]) &&
@@ -154,6 +154,43 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 			if (cur_feat instanceof StrandedFeature) {
 				cur_percent = MathUtils.percentContained (loci.getMin (), loci.getMax (), 
 						current.starts [seq_index], current.ends [seq_index]);
+				if (!(cur_percent >= minimum_percent)) {
+					if (loci.getMax () < current.ends [seq_index] || 
+							current.nexts [seq_index] == Segment.END) {
+						performComplexIteration ();
+					}
+					else {
+						current = current.nexts [seq_index];
+					}
+				}
+				else {
+					print = true;
+					num_per_multiplicity [seq_index][(int) current.multiplicityType () - 1] += 1;
+				}
+			}
+		}
+		return print;
+	}*/
+	
+	public boolean shouldPrintRow (int row) {
+		Location loci = cur_feat.getLocation ();
+		boolean print = false;
+		while (badType (cur_feat) && iterator.hasNext ())
+			cur_feat = (Feature) iterator.next ();
+		if (cur_feat != null)
+			loci = cur_feat.getLocation ();
+		if (loci != null && shouldPrintSegment (row)) {
+			if (cur_feat instanceof StrandedFeature) {
+				while (loci.getMin() < current.getStart (seq_index))
+					current.getNext(seq_index);
+				double running = 0;
+				while (current.getStart(seq_index) < loci.getMax()) {  
+					cur_percent = MathUtils.percentContained (loci.getMin (), loci.getMax (), 
+							current.starts [seq_index], current.ends [seq_index]);
+					//code after here unclear/unchanged
+					if (cur_percent >= minimum_percent && cur_percent > running)
+						running = cur_percent;
+				}
 				if (!(cur_percent >= minimum_percent)) {
 					if (loci.getMax () < current.ends [seq_index] || 
 							current.nexts [seq_index] == Segment.END) {

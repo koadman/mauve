@@ -166,14 +166,16 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	}
 	
 	protected void partition (ArrayList <StrandedFeature> feats, int index) {
-		System.out.println ("before loop");
 		for (int i = 0; i < feats.size(); i++) {
 			StrandedFeature feat = feats.get (i);
 			Annotation note = feat.getAnnotation();
 			String type = feat.getType().toLowerCase();
-			if (note != null && (type.indexOf(GENE) > -1 || type.indexOf(CDS) > -1)) {
+			if (note != null && (type.indexOf(GENE) > -1 || type.indexOf(CDS)
+					> -1) || type.indexOf(RNA) > -1) {
 				if (Operon.last == null || !feat.getStrand ().equals(
-						Operon.last.genes.getLast().getStrand())) {
+						Operon.last.genes.getLast().getStrand()) || 
+						(type.equals('r' + RNA) && 
+						Operon.last.genes.getLast().getType().equals(GENE))) {
 					new Operon ();
 					Operon.last.addGene(feat, 0);
 				}
@@ -189,7 +191,6 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 		}
 		Operon.last.next = Operon.first;
 		Operon.first.prev = Operon.last;
-		System.out.println ("after loop: " + Operon.first.genes);
 		if (Operon.first.genes.getFirst().getStrand().equals(
 				Operon.last.genes.getLast().getStrand())) {
 			long distance = model.getGenomeBySourceIndex(index).getLength() - 
