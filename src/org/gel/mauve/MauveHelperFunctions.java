@@ -203,6 +203,16 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 		else
 			return (Collection) val;
 	}
+	
+	public static int genomeCount (long multiplicity) {
+		int count = 0;
+		while (multiplicity > 0) {
+			if ((multiplicity & 1) == 1)
+				count++;
+			multiplicity = multiplicity >> 1;
+		}
+		return count;
+	}
 
 	public static Hashtable getContigFeatures (Genome genome) {
 		Sequence seq = genome.getAnnotationSequence();

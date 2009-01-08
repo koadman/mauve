@@ -1,11 +1,13 @@
 package org.gel.mauve;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Hashtable;
 
 import org.biojava.bio.seq.Feature;
 import org.biojava.bio.seq.FeatureFilter;
 import org.biojava.bio.seq.OptimizableFilter;
+import org.gel.mauve.analysis.Segment;
 
 public interface MauveConstants {
 	
@@ -231,6 +233,21 @@ public interface MauveConstants {
 			return this.equals (sup);
 		}
 
+	};
+	
+	/**
+	 * comparator for multiplicities.  Can pass in Segments or multiplicities
+	 */
+	public static final Comparator <Object> MULT_COMP = new Comparator <Object> () {
+		public int compare (Object one, Object two) {
+			if (one instanceof Segment)
+				one = ((Segment) one).multiplicityType ();
+			if (two instanceof Segment)
+				two = ((Segment) two).multiplicityType ();
+			int a = MauveHelperFunctions.genomeCount((Long) one);
+			int b = MauveHelperFunctions.genomeCount((Long) two);
+			return a - b;
+		}
 	};
 
 	public final static String DEFAULT_CONTIG = "chromosome";

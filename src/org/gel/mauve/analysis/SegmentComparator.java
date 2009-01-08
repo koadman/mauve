@@ -2,7 +2,9 @@ package org.gel.mauve.analysis;
 
 import java.util.Comparator;
 
-public class SegmentComparator implements Comparator {
+import org.gel.mauve.MauveConstants;
+
+public class SegmentComparator implements Comparator <Object>, MauveConstants {
 
 	public int index;
 
@@ -32,7 +34,8 @@ public class SegmentComparator implements Comparator {
 		do {
 			long rval = 0;
 			if (i == BY_MULTIPLICITY) {
-				rval = ((Segment) o1).multiplicityType () - ((Segment) o2).multiplicityType ();
+				rval = MULT_COMP.compare(((Segment) o1).multiplicityType (),
+						((Segment) o2).multiplicityType ());
 				if (multiple)
 					i++;
 			}

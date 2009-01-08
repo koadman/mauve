@@ -1,9 +1,13 @@
 package org.gel.mauve.analysis.output;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 import java.util.Vector;
 
 import org.biojava.bio.seq.Feature;
@@ -182,15 +186,33 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 		if (loci != null && shouldPrintSegment (row)) {
 			if (cur_feat instanceof StrandedFeature) {
 				while (loci.getMin() < current.getStart (seq_index))
-					current.getNext(seq_index);
+					current = current.getPrev(seq_index);
 				double running = 0;
-				while (current.getStart(seq_index) < loci.getMax()) {  
-					cur_percent = MathUtils.percentContained (loci.getMin (), loci.getMax (), 
+				final Hashtable <Segment, Double> mults = new Hashtable <
+						Segment, Double> ();
+				while (current != Segment.END && 
+						current.getStart(seq_index) < loci.getMax()) { 
+					cur_percent = mults.containsKey(current.multiplicityType()) ? 
+							mults.get(current.multiplicityType()) : 0;
+					cur_percent += MathUtils.percentContained (loci.getMin (), loci.getMax (), 
 							current.starts [seq_index], current.ends [seq_index]);
-					//code after here unclear/unchanged
-					if (cur_percent >= minimum_percent && cur_percent > running)
-						running = cur_percent;
+					mults.put(current, cur_percent);
+					current = current.getNext(seq_index);
 				}
+				ArrayList <Segment> keys = new ArrayList <Segment> (mults.keySet());
+				Collections.sort(keys, new Comparator <Segment> () {
+					public int compare (Segment one, Segment two) {
+						int val = MULT_COMP.compare(one, two);
+						if (val == 0) {
+							double temp = mults.get(one) - mults.get(two);
+							if (temp < 0)
+								val = -1;
+							else if (temp > 0)
+								val = 1;
+						}
+						return val;
+					}
+				});
 				if (!(cur_percent >= minimum_percent)) {
 					if (loci.getMax () < current.ends [seq_index] || 
 							current.nexts [seq_index] == Segment.END) {
