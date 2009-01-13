@@ -11,7 +11,7 @@ import org.gel.mauve.analysis.SegmentComparator;
  */
 
 public class MatchStartComparator extends SegmentComparator implements
-		Comparator {
+		Comparator <Object> {
 	private Genome g;
 
 	public MatchStartComparator (Genome g) {

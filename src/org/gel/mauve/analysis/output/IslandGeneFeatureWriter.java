@@ -72,8 +72,6 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 		num_features [seq_index] = vector.size ();
 		System.out.println ("seq: " + seq_index + " features: " + num_features [seq_index]);
 		iterator = vector.listIterator ();
-		if (iterator.hasNext ())
-			cur_feat = (Feature) iterator.next ();
 	}
 	
 	public Vector setColumnHeaders () {
@@ -137,7 +135,7 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 	}
 	
 	public void printData () {
-		if (cur_feat != null)
+		if (iterator.hasNext())
 			super.printData();
 	}
 
@@ -177,27 +175,24 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 	}*/
 	
 	public boolean shouldPrintRow (int row) {
-		Location loci = cur_feat.getLocation ();
+		Location loci = null;
 		boolean print = false;
-		while (badType (cur_feat) && iterator.hasNext ())
-			cur_feat = (Feature) iterator.next ();
 		if (cur_feat != null)
 			loci = cur_feat.getLocation ();
-		if (loci != null && shouldPrintSegment (row)) {
+		if (loci != null) {
 			if (cur_feat instanceof StrandedFeature) {
-				while (loci.getMin() < current.getStart (seq_index))
-					current = current.getPrev(seq_index);
 				double running = 0;
 				final Hashtable <Segment, Double> mults = new Hashtable <
 						Segment, Double> ();
-				while (current != Segment.END && 
-						current.getStart(seq_index) < loci.getMax()) { 
-					cur_percent = mults.containsKey(current.multiplicityType()) ? 
-							mults.get(current.multiplicityType()) : 0;
+				Segment add = current;
+				while (add != Segment.END && 
+						add.getStart(seq_index) < loci.getMax()) { 
+					cur_percent = mults.containsKey(add.multiplicityType()) ? 
+							mults.get(add.multiplicityType()) : 0;
 					cur_percent += MathUtils.percentContained (loci.getMin (), loci.getMax (), 
-							current.starts [seq_index], current.ends [seq_index]);
-					mults.put(current, cur_percent);
-					current = current.getNext(seq_index);
+							add.starts [seq_index], add.ends [seq_index]);
+					mults.put(add, cur_percent);
+					add = add.getNext(seq_index);
 				}
 				ArrayList <Segment> keys = new ArrayList <Segment> (mults.keySet());
 				Collections.sort(keys, new Comparator <Segment> () {
@@ -213,29 +208,39 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 						return val;
 					}
 				});
-				if (!(cur_percent >= minimum_percent)) {
-					if (loci.getMax () < current.ends [seq_index] || 
-							current.nexts [seq_index] == Segment.END) {
-						performComplexIteration ();
+				for (int i = 0; i < keys.size (); i++) {
+					if (mults.get(keys.get(i)) > minimum_percent) {
+						current = keys.get(i);
+						if (shouldPrintSegment (row)) {
+							cur_percent = mults.get (current);
+							num_per_multiplicity [seq_index][(int)
+							     current.multiplicityType () - 1] += 1;
+							print = true;
+							break;
+						}
 					}
-					else {
-						current = current.nexts [seq_index];
-					}
-				}
-				else {
-					print = true;
-					num_per_multiplicity [seq_index][(int) current.multiplicityType () - 1] += 1;
 				}
 			}
 		}
+		if (!print)
+			performComplexIteration ();
 		return print;
 	}
 	
 	protected void performComplexIteration () {
-		cur_feat = iterator.hasNext () ? (Feature) iterator.next () : null;
-		while (cur_feat != null && cur_feat.getLocation ().getMin () < 
-				current.starts [seq_index] && current.prevs [seq_index] != Segment.END)
-			current = current.prevs [seq_index];
+		do {
+			cur_feat = iterator.hasNext () ? (Feature) iterator.next () : null;
+		} while (cur_feat != null && badType (cur_feat));
+		if (cur_feat != null) {
+			while (cur_feat.getLocation ().getMin () < 
+					current.starts [seq_index] && current.prevs [seq_index] != Segment.END) {
+				current = current.prevs [seq_index];
+			}
+			while (cur_feat.getLocation().getMin() > current.getEnd(seq_index) &&
+					current.getNext(seq_index) != Segment.END) {
+				current = current.getNext(seq_index);
+			}
+		}
 	}
 	
 	protected boolean shouldPrintSegment (int row) {
@@ -248,9 +253,6 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 	protected boolean moreRowsToPrint () {
 		if (cur_feat == null)
 			return false;
-		Location loci = cur_feat.getLocation ();
-		if (loci.getMin () >= current.ends [seq_index] || !shouldPrintSegment (row_number))
-			return super.moreRowsToPrint ();
 		else
 			return true;
 	}
