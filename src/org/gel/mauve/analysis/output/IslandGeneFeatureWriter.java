@@ -184,14 +184,22 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 				double running = 0;
 				final Hashtable <Segment, Double> mults = new Hashtable <
 						Segment, Double> ();
+				Hashtable <Long, Segment> segs = new Hashtable <
+						Long, Segment> ();
 				Segment add = current;
 				while (add != Segment.END && 
 						add.getStart(seq_index) < loci.getMax()) { 
-					cur_percent = mults.containsKey(add.multiplicityType()) ? 
-							mults.get(add.multiplicityType()) : 0;
+					if (segs.containsKey(add.multiplicityType())) {
+						System.out.println ("combining");
+						cur_percent = mults.get(segs.get(add.multiplicityType()));
+					}
+					else {
+						cur_percent = 0;
+						segs.put(add.multiplicityType (), add);
+					}
 					cur_percent += MathUtils.percentContained (loci.getMin (), loci.getMax (), 
 							add.starts [seq_index], add.ends [seq_index]);
-					mults.put(add, cur_percent);
+					mults.put(segs.get(add.multiplicityType()), cur_percent);
 					add = add.getNext(seq_index);
 				}
 				ArrayList <Segment> keys = new ArrayList <Segment> (mults.keySet());
