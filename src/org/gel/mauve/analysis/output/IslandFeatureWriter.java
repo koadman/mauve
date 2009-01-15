@@ -78,8 +78,7 @@ public class IslandFeatureWriter extends AbstractIslandWriter implements
 
 	public boolean shouldPrintRow (int row) {
 		long cur = current.multiplicityType ();
-		return (cur & multiplicity) == multiplicity && cur != all_seq_multiplicity &&
-				current.getSegmentLength (seq_index) > island_min;
+		return (cur & multiplicity) == multiplicity && cur != all_seq_multiplicity;
 	}
 
 }
