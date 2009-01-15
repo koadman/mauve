@@ -101,6 +101,11 @@ public interface MauveConstants {
 	
 	public static final String TOTALS = "totals";
 	
+	public static final String UNCLEAR_MULTS = "unclear_multiplicities";
+	
+	public static final String BACKBONE_MASK = "backbone_mask";
+	
+	
 	/**
 	 * Strings for operon functionality
 	 */

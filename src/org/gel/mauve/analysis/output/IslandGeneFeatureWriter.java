@@ -24,7 +24,6 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 	public static final String PERCENT = "prct_on_is";
 	public static final int ISLAND_COL = -2;
 	public static final int PERCENT_COL = -1;
-	public static final String BACKBONE_MASK = "backbone_mask";
 	public static StringBuffer ids = new StringBuffer ();
 	public static int buffer_count;
 	
@@ -40,9 +39,11 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 	public static final String ISLAND_GENE = "island_gene";
 	
 	
-	protected IslandGeneFeatureWriter (SegmentDataProcessor processor) {
+	protected IslandGeneFeatureWriter (SegmentDataProcessor processor, 
+			String file_tail) {
 		this ((processor.get (
-				BACKBONE_MASK) != null ? "backbone" : "island") + "_genes", processor);
+				BACKBONE_MASK) != null ? "backbone" : "island") + "_" +
+				file_tail, processor);
 	}
 	
 	protected IslandGeneFeatureWriter (String file_part, SegmentDataProcessor proc) {
@@ -70,7 +71,6 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 		Collections.sort (vector, BioJavaUtils.FEATURE_START_COMPARATOR);
 		num_features = (int []) args.get (TOTAL_GENES);
 		num_features [seq_index] = vector.size ();
-		System.out.println ("seq: " + seq_index + " features: " + num_features [seq_index]);
 		iterator = vector.listIterator ();
 	}
 	
@@ -123,6 +123,13 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 		return adjustForContigs (seq_index, value) + "";
 	}
 	
+	/**
+	 * determines if feasture is an appropriate type for consideration to print
+	 * If not, decrements the count of num_features for this sequence
+	 * 
+	 * @param feat
+	 * @return
+	 */
 	public boolean badType (Feature feat) {
 		String type = feat.getType ().toLowerCase ();
 		if (type.indexOf ("rna") > -1 || type.indexOf ("gene") > -1 || 
@@ -138,41 +145,6 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 		if (iterator.hasNext())
 			super.printData();
 	}
-
-	/*public boolean shouldPrintRow (int row) {
-		Location loci = cur_feat.getLocation ();
-		boolean print = false;
-		while ((badType (cur_feat) || loci.getMax () <= current.starts [seq_index]) &&
-				iterator.hasNext ()) {
-			//cur_feat = (Feature) iterator.next ();
-			performComplexIteration ();
-			if (cur_feat != null)
-				loci = cur_feat.getLocation ();
-			else
-				loci = null;
-		}
-		if (loci != null && shouldPrintSegment (row) && loci.getMin () < 
-				current.ends [seq_index]) {
-			if (cur_feat instanceof StrandedFeature) {
-				cur_percent = MathUtils.percentContained (loci.getMin (), loci.getMax (), 
-						current.starts [seq_index], current.ends [seq_index]);
-				if (!(cur_percent >= minimum_percent)) {
-					if (loci.getMax () < current.ends [seq_index] || 
-							current.nexts [seq_index] == Segment.END) {
-						performComplexIteration ();
-					}
-					else {
-						current = current.nexts [seq_index];
-					}
-				}
-				else {
-					print = true;
-					num_per_multiplicity [seq_index][(int) current.multiplicityType () - 1] += 1;
-				}
-			}
-		}
-		return print;
-	}*/
 	
 	public boolean shouldPrintRow (int row) {
 		Location loci = null;
@@ -190,7 +162,6 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 				while (add != Segment.END && 
 						add.getStart(seq_index) < loci.getMax()) { 
 					if (segs.containsKey(add.multiplicityType())) {
-						System.out.println ("combining");
 						cur_percent = mults.get(segs.get(add.multiplicityType()));
 					}
 					else {
@@ -270,7 +241,7 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 		int count = ((Object []) processor.get (FIRSTS)).length;
 		for (int i = 0; i < count; i++) {
 			processor.put (SEQUENCE_INDEX, new Integer (i));
-			new IslandGeneFeatureWriter (processor);
+			new IslandGeneFeatureWriter (processor, "genes");
 			if (i == count - 1 && processor.get (BACKBONE_MASK) == null) {
 				processor.put (BACKBONE_MASK, new Object ());
 				i = -1;

@@ -38,7 +38,8 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	protected Hashtable <StrandedFeature, Operon> maps;
 	protected Operon [] firsts;
 	protected HashSet <Operon> not_fully_aligned;
-	protected LinkedList <Feature> [] non_aligned;
+	//misname and not yet used - non rna or gene features
+	protected HashSet <Feature> [] non_aligned;
 	protected BaseViewerModel model;
 	public static final String RNA = "rna";
 	public static final String GENE = "gene";
@@ -61,7 +62,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 		for (int i = 0; i < firsts.length; i++)
 			findOperons (i, data);
 		findOperonMultiplicity (frame);
-		buildOperonTree ();
+		//buildOperonTree ();
 	}
 	
 	protected void initData (BaseViewerModel mod) {
@@ -134,7 +135,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	protected void findOperonMultiplicity (MauveFrame frame) {
 		AnalysisModule anal = new AnalysisModule (frame);
 		Hashtable args = anal.getAnalysisArgs ();
-		non_aligned = new LinkedList [firsts.length];
+		non_aligned = new HashSet [firsts.length];
 		SegmentDataProcessor proc =  ProcessBackboneFile.getProcessor (
 				(String) args.get (ProcessBackboneFile.INPUT_FILE), args);
 		OperonMultiplicityWriter.initializeVars (proc);
@@ -146,8 +147,14 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 					new File (operon_dir, "operons_" + i + ".tab"), 
 					model.getGenomeBySourceIndex (i));
 			proc.setGenomeIndex(i);
+			proc.put(BACKBONE_MASK, new Object ());
 			non_aligned [i] = new OperonMultiplicityWriter (
-					proc).non_conserved_ops;
+					proc).unclear_mults;
+			proc.remove(BACKBONE_MASK);
+			proc.put(UNCLEAR_MULTS, non_aligned [i]);
+			non_aligned [i] = new OperonMultiplicityWriter (
+					proc).unclear_mults;
+			proc.remove(UNCLEAR_MULTS);
 		}
 	}
 
