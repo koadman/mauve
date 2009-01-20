@@ -32,6 +32,8 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 	protected Feature cur_feat;
 	protected double cur_percent;
 	protected double minimum_percent;
+	//for max allowable length including inserts
+	protected double over_percent;
 	protected int [][] num_per_multiplicity;
 	protected boolean backbone_instead;
 	protected int [] num_features;
@@ -60,6 +62,7 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 			minimum_percent = DEFAULT_MIN_PERCENT_CONTAINED;
 			args.put (MINIMUM_PERCENT_CONTAINED, new Double (minimum_percent));
 		}
+		over_percent = 1 + (1 - minimum_percent);
 		System.out.println ("minPrc " + minimum_percent);
 		if (args.get (BACKBONE_MASK) != null)
 			backbone_instead = true;
@@ -156,6 +159,8 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 				double running = 0;
 				final Hashtable <Segment, Double> mults = new Hashtable <
 						Segment, Double> ();
+				final Hashtable <Long, Segment> end_segs = new Hashtable <
+						Long, Segment> ();
 				Hashtable <Long, Segment> segs = new Hashtable <
 						Long, Segment> ();
 				Segment add = current;
@@ -163,6 +168,7 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 						add.getStart(seq_index) < loci.getMax()) { 
 					if (segs.containsKey(add.multiplicityType())) {
 						cur_percent = mults.get(segs.get(add.multiplicityType()));
+						end_segs.put(add.multiplicityType (), add);
 					}
 					else {
 						cur_percent = 0;
@@ -190,6 +196,16 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 				for (int i = 0; i < keys.size (); i++) {
 					if (mults.get(keys.get(i)) > minimum_percent) {
 						current = keys.get(i);
+						if (end_segs.contains(current.multiplicityType ())) {
+							long start = Math.max(current.getStart(seq_index), 
+									cur_feat.getLocation().getMin());
+							long end = Math.min(end_segs.get(
+									current.multiplicityType ()).getEnd(seq_index), 
+									cur_feat.getLocation ().getMax());
+							if (end - start > BioJavaUtils.getLength(cur_feat) *
+									over_percent)
+								continue;
+						}
 						if (shouldPrintSegment (row)) {
 							cur_percent = mults.get (current);
 							num_per_multiplicity [seq_index][(int)
