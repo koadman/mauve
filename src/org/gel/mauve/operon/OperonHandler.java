@@ -35,17 +35,26 @@ import org.gel.mauve.module.ModuleListener;
 
 public class OperonHandler implements MauveConstants, ModuleListener {
 
+	/**
+	 * currently used to compare to regdb operons (both maps and loci)
+	 */
 	protected Hashtable <StrandedFeature, Operon> maps;
+	protected Hashtable <String, StrandedFeature> loci;
 	protected Operon [] firsts;
+	protected int counts [];
 	protected HashSet <Operon> not_fully_aligned;
-	//misname and not yet used - non rna or gene features
+	//misname and not yet used - non rna or gene features (???)
 	protected HashSet <Feature> [] non_aligned;
+	/**
+	 * contains operons that have both mRNA and other types of RNA
+	 */
+	protected HashSet  <Operon> mixed_ops;
 	protected BaseViewerModel model;
 	public static final String RNA = "rna";
 	public static final String GENE = "gene";
 	public static final String CDS = "cds";
 	//represents maximum distance between genes still considered within an operon
-	protected int max_within = 75;
+	protected int max_within = 50;
 	protected Segment [] seg_starts;
 	protected File operon_dir;
 	//percent more than which is considered an operon or gene is conserved completely
@@ -54,21 +63,34 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	protected double min_prct = 5.0;
 	//minimum significant base pairs
 	protected int min_bp; 
+	//if not null, contains all features to be considered
+	protected Set users;
 	
 	public void startModule(MauveFrame frame) {
 		initData (frame.getModel ());
-		Hashtable data = new Hashtable ();
-		data.put(FILE_STUB, operon_dir.getAbsolutePath());
-		for (int i = 0; i < firsts.length; i++)
-			findOperons (i, data);
+		for (int i = 0; i < firsts.length; i++) {
+			findOperons (i, getWriterData ());
+			System.out.println ("first genes: " +
+					Operon.getFirsts(firsts [i], counts [i]));
+		}
+		//new RegDBInterfacer ("c:\\mauvedata\\operon\\OperonSet.txt", this);
 		findOperonMultiplicity (frame);
 		//buildOperonTree ();
+	}
+	
+	protected Hashtable getWriterData () {
+		Hashtable data = new Hashtable ();
+		data.put(FILE_STUB, operon_dir.getAbsolutePath());
+		return data;
 	}
 	
 	protected void initData (BaseViewerModel mod) {
 		model = mod;
 		maps = new Hashtable <StrandedFeature, Operon> ();
+		loci = new Hashtable <String, StrandedFeature> ();
+		mixed_ops = new HashSet <Operon> ();
 		firsts = new Operon [model.getSequenceCount()];
+		counts = new int [firsts.length];
 		operon_dir = MauveHelperFunctions.getChildOfRootDir(model,
 				OPERON_OUTPUT);
 		operon_dir.mkdir();
@@ -162,6 +184,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 		partition (BioJavaUtils.getSortedStrandedFeatures(model.getGenomeBySourceIndex(
 				index).getAnnotationSequence()), index);
 		firsts [index] = Operon.first;
+		counts [index] = Operon.count;
 		System.out.println ("operons: " + Operon.count);
 		Operon.reset ();
 		data.put(FIRST_OPERON, firsts [index]);
@@ -172,13 +195,21 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 				data);
 	}
 	
+	public void findOperons (int index, Hashtable data, Set 
+			<StrandedFeature> features) {
+		users = features;
+		findOperons (index, data);
+		users = null;
+	}
+	
 	protected void partition (ArrayList <StrandedFeature> feats, int index) {
 		for (int i = 0; i < feats.size(); i++) {
 			StrandedFeature feat = feats.get (i);
 			Annotation note = feat.getAnnotation();
 			String type = feat.getType().toLowerCase();
 			if (note != null && (type.indexOf(GENE) > -1 || type.indexOf(CDS)
-					> -1) || type.indexOf(RNA) > -1) {
+					> -1 || type.indexOf(RNA) > -1) && (users == null ||
+					users.contains(feat))) {
 				if (Operon.last == null || !feat.getStrand ().equals(
 						Operon.last.genes.getLast().getStrand()) || 
 						(type.equals('r' + RNA) && 
@@ -191,9 +222,23 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 						Operon.last.genes.getLast().getLocation().getMax();
 					 if (distance > max_within)
 						 new Operon ();
+					 else {
+						 String l_type = Operon.last.genes.getLast ().getType ().toLowerCase();
+						 if (!l_type.substring(l_type.length() - 3).equals(type.substring(
+								 type.length() - 3)) && (l_type.indexOf(RNA) > -1 || 
+										 type.indexOf(RNA) > -1)) {
+							 mixed_ops.add (Operon.last);
+							 System.out.println ("mix rna w/ gene: " + feat.getLocation() + 
+									 ", " + distance);
+						 }
+					 }
 					 Operon.last.addGene(feat, distance);
-					 maps.put(feat, Operon.last);
 				}
+				 if (feat.getAnnotation().containsProperty("locus_tag")) {
+					 maps.put(feat, Operon.last);
+					 loci.put((String) feat.getAnnotation().getProperty("locus_tag"), 
+							 feat);
+				 }
 			}
 		}
 		Operon.last.next = Operon.first;
@@ -205,6 +250,8 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 			distance += Operon.first.genes.getFirst().getLocation().getMin() - 1;
 			if (distance < max_within) {
 				Operon.last.genes.addAll(Operon.first.genes);
+				for (int i = 0; i < Operon.first.genes.size (); i++)
+					maps.put(Operon.first.genes.get(i), Operon.last);
 				Operon.first.distances.remove(0);
 				Operon.first.distances.addFirst((int) distance);
 				Operon.last.distances.addAll(Operon.first.distances);
