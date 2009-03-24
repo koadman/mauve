@@ -10,8 +10,7 @@ import org.gel.mauve.analysis.SegmentComparator;
  * the equals operator.
  */
 
-public class MatchStartComparator extends SegmentComparator implements
-		Comparator <Object> {
+public class MatchStartComparator extends SegmentComparator {
 	private Genome g;
 
 	public MatchStartComparator (Genome g) {

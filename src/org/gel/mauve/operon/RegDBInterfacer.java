@@ -53,7 +53,7 @@ public class RegDBInterfacer {
 			int index = inc == 1 ? 1 : current.genes.size() - 2;
 			while (index < current.genes.size() && index > -1) {
 				predict = handler.maps.get(current.genes.get (index));
-				if (current.genes.get(index).equals(inc == 1 ? 
+				if (predict != null && current.genes.get(index).equals(inc == 1 ? 
 						predict.genes.getFirst() : predict.genes.getLast()))
 					f_pos.add(current.genes.get(index));
 				index += inc;

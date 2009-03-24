@@ -7,7 +7,7 @@ package org.gel.mauve.operon;
 public interface OperonDiff {
 	
 	//should return null if operons are the same
-	public boolean isSame (Operon one, Operon two);
+	public boolean isSame (Operon one, int seq2);
 	
 	public String getFeature ();
 

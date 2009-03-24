@@ -62,5 +62,10 @@ public class PhyloOperon {
 	public void addDiff (OperonDiff diff) {
 		comps.put(diff.getFeature(), diff);
 	}
+	
+	//code that currently has no real home
+	public void compareGenes (Operon one) {
+		
+	}
 
 }
