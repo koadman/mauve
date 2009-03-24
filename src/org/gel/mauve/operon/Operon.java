@@ -9,12 +9,15 @@ import java.util.LinkedList;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.biojava.bio.seq.StrandedFeature;
+import org.gel.air.bioj.BioJavaUtils;
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MauveHelperFunctions;
 
 public class Operon implements MauveConstants {
 	
 	LinkedList <StrandedFeature> genes;
+	protected StringBuffer name;
+	protected String last_prefix;
 	
 	//contains distance to previous gene
 	LinkedList <Integer> distances;
@@ -38,8 +41,11 @@ public class Operon implements MauveConstants {
 	}
 	
 	protected void init () {
+		count++;
 		genes = new LinkedList <StrandedFeature> ();
 		distances = new LinkedList <Integer> ();
+		name =  new StringBuffer ();
+		last_prefix = "xlckjfalsjfasdasldkjfalsdfj";
 	}
 	
 	protected void connect () {
@@ -50,11 +56,17 @@ public class Operon implements MauveConstants {
 			this.prev = last;
 			last = this;
 		}
-		count++;
 	}
-	public void addGene (StrandedFeature gene, int distance) {
-		genes.add(gene);
+	public void addGene (StrandedFeature feat, int distance) {
+		genes.add(feat);
 		distances.add(distance);
+		String gene = BioJavaUtils.getName(feat);
+		if (gene.startsWith(last_prefix))
+			name.append(gene.substring(last_prefix.length()));
+		else {
+			name.append(gene);
+			last_prefix = gene.substring(0, gene.length() - 2);
+		}
 	}
 	
 	public int getStart () {

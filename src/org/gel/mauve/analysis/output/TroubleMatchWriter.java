@@ -57,12 +57,16 @@ public class TroubleMatchWriter extends AbstractMatchDataWriter implements
 
 	public boolean shouldPrintRow (int row) {
 		long [] lengths = current.getSegmentLengths ();
+		if (lengths.length == 0)
+			return false;
 		int contains = 0;
 		Arrays.sort (lengths);
 		for (int i = 0; i < count; i++) {
 			if (lengths[i] != 0)
 				contains++;
 		}
+		if (contains == 0)
+			return false;
 		long difference = lengths[count - 1] - lengths[count - contains];
 		avg_length = current.getAvgSegmentLength ();
 		ratio = difference / avg_length;

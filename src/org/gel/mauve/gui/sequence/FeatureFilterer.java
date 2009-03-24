@@ -264,9 +264,9 @@ public class FeatureFilterer extends JFrame implements ActionListener {
 		Iterator it = multis.iterator ();
 		while (it.hasNext ()) {
 			MultiLineRenderer multi = (MultiLineRenderer) it.next ();
-			System.out.println ("playing with multi: " + multi);
+			//System.out.println ("playing with multi: " + multi);
 			if (((HashSet) multi_map.get (multi)).contains (over)) {
-				System.out.println ("more than playing");
+				//System.out.println ("more than playing");
 				try {
 					if (add)
 						multi.addRenderer (over);

@@ -12,12 +12,21 @@ public class OperonMultiplicityWriter extends IslandGeneFeatureWriter {
 	
 	protected double min_percent_on_island;
 	protected HashSet <Feature> unclear_mults;
+	//start coordinate of operon to multiplicity; don't have access to actual
+	//operon object here
+	protected Hashtable <Long, Long> mults;
 
 	protected OperonMultiplicityWriter(SegmentDataProcessor processor) {
 		super(processor, "ops");
 	}
 	
-	
+	public String getData (int row, int col) {
+		if (col == MULTIPLICITY_INDEX) {
+			mults.put((long) cur_feat.getLocation().getMin(), 
+					current.multiplicityType());
+		}
+		return super.getData (row, col);
+	}
 
 	protected void initSubClassParticulars(Hashtable args) {
 		min_percent_on_island = 92.0;

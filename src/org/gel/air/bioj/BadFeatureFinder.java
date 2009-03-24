@@ -90,7 +90,8 @@ public class BadFeatureFinder extends AbstractTabbedDataWriter
 			int blast_mult = getBlastMultiplicity (dbxref);
 			//if (blast_mult == 0)
 				//System.out.println ("bad");
-			if (length <= max_bad_length && !ipro && blast_mult == 0) {
+			if (length <= max_bad_length && !ipro && 
+					MauveHelperFunctions.genomeCount(blast_mult) <= 4) {
 				//System.out.println ("overlap");
 				double overlap = findOverlap (i);
 				if (overlap > max_ok_overlap_bp)

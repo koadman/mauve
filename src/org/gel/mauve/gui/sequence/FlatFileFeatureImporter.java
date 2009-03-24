@@ -235,7 +235,7 @@ public class FlatFileFeatureImporter extends JFrame implements ActionListener,
 				OverlayRendererWrapper over = (OverlayRendererWrapper) rends [OVERLAY_REND_INDEX];
 				filterer.addOrRemove (over, false);
 				filterer.addOrRemove (over, true);
-				System.out.println ("there and back again");
+				//System.out.println ("there and back again");
 			}
 			if (resize) {
 				offset [seq] += MauveConstants.FEATURE_HEIGHT;

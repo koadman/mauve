@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.StringTokenizer;
 
+import org.biojava.bio.Annotation;
 import org.biojava.bio.seq.ComponentFeature;
 import org.biojava.bio.seq.Feature;
 import org.biojava.bio.seq.FeatureHolder;
@@ -14,7 +16,7 @@ import org.biojava.bio.seq.StrandedFeature;
 import org.biojava.bio.symbol.Location;
 import org.gel.air.util.MathUtils;
 
-public class BioJavaUtils {
+public class BioJavaUtils implements BioJavaConstants {
 
 	public static ArrayList getSortedStrandedFeatures (FeatureHolder annos) {
 		Iterator <Feature> itty = annos.features();
@@ -28,6 +30,8 @@ public class BioJavaUtils {
 					if ( feat2 instanceof StrandedFeature)
 						feats.add((StrandedFeature) feat2);
 				}
+				//if only want chromosome, not plasmids, uncomment break
+				//break;
 			}
 			else if ( feat instanceof StrandedFeature)
 				feats.add((StrandedFeature) feat);
@@ -38,6 +42,19 @@ public class BioJavaUtils {
 	
 	public static int getLength (Feature feat) {
 		return feat.getLocation().getMax() - feat.getLocation().getMin() + 1;
+	}
+	
+	public static String getName (Feature feat) {
+		Annotation note = feat.getAnnotation();
+		if (note != null) {
+			StringTokenizer toke = new StringTokenizer (LOC_NAME);
+			while (toke.hasMoreTokens()) {
+				String key = toke.nextToken();
+				if (note.containsProperty(key))
+					return (String) note.getProperty(key);
+			}
+		}
+		return null;
 	}
 
 	public static final Comparator FEATURE_START_COMPARATOR = new Comparator () {

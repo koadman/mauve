@@ -7,9 +7,10 @@ import java.util.Hashtable;
 import org.biojava.bio.seq.Feature;
 import org.biojava.bio.seq.FeatureFilter;
 import org.biojava.bio.seq.OptimizableFilter;
+import org.gel.air.bioj.BioJavaConstants;
 import org.gel.mauve.analysis.Segment;
 
-public interface MauveConstants {
+public interface MauveConstants extends BioJavaConstants {
 	
 	
 	/**
@@ -34,18 +35,6 @@ public interface MauveConstants {
 	
 	public final static String COMPLEMENT = "complement";
 
-	/**
-	 * Strings representing choices for ways to navigate
-	 */
-	public static final String PRODUCT_NAME = "product/alternate_product_name";
-
-	public static final String LOC_NAME = "gene/synonym/standard_name/name/"
-			+ "locus_tag/label/old_locus_tag";
-
-	public static final String GO_FEATS = "go_biological_process/"
-			+ "go_cellular_component/go_molecular_function";
-
-	public static final String ID_NUMBER = "ec_number/db_xref/protein_id";
 
 	/**
 	 * Strings representing prebuilt groupings of search fields

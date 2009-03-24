@@ -65,8 +65,11 @@ public class GuideTree {
 				parent.add(kid);
 				bottom = bottom && !kid.getAllowsChildren();
 				tokens.push(parent);
-				if (bottom)
-					bottom_pairs.add(parent);
+				if (bottom) {
+					if (parent.getChildCount() > 1 &&
+							parent.getChildAt(0).isLeaf())
+						bottom_pairs.add(parent);
+				}
 			}
 			else if (token.equals(";")) {
 				root = (DefaultMutableTreeNode) tokens.pop();
@@ -92,7 +95,7 @@ public class GuideTree {
 	}
 	
 	public static void main (String args []) {
-		new GuideTree (new File (args [0]));
+		new GuideTree (new File (args [0])).display ();
 	}
 
 }

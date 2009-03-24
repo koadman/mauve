@@ -28,8 +28,8 @@ public class RegDBInterfacer {
 		f_neg = new HashSet <StrandedFeature> ();
 		map = new Hashtable <StrandedFeature, Operon> ();
 		read (file);
-		removeUnique (0);
 		compare ();
+		removeUnique (0);
 	}
 	
 	public void compare () {
@@ -68,17 +68,17 @@ public class RegDBInterfacer {
 		System.out.println ("true positives (first in both experimental"
 				+ " and predicted operon): " + (num_ops - f_neg.size()) + "/" 
 				+ num_ops);
-		double fp = handler.counts [0] - (num_ops - f_neg.size());
+		//double fp = handler.counts [0] - (num_ops - f_neg.size());
+		double fp = f_pos.size();
 		System.out.println ("false positives (first in predicted but not "
 				+ "experimental): " +  fp + "/" + (num_genes - num_ops));
 		System.out.println ("true negatives (not first in either experimental"
-				+ " or predicted): " + (num_genes - handler.counts [0] - 
-				f_neg.size()) + "/" + (num_genes - num_ops));
+				+ " or predicted): " + (num_genes - num_ops - 
+				fp) + "/" + (num_genes - num_ops));
 		System.out.println ("fpos " + f_pos.size());
 	}
 
 	public void read (String file) {
-		System.out.println ("loci: " + handler.loci.size());
 		try {
 			Operon.reset();
 			BufferedReader in = new BufferedReader (new FileReader (
@@ -86,13 +86,16 @@ public class RegDBInterfacer {
 			String input = null;
 			do {
 				input = in.readLine();
-			} while (!input.trim().startsWith("(4)"));
+			} while (!input.trim().startsWith("(5)"));
 			input = in.readLine();
 			StringTokenizer toke = null;
 			HashSet <String> unique_bnums = new HashSet <String> ();
 			while (input != null) {
+				if (input.indexOf("experiment") < 0) {
+					input = in.readLine();
+					continue;
+				}
 				toke = new StringTokenizer (input);
-				toke.nextToken();
 				toke.nextToken();
 				toke.nextToken();
 				toke = new StringTokenizer (toke.nextToken(), ",");
@@ -133,6 +136,9 @@ public class RegDBInterfacer {
 	
 	public void removeUnique (int seq) {
 		handler.findOperons (seq, handler.getWriterData (), map.keySet());
+		f_pos.clear();
+		f_neg.clear();
+		compare ();
 	}
 	
 	
