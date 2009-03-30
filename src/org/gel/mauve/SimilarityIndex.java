@@ -329,10 +329,10 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 	}
 
 
-	int [] char_map = null;
+	public static final int [] char_map = initCharMap();
 
-	void initCharMap () {
-		char_map = new int [128];
+	static int[] initCharMap () {
+		int[] char_map = new int [128];
 		char_map['a'] = 0;
 		char_map['A'] = 0;
 		char_map['c'] = 1;
@@ -368,6 +368,7 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 		char_map['N'] = 4;
 		char_map['x'] = 4;
 		char_map['X'] = 4;
+		return char_map;
 	}
 
 	double fracs[][] = null;

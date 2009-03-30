@@ -28,8 +28,7 @@ public class MauveAlignFrame extends AlignFrame {
 	JTextField backboneSizeText = new JTextField ();
 
 	JCheckBox extendLcbsCheckBox = new JCheckBox ();
-	JComboBox alignerChoice = new JComboBox (new String [] {"Muscle 3.6",
-			"ClustalW 1.8.4"});
+	JComboBox alignerChoice = new JComboBox (new String [] {"Muscle 3.6"});
 
 	JLabel alignerChoiceLabel = new JLabel ("Aligner:", JLabel.RIGHT);
 
@@ -223,7 +222,7 @@ public class MauveAlignFrame extends AlignFrame {
 		for (int seqI = 0; seqI < sequences.length; seqI++) {
 			cmd_vec.addElement (sequences[seqI]);
 			if (sequences.length > 1) {
-				cur_cmd = sequences[seqI] + ".sml";
+				cur_cmd = sequences[seqI] + ".sslist";
 				cmd_vec.addElement (cur_cmd);
 	            File sml_file = new File(cur_cmd);
 	            if(sml_file.exists())  sml_file.delete();

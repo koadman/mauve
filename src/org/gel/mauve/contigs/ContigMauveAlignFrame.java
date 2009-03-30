@@ -32,8 +32,8 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 		first = true;
 		minLcbWeightText.setText("200");
 		refineCheckBox.setSelected(false);
-		seedFamiliesCheckBox.setSelected(true);
-		JLabel seq_label = new JLabel ("Reference sequence expected first," +
+		seedFamiliesCheckBox.setSelected(false);
+		JLabel seq_label = new JLabel ("Reference sequence expected first,<br/>" +
 				" draft second.");
 		seq_label.setLocation(new Point(30, 184));
 		seq_label.setVisible(true);

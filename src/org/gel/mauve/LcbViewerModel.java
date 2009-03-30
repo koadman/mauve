@@ -71,7 +71,7 @@ public class LcbViewerModel extends BaseViewerModel {
 	 * @return Returns the sequence coordinates of currently viewed LCB
 	 *         boundaries.
 	 */
-	LCB [] getVisibleLcbList () {
+	public LCB [] getVisibleLcbList () {
 		return visibleLcbList;
 	}
 
@@ -153,7 +153,7 @@ public class LcbViewerModel extends BaseViewerModel {
 	public LCB [] getFullLcbList () {
 		return fullLcbList;
 	}
-
+	
 	/**
 	 * @param delLcbList
 	 *            list of deleted LCBs that should not be shown.

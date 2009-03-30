@@ -16,7 +16,7 @@ import org.gel.mauve.tree.TreeStore;
  */
 public class XMFAAlignment implements Serializable {
 	/** Versioning for serializations of this object */
-	static final long serialVersionUID = 2;
+	static final long serialVersionUID = 3;
 
 	// The file containing alignment data (transient, can't be serialized)
 	protected transient RandomAccessFile xmfa_file;
@@ -41,6 +41,9 @@ public class XMFAAlignment implements Serializable {
 
 	// A list of LCBs contained in this alignment
 	protected LCB [] lcb_list;
+
+	// A list of LCBs as they appear in the file
+	private LCB [] source_lcb_list;
 
 	// Array of comment lines for each alignment entry in the XMFA
 	protected String [] comments;
@@ -429,6 +432,9 @@ public class XMFAAlignment implements Serializable {
 		file_pos = (Match []) tmp_offs.toArray (file_pos);
 		lcb_list = new LCB [tmp_lcbs.size ()];
 		lcb_list = (LCB []) tmp_lcbs.toArray (lcb_list);
+		setSourceLcbList(new LCB [lcb_list.length]);
+		for(int ll = 0; ll < lcb_list.length; ll++)
+			getSourceLcbList()[ll] = new LCB(lcb_list[ll]);
 		seq_length = new long [seq_count];
 		gis_tree = new GISTree [intervals.length] [seq_count];
 		for (int gistI = 0; gistI < gis_tree_tmp.size (); gistI++) {
@@ -619,7 +625,7 @@ public class XMFAAlignment implements Serializable {
 	 * @param length
 	 *            Length to read in columns (includes gaps)
 	 */
-	byte [] readRawSequence (int ivI, int seqI, long left_col, long length) {
+	public byte [] readRawSequence (int ivI, int seqI, long left_col, long length) {
 		// check boundary condition
 		if (gis_tree[ivI][seqI].length () == 0) {
 			if (length == 0)
@@ -719,7 +725,7 @@ public class XMFAAlignment implements Serializable {
 		return byte_buf;
 	}
 
-	byte [] filterNewlines (byte [] byte_buf) {
+	static public byte [] filterNewlines (byte [] byte_buf) {
 		// filter the newlines
 		int byte_off = 0;
 		for (int byteI = 0; byteI < byte_buf.length; byteI++) {
@@ -820,6 +826,16 @@ public class XMFAAlignment implements Serializable {
 
 		}
 	}
+	
+	/**
+	 * Returns the length in alignment columns of a particular LCB
+	 * @param lcbId	The index of the LCB in question
+	 * @return	a long int with the length
+	 */
+	public long getLcbLength(int lcbId)
+	{
+		return gis_tree[lcbId][0].length();
+	}
 
 	/**
 	 * Reorder the sequences to conform to the order given in new_order[]
@@ -828,5 +844,13 @@ public class XMFAAlignment implements Serializable {
 		for (int lcbI = 0; lcbI < lcb_list.length; lcbI++) {
 			lcb_list[lcbI].setReference (g);
 		}
+	}
+
+	public void setSourceLcbList(LCB [] source_lcb_list) {
+		this.source_lcb_list = source_lcb_list;
+	}
+
+	public LCB [] getSourceLcbList() {
+		return source_lcb_list;
 	}
 }
