@@ -47,7 +47,7 @@ public class OperonFeatureWriter extends AbstractTabbedDataWriter implements
 			case TYPE:
 				return OPERON_STRING;
 			case LABEL:
-				return count + "";
+				return current.name.toString();
 			case CONTIG:
 				return "Chromosome";
 			case STRAND:

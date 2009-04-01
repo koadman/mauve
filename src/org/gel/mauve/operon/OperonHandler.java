@@ -10,6 +10,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.Vector;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -24,8 +25,10 @@ import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.Genome;
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MauveHelperFunctions;
+import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.analysis.AnalysisModule;
 import org.gel.mauve.analysis.GuideTree;
+import org.gel.mauve.analysis.PhyloMultiplicity;
 import org.gel.mauve.analysis.ProcessBackboneFile;
 import org.gel.mauve.analysis.Segment;
 import org.gel.mauve.analysis.output.SegmentDataProcessor;
@@ -45,11 +48,15 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	protected HashSet <Operon> not_fully_aligned;
 	//misname and not yet used - non rna or gene features (???)
 	protected HashSet <Feature> [] non_aligned;
+	protected Hashtable <Long, PhyloMultiplicity> [] op_mults;
+	protected Vector [] bioj_ops;
+	protected Vector <Operon> [] op_lists;
+	protected SegmentDataProcessor proc;
 	/**
 	 * contains operons that have both mRNA and other types of RNA
 	 */
 	protected HashSet  <Operon> mixed_ops;
-	protected BaseViewerModel model;
+	protected XmfaViewerModel model;
 	public static final String RNA = "rna";
 	public static final String GENE = "gene";
 	public static final String CDS = "cds";
@@ -88,12 +95,13 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	}
 	
 	protected void initData (BaseViewerModel mod) {
-		model = mod;
+		model = (XmfaViewerModel) mod;
 		maps = new Hashtable <StrandedFeature, Operon> ();
 		loci = new Hashtable <String, StrandedFeature> ();
 		mixed_ops = new HashSet <Operon> ();
 		firsts = new Operon [model.getSequenceCount()];
 		counts = new int [firsts.length];
+		op_lists = new Vector [firsts.length];
 		operon_dir = MauveHelperFunctions.getChildOfRootDir(model,
 				OPERON_OUTPUT);
 		operon_dir.mkdir();
@@ -102,6 +110,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	protected void buildOperonTree () {
 		GuideTree genomes = GuideTree.fromBaseModel(model);
 		PhyloOperon comp = new PhyloOperon (this);
+		HashSet <DefaultMutableTreeNode> one_child = new HashSet <DefaultMutableTreeNode> ();
 		LinkedList <DefaultMutableTreeNode> parents = genomes.getBottomPairs();
 		while (parents.size() > 0) {
 			LinkedList <DefaultMutableTreeNode> new_rents = new LinkedList <
@@ -119,9 +128,15 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 				parent.setUserObject(comp.performParsimony (
 						(DefaultMutableTreeNode) parent.getChildAt(0),
 						(DefaultMutableTreeNode) parent.getChildAt (1)));
-				if (parent.getParent() != null && !new_rents.contains (
-						parent.getParent()))
-					new_rents.add((DefaultMutableTreeNode) parent.getParent ());
+				DefaultMutableTreeNode grandpa = (DefaultMutableTreeNode) parent.getParent ();
+				if (grandpa != null) {
+					if (one_child.contains(grandpa)) {
+						new_rents.add(grandpa);
+						one_child.remove(grandpa);
+					}
+					else
+						one_child.add (grandpa);
+				}
 			}
 			parents = new_rents;
 		}
@@ -143,7 +158,9 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 		AnalysisModule anal = new AnalysisModule (frame);
 		Hashtable args = anal.getAnalysisArgs ();
 		non_aligned = new HashSet [firsts.length];
-		SegmentDataProcessor proc =  ProcessBackboneFile.getProcessor (
+		op_mults = new Hashtable [firsts.length];
+		bioj_ops = new Vector [firsts.length];
+		proc =  ProcessBackboneFile.getProcessor (
 				(String) args.get (ProcessBackboneFile.INPUT_FILE), args);
 		OperonMultiplicityWriter.initializeVars (proc);
 		proc.put(FILE_STUB, new File (operon_dir, MauveHelperFunctions.getFileStub (
@@ -158,8 +175,14 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 					proc).unclear_mults;
 			proc.remove(BACKBONE_MASK);
 			proc.put(UNCLEAR_MULTS, non_aligned [i]);
-			non_aligned [i] = new OperonMultiplicityWriter (
-					proc).unclear_mults;
+			OperonMultiplicityWriter writer = new OperonMultiplicityWriter (
+					proc);
+			non_aligned [i] = writer.unclear_mults;
+			op_mults [i] = writer.mults;
+			HashSet <String> types = new HashSet <String> ();
+			types.add(OPERON_STRING);
+			bioj_ops [i] = BioJavaUtils.restrictedList (
+					writer.getFeatureList(), types);
 			proc.remove(UNCLEAR_MULTS);
 		}
 	}
@@ -186,7 +209,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 		users = null;
 	}
 	
-	protected void partition (ArrayList <StrandedFeature> feats, int index) {
+	protected void partition (Vector <StrandedFeature> feats, int index) {
 		for (int i = 0; i < feats.size(); i++) {
 			StrandedFeature feat = feats.get (i);
 			Annotation note = feat.getAnnotation();
@@ -198,14 +221,14 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 						Operon.last.genes.getLast().getStrand()) || 
 						(type.equals('r' + RNA) && 
 						Operon.last.genes.getLast().getType().equals(GENE))) {
-					new Operon ();
+					new Operon (index);
 					Operon.last.addGene(feat, 0);
 				}
 				else {
 					 int distance = feat.getLocation().getMin() - 1 -
 						Operon.last.genes.getLast().getLocation().getMax();
 					 if (distance > max_within)
-						 new Operon ();
+						 new Operon (index);
 					 else {
 						 String l_type = Operon.last.genes.getLast ().getType ().toLowerCase();
 						 if (!l_type.substring(l_type.length() - 3).equals(type.substring(
@@ -226,6 +249,13 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 				 }
 			}
 		}
+		Vector <Operon> op_list = new Vector <Operon> ();
+		op_lists [index] = op_list;
+		Operon current = Operon.first;
+		while (current != null) {
+			op_list.add (current);
+			current = current.next;
+		}
 		Operon.last.next = Operon.first;
 		Operon.first.prev = Operon.last;
 		if (Operon.first.genes.getFirst().getStrand().equals(
@@ -233,22 +263,21 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 			long distance = model.getGenomeBySourceIndex(index).getLength() - 
 					Operon.last.genes.getLast().getLocation().getMax();
 			distance += Operon.first.genes.getFirst().getLocation().getMin() - 1;
+			System.out.println ("combining first and last operon");
 			if (distance < max_within) {
 				Operon.last.genes.addAll(Operon.first.genes);
 				for (int i = 0; i < Operon.first.genes.size (); i++)
 					maps.put(Operon.first.genes.get(i), Operon.last);
-				Operon.first.distances.remove(0);
-				Operon.first.distances.addFirst((int) distance);
 				Operon.last.distances.addAll(Operon.first.distances);
 				Operon.first.next.prev = Operon.last;
 				Operon.last.prev.next = Operon.first;
 				Operon.last.next = Operon.first.next;
+				op_list.remove(op_list.size () - 1);
 			}
-			else {
-				Operon.first.distances.removeFirst();
-				Operon.first.distances.addFirst((int) distance);
-			}
+			Operon.first.distances.removeFirst();
+			Operon.first.distances.addFirst((int) distance);
 		}
+		
 	}
 
 	/**

@@ -27,7 +27,7 @@ public class RegDBInterfacer {
 		f_pos = new HashSet <StrandedFeature> ();
 		f_neg = new HashSet <StrandedFeature> ();
 		map = new Hashtable <StrandedFeature, Operon> ();
-		read (file);
+		read (file, 0);
 		compare ();
 		removeUnique (0);
 	}
@@ -78,7 +78,7 @@ public class RegDBInterfacer {
 		System.out.println ("fpos " + f_pos.size());
 	}
 
-	public void read (String file) {
+	public void read (String file,int seq) {
 		try {
 			Operon.reset();
 			BufferedReader in = new BufferedReader (new FileReader (
@@ -106,7 +106,7 @@ public class RegDBInterfacer {
 						bnum = bnum.substring(bnum.indexOf('|') + 1);
 						if (handler.loci.containsKey (bnum)) {
 							if (current == null)
-								current = new Operon ();
+								current = new Operon (seq);
 							current.addGene(handler.loci.remove(bnum), -1);
 							map.put(current.genes.getLast(), current);
 							num_genes++;

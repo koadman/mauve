@@ -8,7 +8,7 @@ import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.Chromosome;
 import org.gel.mauve.Genome;
 import org.gel.mauve.MauveConstants;
-import org.gel.mauve.analysis.output.SegmentDataProcessor;
+import org.gel.mauve.MauveHelperFunctions;
 import org.gel.mauve.contigs.ContigHandler;
 import org.gel.mauve.contigs.DefaultContigHandler;
 import org.gel.mauve.gui.Mauve;
@@ -83,7 +83,7 @@ public class AnalysisModule implements FlatFileFeatureConstants,
 		Genome genome = model.getGenomeBySourceIndex (sequence);
 		Chromosome one = genome.getChromosomeAt (segment.starts [sequence]);
 		Chromosome end = genome.getChromosomeAt (segment.ends [sequence]);
-		if (one != end && SegmentDataProcessor.multiplicityForGenome (
+		if (one != end && MauveHelperFunctions.multiplicityForGenome (
 				sequence, model.getSequenceCount ()) != segment.multiplicityType ()) {
 			System.out.println ("seg: " + segment);
 			return;

@@ -338,11 +338,16 @@ public class LcbViewerModel extends BaseViewerModel {
 	 * sequence.
 	 */
 	public void alignView (Genome g, long left, long right) {
+		
+		alignView (getAlignCoords (g, left, right), g);
+	}
+	
+	public long [] getAlignCoords (Genome g, long left, long right) {
 		Vector sortedMatches = g.getSortedMatches ();
 		int [] match_range = new int [2];
 		getMatchRange (g, left, right, match_range);
 		if (match_range[1] == match_range[0])
-			return;
+			return null;
 		// construct the coords array
 		Match m = ((Match) sortedMatches.get (match_range[0]));
 		long [] coords = new long [genomes.length];
@@ -354,7 +359,7 @@ public class LcbViewerModel extends BaseViewerModel {
 				coords[gI] = m.getStart (cur_g) + m.getLength (cur_g)
 						- (right - m.getStart (g));
 		}
-		alignView (coords, g);
+		return coords;
 	}
 
 	public void alignView (Genome g, long coord) {

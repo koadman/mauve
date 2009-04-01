@@ -5,8 +5,11 @@ import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 
 import org.biojava.bio.AnnotationType;
 import org.biojava.bio.seq.ComponentFeature;
@@ -113,6 +116,38 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 	
 	public static Chromosome getChromByStart (Hashtable table, Chromosome chrom) {
 		return (Chromosome) table.get (new Long (chrom.getStart ()));
+	}
+	
+	/**
+	 * gets start and end of one genome from start and inde
+	 * @param segments
+	 * @param sort_ind
+	 * @param related_ind
+	 * @param start
+	 * @param end
+	 * @param comp
+	 * @return
+	 */
+	//not done
+	public static long [] getSpan (List <Segment> segments, int sort_ind, 
+			int related_ind, long start, long end, Comparator comp) {
+		long [] vals = new long [2];
+		int index = -(Collections.binarySearch(segments, 
+				start, comp) + 1);
+		Segment seg = segments.get(index);
+		index = -(Collections.binarySearch(segments, 
+				end, comp) + 1);
+		if (seg.starts [sort_ind] > start)
+			seg = seg.getPrev(sort_ind);
+		while (seg.getStart (related_ind) > 0)
+			seg = seg.getNext(sort_ind);
+		vals [0] = seg.getStart (related_ind);
+		seg = segments.get(index);
+		seg = seg.getPrev(sort_ind);
+		while (seg.getStart (related_ind) == 0)
+			seg = seg.getPrev(sort_ind);
+		vals [1] = seg.getEnd(related_ind);
+		return vals;
 	}
 	
 	public static Feature getFeatByStart (Hashtable table, Chromosome chrom) {
@@ -233,6 +268,12 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 	 */
 	public static byte [] getDNABytes (SymbolList sequence) {
 		return sequence.seqString().getBytes();
+	}
+
+	public static long multiplicityForGenome (int index, int count) {
+		long multiplicity = 1;
+		multiplicity <<= (count - index - 1);
+		return multiplicity;
 	}
 
 }

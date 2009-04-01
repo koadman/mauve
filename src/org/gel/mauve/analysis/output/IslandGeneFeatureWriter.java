@@ -17,6 +17,7 @@ import org.gel.air.bioj.BioJavaUtils;
 import org.gel.air.util.MathUtils;
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.MauveHelperFunctions;
+import org.gel.mauve.analysis.PhyloMultiplicity;
 import org.gel.mauve.analysis.Segment;
 
 public class IslandGeneFeatureWriter extends IslandFeatureWriter {
@@ -37,6 +38,9 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 	protected int [][] num_per_multiplicity;
 	protected boolean backbone_instead;
 	protected int [] num_features;
+	protected Vector features;
+	protected Hashtable <Segment, Double> mult_percents;
+	protected Hashtable <Long, Segment> end_segs;
 	
 	public static final String ISLAND_GENE = "island_gene";
 	
@@ -67,14 +71,12 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 		if (args.get (BACKBONE_MASK) != null)
 			backbone_instead = true;
 		num_per_multiplicity = ((int [][]) args.get (NUM_GENES_PER_MULT));
-		Iterator itty = MauveHelperFunctions.getFeatures (model, seq_index);
-		Vector vector = new Vector ();
-		while (itty.hasNext ())
-			vector.add (itty.next ());
-		Collections.sort (vector, BioJavaUtils.FEATURE_START_COMPARATOR);
+		features = BioJavaUtils.getSortedStrandedFeatures(
+				model.getGenomeBySourceIndex(seq_index).getAnnotationSequence(
+				));
 		num_features = (int []) args.get (TOTAL_GENES);
-		num_features [seq_index] = vector.size ();
-		iterator = vector.listIterator ();
+		num_features [seq_index] = features.size ();
+		iterator = features.listIterator ();
 	}
 	
 	public Vector setColumnHeaders () {
@@ -157,9 +159,9 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 		if (loci != null) {
 			if (cur_feat instanceof StrandedFeature) {
 				double running = 0;
-				final Hashtable <Segment, Double> mults = new Hashtable <
+				mult_percents = new Hashtable <
 						Segment, Double> ();
-				final Hashtable <Long, Segment> end_segs = new Hashtable <
+				end_segs = new Hashtable <
 						Long, Segment> ();
 				Hashtable <Long, Segment> segs = new Hashtable <
 						Long, Segment> ();
@@ -167,7 +169,7 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 				while (add != Segment.END && 
 						add.getStart(seq_index) < loci.getMax()) { 
 					if (segs.containsKey(add.multiplicityType())) {
-						cur_percent = mults.get(segs.get(add.multiplicityType()));
+						cur_percent = mult_percents.get(segs.get(add.multiplicityType()));
 						end_segs.put(add.multiplicityType (), add);
 					}
 					else {
@@ -176,15 +178,15 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 					}
 					cur_percent += MathUtils.percentContained (loci.getMin (), loci.getMax (), 
 							add.starts [seq_index], add.ends [seq_index]);
-					mults.put(segs.get(add.multiplicityType()), cur_percent);
+					mult_percents.put(segs.get(add.multiplicityType()), cur_percent);
 					add = add.getNext(seq_index);
 				}
-				ArrayList <Segment> keys = new ArrayList <Segment> (mults.keySet());
+				ArrayList <Segment> keys = new ArrayList <Segment> (mult_percents.keySet());
 				Collections.sort(keys, new Comparator <Segment> () {
 					public int compare (Segment one, Segment two) {
 						int val = MULT_COMP.compare(one, two);
 						if (val == 0) {
-							double temp = mults.get(one) - mults.get(two);
+							double temp = mult_percents.get(one) - mult_percents.get(two);
 							if (temp < 0)
 								val = -1;
 							else if (temp > 0)
@@ -193,21 +195,35 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 						return val;
 					}
 				});
-				for (int i = 0; i < keys.size (); i++) {
-					if (mults.get(keys.get(i)) > minimum_percent) {
+				next: for (int i = 0; i < keys.size (); i++) {
+					if (mult_percents.get(keys.get(i)) > minimum_percent) {
 						current = keys.get(i);
 						if (end_segs.contains(current.multiplicityType ())) {
-							long start = Math.max(current.getStart(seq_index), 
-									cur_feat.getLocation().getMin());
-							long end = Math.min(end_segs.get(
-									current.multiplicityType ()).getEnd(seq_index), 
-									cur_feat.getLocation ().getMax());
-							if (end - start > BioJavaUtils.getLength(cur_feat) *
-									over_percent)
-								continue;
+							//not entering this code for e. coli case
+							System.out.println ("end_segs");
+							long genomes = current.multiplicityType();
+							for (int j = num_features.length; j > -1; j--) {
+								if ((genomes & 1) ==1) {
+									//not right for any genome but the one containing the feature,
+									//which doesn't need this check.  also not right regarding reverses
+									long start = Math.max(current.getStart(seq_index), 
+											cur_feat.getLocation().getMin());
+									long end = Math.min(end_segs.get(
+											current.multiplicityType ()).getEnd(seq_index), 
+											cur_feat.getLocation ().getMax());
+									if (end - start > BioJavaUtils.getLength(cur_feat) *
+											over_percent || end - start < 
+											BioJavaUtils.getLength(cur_feat) *
+											minimum_percent) {
+										System.out.println ("continuing");
+										continue next;
+									}
+								genomes = genomes >> 1;
+								}
+							}
 						}
 						if (shouldPrintSegment (row)) {
-							cur_percent = mults.get (current);
+							cur_percent = mult_percents.get (current);
 							num_per_multiplicity [seq_index][(int)
 							     current.multiplicityType () - 1] += 1;
 							print = true;
@@ -220,6 +236,10 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 		if (!print)
 			performComplexIteration ();
 		return print;
+	}
+	
+	public Vector getFeatureList () {
+		return features;
 	}
 	
 	protected void performComplexIteration () {
@@ -263,6 +283,15 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 				i = -1;
 			}
 		}
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public PhyloMultiplicity getCurrentMultData () {
+		return new PhyloMultiplicity (mult_percents, current.multiplicityType(),
+				end_segs);
 	}
 	
 	public static void initializeVars (SegmentDataProcessor processor) {

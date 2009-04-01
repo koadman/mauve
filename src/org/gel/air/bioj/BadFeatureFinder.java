@@ -30,7 +30,7 @@ import org.gel.mauve.module.ModuleListener;
 public class BadFeatureFinder extends AbstractTabbedDataWriter
 		implements MauveConstants {
 	
-	protected ArrayList <StrandedFeature> feats;
+	protected Vector <StrandedFeature> feats;
 	protected ArrayList <StrandedFeature> feats2;
 	protected Hashtable <String, double []> [] blast;
 	protected HashSet <String> interpro;

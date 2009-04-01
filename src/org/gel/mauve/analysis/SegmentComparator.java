@@ -12,6 +12,12 @@ public class SegmentComparator implements Comparator <Object>, MauveConstants {
 
 	public static final int BY_MULTIPLICITY = -1;
 	
+	/**
+	 * if mult, compares in order of indeces from first given in order,
+	 * then restarts
+	 * @param index
+	 * @param mult
+	 */
 	public SegmentComparator (int index, boolean mult) {
 		this.index = index;
 		multiple = mult;

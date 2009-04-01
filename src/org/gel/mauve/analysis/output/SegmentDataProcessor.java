@@ -9,6 +9,7 @@ import java.util.Vector;
 
 import org.gel.mauve.Match;
 import org.gel.mauve.MauveConstants;
+import org.gel.mauve.MauveHelperFunctions;
 import org.gel.mauve.analysis.Segment;
 import org.gel.mauve.analysis.SegmentComparator;
 import org.gel.mauve.contigs.ContigHandler;
@@ -20,6 +21,8 @@ public class SegmentDataProcessor extends Hashtable implements MauveConstants {
 	protected int backbone_min;
 
 	protected int reference = -1;
+	
+	protected SegmentComparator last_comp;
 
 	protected Segment [] firsts;
 
@@ -105,15 +108,9 @@ public class SegmentDataProcessor extends Hashtable implements MauveConstants {
 	}
 	
 	public long multiplicityForGenome (int index) {
-		return multiplicityForGenome (index, count);
+		return MauveHelperFunctions.multiplicityForGenome (index, count);
 	}
 	
-	public static long multiplicityForGenome (int index, int count) {
-		long multiplicity = 1;
-		multiplicity <<= (count - index - 1);
-		return multiplicity;
-	}
-
 	protected int getReferenceSequence () {
 		if (reference == -1) {
 			Iterator itty = backbone.iterator ();
@@ -283,9 +280,16 @@ public class SegmentDataProcessor extends Hashtable implements MauveConstants {
 		}
 		return titles;
 	}
-
-	protected List getSegmentsSortedBySeq (int sequence) {
-		Collections.sort (backbone, new SegmentComparator (sequence));
+	
+	public SegmentComparator getLastComp () {
+		return last_comp;
+	}
+	
+	public List getSegmentsSortedBySeq (int sequence) {
+		if (last_comp == null || last_comp.index != sequence) {
+			last_comp = new SegmentComparator (sequence);
+			Collections.sort (backbone, last_comp);
+		}
 		return backbone;
 	}
 

@@ -19,6 +19,8 @@ public class Operon implements MauveConstants {
 	protected StringBuffer name;
 	protected String last_prefix;
 	
+	protected int seq;
+	
 	//contains distance to previous gene
 	LinkedList <Integer> distances;
 	
@@ -36,8 +38,9 @@ public class Operon implements MauveConstants {
 		}
 	}
 	
-	public Operon () {
+	public Operon (int seq) {
 		this (true);
+		this.seq = seq;
 	}
 	
 	protected void init () {
@@ -61,11 +64,18 @@ public class Operon implements MauveConstants {
 		genes.add(feat);
 		distances.add(distance);
 		String gene = BioJavaUtils.getName(feat);
-		if (gene.startsWith(last_prefix))
+		if (gene == null || gene.length() < 2) {
+			System.out.println ("unamed feature added to operon");
+			name.append("?");
+		}
+		else if (gene.startsWith(last_prefix))
 			name.append(gene.substring(last_prefix.length()));
 		else {
 			name.append(gene);
-			last_prefix = gene.substring(0, gene.length() - 2);
+			int ind = 0;
+			while (ind < gene.length() && Character.isLowerCase(gene.charAt(ind)))
+				ind++;
+			last_prefix = gene.substring(0, ind);
 		}
 	}
 	

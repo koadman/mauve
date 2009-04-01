@@ -2,7 +2,6 @@ package org.gel.mauve;
 
 import java.awt.Component;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
@@ -14,6 +13,7 @@ import org.biojava.bio.seq.Feature;
 import org.biojava.bio.seq.FeatureFilter;
 import org.biojava.bio.seq.FeatureHolder;
 import org.biojava.bio.symbol.Location;
+import org.gel.air.bioj.BioJavaUtils;
 import org.gel.mauve.gui.navigation.AnnotationContainsFilter;
 import org.gel.mauve.gui.navigation.NavigationPanel;
 
@@ -25,8 +25,6 @@ import org.gel.mauve.gui.navigation.NavigationPanel;
  * 
  */
 public class SeqFeatureData implements MauveConstants {
-
-	public static FeatureComparator feature_comp = new FeatureComparator ();
 
 	/**
 	 * private constructor prevents instantiation; all static
@@ -111,40 +109,19 @@ public class SeqFeatureData implements MauveConstants {
 	 */
 	public static void removeLocationDuplicates (LinkedList feats) {
 		if (feats.size () > 1) {
-			Collections.sort (feats, feature_comp);
+			Collections.sort (feats, BioJavaUtils.FEATURE_COMPARATOR);
 			Object first = feats.get (0);
 			Object compare = null;
 			int index = 1;
 			do {
 				compare = feats.get (index);
-				if (feature_comp.compare (first, compare) == 0)
+				if (BioJavaUtils.FEATURE_COMPARATOR.compare (first, compare) == 0)
 					feats.remove (index);
 				else {
 					first = compare;
 					index++;
 				}
 			} while (index < feats.size ());
-		}
-	}
-
-	/**
-	 * A comparator for features.
-	 * 
-	 */
-	static class FeatureComparator implements Comparator {
-		/**
-		 * Returns -1 if Feature a is first in the sequence, 1 if b is first,
-		 * and 0 if they are at the same place
-		 * 
-		 * @param a
-		 *            The first object to compare
-		 * @param b
-		 *            The second object to compare
-		 */
-		public int compare (Object a, Object b) {
-			int one = ((Feature) a).getLocation ().getMin ();
-			int two = ((Feature) b).getLocation ().getMin ();
-			return (one == two) ? 0 : (one < two) ? -1 : 1;
 		}
 	}
 

@@ -33,7 +33,7 @@ public class OperonWriter extends AbstractTabbedDataWriter implements MauveConst
 	protected String getData(int column, int row) {
 		switch (column) {
 			case 0:
-				return operon_count + "";
+				return operon.name.toString ();
 			case 1:
 				return MauveHelperFunctions.getUniqueId(gene);
 			case 2:

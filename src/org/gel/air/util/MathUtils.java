@@ -4,6 +4,9 @@ import java.util.Random;
 
 public class MathUtils {
 	
+	/**
+	 * percent of in range contained by out range
+	 */
 	public static double percentContained (long in_left, long in_right, 
 			long out_left, long out_right) {
 		long length = in_right - in_left;

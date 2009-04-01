@@ -5,6 +5,8 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 
 import org.biojava.bio.seq.Feature;
+import org.gel.mauve.analysis.PhyloMultiplicity;
+import org.gel.mauve.analysis.Segment;
 import org.gel.mauve.analysis.output.IslandGeneFeatureWriter;
 import org.gel.mauve.analysis.output.SegmentDataProcessor;
 
@@ -14,7 +16,7 @@ public class OperonMultiplicityWriter extends IslandGeneFeatureWriter {
 	protected HashSet <Feature> unclear_mults;
 	//start coordinate of operon to multiplicity; don't have access to actual
 	//operon object here
-	protected Hashtable <Long, Long> mults;
+	protected Hashtable <Long, PhyloMultiplicity> mults;
 
 	protected OperonMultiplicityWriter(SegmentDataProcessor processor) {
 		super(processor, "ops");
@@ -23,7 +25,7 @@ public class OperonMultiplicityWriter extends IslandGeneFeatureWriter {
 	public String getData (int row, int col) {
 		if (col == MULTIPLICITY_INDEX) {
 			mults.put((long) cur_feat.getLocation().getMin(), 
-					current.multiplicityType());
+					getCurrentMultData ());
 		}
 		return super.getData (row, col);
 	}
@@ -34,6 +36,7 @@ public class OperonMultiplicityWriter extends IslandGeneFeatureWriter {
 		if (unclear_mults == null)
 		unclear_mults = new HashSet <Feature> ();
 		args.put(MINIMUM_PERCENT_CONTAINED, min_percent_on_island);
+		mults = new Hashtable <Long, PhyloMultiplicity> ();
 		super.initSubClassParticulars(args);
 	}
 
