@@ -4,12 +4,20 @@ import java.util.Hashtable;
 import java.util.Iterator;
 
 import org.gel.mauve.MauveHelperFunctions;
+import org.gel.mauve.XmfaViewerModel;
+import org.gel.mauve.operon.Operon;
+import org.gel.mauve.operon.OperonHandler;
 
 public class PhyloMultiplicity {
+	
+	public static final int NOT_ALIGNED = 0;
+	public static final int REARRANGEMENT = 1;
 	
 	protected Hashtable <Segment, Double> mult_percents;
 	protected long best_mult;
 	protected Hashtable <Long, Segment> end_segs;
+	protected double last_percent;
+	protected int last_description;
 	
 	public PhyloMultiplicity (Hashtable <Segment, Double> percents,
 			long best, Hashtable <Long, Segment> ends) {
@@ -26,8 +34,19 @@ public class PhyloMultiplicity {
 		return best_mult;
 	}
 	
-	public boolean inMultiplicity (long length, int seq, int ref, 
-			double min_prct) {
+	public int getLastMismatch () {
+		return last_description; 
+	}
+	
+	public double getLastPercent () {
+		return last_percent;
+	}
+	
+	
+	//change so considers subsets; start with all in set, remove smallest 1, etc.
+	
+	public long [] inMultiplicity (long start, long end, XmfaViewerModel model,  
+			int seq, int ref, double min_prct) {
 		Iterator <Segment> itty = mult_percents.keySet().iterator();
 		long mult = MauveHelperFunctions.multiplicityForGenome(seq, 
 				mult_percents.keys().nextElement().starts.length);
@@ -40,25 +59,35 @@ public class PhyloMultiplicity {
 				prct += mult_percents.get(seg);
 				if (first == null || seg.getStart(ref) < first.getStart(ref))
 					first = seg;
+				if (end_segs.containsKey(seg.multiplicityType()))
+					seg = end_segs.get(seg.multiplicityType());
 				if (last == null || seg.getEnd(ref) > last.getEnd(ref))
 					last = seg;
 			}
-		}
-		//doing comparison based on ends of segment, not operon
-		//ok if bb segments are close to the same length, which I don't think
-		//is necessarily true.
+		}	
 		if (prct > min_prct) {
-			long span = 0;
-			if (first.reverse [seq] == first.reverse [ref])
-				span = last.getEnd(seq) - first.getStart(seq);
-			else
-				span = first.getEnd(seq) - last.getStart(seq);
-			prct = span / ((double) last.getEnd(ref) - first.getStart(ref));
+			long r_start = Math.max(first.getStart(ref), start);
+			long r_end = Math.min(last.getEnd(ref), end);
+			boolean reverse = first.reverse [seq] != first.reverse [ref];
+			long s_start = model.getAlignCoords (
+					model.getGenomeBySourceIndex(
+					ref), reverse ? r_end : r_start) [seq];
+			long s_end = model.getAlignCoords (
+					model.getGenomeBySourceIndex(
+					ref), reverse ? r_start : r_end) [seq];
+			long span = s_end - s_start;
+			prct = span / ((double) end - start);
+			prct *= 100;
 			if (prct > min_prct && prct < (200 - min_prct))
-				return true;
+				return new long [] {s_start, s_end};
+			else
+				last_description = REARRANGEMENT;
 		}
-
-		return false;
+		else {
+			last_description = NOT_ALIGNED;
+		}
+		last_percent = prct;
+		return null;
 	}
 
 }

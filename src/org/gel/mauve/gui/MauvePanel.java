@@ -155,6 +155,10 @@ public class MauvePanel extends JPanel implements ActionListener, ModelProgressL
         });
     }
 
+    public SequenceNavigator getNavigator () {
+    	return navigator;
+    }
+    
     /**
      *  
      */

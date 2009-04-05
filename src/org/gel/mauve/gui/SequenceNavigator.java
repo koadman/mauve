@@ -645,11 +645,15 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 * @param genome		The genome containing the feature
 	 */	
 	public void displayFeature (Feature feat, Genome genome) {
+		displayFeature (feat.getLocation().getMin (), 
+				feat.getLocation().getMax (), genome);
+	}
+	
+	public void displayFeature (long min, long max, Genome genome) {
 		try {
-			adjustZoom(feat);
-			goToPosition(SeqFeatureData.centerOfFeature(feat), genome, rrpanel);
-			data_model.highlightRange(genome,
-					feat.getLocation().getMin(), feat.getLocation().getMax());
+			adjustZoom((int) (max - min));
+			goToPosition((max + min) / 2, genome, rrpanel);
+			data_model.highlightRange(genome, min, max);
 		} catch (Exception e) {
 			e.printStackTrace ();
 		}		
@@ -659,8 +663,7 @@ public class SequenceNavigator extends JSplitPane implements ActionListener,
 	 * Adjust zoom so desired feature is a decent size and is all viewable
 	 * @param feat
 	 */
-	public void adjustZoom (Feature feat) {
-		int length = feat.getLocation().getMax () - feat.getLocation ().getMin();
+	public void adjustZoom (int length) {
 		long vis_length = ((Genome) genomes.getItemAt(
 				genomes.getItemCount() == 1 ? 0 : 1)).getViewLength ();
 		double percent = 0;

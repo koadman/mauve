@@ -92,6 +92,8 @@ public interface MauveConstants extends BioJavaConstants {
 	
 	public static final String UNCLEAR_MULTS = "unclear_multiplicities";
 	
+	public static final String MULTIPLICITIES = "multiplicities";
+	
 	public static final String BACKBONE_MASK = "backbone_mask";
 	
 	

@@ -61,7 +61,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	public static final String GENE = "gene";
 	public static final String CDS = "cds";
 	//represents maximum distance between genes still considered within an operon
-	protected int max_within = 200;
+	protected int max_within = 50;
 	protected File operon_dir;
 	//percent more than which is considered an operon or gene is conserved completely
 	protected double complete = 95.0;
@@ -71,21 +71,21 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	protected Set users;
 	
 	public void startModule(MauveFrame frame) {
-		do {
-		initData (frame.getModel ());
-		for (int i = 0; i < firsts.length; i++) {
-			System.out.println ("max in-operon distance: " + max_within);
-			findOperons (i, getWriterData ());
-			System.out.println ("first genes: " +
-					Operon.getFirsts(firsts [i], counts [i]));
-			System.out.println ("mixed rna and genes: " + mixed_ops.size());
-			mixed_ops.clear();
-		}
-		//new RegDBInterfacer ("c:\\mauvedata\\operon\\TUSet.txt", this);
-		findOperonMultiplicity (frame);
-		//buildOperonTree ();
-		max_within += 50;
-		} while (max_within < 210);
+		//do {
+			initData (frame.getModel ());
+			for (int i = 0; i < firsts.length; i++) {
+				//System.out.println ("max in-operon distance: " + max_within);
+				findOperons (i, getWriterData ());
+				/*System.out.println ("first genes: " +
+						Operon.getFirsts(firsts [i], counts [i]));
+				System.out.println ("mixed rna and genes: " + mixed_ops.size());*/
+				mixed_ops.clear();
+			}
+			//new RegDBInterfacer ("c:\\mauvedata\\operon\\TUSet.txt", this);
+			findOperonMultiplicity (frame);
+			buildOperonTree (frame);
+			//max_within += 50;
+		//} while (max_within < 210);
 	}
 	
 	protected Hashtable getWriterData () {
@@ -107,53 +107,6 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 		operon_dir.mkdir();
 	}
 	
-	protected void buildOperonTree () {
-		GuideTree genomes = GuideTree.fromBaseModel(model);
-		PhyloOperon comp = new PhyloOperon (this);
-		HashSet <DefaultMutableTreeNode> one_child = new HashSet <DefaultMutableTreeNode> ();
-		LinkedList <DefaultMutableTreeNode> parents = genomes.getBottomPairs();
-		while (parents.size() > 0) {
-			LinkedList <DefaultMutableTreeNode> new_rents = new LinkedList <
-					DefaultMutableTreeNode> ();
-			for (int i = 0; i < parents.size(); i++) {
-				DefaultMutableTreeNode parent = parents.get(i);
-				for (int j = 0; j < 2; j++) {
-					DefaultMutableTreeNode child = (DefaultMutableTreeNode) 
-					parent.getChildAt(j);
-					if (child.isLeaf()) {
-						child.setUserObject (firsts [((Integer) 
-								child.getUserObject()).intValue () - 1]);
-					}
-				}
-				parent.setUserObject(comp.performParsimony (
-						(DefaultMutableTreeNode) parent.getChildAt(0),
-						(DefaultMutableTreeNode) parent.getChildAt (1)));
-				DefaultMutableTreeNode grandpa = (DefaultMutableTreeNode) parent.getParent ();
-				if (grandpa != null) {
-					if (one_child.contains(grandpa)) {
-						new_rents.add(grandpa);
-						one_child.remove(grandpa);
-					}
-					else
-						one_child.add (grandpa);
-				}
-			}
-			parents = new_rents;
-		}
-	}
-	
-
-	public int getSeqInd (Operon first) {
-		int ind = -1;
-		for (int i = 0; i < firsts.length; i++) {
-			if (first == firsts [i]) {
-				ind = i;
-				break;
-			}
-		}
-		return ind;
-	}
-	
 	protected void findOperonMultiplicity (MauveFrame frame) {
 		AnalysisModule anal = new AnalysisModule (frame);
 		Hashtable args = anal.getAnalysisArgs ();
@@ -171,11 +124,14 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 					model.getGenomeBySourceIndex (i));
 			proc.setGenomeIndex(i);
 			proc.put(BACKBONE_MASK, new Object ());
-			non_aligned [i] = new OperonMultiplicityWriter (
-					proc).unclear_mults;
+			OperonMultiplicityWriter writer = new OperonMultiplicityWriter (
+					proc);
+			non_aligned [i] = writer.unclear_mults;
+			op_mults [i] = writer.mults;
+			proc.put(MULTIPLICITIES, writer.mults);
 			proc.remove(BACKBONE_MASK);
 			proc.put(UNCLEAR_MULTS, non_aligned [i]);
-			OperonMultiplicityWriter writer = new OperonMultiplicityWriter (
+			writer = new OperonMultiplicityWriter (
 					proc);
 			non_aligned [i] = writer.unclear_mults;
 			op_mults [i] = writer.mults;
@@ -184,9 +140,59 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 			bioj_ops [i] = BioJavaUtils.restrictedList (
 					writer.getFeatureList(), types);
 			proc.remove(UNCLEAR_MULTS);
+			proc.remove(MULTIPLICITIES);
 		}
 	}
 
+	protected void buildOperonTree (MauveFrame frame) {
+		GuideTree genomes = GuideTree.fromBaseModel(model);
+		PhyloOperon comp = new PhyloOperon (this);
+		HashSet <DefaultMutableTreeNode> one_child = new HashSet <DefaultMutableTreeNode> ();
+		LinkedList <DefaultMutableTreeNode> parents = genomes.getBottomPairs();
+		while (parents.size() > 0) {
+			LinkedList <DefaultMutableTreeNode> new_rents = new LinkedList <
+					DefaultMutableTreeNode> ();
+			for (int i = 0; i < parents.size(); i++) {
+				DefaultMutableTreeNode parent = parents.get(i);
+				for (int j = 0; j < 2; j++) {
+					DefaultMutableTreeNode child = (DefaultMutableTreeNode) 
+					parent.getChildAt(j);
+					if (child.isLeaf()) {
+						child.setUserObject (firsts [((Integer) 
+								child.getUserObject()).intValue () - 1]);
+					}
+				}
+				parent.setUserObject(comp.buildAncestor (
+						(DefaultMutableTreeNode) parent.getChildAt(0),
+						(DefaultMutableTreeNode) parent.getChildAt (1)));
+				DefaultMutableTreeNode grandpa = (DefaultMutableTreeNode) parent.getParent ();
+				if (grandpa != null) {
+					if (one_child.contains(grandpa)) {
+						new_rents.add(grandpa);
+						one_child.remove(grandpa);
+					}
+					else
+						one_child.add (grandpa);
+				}
+			}
+			parents = new_rents;
+		}
+		//comp.pruneTree (genomes.getRoot());
+		new OperonTree (frame, comp, genomes).display();
+	}
+	
+
+	public int getSeqInd (Operon first) {
+		int ind = -1;
+		for (int i = 0; i < firsts.length; i++) {
+			if (first == firsts [i]) {
+				ind = i;
+				break;
+			}
+		}
+		return ind;
+	}
+	
 	protected void findOperons (int index, Hashtable data) {
 		partition (BioJavaUtils.getSortedStrandedFeatures(model.getGenomeBySourceIndex(
 				index).getAnnotationSequence()), index);
@@ -258,7 +264,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 		}
 		Operon.last.next = Operon.first;
 		Operon.first.prev = Operon.last;
-		if (Operon.first.genes.getFirst().getStrand().equals(
+		/*if (Operon.first.genes.getFirst().getStrand().equals(
 				Operon.last.genes.getLast().getStrand())) {
 			long distance = model.getGenomeBySourceIndex(index).getLength() - 
 					Operon.last.genes.getLast().getLocation().getMax();
@@ -276,7 +282,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 			}
 			Operon.first.distances.removeFirst();
 			Operon.first.distances.addFirst((int) distance);
-		}
+		}*/
 		
 	}
 

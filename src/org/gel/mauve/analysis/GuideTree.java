@@ -10,9 +10,11 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 
 import javax.swing.JFrame;
+import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import org.gel.air.gui.GuiUtils;
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.MauveHelperFunctions;
 
@@ -54,16 +56,16 @@ public class GuideTree {
 				;
 			else if (token.startsWith("seq"))
 				tokens.push(new DefaultMutableTreeNode (new Integer (
-						token.substring(3)), false));
+						token.substring(3))));
 			else if (token.equals(")")) {
 				boolean bottom = true;
 				DefaultMutableTreeNode parent = new DefaultMutableTreeNode ();
 				DefaultMutableTreeNode kid = (DefaultMutableTreeNode) tokens.pop();
 				parent.add(kid);
-				bottom = !kid.getAllowsChildren();
+				bottom = kid.getUserObject() != null;
 				kid = (DefaultMutableTreeNode) tokens.pop();
 				parent.add(kid);
-				bottom = bottom && !kid.getAllowsChildren();
+				bottom = bottom && kid.getUserObject() != null;
 				tokens.push(parent);
 				if (bottom) {
 					if (parent.getChildCount() > 1 &&
@@ -83,10 +85,7 @@ public class GuideTree {
 	}
 	
 	public void display () {
-		JFrame frame = new JFrame ();
-		frame.getContentPane().add(new JTree (root));
-		frame.pack();
-		frame.setVisible(true);
+		GuiUtils.display(new JScrollPane(new JTree (root)));
 	}
 	
 	public static GuideTree fromBaseModel (BaseViewerModel model) {

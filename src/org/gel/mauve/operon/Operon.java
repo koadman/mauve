@@ -79,16 +79,28 @@ public class Operon implements MauveConstants {
 		}
 	}
 	
-	public int getStart () {
+	public long getStart () {
 		return genes.getFirst().getLocation().getMin();
 	}
 	
-	public int getEnd () {
+	public long getEnd () {
 		return genes.getLast().getLocation().getMax();
+	}
+	
+	public int getSeq () {
+		return seq;
+	}
+	
+	public String getName () {
+		return name.toString();
 	}
 	
 	public boolean forward () {
 		return genes.getFirst ().getStrand().equals(StrandedFeature.POSITIVE);
+	}
+	
+	public String toString () {
+		return getName ();
 	}
 	
 	public static void reset () {

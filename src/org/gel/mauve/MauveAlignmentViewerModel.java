@@ -261,19 +261,24 @@ abstract public class MauveAlignmentViewerModel extends LcbViewerModel {
 	 */
 	@Override
 	public void alignView (Genome g, long position) {
+
+		alignView (getAlignCoords (g, position), g);
+	}
+	
+	public long [] getAlignCoords (Genome g, long position) {
 		long [] iv_col;
 		try {
 			iv_col = getLCBAndColumn (g, position);
 		} catch (ArrayIndexOutOfBoundsException e) {
 			// User clicked outside of bounds of sequence, so do nothing.
-			return;
+			return null;
 		}
 		long [] coords = new long [this.getSequenceCount ()];
 		;
 		boolean [] gap = new boolean [this.getSequenceCount ()];
 		;
 		getColumnCoordinates ((int) iv_col[0], iv_col[1], coords, gap);
-		alignView (coords, g);
+		return coords;
 	}
 
 	/**

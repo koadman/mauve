@@ -21,22 +21,16 @@ public class OperonMultiplicityWriter extends IslandGeneFeatureWriter {
 	protected OperonMultiplicityWriter(SegmentDataProcessor processor) {
 		super(processor, "ops");
 	}
-	
-	public String getData (int row, int col) {
-		if (col == MULTIPLICITY_INDEX) {
-			mults.put((long) cur_feat.getLocation().getMin(), 
-					getCurrentMultData ());
-		}
-		return super.getData (row, col);
-	}
 
 	protected void initSubClassParticulars(Hashtable args) {
 		min_percent_on_island = 92.0;
 		unclear_mults = (HashSet) args.get(UNCLEAR_MULTS);
 		if (unclear_mults == null)
-		unclear_mults = new HashSet <Feature> ();
+			unclear_mults = new HashSet <Feature> ();
+		mults = (Hashtable <Long, PhyloMultiplicity>) args.get(MULTIPLICITIES);
 		args.put(MINIMUM_PERCENT_CONTAINED, min_percent_on_island);
-		mults = new Hashtable <Long, PhyloMultiplicity> ();
+		if (mults == null)
+			mults = new Hashtable <Long, PhyloMultiplicity> ();
 		super.initSubClassParticulars(args);
 	}
 
@@ -63,6 +57,10 @@ public class OperonMultiplicityWriter extends IslandGeneFeatureWriter {
 		else {
 			Feature prev = cur_feat;
 			boolean should = super.shouldPrintRow (row);
+			if (prev != null) {
+				mults.put((long) prev.getLocation().getMin(), 
+						getCurrentMultData ());
+			}
 			if (!should && backbone_instead && prev != null) {
 				unclear_mults.add(prev);
 			}

@@ -198,9 +198,8 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 				next: for (int i = 0; i < keys.size (); i++) {
 					if (mult_percents.get(keys.get(i)) > minimum_percent) {
 						current = keys.get(i);
-						if (end_segs.contains(current.multiplicityType ())) {
+						if (end_segs.containsKey(current.multiplicityType ())) {
 							//not entering this code for e. coli case
-							System.out.println ("end_segs");
 							long genomes = current.multiplicityType();
 							for (int j = num_features.length; j > -1; j--) {
 								if ((genomes & 1) ==1) {
@@ -215,7 +214,6 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 											over_percent || end - start < 
 											BioJavaUtils.getLength(cur_feat) *
 											minimum_percent) {
-										System.out.println ("continuing");
 										continue next;
 									}
 								genomes = genomes >> 1;
