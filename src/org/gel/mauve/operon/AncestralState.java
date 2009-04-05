@@ -96,6 +96,11 @@ public class AncestralState {
 		return sames.containsKey(op) && sames.get(op).contains(feat);
 	}
 	
+	public boolean definitelyPresent (Operon op, String feat) {
+		return sames.containsKey(op) && sames.get(op).contains(feat) &&
+				!(unclears.containsKey(op) && unclears.get(op).contains(feat));
+	}
+	
 	public boolean inUnclears (Operon op, String feat) {
 		return unclears.containsKey(op) && unclears.get(op).contains(feat);
 	}

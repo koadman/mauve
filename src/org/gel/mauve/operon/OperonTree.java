@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -76,7 +77,8 @@ public class OperonTree extends JTree implements TreeSelectionListener,
 			AncestralState state = (AncestralState) node.getUserObject();
 			state.seqs = seqs;
 			populateSames (node, state, seqs);
-			populateDiffs (node, state, left, right);
+			populateDiffs (node, left, right, "present but absent in one child", state.differences2);
+			populateDiffs (node, left, right, "absent but present in one child", state.differences);
 		}
 		else {
 			Operon op = (Operon) node.getUserObject();
@@ -90,9 +92,9 @@ public class OperonTree extends JTree implements TreeSelectionListener,
 	protected void populateSames (DefaultMutableTreeNode node,
 			AncestralState state, HashSet <Integer> seqs) {
 		DefaultMutableTreeNode sames_node = new DefaultMutableTreeNode (
-				state.sames.size () + " conserved operons");
+				state.sames.size () + " present operons");
 		DefaultMutableTreeNode unclears_node = new DefaultMutableTreeNode (
-				state.unclears.size () + " presence conflicted");
+				state.unclears.size () + " possibly present");
 		node.add (sames_node);
 		node.add (unclears_node);
 		Iterator <Operon> itty = state.sames.keySet().iterator();
@@ -104,19 +106,22 @@ public class OperonTree extends JTree implements TreeSelectionListener,
 				DefaultMutableTreeNode unclear_node = new DefaultMutableTreeNode (
 						new UnclearOperon (op, op_node));
 				unclears_node.add (unclear_node);
+				populateSames (unclear_node, op, seqs);
 			}
-			sames_node.add (op_node);
-			populateSames (op_node, op, seqs);		
+			else {
+				sames_node.add (op_node);
+				populateSames (op_node, op, seqs);
+			}
 		}
 	}
 	
 	protected void populateDiffs (DefaultMutableTreeNode node,
-			AncestralState state, HashSet <Integer> lefts,
-			HashSet <Integer> rights) {
+			HashSet <Integer> lefts, HashSet <Integer> rights, String display,
+			Hashtable <Operon, Hashtable <String, DifferentOperon>> differences) {
 		DefaultMutableTreeNode diffs_node = new DefaultMutableTreeNode (
-				state.differences.size () + " non-conserved operons");
+				differences.size () + " " + display);
 		node.add (diffs_node);
-		Iterator <Operon> itty = state.differences.keySet().iterator(); 
+		Iterator <Operon> itty = differences.keySet().iterator(); 
 		while (itty.hasNext ()) {
 			Operon op = itty.next();
 			DefaultMutableTreeNode op_node = new DefaultMutableTreeNode (
@@ -131,7 +136,7 @@ public class OperonTree extends JTree implements TreeSelectionListener,
 				populateSames (sub_same, op, current);
 			
 			current = current == rights ? lefts : rights;
-			DifferentOperon diff_op = state.differences.get(op).values ().iterator().next ();
+			DifferentOperon diff_op = differences.get(op).values ().iterator().next ();
 			DefaultMutableTreeNode diff_node = new DefaultMutableTreeNode (
 					diff_op.diffs.values ().iterator().next ());
 			op_node.add (diff_node);
@@ -239,6 +244,9 @@ public class OperonTree extends JTree implements TreeSelectionListener,
 					System.out.println ("bad seq num: " + op.seq + " " + op.toString());
 				navigator.displayFeature (op.getStart(), op.getEnd (),
 						phylo.handler.model.getGenomeBySourceIndex(op.seq));
+				String new_text = obj.toString ();
+				if (!new_text.contains (last_search))
+					search.setText(new_text);
 			}
 		}
 	}
@@ -264,10 +272,14 @@ public class OperonTree extends JTree implements TreeSelectionListener,
 				search_index = search_index == search_results.size () - 1 ?
 						0 : search_index + 1;
 			if (search_results.size () > 0) {
-				TreePath path = new TreePath (search_results.get(
+				final TreePath path = new TreePath (search_results.get(
 						search_index).getPath());
 				setSelectionPath (path);
-				scrollPathToVisible (path);
+				SwingUtilities.invokeLater (new Runnable () {
+					public void run () {
+						scrollPathToVisible (path);
+					}
+				});
 			}
 		}
 	}

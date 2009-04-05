@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.swing.UIManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.biojava.bio.Annotation;
@@ -61,7 +62,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	public static final String GENE = "gene";
 	public static final String CDS = "cds";
 	//represents maximum distance between genes still considered within an operon
-	protected int max_within = 50;
+	protected int max_within = 125;
 	protected File operon_dir;
 	//percent more than which is considered an operon or gene is conserved completely
 	protected double complete = 95.0;
@@ -71,6 +72,12 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	protected Set users;
 	
 	public void startModule(MauveFrame frame) {
+		/*try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}
+		catch (Exception e) {
+			e.printStackTrace ();
+		}*/
 		//do {
 			initData (frame.getModel ());
 			for (int i = 0; i < firsts.length; i++) {
@@ -177,7 +184,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 			}
 			parents = new_rents;
 		}
-		//comp.pruneTree (genomes.getRoot());
+		comp.pruneTree (genomes.getRoot());
 		new OperonTree (frame, comp, genomes).display();
 	}
 	
@@ -241,9 +248,6 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 								 type.length() - 3)) && (l_type.indexOf(RNA) > -1 || 
 										 type.indexOf(RNA) > -1)) {
 							 mixed_ops.add (Operon.last);
-							 System.out.println ("mix rna w/ gene: " + MauveHelperFunctions.getUniqueId(feat) + " " +
-									 feat.getLocation() + 
-									 ", " + distance);
 						 }
 					 }
 					 Operon.last.addGene(feat, distance);

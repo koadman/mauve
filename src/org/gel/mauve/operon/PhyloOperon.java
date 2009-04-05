@@ -44,19 +44,45 @@ public class PhyloOperon {
 			AncestralState current = (AncestralState) node.getUserObject();
 			AncestralState parent = (AncestralState) ((DefaultMutableTreeNode) 
 					node.getParent ()).getUserObject();
-			Iterator <Operon> itty = current.differences.keySet().iterator();
+			Iterator <Operon> itty = new LinkedList (
+					current.differences.keySet()).iterator();
 			while (itty.hasNext()) {
 				Operon op = itty.next();
 				Hashtable <String, DifferentOperon> diffs = 
 					current.differences.get(op);
-				Iterator <String> feats = diffs.keySet().iterator();
+				Iterator <String> feats = new LinkedList (
+						diffs.keySet()).iterator();
 				while (feats.hasNext()) {
 					String feat = feats.next();
-					if (parent.inSames (op, feat))
+					if (parent.definitelyPresent (op, feat))
 						current.makePresent (op, feat);
+					else if (!parent.isOption(op, feat)) {
+						diffs.remove(feat);
+						if (diffs.size () == 0)
+							current.differences.remove (op);
+					}
 				}
 			}
-			itty = current.unclears.keySet ().iterator ();
+			
+			itty = new LinkedList (current.unclears.keySet ()).iterator ();
+			while (itty.hasNext()) {
+				Operon op = itty.next();
+				HashSet <String> diffs = current.unclears.get(op);
+				Iterator <String> feats = new LinkedList (diffs).iterator();
+				while (feats.hasNext()) {
+					String feat = feats.next();
+					if (parent.definitelyPresent (op, feat)) {
+						diffs.remove (feat);
+						if (diffs.size () == 0)
+							current.unclears.remove(op);
+						else if (!parent.isOption(op, feat)) {
+							diffs.remove(feat);
+							if (diffs.size () == 0)
+								current.unclears.remove (op);
+						}
+					}
+				}
+			}
 			
 		}
 		for (int i = 0; i < 2; i++) {
@@ -140,7 +166,9 @@ public class PhyloOperon {
 			op_diff_seq = -1;
 			//two = null;
 			boolean same = diff.isSame(one, seq);
-			if (!same) {
+			if (one.getName ().contains("lsrK"))
+				System.out.println (one.seq + " " + one.getName () +
+						" " + seq + " " + same);			if (!same) {
 				op_diff = diff.getLastDifference();
 				op_diff_seq = seq;
 			}
@@ -151,10 +179,14 @@ public class PhyloOperon {
 						).getChildAt(1)).getFirstLeaf();
 						seq = ((Operon) cur_leaf.getUserObject()).seq;
 						same = diff.isSame(one, seq);
+						if (one.getName ().contains("lsrK"))
+							System.out.println (one.seq + " " + one.getName () +
+									" " + seq + " " + same);
 					}
 					else
 						cur_leaf = (DefaultMutableTreeNode) cur_leaf.getParent ();
 				}
+				
 				if (same) {
 					two = (Operon) diff.getRelatedOperons(
 							one, seq).iterator().next();
@@ -184,6 +216,7 @@ public class PhyloOperon {
 				}
 			} while (cur_leaf != right);
 
+			
 			if (top) {
 				boolean unclear = one_diff;
 				DefaultMutableTreeNode one_node = (DefaultMutableTreeNode) 

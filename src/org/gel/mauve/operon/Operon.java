@@ -65,7 +65,6 @@ public class Operon implements MauveConstants {
 		distances.add(distance);
 		String gene = BioJavaUtils.getName(feat);
 		if (gene == null || gene.length() < 2) {
-			System.out.println ("unamed feature added to operon");
 			name.append("?");
 		}
 		else if (gene.startsWith(last_prefix))

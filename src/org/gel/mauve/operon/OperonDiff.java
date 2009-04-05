@@ -103,6 +103,8 @@ public abstract class OperonDiff {
 			PhyloMultiplicity p_mult = handler.op_mults [op.seq].get(op.getStart()); 
 			long [] coords = p_mult.inMultiplicity (op.getStart (), op.getEnd(), 
 					handler.model, seq, op.seq, min_overlap);
+			if (op.getName().contains("lsrK") && op.seq == 4 && seq == 2)
+				System.out.println ("coords: " + coords);
 			if (coords != null) {
 				long start = coords [0];
 				long end = coords [1];

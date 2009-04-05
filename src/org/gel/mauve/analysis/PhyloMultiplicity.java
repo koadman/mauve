@@ -78,6 +78,12 @@ public class PhyloMultiplicity {
 			long span = s_end - s_start;
 			prct = span / ((double) end - start);
 			prct *= 100;
+			if (start == 4280606 && seq == 2 && ref == 4) {
+				System.out.println ("sstuff: " + s_start + ", " + s_end + " opend " + end);
+				System.out.println ("rstuff: " + r_start + ", " + r_end);
+				System.out.println ("prct: " + prct);
+				System.out.println ("segs: " + first + "\r\n" + last);
+			}
 			if (prct > min_prct && prct < (200 - min_prct))
 				return new long [] {s_start, s_end};
 			else
