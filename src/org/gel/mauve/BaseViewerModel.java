@@ -893,6 +893,8 @@ public class BaseViewerModel {
 		rangeHighlightGenome = g;
 		rangeHighlightLeft = left_end;
 		rangeHighlightRight = right_end;
+		if (g != null)
+			updateHighlight (g, (right_end + left_end) / 2);
 		fireHighlightEvent ();
 	}
 
