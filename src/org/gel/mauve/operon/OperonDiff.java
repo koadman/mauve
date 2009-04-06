@@ -136,13 +136,13 @@ public abstract class OperonDiff {
 				difference = "Aligned to part or none of other operon";
 			}
 			else if (p_mult.getLastMismatch() == PhyloMultiplicity.NOT_ALIGNED) {
-				double percent = p_mult.getLastPercent() / 100;
+				double percent = p_mult.getLastPercent();
 				if (percent == 0)
 					difference = "Operon not in genome";
 				else
 				{
-					difference = "Only " + DecimalFormat.getPercentInstance().format(
-							percent) + " of operon in genome";
+					difference = "Only " + MathUtils.doubleToString(
+							percent, 2) + "% of operon in genome";
 				}
 			}
 			else

@@ -16,17 +16,14 @@ public class FeatureRelator {
 	public static final String ORTHOLOGS = "orthologs";
 	public static final String PARALOGS = "paralogs";
 	public static final String ALL_LOGS = "both";
-	protected Hashtable <String, StrandedFeature> ids_to_feats;
-	
+	//contains prefixes by identifying int
+	protected Hashtable <Integer, String> prefixes;
+
 	
 	public FeatureRelator () {
 		init ();
 	}
 	
-	public FeatureRelator (Hashtable feats) {
-		ids_to_feats = feats;
-		init ();
-	}
 	
 	public void init () {
 		relations = new Hashtable <String, Hashtable <String, HashSet>> ();
@@ -55,28 +52,28 @@ public class FeatureRelator {
 		}
 	}
 	
+	public void setPrefixes (Hashtable <Integer, String> prefs) {
+		prefixes = prefs;
+	}
+	
 	/**
 	 * gets feature for specific biojava sequence from 
 	 * @param seq
 	 * @return
 	 */
-	public StrandedFeature getFeatureForSequence (String relation, 
-			String comp_id, Sequence seq) {
-		StrandedFeature ret = null;
-		if (ids_to_feats != null) {
-			if (relations.get(relation).contains(comp_id)) {
-				Iterator <String> itty = relations.get(relation).get(
-						comp_id).iterator();
-				while (itty.hasNext()) {
-					StrandedFeature feat = ids_to_feats.get(itty.next());
-					if (feat != null && feat.getSequence() == seq) {
-						ret = feat;
-						break;
-					}
-				}
+	public String getFeatureForSequence (String relation, 
+			String comp_id, int seq) {
+		if (relations.get(relation).containsKey(comp_id)) {
+			Iterator <String> itty = relations.get(relation).get(
+					comp_id).iterator();
+			String prefix = prefixes.get(seq);
+			while (itty.hasNext()) {
+				String id = itty.next();
+				if (id.startsWith(prefix))
+					return id;
 			}
 		}
-		return ret;
+		return null;
 	}
 	
 	public static void main (String [] args) {

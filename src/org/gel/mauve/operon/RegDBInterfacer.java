@@ -10,8 +10,12 @@ import java.util.StringTokenizer;
 
 import org.biojava.bio.seq.StrandedFeature;
 import org.gel.air.bioj.BioJavaUtils;
+import org.gel.air.bioj.FeatureRelator;
+import org.gel.mauve.MauveConstants;
+import org.gel.mauve.MauveHelperFunctions;
+import org.gel.mauve.operon.Operon.OpIterator;
 
-public class RegDBInterfacer {
+public class RegDBInterfacer implements MauveConstants {
 	
 	protected OperonHandler handler;
 	protected int num_operons;
@@ -20,6 +24,8 @@ public class RegDBInterfacer {
 	protected int num_genes;
 	protected HashSet <StrandedFeature> f_pos, f_neg;
 	protected Hashtable <StrandedFeature, Operon> map;
+	protected Hashtable <String, StrandedFeature> ids_to_feats; 
+	protected int seq;
 	
 	
 	public RegDBInterfacer (String file, OperonHandler op_handler) {
@@ -27,7 +33,70 @@ public class RegDBInterfacer {
 		f_pos = new HashSet <StrandedFeature> ();
 		f_neg = new HashSet <StrandedFeature> ();
 		map = new Hashtable <StrandedFeature, Operon> ();
-		read (file, 0);
+		ids_to_feats = new Hashtable <String, StrandedFeature> ();
+		seq = 0;
+		read (file);
+	}
+	
+	public Hashtable <StrandedFeature, Operon> getRegDBOperons () {
+		return map;
+	}
+	
+	protected void restrict () {
+		FeatureRelator relate = new FeatureRelator ();
+		relate.load(FeatureRelator.ORTHOLOGS, 
+				"c:\\mauvedata\\operon\\orthos\\ecoli_orthos.txt");
+		relate.load(FeatureRelator.PARALOGS, 
+				"c:\\mauvedata\\operon\\orthos\\ecoli_paras.txt");
+		Operon [] firsts = handler.firsts;
+		Hashtable <Integer, String> prefixes = new Hashtable <
+			Integer, String> (firsts.length);
+		for (int i = 0; i < firsts.length; i++) {
+			String id = MauveHelperFunctions.getTruncatedDBXrefID(
+					firsts [i].genes.get(0), ASAP);
+			prefixes.put(i, id.substring(0, 3));
+		}
+		relate.setPrefixes (prefixes);
+		for (int i = 0; i < firsts.length; i++) {
+			System.out.println ("five: " + i);
+			int count = 0;
+			if (i == 1) {
+				Operon first = firsts [1];
+				first.next.next = first;
+				first.prev = first.next;
+			}
+			else if (i != seq) {
+				OpIterator oppy = new OpIterator (firsts [i]);
+				while (oppy.hasNext()) {
+					boolean keep = false;
+					Iterator <StrandedFeature> itty = oppy.next().genes.iterator();
+					while (itty.hasNext()) {
+						StrandedFeature feat = itty.next();
+						/*System.out.println ("key: " + MauveHelperFunctions.getTruncatedDBXrefID(
+								feat, ASAP));*/
+						String related_id = relate.getFeatureForSequence(
+								FeatureRelator.ORTHOLOGS, 
+								MauveHelperFunctions.getTruncatedDBXrefID(
+										feat, ASAP), seq);
+						if (related_id != null && ids_to_feats.containsKey(related_id)) {
+							keep = true;
+							break;
+						}
+					}
+					/*if (keep)
+						System.out.println ("keep!!!!!");*/
+					if (!keep) {
+						count++;
+						oppy.remove();
+					}
+				}
+				firsts [i] = oppy.getStart();
+			}
+			System.out.println ("removed " + count + " from " + i);
+		}
+	}
+	
+	public void performComparison () {
 		compare ();
 		removeUnique (0);
 	}
@@ -78,7 +147,7 @@ public class RegDBInterfacer {
 		System.out.println ("fpos " + f_pos.size());
 	}
 
-	public void read (String file,int seq) {
+	public void read (String file) {
 		try {
 			Operon.reset();
 			BufferedReader in = new BufferedReader (new FileReader (
@@ -107,8 +176,11 @@ public class RegDBInterfacer {
 						if (handler.loci.containsKey (bnum)) {
 							if (current == null)
 								current = new Operon (seq);
-							current.addGene(handler.loci.remove(bnum), -1);
-							map.put(current.genes.getLast(), current);
+							StrandedFeature feat = handler.loci.remove(bnum);
+							current.addGene(feat, -1);
+							map.put(feat, current);
+							ids_to_feats.put(MauveHelperFunctions.
+									getTruncatedDBXrefID(feat, ASAP), feat);
 							num_genes++;
 						}
 						else
@@ -124,8 +196,8 @@ public class RegDBInterfacer {
 			System.out.println ("unique bnums from regdb (" + 
 					unique_bnums.size () + "): " + unique_bnums);
 			//if more than one genome has bnumbers, count will be wrong
-			System.out.println ("unique bnums from asap (" + 
-					handler.loci.size() + "): " + handler.loci.keySet ());
+			/*System.out.println ("unique bnums from asap (" + 
+					handler.loci.size() + "): " + handler.loci.keySet ());*/
 			first = Operon.first;
 			num_ops = Operon.count;
 			Operon.reset();
@@ -134,6 +206,10 @@ public class RegDBInterfacer {
 		}
 	}
 	
+	/**
+	 * recalcs operons w/o features not present in regdb operons and
+	 * recalcs comparison
+	 */
 	public void removeUnique (int seq) {
 		handler.findOperons (seq, handler.getWriterData (), map.keySet());
 		f_pos.clear();

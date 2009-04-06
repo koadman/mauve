@@ -143,8 +143,16 @@ public class Operon implements MauveConstants {
 			return ret;
 		}
 
+		//assumes circular
 		public void remove() {
-			System.out.println ("remove not implemented");
+			if (current.prev == start)
+				start = null;
+			current.prev.prev.next = current;
+			current.prev = current.prev.prev; 
+		}
+		
+		public Operon getStart () {
+			return start;
 		}
 		
 		

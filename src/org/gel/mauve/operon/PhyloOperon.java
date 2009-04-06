@@ -44,6 +44,9 @@ public class PhyloOperon {
 			AncestralState current = (AncestralState) node.getUserObject();
 			AncestralState parent = (AncestralState) ((DefaultMutableTreeNode) 
 					node.getParent ()).getUserObject();
+			HashSet other_seqs = ((AncestralState) getOtherChild (
+					node).getUserObject ()).seqs;
+			
 			Iterator <Operon> itty = new LinkedList (
 					current.differences.keySet()).iterator();
 			while (itty.hasNext()) {
@@ -54,9 +57,11 @@ public class PhyloOperon {
 						diffs.keySet()).iterator();
 				while (feats.hasNext()) {
 					String feat = feats.next();
-					if (parent.definitelyPresent (op, feat))
+					if (parent.definitelyPresent (op, feat, other_seqs, sames))
 						current.makePresent (op, feat);
-					else if (!parent.isOption(op, feat)) {
+					else if (!parent.isOption(op, feat, other_seqs, sames)) {
+						if (op.getName().contains("ydjS"))
+							System.out.println ("removing it");
 						diffs.remove(feat);
 						if (diffs.size () == 0)
 							current.differences.remove (op);
@@ -71,11 +76,11 @@ public class PhyloOperon {
 				Iterator <String> feats = new LinkedList (diffs).iterator();
 				while (feats.hasNext()) {
 					String feat = feats.next();
-					if (parent.definitelyPresent (op, feat)) {
+					if (parent.definitelyPresent (op, feat, other_seqs, sames)) {
 						diffs.remove (feat);
 						if (diffs.size () == 0)
 							current.unclears.remove(op);
-						else if (!parent.isOption(op, feat)) {
+						else if (!parent.isOption(op, feat, other_seqs, sames)) {
 							diffs.remove(feat);
 							if (diffs.size () == 0)
 								current.unclears.remove (op);
@@ -96,6 +101,17 @@ public class PhyloOperon {
 	protected AncestralState buildAncestor (DefaultMutableTreeNode one, 
 			DefaultMutableTreeNode two) {
 		parent = new AncestralState ();
+		HashSet <Integer> seqs = new HashSet <Integer> ();
+		if (one.isLeaf())
+			seqs.add(((Operon) one.getUserObject()).seq);
+		else
+			seqs.addAll(((AncestralState) one.getUserObject()).seqs);
+		if (two.isLeaf())
+			seqs.add(((Operon) two.getUserObject()).seq);
+		else
+			seqs.addAll(((AncestralState) two.getUserObject()).seqs);
+		parent.seqs = seqs;
+		
 		done = new HashSet ();
 		Iterator <Operon> itty = null;
 		itty = one.isLeaf () ? new Operon.OpIterator ((Operon) one.getUserObject()) :
@@ -166,9 +182,10 @@ public class PhyloOperon {
 			op_diff_seq = -1;
 			//two = null;
 			boolean same = diff.isSame(one, seq);
-			if (one.getName ().contains("lsrK"))
+			if (one.getName ().contains("ydjS"))
 				System.out.println (one.seq + " " + one.getName () +
-						" " + seq + " " + same);			if (!same) {
+						" " + seq + " " + same);
+			if (!same) {
 				op_diff = diff.getLastDifference();
 				op_diff_seq = seq;
 			}
@@ -179,7 +196,7 @@ public class PhyloOperon {
 						).getChildAt(1)).getFirstLeaf();
 						seq = ((Operon) cur_leaf.getUserObject()).seq;
 						same = diff.isSame(one, seq);
-						if (one.getName ().contains("lsrK"))
+						if (one.getName ().contains("ydjS"))
 							System.out.println (one.seq + " " + one.getName () +
 									" " + seq + " " + same);
 					}
@@ -219,12 +236,7 @@ public class PhyloOperon {
 			
 			if (top) {
 				boolean unclear = one_diff;
-				DefaultMutableTreeNode one_node = (DefaultMutableTreeNode) 
-					right.getParent().getChildAt(0);
-				if (one_node == right) {
-					one_node = (DefaultMutableTreeNode) 
-							right.getParent().getChildAt(1);
-				}
+				DefaultMutableTreeNode one_node = getOtherChild (right);
 				if (!one_node.isLeaf() && ((AncestralState) 
 						one_node.getUserObject()).inUnclears (one, feat))
 					unclear = true; 
@@ -238,12 +250,27 @@ public class PhyloOperon {
 						parent.addUnclear(one, feat);
 					}
 				}
+				if (one.getName().contains("ydjS"))
+					System.out.println("same " + same + " unclear " +unclear);
 				if (!same && !unclear) {
+					if (one.getName().contains("ydjS"))
+						System.out.println("it should really be there");
+					
 					parent.addDifference (one, op_diff_seq, feat, op_diff);
 				}
 			}
 
 		}
+	}
+	
+	public DefaultMutableTreeNode getOtherChild (DefaultMutableTreeNode node){
+		DefaultMutableTreeNode one_node = (DefaultMutableTreeNode) 
+		node.getParent().getChildAt(0);
+		if (one_node == node) {
+			one_node = (DefaultMutableTreeNode) 
+			node.getParent().getChildAt(1);
+		}
+		return one_node;
 	}
 	
 	/*if (top) {

@@ -96,7 +96,7 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 			case ISLAND_COL:
 				return current.typed_id;
 			case PERCENT_COL:
-				return MauveHelperFunctions.doubleToString (cur_percent, 2);
+				return MathUtils.doubleToString (cur_percent, 2);
 			case TYPE:
 				return ISLAND_GENE;
 			case LABEL:

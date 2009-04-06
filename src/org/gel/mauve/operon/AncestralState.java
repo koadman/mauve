@@ -2,6 +2,7 @@ package org.gel.mauve.operon;
 
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -92,6 +93,21 @@ public class AncestralState {
 		return option;
 	}
 	
+	public boolean isOption (Operon op, String feat, 
+			HashSet <Integer> seqs, 
+			Hashtable <Operon, Hashtable <String, HashSet <Operon>>> logs) {
+		boolean ret = isOption (op, feat);
+		if (!ret && logs.containsKey (op) && logs.get(op).containsKey(feat)) {
+			Iterator <Operon> itty = logs.get (op).get (feat).iterator();
+			while (itty.hasNext () && !ret) {
+				Operon op2 = itty.next ();
+				if (seqs.contains(op2.seq))
+					ret = isOption (op2, feat);
+			}
+		}
+		return ret;
+	}
+	
 	public boolean inSames (Operon op, String feat) {
 		return sames.containsKey(op) && sames.get(op).contains(feat);
 	}
@@ -99,6 +115,21 @@ public class AncestralState {
 	public boolean definitelyPresent (Operon op, String feat) {
 		return sames.containsKey(op) && sames.get(op).contains(feat) &&
 				!(unclears.containsKey(op) && unclears.get(op).contains(feat));
+	}
+	
+	public boolean definitelyPresent (Operon op, String feat, 
+			HashSet <Integer> seqs, 
+			Hashtable <Operon, Hashtable <String, HashSet <Operon>>> logs) {
+		boolean ret = definitelyPresent (op, feat);
+		if (!ret && logs.containsKey (op) && logs.get(op).containsKey(feat)) {
+			Iterator <Operon> itty = logs.get (op).get (feat).iterator();
+			while (itty.hasNext () && !ret) {
+				Operon op2 = itty.next ();
+				if (seqs.contains(op2.seq))
+					ret = definitelyPresent (op2, feat);
+			}
+		}
+		return ret;
 	}
 	
 	public boolean inUnclears (Operon op, String feat) {

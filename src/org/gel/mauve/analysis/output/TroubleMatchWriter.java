@@ -7,9 +7,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.gel.air.util.MathUtils;
 import org.gel.mauve.Match;
 import org.gel.mauve.MauveConstants;
-import org.gel.mauve.MauveHelperFunctions;
 import org.gel.mauve.analysis.Segment;
 import org.gel.mauve.analysis.SegmentComparator;
 import org.gel.mauve.gui.sequence.FlatFileFeatureConstants;
@@ -94,7 +94,7 @@ public class TroubleMatchWriter extends AbstractMatchDataWriter implements
 				decimals = 1;
 			} else
 				data = ratio;
-			return MauveHelperFunctions.doubleToString (data, decimals);
+			return MathUtils.doubleToString (data, decimals);
 		}
 
 	}

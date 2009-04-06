@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import org.gel.air.util.MathUtils;
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MauveHelperFunctions;
 import org.gel.mauve.analysis.Segment;
@@ -145,7 +146,7 @@ public class OverviewFileWriter extends AbstractTabbedDataWriter implements Mauv
 			}
 			if (percent != -1) {
 				double_totals [column] += percent;
-				return MauveHelperFunctions.doubleToString (percent * 100, 1);
+				return MathUtils.doubleToString (percent * 100, 1);
 			}
 			else if (count != -1) {
 				long_totals [column] += count;
@@ -181,7 +182,7 @@ public class OverviewFileWriter extends AbstractTabbedDataWriter implements Mauv
 				return (tot - long_totals [column]) + "";
 			}
 			else
-				return MauveHelperFunctions.doubleToString (100 - (
+				return MathUtils.doubleToString (100 - (
 						double_totals [column] * 100), 1);
 		}
 		return null;

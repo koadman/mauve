@@ -20,6 +20,7 @@ import org.biojava.bio.seq.ComponentFeature;
 import org.biojava.bio.seq.Feature;
 import org.biojava.bio.seq.StrandedFeature;
 import org.gel.air.bioj.BioJavaUtils;
+import org.gel.air.bioj.FeatureRelator;
 import org.gel.air.util.GroupUtils;
 import org.gel.air.util.MathUtils;
 import org.gel.mauve.BaseViewerModel;
@@ -62,7 +63,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	public static final String GENE = "gene";
 	public static final String CDS = "cds";
 	//represents maximum distance between genes still considered within an operon
-	protected int max_within = 125;
+	protected int max_within = 50;
 	protected File operon_dir;
 	//percent more than which is considered an operon or gene is conserved completely
 	protected double complete = 95.0;
@@ -70,6 +71,13 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	protected double min_prct = 5.0;
 	//if not null, contains all features to be considered
 	protected Set users;
+	protected boolean regdb_restrict;
+	protected RegDBInterfacer regdb_int;
+	
+	public OperonHandler (String [] args) {
+		if (args.length > 1 && args [1].toLowerCase().startsWith("regdb"))
+			regdb_restrict = true;
+	}
 	
 	public void startModule(MauveFrame frame) {
 		/*try {
@@ -88,8 +96,13 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 				System.out.println ("mixed rna and genes: " + mixed_ops.size());*/
 				mixed_ops.clear();
 			}
-			//new RegDBInterfacer ("c:\\mauvedata\\operon\\TUSet.txt", this);
+			if (regdb_restrict)
+				regdb_int = new RegDBInterfacer (
+						"c:\\mauvedata\\operon\\TUSet.txt", this);
 			findOperonMultiplicity (frame);
+			if (regdb_int != null) {
+				regdb_int.restrict ();
+			}
 			buildOperonTree (frame);
 			//max_within += 50;
 		//} while (max_within < 210);
@@ -294,7 +307,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		MauveModule mv = new MauveModule (new OperonHandler ());
+		MauveModule mv = new MauveModule (new OperonHandler (args));
 		MauveModule.mainHook (args, mv);
 	}
 

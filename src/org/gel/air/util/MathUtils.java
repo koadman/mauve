@@ -1,5 +1,6 @@
 package org.gel.air.util;
 
+import java.text.DecimalFormat;
 import java.util.Random;
 
 public class MathUtils {
@@ -45,6 +46,12 @@ public class MathUtils {
 		gaus *= deviation;
 		return (int) gaus;
 		
+	}
+
+	public static String doubleToString (double number, int decimals) {
+		DecimalFormat format = new DecimalFormat ();
+		format.setMaximumFractionDigits (decimals);
+		return format.format (number);
 	}
 
 }

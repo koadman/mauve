@@ -75,7 +75,6 @@ public class OperonTree extends JTree implements TreeSelectionListener,
 					node.getChildAt(1));
 			seqs.addAll (right);
 			AncestralState state = (AncestralState) node.getUserObject();
-			state.seqs = seqs;
 			populateSames (node, state, seqs);
 			populateDiffs (node, left, right, "present but absent in one child", state.differences2);
 			populateDiffs (node, left, right, "absent but present in one child", state.differences);
@@ -92,7 +91,8 @@ public class OperonTree extends JTree implements TreeSelectionListener,
 	protected void populateSames (DefaultMutableTreeNode node,
 			AncestralState state, HashSet <Integer> seqs) {
 		DefaultMutableTreeNode sames_node = new DefaultMutableTreeNode (
-				state.sames.size () + " present operons");
+				(state.sames.size () - state.unclears.size ())
+				+ " present operons");
 		DefaultMutableTreeNode unclears_node = new DefaultMutableTreeNode (
 				state.unclears.size () + " possibly present");
 		node.add (sames_node);
@@ -245,7 +245,7 @@ public class OperonTree extends JTree implements TreeSelectionListener,
 				navigator.displayFeature (op.getStart(), op.getEnd (),
 						phylo.handler.model.getGenomeBySourceIndex(op.seq));
 				String new_text = obj.toString ();
-				if (!new_text.contains (last_search))
+				if (last_search == null || !new_text.contains (last_search))
 					search.setText(new_text);
 			}
 		}

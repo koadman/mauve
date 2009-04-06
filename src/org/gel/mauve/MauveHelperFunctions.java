@@ -2,7 +2,6 @@ package org.gel.mauve;
 
 import java.io.File;
 import java.io.PrintStream;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -89,12 +88,6 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 		writer.printRow (data);
 	}
 
-	public static String doubleToString (double number, int decimals) {
-		DecimalFormat format = new DecimalFormat ();
-		format.setMaximumFractionDigits (decimals);
-		return format.format (number);
-	}
-	
 	public static String getSeqPartOfFile (SegmentDataProcessor processor) {
 		return "seq_" + processor.get (SEQUENCE_INDEX).toString ();
 	}
