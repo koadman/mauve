@@ -126,6 +126,7 @@ public abstract class OperonDiff {
 						if (MathUtils.percentContained(start, end, loci.getMin(), loci.getMax ()) >
 								min_overlap) {
 							comps = new HashSet ();
+							//not necessarily at same index anymore if remove regdb stuff
 							comps.add (handler.op_lists [seq].get(ind));
 							return true;
 						}

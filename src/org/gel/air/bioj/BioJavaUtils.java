@@ -28,7 +28,9 @@ public class BioJavaUtils implements BioJavaConstants {
 		Vector keeps = new Vector <Feature> ();
 		while (itty.hasNext()) {
 			Feature feat = itty.next();
+			//right way but failing if operon in gbk file
 			if (types.contains(feat.getType()))
+			if (feat.getAnnotation().containsProperty("label"))
 				keeps.add(feat);
 		}
 		return keeps;
