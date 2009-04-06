@@ -60,12 +60,12 @@ public class RegDBInterfacer implements MauveConstants {
 		for (int i = 0; i < firsts.length; i++) {
 			System.out.println ("five: " + i);
 			int count = 0;
-			if (i == 1) {
+			/*if (i == 1) {
 				Operon first = firsts [1];
 				first.next.next = first;
 				first.prev = first.next;
 			}
-			else if (i != seq) {
+			else*/ if (i != 10) {
 				OpIterator oppy = new OpIterator (firsts [i]);
 				while (oppy.hasNext()) {
 					boolean keep = false;
