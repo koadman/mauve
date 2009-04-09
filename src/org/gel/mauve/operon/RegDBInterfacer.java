@@ -2,6 +2,7 @@ package org.gel.mauve.operon;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -42,60 +43,131 @@ public class RegDBInterfacer implements MauveConstants {
 		return map;
 	}
 	
-	protected void restrict () {
-		FeatureRelator relate = new FeatureRelator ();
-		relate.load(FeatureRelator.ORTHOLOGS, 
-				"c:\\mauvedata\\operon\\orthos\\ecoli_orthos.txt");
-		relate.load(FeatureRelator.PARALOGS, 
-				"c:\\mauvedata\\operon\\orthos\\ecoli_paras.txt");
+	protected void restrictRightRegDB () {
+		compare ();
 		Operon [] firsts = handler.firsts;
-		Hashtable <Integer, String> prefixes = new Hashtable <
-			Integer, String> (firsts.length);
+		FeatureRelator relate = handler.getFeatureRelator();
+		Hashtable <String, StrandedFeature> temp = ids_to_feats;
+		Hashtable <String, StrandedFeature> k12 = new Hashtable <
+				String, StrandedFeature> (ids_to_feats);
 		for (int i = 0; i < firsts.length; i++) {
-			String id = MauveHelperFunctions.getTruncatedDBXrefID(
-					firsts [i].genes.get(0), ASAP);
-			prefixes.put(i, id.substring(0, 3));
+			if (i == seq) {
+				OpIterator oppy = new OpIterator (firsts [i]);
+				int count = 0;
+				while (oppy.hasNext()) {
+					boolean keep = true;
+					Operon op = oppy.next();
+					Iterator <StrandedFeature> genes = op.genes.iterator();
+					while (keep && genes.hasNext()) {
+						StrandedFeature gene = genes.next();
+						if (!map.containsKey(gene) || f_pos.contains(gene) ||
+								f_neg.contains(gene)) {
+							keep = false;
+						}
+					}
+					if (keep && op.genes.size() != map.get(op.genes.get(0)).genes.size())
+						keep = false;
+					if (!keep) {
+						genes = op.genes.iterator();
+						while (genes.hasNext ()) {
+							k12.keySet().remove(MauveHelperFunctions.
+									getTruncatedDBXrefID(
+									genes.next (), ASAP));
+						}
+						oppy.remove();
+						count++;
+					}
+				}
+				firsts [i] = oppy.getStart();
+				ids_to_feats = k12;
+				System.out.println ("after restrict right: " + (handler.counts [seq] - count));
+			}
+			else if (i != 1){
+				restrictRightRegDB (i, relate, firsts);
+			}
+			else {
+				Operon first = firsts [1];
+				first.next.next = first;
+				first.prev = first.next;				
+			}
 		}
-		relate.setPrefixes (prefixes);
+		ids_to_feats = temp;
+	}
+	
+	protected void restrictAllRegDB () {
+		Operon [] firsts = handler.firsts;
+		FeatureRelator relate = handler.getFeatureRelator();
 		for (int i = 0; i < firsts.length; i++) {
-			System.out.println ("five: " + i);
-			int count = 0;
-			/*if (i == 1) {
+			if (i == 1) {
 				Operon first = firsts [1];
 				first.next.next = first;
 				first.prev = first.next;
 			}
-			else*/ if (i != 10) {
-				OpIterator oppy = new OpIterator (firsts [i]);
-				while (oppy.hasNext()) {
-					boolean keep = false;
-					Iterator <StrandedFeature> itty = oppy.next().genes.iterator();
-					while (itty.hasNext()) {
-						StrandedFeature feat = itty.next();
-						/*System.out.println ("key: " + MauveHelperFunctions.getTruncatedDBXrefID(
-								feat, ASAP));*/
-						String related_id = relate.getFeatureForSequence(
-								FeatureRelator.ORTHOLOGS, 
-								MauveHelperFunctions.getTruncatedDBXrefID(
-										feat, ASAP), seq);
-						if (related_id != null && ids_to_feats.containsKey(related_id)) {
-							keep = true;
-							break;
-						}
-					}
-					/*if (keep)
-						System.out.println ("keep!!!!!");*/
-					if (!keep) {
-						count++;
-						oppy.remove();
-					}
-				}
-				firsts [i] = oppy.getStart();
+			else {
+				System.out.println ("five: " + i);
+				restrictAllRegDB (i, relate, firsts);
 			}
-			System.out.println ("removed " + count + " from " + i);
 		}
 	}
 	
+	public void restrictAllRegDB (int ind, FeatureRelator relate, 
+			Operon [] firsts) {
+		OpIterator oppy = new OpIterator (firsts [ind]);
+		while (oppy.hasNext()) {
+			boolean keep = false;
+			Iterator <StrandedFeature> itty = oppy.next().genes.iterator();
+			while (itty.hasNext()) {
+				StrandedFeature feat = itty.next();
+				/*System.out.println ("key: " + MauveHelperFunctions.getTruncatedDBXrefID(
+						feat, ASAP));*/
+				String related_id = relate.getFeatureForSequence(
+						FeatureRelator.ORTHOLOGS, 
+						MauveHelperFunctions.getTruncatedDBXrefID(
+								feat, ASAP), seq);
+				if (related_id != null && ids_to_feats.containsKey(related_id)) {
+					keep = true;
+					break;
+				}
+			}
+			/*if (keep)
+				System.out.println ("keep!!!!!");*/
+			if (!keep) {
+				oppy.remove();
+			}
+		}
+		firsts [ind] = oppy.getStart();
+
+	}
+	
+	public void restrictRightRegDB (int ind, FeatureRelator relate, 
+			Operon [] firsts) {
+		OpIterator oppy = new OpIterator (firsts [ind]);
+		while (oppy.hasNext()) {
+			boolean keep = true;
+			Iterator <StrandedFeature> itty = oppy.next().genes.iterator();
+			while (itty.hasNext()) {
+				StrandedFeature feat = itty.next();
+				/*System.out.println ("key: " + MauveHelperFunctions.getTruncatedDBXrefID(
+						feat, ASAP));*/
+				String related_id = relate.getFeatureForSequence(
+						FeatureRelator.ORTHOLOGS, 
+						MauveHelperFunctions.getTruncatedDBXrefID(
+								feat, ASAP), seq);
+				if (related_id == null || !ids_to_feats.containsKey(related_id)) {
+					keep = false;
+					break;
+				}
+			}
+			/*if (keep)
+				System.out.println ("keep!!!!!");*/
+			if (!keep) {
+				oppy.remove();
+			}
+		}
+		firsts [ind] = oppy.getStart();
+
+	}
+
 	public void performComparison () {
 		compare ();
 		removeUnique (0);

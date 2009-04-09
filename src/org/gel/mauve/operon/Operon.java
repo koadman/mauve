@@ -70,6 +70,8 @@ public class Operon implements MauveConstants {
 		else if (gene.startsWith(last_prefix))
 			name.append(gene.substring(last_prefix.length()));
 		else {
+			if (name.length() > 0)
+				name.append('-');
 			name.append(gene);
 			int ind = 0;
 			while (ind < gene.length() && Character.isLowerCase(gene.charAt(ind)))

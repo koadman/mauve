@@ -73,6 +73,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	protected Set users;
 	protected boolean regdb_restrict;
 	protected RegDBInterfacer regdb_int;
+	protected FeatureRelator relate;
 	
 	public OperonHandler (String [] args) {
 		if (args.length > 1 && args [1].toLowerCase().startsWith("regdb"))
@@ -101,7 +102,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 						"c:\\mauvedata\\operon\\TUSet.txt", this);
 			findOperonMultiplicity (frame);
 			if (regdb_int != null) {
-				regdb_int.restrict ();
+				regdb_int.restrictRightRegDB ();
 			}
 			buildOperonTree (frame);
 			//max_within += 50;
@@ -233,6 +234,25 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 		users = features;
 		findOperons (index, data);
 		users = null;
+	}
+	
+	public FeatureRelator getFeatureRelator () {
+		if (relate == null) {
+			relate = new FeatureRelator ();
+			relate.load(FeatureRelator.ORTHOLOGS, 
+			"c:\\mauvedata\\operon\\orthos\\ecoli_orthos.txt");
+			relate.load(FeatureRelator.PARALOGS, 
+			"c:\\mauvedata\\operon\\orthos\\ecoli_paras.txt");
+			Hashtable <Integer, String> prefixes = new Hashtable <
+			Integer, String> (firsts.length);
+			for (int i = 0; i < firsts.length; i++) {
+				String id = MauveHelperFunctions.getTruncatedDBXrefID(
+						firsts [i].genes.get(0), ASAP);
+				prefixes.put(i, id.substring(0, 3));
+			}
+			relate.setPrefixes (prefixes);
+		}
+		return relate;
 	}
 	
 	protected void partition (Vector <StrandedFeature> feats, int index) {

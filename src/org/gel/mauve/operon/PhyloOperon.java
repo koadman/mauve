@@ -111,19 +111,33 @@ public class PhyloOperon {
 		else
 			seqs.addAll(((AncestralState) two.getUserObject()).seqs);
 		parent.seqs = seqs;
-		
+		System.out.println ("ancestor done: " + seqs.toString());
 		done = new HashSet ();
 		Iterator <Operon> itty = null;
 		itty = one.isLeaf () ? new Operon.OpIterator ((Operon) one.getUserObject()) :
 				((AncestralState) one.getUserObject()).sames.keySet ().iterator ();
 		DefaultMutableTreeNode seq1 = one;
 		DefaultMutableTreeNode seq2 = two;
+		int count = 0;
 		while (itty.hasNext()) {
 			Operon op = itty.next();
+			count++;
+			/*if (op.seq == 0 && count < 1000) {
+				System.out.println ("operon: " + op);
+				count++;
+			}
+			if (count > 999)
+				try {
+					Thread.sleep(2000000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}*/
 			compareOperons (op, seq2, comps, true, false);
 			done.add (op);
 		}
 		System.out.println ("done1: " + done.size());
+		System.out.println ("count: " + count);
 		if (!one.isLeaf()) {
 			itty = ((AncestralState) one.getUserObject()).differences.keySet (
 					).iterator ();
