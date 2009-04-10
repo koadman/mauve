@@ -361,8 +361,6 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
 
         read_filename = output_file;
         
-    	cmd_vec.addElement("--backbone-output=" + output_file + ".backbone");
-
         detect_lcbs = isLCBSearchEnabled();
         if (detect_lcbs)
         {
@@ -395,6 +393,8 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
             // make a guide tree file name
             cur_cmd = "--output-guide-tree=" + output_file + ".guide_tree";
             cmd_vec.addElement(cur_cmd);
+
+            cmd_vec.addElement("--backbone-output=" + output_file + ".backbone");
         }
         else if (!detect_lcbs)
         {
