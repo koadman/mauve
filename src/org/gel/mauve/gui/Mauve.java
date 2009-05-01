@@ -93,6 +93,8 @@ public class Mauve {
 
 		if (!hasRequiredJVM ())
 			return;
+		if (!hasEnoughHeapSpace())
+			return;
 		if (!System.getProperties ().containsKey ("mauve.force.console")) {
 			MyConsole.setUseSwing (true);
 		}
@@ -227,6 +229,28 @@ public class Mauve {
 								"Sorry, Mauve requires at least Java version 1.4 to operate correctly");
 				return false;
 			}
+		}
+		return true;
+	}
+	
+	/*
+	 * We require at least 384 Mb of Heap for visualization
+	 */
+	private boolean hasEnoughHeapSpace() {
+		final long required_mb = 384;	/**< Set this to the minimum required megabytes to run Mauve smoothly */
+		long maxmem = java.lang.Runtime.getRuntime().maxMemory();
+		if( maxmem < required_mb*1024*1024 )
+		{
+			StringBuilder errorMessage = new StringBuilder();
+			errorMessage.append("Sorry, Mauve requires at least " + required_mb + "Mb of memory to operate correctly.\n");			
+			if(System.getProperty("os.name").indexOf("indows") > 0)
+			{
+				errorMessage.append("If Mauve was launched by double-clicking Mauve.jar, please relaunch \nMauve by clicking the shortcut in the Windows menu instead, as that \nwill set the memory requirements appropriately.\n\n");
+			}			
+			errorMessage.append("If Mauve was launched via the command-line, please use the -Xmx java \nargument to increase the memory heap allocation size.\n");
+			errorMessage.append("For example, to launch Mauve with 500MB: java -Xmx500m -jar Mauve.jar\n");
+			JOptionPane.showMessageDialog(null, errorMessage.toString(), "Error launching Mauve", JOptionPane.ERROR_MESSAGE);
+			return false;
 		}
 		return true;
 	}
