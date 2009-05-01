@@ -499,7 +499,6 @@ public class AlignFrame extends java.awt.Frame
 
     public void determineLCBsCheckBoxActionPerformed(java.awt.event.ActionEvent e)
     {
-    	System.err.println("in AlignFrame!");
         if (determineLCBsCheckBox.isSelected())
         {
             recursiveCheckBox.setEnabled(true);
@@ -563,6 +562,7 @@ public class AlignFrame extends java.awt.Frame
     public void outputButtonActionPerformed(java.awt.event.ActionEvent e)
     {
     	fc.setDialogTitle("Save alignment file");
+    	fc.setName("");
         int returnVal = fc.showSaveDialog(this);
 
         if (returnVal == JFileChooser.APPROVE_OPTION)
