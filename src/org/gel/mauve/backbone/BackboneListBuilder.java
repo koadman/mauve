@@ -11,6 +11,7 @@ import java.util.Vector;
 import org.gel.mauve.Genome;
 import org.gel.mauve.XMFAAlignment;
 import org.gel.mauve.XmfaViewerModel;
+import org.gel.mauve.format.FileFinder;
 
 public class BackboneListBuilder {
 	public static File getBbFile (XmfaViewerModel model, XMFAAlignment xmfa) {
@@ -22,12 +23,8 @@ public class BackboneListBuilder {
 		} else {
 			return null; // no backbone information
 		}
+    	bb_fname = FileFinder.findFile(model, bb_fname);
 		File src = new File (bb_fname);
-		if (!src.canRead ()) {
-			bb_fname = model.getSrc ().getParent () + File.separatorChar
-					+ src.getName ();
-		}
-		src = new File (bb_fname);
 		if (!src.canRead ()) {
 			return null; // can't read the backbone file
 		}
