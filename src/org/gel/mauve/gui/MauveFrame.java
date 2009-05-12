@@ -187,7 +187,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFile.setMnemonic('F');
         jMenuFileOpen.setToolTipText("Open an existing alignment...");
         jMenuFileOpen.setVisible(true);
-        jMenuFileOpen.setText("Open...");
+        jMenuFileOpen.setText("Open alignment...");
         jMenuFileOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
         jMenuFileOpen.setMnemonic('O');
         
