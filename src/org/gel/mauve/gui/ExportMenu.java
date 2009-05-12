@@ -73,7 +73,7 @@ public class ExportMenu extends JMenu implements ActionListener {
 		
         add(jMenuFileExportImage);
         add(jMenuFileExportSnps);
-        add(jMenuFileExportSpas);
+//        add(jMenuFileExportSpas);
         add(jMenuFileExportPermutation);
         add(jMenuFileExportOrthologs);
 
@@ -87,8 +87,13 @@ public class ExportMenu extends JMenu implements ActionListener {
     	{
 			jMenuFileExportSnps.setEnabled(true);
 			jMenuFileExportSpas.setEnabled(true);
-			jMenuFileExportPermutation.setEnabled(true);
+       		jMenuFileExportPermutation.setEnabled(true);
 			jMenuFileExportOrthologs.setEnabled(true);
+    	}else{
+			jMenuFileExportSnps.setEnabled(false);
+			jMenuFileExportSpas.setEnabled(false);
+       		jMenuFileExportPermutation.setEnabled(false);
+			jMenuFileExportOrthologs.setEnabled(false);
     	}
         jMenuFileExportImage.setEnabled(true);
     }
@@ -132,19 +137,8 @@ public class ExportMenu extends JMenu implements ActionListener {
         }
         if (e.getActionCommand().equals("ExportPermutation"))
         {
-        	//temporary, write a snp export
-        	JFileChooser fc = new JFileChooser();
-        	fc.setDialogTitle("Export permutation file to...");
-            if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION)
-            {
-            	try{
-            	BufferedWriter bw = new BufferedWriter( new FileWriter(fc.getSelectedFile()));
-            	XmfaViewerModel xvm = (XmfaViewerModel)model;
-    			PermutationExporter.export(xvm, bw);
-    			bw.flush();
-    			bw.close();
-            	}catch(IOException ioe){ioe.printStackTrace();}
-            }
+        	XmfaViewerModel xvm = (XmfaViewerModel)model;
+        	PermutationExporter.ExportFrame pef = new PermutationExporter.ExportFrame(xvm);
         }
 		
 	}
