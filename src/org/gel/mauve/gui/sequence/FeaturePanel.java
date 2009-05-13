@@ -181,6 +181,9 @@ public class FeaturePanel extends AbstractSequencePanel
 		Dimension my_size = getSize ();
 		my_size.height += MauveConstants.FEATURE_HEIGHT;
 		setNewSize (my_size);
+		SeqPanel parent = (SeqPanel) getParent ();
+		parent.addToSize (MauveConstants.FEATURE_HEIGHT, true);
+		parent.updateSize();
 	}
 	
 	private void setNewSize (Dimension my_size) {

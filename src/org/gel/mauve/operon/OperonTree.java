@@ -76,8 +76,12 @@ public class OperonTree extends JTree implements TreeSelectionListener,
 			seqs.addAll (right);
 			AncestralState state = (AncestralState) node.getUserObject();
 			populateSames (node, state, seqs);
-			populateDiffs (node, left, right, "present but absent in one child", state.differences2);
-			populateDiffs (node, left, right, "absent but present in one child", state.differences);
+			if (node.getParent() == null)
+				populateDiffs (node, left, right, "conserved in one child", state.differences, state);
+			else {
+				populateDiffs (node, left, right, "conserved but different in one child", state.differences2, state);
+				populateDiffs (node, left, right, "different but conserved in one child", state.differences, state);
+			}
 		}
 		else {
 			Operon op = (Operon) node.getUserObject();
@@ -92,9 +96,9 @@ public class OperonTree extends JTree implements TreeSelectionListener,
 			AncestralState state, HashSet <Integer> seqs) {
 		DefaultMutableTreeNode sames_node = new DefaultMutableTreeNode (
 				(state.sames.size () - state.unclears.size ())
-				+ " present operons");
+				+ " conserved operons");
 		DefaultMutableTreeNode unclears_node = new DefaultMutableTreeNode (
-				state.unclears.size () + " possibly present");
+				state.unclears.size () + " unresolved at either child");
 		node.add (sames_node);
 		node.add (unclears_node);
 		Iterator <Operon> itty = state.sames.keySet().iterator();
@@ -106,18 +110,19 @@ public class OperonTree extends JTree implements TreeSelectionListener,
 				DefaultMutableTreeNode unclear_node = new DefaultMutableTreeNode (
 						new UnclearOperon (op, op_node));
 				unclears_node.add (unclear_node);
-				populateSames (unclear_node, op, seqs);
+				populateSames (unclear_node, op, seqs, null);
 			}
 			else {
 				sames_node.add (op_node);
-				populateSames (op_node, op, seqs);
+				populateSames (op_node, op, seqs, state);
 			}
 		}
 	}
 	
 	protected void populateDiffs (DefaultMutableTreeNode node,
 			HashSet <Integer> lefts, HashSet <Integer> rights, String display,
-			Hashtable <Operon, Hashtable <String, DifferentOperon>> differences) {
+			Hashtable <Operon, Hashtable <String, DifferentOperon>> differences,
+			AncestralState state) {
 		DefaultMutableTreeNode diffs_node = new DefaultMutableTreeNode (
 				differences.size () + " " + display);
 		node.add (diffs_node);
@@ -133,7 +138,7 @@ public class OperonTree extends JTree implements TreeSelectionListener,
 					"conserved operons");
 			op_node.add (sub_same);
 			if (phylo.sames.containsKey(op))
-				populateSames (sub_same, op, current);
+				populateSames (sub_same, op, current, state);
 			
 			current = current == rights ? lefts : rights;
 			DifferentOperon diff_op = differences.get(op).values ().iterator().next ();
@@ -141,13 +146,13 @@ public class OperonTree extends JTree implements TreeSelectionListener,
 					diff_op.diffs.values ().iterator().next ());
 			op_node.add (diff_node);
 			DefaultMutableTreeNode seq_list = new DefaultMutableTreeNode (
-					current);
+					seqListToString (current));
 			diff_node.add(seq_list);
 		}
 	}
 	
 	protected void populateSames (DefaultMutableTreeNode op_node,
-			Operon op, HashSet <Integer> seqs) {
+			Operon op, HashSet <Integer> seqs, AncestralState state) {
 		Iterator <Operon> others = phylo.sames.get(op).values (
 				).iterator().next ().iterator ();
 		HashSet <Integer> sames = new HashSet <Integer> ();
@@ -157,9 +162,23 @@ public class OperonTree extends JTree implements TreeSelectionListener,
 				sames.add (other.seq);
 			}
 		}
+		
+		if (state != null && sames.size() == state.seqs.size ())
+			state.conserved_core++;
 		DefaultMutableTreeNode child_node = 
-			new DefaultMutableTreeNode (sames);
+			new DefaultMutableTreeNode (seqListToString (sames));
 		op_node.add (child_node);
+	}
+	
+	protected String seqListToString (HashSet <Integer> seqs) {
+		String s = "";
+		Iterator <Integer> itty = seqs.iterator ();
+		while  (itty.hasNext ()) {
+			s += AncestralState.SEQ_NAMES.get (itty.next ());
+			if (itty.hasNext())
+				s += ", ";
+		}
+		return s;
 	}
 		
 	protected void populateLeaf (DefaultMutableTreeNode node,
@@ -186,7 +205,7 @@ public class OperonTree extends JTree implements TreeSelectionListener,
 		location = new JLabel (" ");
 		panel.add(location, BorderLayout.NORTH);
 		search_results = new Vector <DefaultMutableTreeNode> ();
-		GuiUtils.display(panel);
+		GuiUtils.display(panel, "Operon Explorer");
 	}
 	
 	protected void setLocationLabel (Object [] path) {
@@ -334,7 +353,7 @@ public class OperonTree extends JTree implements TreeSelectionListener,
 		
 		public String toString () {
 			return op.seq + ": " + phylo.handler.model.getGenomeBySourceIndex(
-					op.seq).getDisplayName();
+					op.seq).getDisplayName() + " " + phylo.handler.counts [op.seq];
 		}
 	}
 

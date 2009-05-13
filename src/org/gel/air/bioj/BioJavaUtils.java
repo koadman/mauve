@@ -21,19 +21,50 @@ import org.gel.air.util.MathUtils;
 public class BioJavaUtils implements BioJavaConstants {
 
 	public static Vector restrictedList (Vector <Feature> features, HashSet types) {
-		return restrictedList (features.iterator(), types);
+		return restrictedList (features.iterator(), types, false);
+	}
+	
+	public static Vector restrictedList (Vector <Feature> features, HashSet types,
+			boolean post_loaded) {
+		return restrictedList (features.iterator(), types, post_loaded);
 	}
 	
 	public static Vector restrictedList (Iterator <Feature> itty, HashSet types) {
+		return restrictedList (itty, types, false);
+	}
+	public static Vector restrictedList (Iterator <Feature> itty, HashSet types,
+			boolean post_loaded) {
 		Vector keeps = new Vector <Feature> ();
 		while (itty.hasNext()) {
 			Feature feat = itty.next();
-			//right way but failing if operon in gbk file
-			if (types.contains(feat.getType()))
-			if (feat.getAnnotation().containsProperty("label"))
+			boolean good = false;
+			String type = feat.getType().toLowerCase();
+			Iterator <String> keep = types.iterator();
+			while (keep.hasNext()) {
+				if (type.contains(keep.next().toLowerCase ()))
+					good = true;
+			}
+			if (good && feat.getAnnotation() != null)
+			if ((!post_loaded) || feat.getAnnotation().containsProperty("label"))
 				keeps.add(feat);
 		}
+		System.out.println ("sl: " + keeps.size());
 		return keeps;
+	}
+	
+	public static Hashtable <String, StrandedFeature> getLoci (
+			Vector <StrandedFeature> feats) {
+		Hashtable <String, StrandedFeature> loci = new Hashtable <String, 
+				StrandedFeature> ();
+		Iterator <StrandedFeature> itty = feats.iterator();
+		while (itty.hasNext()) {
+			StrandedFeature feat = itty.next(); 
+			if (feat.getAnnotation().containsProperty("locus_tag")) {
+				loci.put((String) feat.getAnnotation().getProperty("locus_tag"), 
+						feat);
+			}
+		}
+		return loci;
 	}
 
 	public static Vector getSortedStrandedFeatures (FeatureHolder annos) {
@@ -73,6 +104,13 @@ public class BioJavaUtils implements BioJavaConstants {
 			}
 		}
 		return null;
+	}
+	
+	public static String getPrefix (String gene) {
+		int ind = 0;
+		while (ind < gene.length() && Character.isLowerCase(gene.charAt(ind)))
+			ind++;
+		return gene.substring(0, ind);
 	}
 
 	public static final Comparator FEATURE_START_COMPARATOR = new Comparator () {

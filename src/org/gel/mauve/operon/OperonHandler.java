@@ -38,7 +38,8 @@ import org.gel.mauve.gui.MauveFrame;
 import org.gel.mauve.module.MauveModule;
 import org.gel.mauve.module.ModuleListener;
 
-public class OperonHandler implements MauveConstants, ModuleListener {
+public class OperonHandler implements MauveConstants, OperonConstants,
+		ModuleListener {
 
 	/**
 	 * currently used to compare to regdb operons (both maps and loci)
@@ -48,7 +49,8 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	protected Operon [] firsts;
 	protected int counts [];
 	protected HashSet <Operon> not_fully_aligned;
-	//misname and not yet used - non rna or gene features (???)
+	//operon features that don't have clear aligned class, or haven't
+	//yet been classified.
 	protected HashSet <Feature> [] non_aligned;
 	protected Hashtable <Long, PhyloMultiplicity> [] op_mults;
 	protected Vector [] bioj_ops;
@@ -59,11 +61,8 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	 */
 	protected HashSet  <Operon> mixed_ops;
 	protected XmfaViewerModel model;
-	public static final String RNA = "rna";
-	public static final String GENE = "gene";
-	public static final String CDS = "cds";
 	//represents maximum distance between genes still considered within an operon
-	protected int max_within = 50;
+	protected int max_within = 125;
 	protected File operon_dir;
 	//percent more than which is considered an operon or gene is conserved completely
 	protected double complete = 95.0;
@@ -72,7 +71,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	//if not null, contains all features to be considered
 	protected Set users;
 	protected boolean regdb_restrict;
-	protected RegDBInterfacer regdb_int;
+	protected RegDBOperon regdb_int;
 	protected FeatureRelator relate;
 	
 	public OperonHandler (String [] args) {
@@ -98,7 +97,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 				mixed_ops.clear();
 			}
 			if (regdb_restrict)
-				regdb_int = new RegDBInterfacer (
+				regdb_int = new RegDBOperon (
 						"c:\\mauvedata\\operon\\TUSet.txt", this);
 			findOperonMultiplicity (frame);
 			if (regdb_int != null) {
@@ -159,7 +158,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 			HashSet <String> types = new HashSet <String> ();
 			types.add(OPERON_STRING);
 			bioj_ops [i] = BioJavaUtils.restrictedList (
-					writer.getFeatureList(), types);
+					writer.getFeatureList(), types, true);
 			proc.remove(UNCLEAR_MULTS);
 			proc.remove(MULTIPLICITIES);
 		}
@@ -215,6 +214,7 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 	}
 	
 	protected void findOperons (int index, Hashtable data) {
+		//getFeatureRelator ();
 		partition (BioJavaUtils.getSortedStrandedFeatures(model.getGenomeBySourceIndex(
 				index).getAnnotationSequence()), index);
 		firsts [index] = Operon.first;
@@ -243,25 +243,43 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 			"c:\\mauvedata\\operon\\orthos\\ecoli_orthos.txt");
 			relate.load(FeatureRelator.PARALOGS, 
 			"c:\\mauvedata\\operon\\orthos\\ecoli_paras.txt");
-			Hashtable <Integer, String> prefixes = new Hashtable <
-			Integer, String> (firsts.length);
-			for (int i = 0; i < firsts.length; i++) {
-				String id = MauveHelperFunctions.getTruncatedDBXrefID(
-						firsts [i].genes.get(0), ASAP);
-				prefixes.put(i, id.substring(0, 3));
+			if (firsts [0] != null) {
+				Hashtable <Integer, String> prefixes = new Hashtable <
+					Integer, String> (firsts.length);
+				for (int i = 0; i < firsts.length; i++) {
+					String id = MauveHelperFunctions.getTruncatedDBXrefID(
+							firsts [i].genes.get(0), ASAP);
+					prefixes.put(i, id.substring(0, 3));
+				}
+				relate.setPrefixes (prefixes);
 			}
-			relate.setPrefixes (prefixes);
+			/*else {
+				Hashtable <Integer, String> prefixes = new Hashtable <
+					Integer, String> (firsts.length);
+				prefixes.put(0, "ABE");
+				prefixes.put(1, "ADR");
+				prefixes.put(2, "ABH");
+				prefixes.put(3, "ACA");
+				prefixes.put(4, "ABR");
+				prefixes.put(5, "AEA");
+				prefixes.put(6, "ABU");
+				prefixes.put(7, "ABX");
+				relate.setPrefixes (prefixes);
+			}*/
 		}
 		return relate;
 	}
+
 	
-	protected void partition (Vector <StrandedFeature> feats, int index) {
+	protected void partition (Vector feats, int index) {
+		feats = BioJavaUtils.restrictedList(feats, FEAT_TYPES);
+		loci = BioJavaUtils.getLoci(feats);
 		for (int i = 0; i < feats.size(); i++) {
-			StrandedFeature feat = feats.get (i);
+			StrandedFeature feat = (StrandedFeature) feats.get (i);
 			Annotation note = feat.getAnnotation();
 			String type = feat.getType().toLowerCase();
-			if (note != null && (type.indexOf(GENE) > -1 || type.indexOf(CDS)
-					> -1 || type.indexOf(RNA) > -1) && (users == null ||
+			if (note != null /*&& relate.hasGeneName(feat, all, FeatureRelator.ORTHOLOGS)*/
+					&& (users == null ||
 					users.contains(feat))) {
 				if (Operon.last == null || !feat.getStrand ().equals(
 						Operon.last.genes.getLast().getStrand()) || 
@@ -286,10 +304,6 @@ public class OperonHandler implements MauveConstants, ModuleListener {
 					 Operon.last.addGene(feat, distance);
 				}
 				maps.put(feat, Operon.last);
-				if (feat.getAnnotation().containsProperty("locus_tag")) {
-					 loci.put((String) feat.getAnnotation().getProperty("locus_tag"), 
-							 feat);
-				 }
 			}
 		}
 		Vector <Operon> op_list = new Vector <Operon> ();

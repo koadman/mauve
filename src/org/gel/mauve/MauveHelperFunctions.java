@@ -16,7 +16,9 @@ import org.biojava.bio.seq.Feature;
 import org.biojava.bio.seq.FeatureFilter;
 import org.biojava.bio.seq.FeatureHolder;
 import org.biojava.bio.seq.Sequence;
+import org.biojava.bio.seq.StrandedFeature;
 import org.biojava.bio.symbol.SymbolList;
+import org.gel.air.bioj.BioJavaUtils;
 import org.gel.mauve.analysis.Segment;
 import org.gel.mauve.analysis.output.AbstractTabbedDataWriter;
 import org.gel.mauve.analysis.output.SegmentDataProcessor;
@@ -39,6 +41,30 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 			file += "fas";
 		}
 		return file;
+	}
+	
+	public static Hashtable <String, StrandedFeature> idsToFeats (
+			BaseViewerModel model) {
+		Hashtable <String, StrandedFeature> all = new Hashtable <
+				String, StrandedFeature> ();
+		for (int i = 0; i < model.getSequenceCount(); i++) {
+			Iterator <StrandedFeature> feats = BioJavaUtils.
+					getSortedStrandedFeatures(model.getGenomeBySourceIndex(
+					i).getAnnotationSequence()).iterator();
+			while (feats.hasNext()) {
+				StrandedFeature feat = feats.next();
+				if (feat.getAnnotation()!= null) {
+					try {
+						String id = getTruncatedDBXrefID (feat, ASAP);
+						all.put(id, feat);
+					}				
+					catch (Exception e) {
+						//System.out.println ("null: " + feat.getType());
+					}
+				}
+			}
+		}
+		return all;
 	}
 	
 	public static File getRootDirectory (BaseViewerModel model) {

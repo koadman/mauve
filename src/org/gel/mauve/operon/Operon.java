@@ -73,10 +73,7 @@ public class Operon implements MauveConstants {
 			if (name.length() > 0)
 				name.append('-');
 			name.append(gene);
-			int ind = 0;
-			while (ind < gene.length() && Character.isLowerCase(gene.charAt(ind)))
-				ind++;
-			last_prefix = gene.substring(0, ind);
+			last_prefix = BioJavaUtils.getPrefix(gene);
 		}
 	}
 	

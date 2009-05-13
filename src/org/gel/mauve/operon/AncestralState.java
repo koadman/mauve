@@ -8,6 +8,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 public class AncestralState {
 	
+	static final Hashtable <Integer, String> SEQ_NAMES = new Hashtable <Integer, String>();
 	//HashSet <DifferentOperon> diffs;
 	/** 
 	 *  before PhyloOperon.pruneTree (), contains all operons are different
@@ -30,6 +31,8 @@ public class AncestralState {
 	
 	protected HashSet <Integer> seqs;
 
+	protected int conserved_core;
+	
 	public AncestralState() {
 		//diffs = new HashSet <DifferentOperon> ();
 		differences = new Hashtable <Operon, Hashtable <
@@ -145,9 +148,17 @@ public class AncestralState {
 	}
 	
 	public String toString () {
-		return seqs.toString ();
+		String s = "";
+		Iterator <Integer> itty = seqs.iterator ();
+		while  (itty.hasNext ()) {
+			s += SEQ_NAMES.get (itty.next ());
+			if (itty.hasNext())
+				s += ", ";
+		}
+		return s + " " + conserved_core;
 		//return "sames: " + sames.size() + "  diffs: " + differences.size () + "  unclear: " + unclears.size ();
 	}
+	
 	
 	public static class DifferentOperon {
 		
@@ -175,6 +186,18 @@ public class AncestralState {
 		public String toString () {
 			return difference;
 		}
+
+	}
+	
+	static {
+		SEQ_NAMES.put (0, "K12");
+		SEQ_NAMES.put (1, "HS");
+		SEQ_NAMES.put (2, "EDL");
+		SEQ_NAMES.put (3, "Sakai");
+		SEQ_NAMES.put (4, "CFT");
+		SEQ_NAMES.put (5, "UTI");
+		SEQ_NAMES.put (6, "LT2");
+		SEQ_NAMES.put (7, "CT18");
 	}
 
 }

@@ -7,8 +7,10 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
+import org.biojava.bio.seq.Feature;
 import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.seq.StrandedFeature;
+import org.gel.mauve.MauveHelperFunctions;
 
 public class FeatureRelator {
 	
@@ -54,6 +56,31 @@ public class FeatureRelator {
 	
 	public void setPrefixes (Hashtable <Integer, String> prefs) {
 		prefixes = prefs;
+	}
+	
+	public boolean hasGeneName (StrandedFeature feat, Hashtable <String, 
+			StrandedFeature> ids, String relation) {
+		try {
+			String id = MauveHelperFunctions.getTruncatedDBXrefID(feat, "ASAP");
+		HashSet feats = relation == null ? new HashSet <String> () : 
+			relations.get(relation).get(id);
+		if (!(relation == null) && relations.containsKey (relation)) {
+			if (feats != null) {
+				Iterator <String> itty = feats.iterator();
+				while (itty.hasNext()) {
+					StrandedFeature log = ids.get(itty.next());
+					if (log.getAnnotation() != null && log.getAnnotation(
+							).containsProperty("gene"))
+						return true;
+				}
+			}
+		}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return false;
 	}
 	
 	/**

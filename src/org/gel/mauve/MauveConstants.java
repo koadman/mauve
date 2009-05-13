@@ -31,10 +31,6 @@ public interface MauveConstants extends BioJavaConstants {
 
 	public final static String RIGHT_STRING = "right_end";
 
-	public final static String FORWARD = "forward";
-	
-	public final static String COMPLEMENT = "complement";
-
 
 	/**
 	 * Strings representing prebuilt groupings of search fields

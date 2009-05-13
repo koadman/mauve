@@ -2,11 +2,13 @@ package org.gel.mauve.operon;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.StringTokenizer;
 
 import org.biojava.bio.seq.StrandedFeature;
@@ -16,7 +18,7 @@ import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MauveHelperFunctions;
 import org.gel.mauve.operon.Operon.OpIterator;
 
-public class RegDBInterfacer implements MauveConstants {
+public class RegDBOperon implements MauveConstants {
 	
 	protected OperonHandler handler;
 	protected int num_operons;
@@ -29,14 +31,19 @@ public class RegDBInterfacer implements MauveConstants {
 	protected int seq;
 	
 	
-	public RegDBInterfacer (String file, OperonHandler op_handler) {
+	public RegDBOperon (String file, OperonHandler op_handler) {
 		handler = op_handler;
 		f_pos = new HashSet <StrandedFeature> ();
 		f_neg = new HashSet <StrandedFeature> ();
 		map = new Hashtable <StrandedFeature, Operon> ();
 		ids_to_feats = new Hashtable <String, StrandedFeature> ();
 		seq = 0;
-		read (file);
+		if (op_handler != null)
+			readOperons (file, op_handler.loci);
+	}
+	
+	public RegDBOperon (String file) {
+		this (file, null);
 	}
 	
 	public Hashtable <StrandedFeature, Operon> getRegDBOperons () {
@@ -75,6 +82,7 @@ public class RegDBInterfacer implements MauveConstants {
 									genes.next (), ASAP));
 						}
 						oppy.remove();
+						handler.counts [i]--;
 						count++;
 					}
 				}
@@ -82,13 +90,8 @@ public class RegDBInterfacer implements MauveConstants {
 				ids_to_feats = k12;
 				System.out.println ("after restrict right: " + (handler.counts [seq] - count));
 			}
-			else if (i != 1){
-				restrictRightRegDB (i, relate, firsts);
-			}
 			else {
-				Operon first = firsts [1];
-				first.next.next = first;
-				first.prev = first.next;				
+				restrictRightRegDB (i, relate, firsts);
 			}
 		}
 		ids_to_feats = temp;
@@ -98,15 +101,7 @@ public class RegDBInterfacer implements MauveConstants {
 		Operon [] firsts = handler.firsts;
 		FeatureRelator relate = handler.getFeatureRelator();
 		for (int i = 0; i < firsts.length; i++) {
-			if (i == 1) {
-				Operon first = firsts [1];
-				first.next.next = first;
-				first.prev = first.next;
-			}
-			else {
-				System.out.println ("five: " + i);
-				restrictAllRegDB (i, relate, firsts);
-			}
+			restrictAllRegDB (i, relate, firsts);
 		}
 	}
 	
@@ -133,6 +128,7 @@ public class RegDBInterfacer implements MauveConstants {
 				System.out.println ("keep!!!!!");*/
 			if (!keep) {
 				oppy.remove();
+				handler.counts [ind]--;
 			}
 		}
 		firsts [ind] = oppy.getStart();
@@ -162,6 +158,7 @@ public class RegDBInterfacer implements MauveConstants {
 				System.out.println ("keep!!!!!");*/
 			if (!keep) {
 				oppy.remove();
+				handler.counts [ind]--;
 			}
 		}
 		firsts [ind] = oppy.getStart();
@@ -219,36 +216,65 @@ public class RegDBInterfacer implements MauveConstants {
 		System.out.println ("fpos " + f_pos.size());
 	}
 
-	public void read (String file) {
+	public static String getFirstRealLine (BufferedReader in, int col) {
+		String input = null;
+		try {
+			do {
+				input = in.readLine();
+			} while (!input.trim().startsWith("(" + col + ")"));
+			input = in.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return input;
+	}
+	
+	public void readOperons (String file, Hashtable <String, 
+			StrandedFeature> loci) {
 		try {
 			Operon.reset();
 			BufferedReader in = new BufferedReader (new FileReader (
 					file));
-			String input = null;
-			do {
-				input = in.readLine();
-			} while (!input.trim().startsWith("(5)"));
-			input = in.readLine();
+			String input = getFirstRealLine (in, 5);
 			StringTokenizer toke = null;
 			HashSet <String> unique_bnums = new HashSet <String> ();
+			Hashtable <String, StrandedFeature> temp = new Hashtable <String, 
+					StrandedFeature> ();
 			while (input != null) {
 				if (input.indexOf("experiment") < 0) {
 					input = in.readLine();
 					continue;
 				}
-				toke = new StringTokenizer (input);
+				toke = new StringTokenizer (input, "\t");
+				LinkedList ordered_genes = getOrdered  (toke.nextToken());
 				toke.nextToken();
-				toke.nextToken();
+				toke.nextToken ();
 				toke = new StringTokenizer (toke.nextToken(), ",");
 				Operon current = null;
+				Hashtable <String, String> genes = new Hashtable <String, String> ();
 				while (toke.hasMoreTokens()) {
 					String bnum = toke.nextToken();
 					if (!bnum.endsWith("|")) {
-						bnum = bnum.substring(bnum.indexOf('|') + 1);
-						if (handler.loci.containsKey (bnum)) {
+						int ind = bnum.indexOf('|');
+						if (ind == -1)
+							System.out.println ("no |: " + bnum);
+						if (loci.containsKey (bnum))
+							genes.put(bnum.substring (0, ind), bnum.substring (
+									ind + 1));
+						else
+							unique_bnums.add(bnum);
+					}
+				}
+				if (ordered_genes.size() == genes.size()) {
+					Iterator <String> order = ordered_genes.iterator();
+					while (order.hasNext()) {
+						String gene = order.next ();
+						if (genes.containsKey(gene)) {
+							String bnum = genes.get(gene);
 							if (current == null)
 								current = new Operon (seq);
-							StrandedFeature feat = handler.loci.remove(bnum);
+							StrandedFeature feat = loci.remove(bnum);
+							temp.put (bnum, feat);
 							current.addGene(feat, -1);
 							map.put(feat, current);
 							ids_to_feats.put(MauveHelperFunctions.
@@ -256,20 +282,105 @@ public class RegDBInterfacer implements MauveConstants {
 							num_genes++;
 						}
 						else
-							unique_bnums.add(bnum);
+							System.out.println ("not in genes: "+ gene + " " + genes.keySet());
 					}
 				}
 				if (current != null) {
-					Collections.sort(current.genes, 
-							BioJavaUtils.FEATURE_START_COMPARATOR);
+					if (current.genes.get(0).getStrand() == 
+						StrandedFeature.NEGATIVE)
+					Collections.reverse(current.genes);
 				}
 				input = in.readLine();
 			}
+				
 			System.out.println ("unique bnums from regdb (" + 
 					unique_bnums.size () + "): " + unique_bnums);
 			//if more than one genome has bnumbers, count will be wrong
 			/*System.out.println ("unique bnums from asap (" + 
 					handler.loci.size() + "): " + handler.loci.keySet ());*/
+			loci.putAll (temp);
+			first = Operon.first;
+			num_ops = Operon.count;
+			Operon.reset();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	
+	/**
+	 * should be outmoded; call readOperons but this might have a different
+	 * set and should still be in working order.
+	 * @param file
+	 */
+	public void readTUs (String file) {
+		try {
+			Operon.reset();
+			BufferedReader in = new BufferedReader (new FileReader (
+					file));
+			String input = getFirstRealLine (in, 5);
+			StringTokenizer toke = null;
+			HashSet <String> unique_bnums = new HashSet <String> ();
+			Hashtable <String, StrandedFeature> temp = new Hashtable <String, 
+			StrandedFeature> ();
+			while (input != null) {
+				if (input.indexOf("experiment") < 0) {
+					input = in.readLine();
+					continue;
+				}
+				toke = new StringTokenizer (input, "\t");
+				LinkedList ordered_genes = getOrdered  (toke.nextToken());
+				toke.nextToken();
+				toke = new StringTokenizer (toke.nextToken(), ",");
+				Operon current = null;
+				Hashtable <String, String> genes = new Hashtable <String, String> ();
+				while (toke.hasMoreTokens()) {
+					String bnum = toke.nextToken();
+					if (!bnum.endsWith("|")) {
+						int ind = bnum.indexOf('|');
+						if (ind == -1)
+							System.out.println ("no |: " + bnum);
+						if (handler.loci.containsKey (bnum))
+							genes.put(bnum.substring (0, ind), bnum.substring (
+									ind + 1));
+						else
+							unique_bnums.add(bnum);
+					}
+				}
+				if (ordered_genes.size() == genes.size()) {
+					Iterator <String> order = ordered_genes.iterator();
+					while (order.hasNext()) {
+						String gene = order.next ();
+						if (genes.containsKey(gene)) {
+							String bnum = genes.get(gene);
+							if (current == null)
+								current = new Operon (seq);
+							StrandedFeature feat = handler.loci.remove(bnum);
+							temp.put(bnum, feat);
+							current.addGene(feat, -1);
+							map.put(feat, current);
+							ids_to_feats.put(MauveHelperFunctions.
+									getTruncatedDBXrefID(feat, ASAP), feat);
+							num_genes++;
+						}
+						else
+							System.out.println ("not in genes: "+ gene + " " + genes.keySet());
+					}
+				}
+				if (current != null) {
+					if (current.genes.get(0).getStrand() == 
+						StrandedFeature.NEGATIVE)
+					Collections.reverse(current.genes);
+				}
+				input = in.readLine();
+			}
+				
+			System.out.println ("unique bnums from regdb (" + 
+					unique_bnums.size () + "): " + unique_bnums);
+			//if more than one genome has bnumbers, count will be wrong
+			/*System.out.println ("unique bnums from asap (" + 
+					handler.loci.size() + "): " + handler.loci.keySet ());*/
+			handler.loci.putAll(temp);
 			first = Operon.first;
 			num_ops = Operon.count;
 			Operon.reset();
@@ -278,6 +389,20 @@ public class RegDBInterfacer implements MauveConstants {
 		}
 	}
 	
+
+	
+	public static LinkedList <String> getOrdered (String name) {
+		LinkedList <String> genes = new LinkedList <String> ();
+		StringTokenizer toke = new StringTokenizer (name, "-");
+		while (toke.hasMoreTokens()) {
+			String group = toke.nextToken();
+			String prefix = BioJavaUtils.getPrefix(group);
+			int ind = prefix.length();
+			while (ind < group.length())
+				genes.add(prefix + group.charAt(ind++));
+		}
+		return genes;
+	}
 	/**
 	 * recalcs operons w/o features not present in regdb operons and
 	 * recalcs comparison

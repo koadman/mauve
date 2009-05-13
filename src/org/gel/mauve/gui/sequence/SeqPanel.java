@@ -31,6 +31,7 @@ import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.TooManyListenersException;
 
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 
 import org.gel.mauve.BaseViewerModel;
@@ -109,8 +110,7 @@ public class SeqPanel extends AbstractSequencePanel implements MouseListener
         if (genome.getAnnotationSequence() != null)
         {
             feature = new FeaturePanel(genome, model);
-            my_size.height += FeaturePanel.DEFAULT_HEIGHT;
-            my_max_size.height += FeaturePanel.DEFAULT_HEIGHT;
+            addToSize (FeaturePanel.DEFAULT_HEIGHT, false);
         }
 
 
@@ -213,10 +213,7 @@ public class SeqPanel extends AbstractSequencePanel implements MouseListener
 	        c.weighty = 0.1;
 	        add(label);
 	        layoutManager.setConstraints(label, c);
-	        setPreferredSize(my_size);
-	        setMaximumSize(my_max_size);
-	        setMinimumSize(min_size);
-	        setSize(my_size);
+	        updateSize ();
 	    }else
 	    {
 	    	// genome not visible...
@@ -226,6 +223,30 @@ public class SeqPanel extends AbstractSequencePanel implements MouseListener
 	        layoutManager.setConstraints(label, c);
 	        setAllSizes(invisible_size);
 	    }
+    }
+    
+    /**
+     * add amount to size
+     */
+    public void addToSize (int grow, boolean min) {
+        my_size.height += grow;
+        my_max_size.height += grow;
+        if (min)
+        	min_size.height += grow;
+    }
+     
+    /**
+     * updated size using class variables
+     */
+    public void updateSize () {
+        setPreferredSize(my_size);
+        setMaximumSize(my_max_size);
+        setMinimumSize(min_size);
+        setSize(my_size);
+        if (isVisible () && getParent () != null) {
+        	getParent ().invalidate ();
+        	((JComponent) getParent ()).revalidate ();
+        }
     }
     
     /**

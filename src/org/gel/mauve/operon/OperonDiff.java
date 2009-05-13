@@ -113,6 +113,10 @@ public abstract class OperonDiff {
 						BioJavaUtils.FEATURE_COMPARATOR);
 				if (ind < 0)
 					ind = -(ind + 1);
+				if (ind >= seq2_ops.size ()) {
+					difference = "Operon not in genome";
+					return false;
+				}
 				if (start < seq2_ops.get(ind).getLocation().getMin() &&
 						ind > 0 && seq2_ops.get(ind).getLocation (
 						).getMax () > start) {
@@ -126,7 +130,6 @@ public abstract class OperonDiff {
 						if (MathUtils.percentContained(start, end, loci.getMin(), loci.getMax ()) >
 								min_overlap) {
 							comps = new HashSet ();
-							//not necessarily at same index anymore if remove regdb stuff
 							comps.add (handler.op_lists [seq].get(ind));
 							return true;
 						}

@@ -2,16 +2,20 @@ package org.gel.air.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.HashSet;
+import java.util.StringTokenizer;
 
 public class IOUtils {
 
@@ -31,6 +35,25 @@ public class IOUtils {
 	          if (in != null)          in.close();
 	          if (out != null)     out.close();
 	     }
+	}
+	
+	public static HashSet <Integer> readIntoSet (String file) {
+		HashSet <Integer> vals = new HashSet <Integer> ();
+		try {
+			BufferedReader in = new BufferedReader (new FileReader (file));
+			String input = in.readLine();
+			while (input != null) {
+				StringTokenizer toke = new StringTokenizer (input, " ");
+				toke.nextToken();
+				while (toke.hasMoreTokens())
+					vals.add(Integer.parseInt(toke.nextToken ()));
+				input = in.readLine();
+			}
+			in.close();
+		} catch (Exception e) { 
+			e.printStackTrace();
+		}
+		return vals;
 	}
 	
 	public static long guaranteedSkip (InputStream in, long amount) throws IOException {
