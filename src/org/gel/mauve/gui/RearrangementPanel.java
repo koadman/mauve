@@ -456,11 +456,10 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
 	        if(lm.getLcbChangePoints().size() > 0)
 	        	weight_value_text.setText(lm.getLcbChangePoints().elementAt(0).toString());
 	        toolbar.add(weight_value_text);
+	        // tell the user how many LCBs there are
+	        String status_text = "There are " + lm.getVisibleLcbCount() + " LCBs with minimum weight " + lm.getMinLCBWeight();
+	        fireHintMessageEvent(status_text);
         }
-
-        // tell the user how many LCBs there are
-        String status_text = "There are " + lm.getVisibleLcbCount() + " LCBs with minimum weight " + lm.getMinLCBWeight();
-        fireHintMessageEvent(status_text);
     }
 
     /**
