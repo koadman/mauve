@@ -31,4 +31,4 @@ MAUVE=`cd "$MAUVE0" && pwd`
 cd "$saveddir"
 #end BEAST section
 
-$JAVA_CMD $JAVA_ARGS -jar $MAUVE/Mauve.jar $1 $2 $3 $4 $5
+$JAVA_CMD $JAVA_ARGS -DmauveDir=$MAUVE/ -jar $MAUVE/Mauve.jar $1 $2 $3 $4 $5
