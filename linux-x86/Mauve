@@ -7,4 +7,28 @@
 # (c) 2003 Aaron Darling
 
 JAVA_CMD=java
-$JAVA_CMD -Xms200M -Xmx1500M -jar Mauve.jar
+JAVA_ARGS="-Xms200M -Xmx1500M"
+
+# this section taken from GPL BEAST code
+## resolve links - $0 may be a link to application
+PRG="$0"
+
+# need this for relative symlinks
+while [ -h "$PRG" ] ; do
+    ls=`ls -ld "$PRG"`
+    link=`expr "$ls" : '.*-> \(.*\)$'`
+    if expr "$link" : '/.*' > /dev/null; then
+PRG="$link"
+    else
+PRG="`dirname "$PRG"`/$link"
+    fi
+done
+
+# make it fully qualified
+saveddir=`pwd`
+MAUVE0=`dirname "$PRG"`
+MAUVE=`cd "$MAUVE0" && pwd`
+cd "$saveddir"
+#end BEAST section
+
+$JAVA_CMD $JAVA_ARGS -jar $MAUVE/Mauve.jar $1 $2 $3 $4 $5
