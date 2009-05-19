@@ -132,6 +132,9 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         this.mauve = mauve;
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         fc = new JFileChooser();
+        String osname = System.getProperty("os.name");
+        if(osname.indexOf("indow")==-1&&osname.indexOf("Mac")==-1)
+        	fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
         pack();
         initComponents();
         setVisible(true);

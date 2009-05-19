@@ -190,7 +190,12 @@ public class AlignFrame extends java.awt.Frame
         setLocation(new java.awt.Point(0, 0));
         setLayout(null);
         setTitle("Align sequences...");
-
+        
+        // if we're not on Mac or Windows then use the current dir as default
+        String osname = System.getProperty("os.name");
+        if(osname.indexOf("indow")==-1&&osname.indexOf("Mac")==-1)
+        	fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
+        
         parameterPanel.add(defaultSeedCheckBox);
         parameterPanel.add(determineLCBsCheckBox);
         parameterPanel.add(collinearCheckBox);
@@ -344,9 +349,12 @@ public class AlignFrame extends java.awt.Frame
         }
         else
         {
-        	String pname = "./" + name;
+        	String mauvedir = System.getProperty("mauveDir");
+        	if(mauvedir == null)	mauvedir = "./";
+        	String pname = mauvedir + name;
+        	System.out.println("trying path " + pname);
         	if(os_arch.indexOf("64") >= 0)
-        		pname = "./linux-x64/" + name;
+        		pname = mauvedir + "linux-x64/" + name;
         	File f = new File(pname);
         	if( f.exists())
         		return pname;
@@ -563,6 +571,7 @@ public class AlignFrame extends java.awt.Frame
     {
     	fc.setDialogTitle("Save alignment file");
     	fc.setName("");
+    	fc.setSelectedFile(new File( outputFileText.getText() ));
         int returnVal = fc.showSaveDialog(this);
 
         if (returnVal == JFileChooser.APPROVE_OPTION)
