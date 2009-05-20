@@ -59,12 +59,20 @@ public class BioJavaUtils implements BioJavaConstants {
 		Iterator <StrandedFeature> itty = feats.iterator();
 		while (itty.hasNext()) {
 			StrandedFeature feat = itty.next(); 
-			if (feat.getAnnotation().containsProperty("locus_tag")) {
-				loci.put((String) feat.getAnnotation().getProperty("locus_tag"), 
+			if (feat.getAnnotation().containsProperty(LOCUS_TAG)) {
+				loci.put((String) feat.getAnnotation().getProperty(LOCUS_TAG), 
 						feat);
 			}
 		}
 		return loci;
+	}
+	
+	public static String getLocus (StrandedFeature feat) {
+		if (feat.getAnnotation().containsProperty(LOCUS_TAG)) {
+			return (String) feat.getAnnotation().getProperty(LOCUS_TAG);
+		}
+		else
+			return null;
 	}
 
 	public static Vector getSortedStrandedFeatures (FeatureHolder annos) {

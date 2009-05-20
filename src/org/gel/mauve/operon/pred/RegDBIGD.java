@@ -14,13 +14,13 @@ import org.gel.mauve.operon.pred.PredictionHandler.OperonGene;
 public class RegDBIGD implements IGDSource {
 	
 	Hashtable <String, StrandedFeature> bnums;
-	Hashtable <String, OperonGene> map;
+	Hashtable <String, OperonGene> op_map;
 	PredictionHandler handler;
 	LinkedList <OperonGene> genes;
 	
 	public RegDBIGD (PredictionHandler pred) {
 		handler = pred;
-		map = new Hashtable <String, OperonGene> ();
+		op_map = new Hashtable <String, OperonGene> ();
 		bnums = handler.bnums;
 	}
 	
@@ -45,24 +45,25 @@ public class RegDBIGD implements IGDSource {
  					while (toke.hasMoreTokens()) {
 						gene = toke.nextToken();
 						int sep = gene.indexOf ('|');
-						if (sep < 0 || !bnums.containsKey (gene.substring(
-								sep + 1, gene.length()))) {
+						String bnum = gene.substring(
+								sep + 1, gene.length());
+						if (sep < 0 || !bnums.containsKey (bnum)) {
 							temp = null;
 							break;
 						}
-						OperonGene op_gene = new OperonGene (
-								gene.substring(0, sep));
+						OperonGene op_gene = new OperonGene (bnum);
+						op_gene.feat = bnums.get(bnum);
 						temp.put(op_gene.name, op_gene);
 						op_gene.operon = operon;
 					}
  					if (temp != null)
- 						map.putAll(temp);
+ 						op_map.putAll(temp);
 				}
 				input = in.readLine();
 			}
 			in.close();
 			System.out.println ("number operons: " + num);
-			System.out.println ("number genes in operons: " + map.size());
+			System.out.println ("number genes in operons: " + op_map.size());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -80,45 +81,19 @@ public class RegDBIGD implements IGDSource {
 			while (input != null) {
 				toke  = new StringTokenizer (input, "\t");
 				toke.nextToken();
-				String name = toke.nextToken();
-				OperonGene gene = map.get(name);
-				if (gene == null) {
-					if (name.equals(REGDB_PSEUDO))
-						name = "psd" + pseudo++;
-					gene = new OperonGene (name);
-					operon = null;
-				}
-				//fix for fact that some genes in regdb have no coordinates
-				//now fixed b/c those with no coords have no bnums too.
-				/*else if (operon != null) {
-					if (operon.equals(gene.operon)) {
-						map.remove(gene.name);
-						input = in.readLine();
-						continue;
-					}
-					operon = null;
-				}*/
+				toke.nextToken();
 				String bnum = toke.nextToken();
 				if (!bnum.startsWith("b") || !bnums.containsKey(bnum)) {
 					input = in.readLine();
 					continue;
 				}
-				try {
-					gene.feat = bnums.get(bnum);
-					genes.add(gene);
-				} catch (NumberFormatException e) {
-					System.out.println ("no coords: " + input);
-					if (map.containsKey(name)) {
-						operon = gene.operon;
-						if (genes.size() > 0) {
-							OperonGene last = genes.getLast();
-							while (operon.equals(last.operon)) {
-								map.remove(last.name);
-								genes.removeLast();
-							}
-						}
-					}
+				OperonGene gene = op_map.get(bnum);
+				if (gene == null) {
+					gene = new OperonGene (bnum);
+					operon = null;
 				}
+				gene.feat = bnums.get(bnum);
+				genes.add(gene);
 				input = in.readLine();
 			}
 			in.close();
@@ -126,14 +101,14 @@ public class RegDBIGD implements IGDSource {
 			System.out.println ("input: " + input);
 			e.printStackTrace();
 		}
-		System.out.println ("genes not in op: " + (genes.size() - map.size()));
+		System.out.println ("genes not in op: " + (genes.size() - op_map.size()));
 	}
 
 	public int getType(IGD igd) {
 		if (igd.getLength () < handler.length_restriction)
 			return UNDERLENGTH;
-		boolean one = map.containsKey(igd.gene1.name);
-		boolean two = map.containsKey(igd.gene2.name);
+		boolean one = op_map.containsKey(igd.gene1.name);
+		boolean two = op_map.containsKey(igd.gene2.name);
 		if (one && two && igd.gene1.operon.equals(igd.gene2.operon)) {
 			if (igd.getLength () > 250)
 				System.out.println ("over 150: " + igd.gene1.name + ", " + 

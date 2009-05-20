@@ -17,6 +17,7 @@ public interface BioJavaConstants {
 
 	public static final String ID_NUMBER = "ec_number/db_xref/protein_id";
 	
+	public static final String LOCUS_TAG = "locus_tag";
 	
 	public final static String FORWARD = "forward";
 	

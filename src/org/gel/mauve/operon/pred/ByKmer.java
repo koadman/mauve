@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import org.gel.air.util.MathUtils;
 import org.gel.mauve.operon.OperonConstants;
 import org.gel.mauve.operon.pred.PredictionHandler.IGD;
 
@@ -39,56 +40,63 @@ public class ByKmer implements OperonConstants {
 		calcConditionalKmerLikelihood ();
 	}
 	
-	public Hashtable <IGD, Double> classify (HashSet <IGD> igds) {
+	public void classify (HashSet <IGD> igds) {
 		Iterator <IGD> itty = igds.iterator();
-		Hashtable <IGD, Double> predictions = new Hashtable <IGD, Double> (); 
 		while (itty.hasNext()) {
 			IGD igd = itty.next();
-			String dna = igd.dna;
-			if (dna.length() < handler.max_within/*length*/)
-				predictions.put (igd, 10.0);
-			else if (dna.length() > handler.min_without)
-				predictions.put(igd, -10.0);
-			else {
-				double prob = 0;
-				Kmer prev = kmers.get(dna.substring(0, length));
-				prob += prev.marg_probs [PredictionHandler.INTERNAL] - 
-				prev.marg_probs [PredictionHandler.EXTERNAL];
-				for (int i = 1; i + length <= igd.dna.length(); i++) {
-					Kmer cur = kmers.get(dna.substring (i, i + length));
-					prob += prev.trans_probs [INTERNAL].get(
-							cur.symbols);
-					prob -= prev.trans_probs [PredictionHandler.EXTERNAL].get(
-							cur.symbols);
-					prev = cur;
-				}
-				predictions.put(igd, prob);
-			}
+			classifyIGD (igd);
 		}
-		return predictions;
 	}
 	
-	public void summarize (Hashtable <IGD, Double> predictions, IGDSource typer) {
+	public void classifyIGD (IGD igd) {
+		String dna = igd.dna;
+		if (!igd.sameStrand() || dna.length() > handler.min_without) {
+			igd.s_ext_prob = 0;
+			igd.s_int_prob = Double.NEGATIVE_INFINITY;
+			igd.ratio = Double.NEGATIVE_INFINITY;
+		}
+		else if (dna.length() < handler.max_within/*length*/) {
+			igd.ratio = Double.POSITIVE_INFINITY;
+			igd.s_int_prob = 0;
+			igd.s_ext_prob = Double.NEGATIVE_INFINITY;
+		}
+		else {
+			Kmer prev = kmers.get(dna.substring(0, length));
+			igd.s_int_prob = prev.marg_probs [PredictionHandler.INTERNAL];
+			igd.s_ext_prob = prev.marg_probs [PredictionHandler.EXTERNAL];
+			for (int i = 1; i + length <= igd.dna.length(); i++) {
+				Kmer cur = kmers.get(dna.substring (i, i + length));
+				igd.s_int_prob += prev.trans_probs [INTERNAL].get(
+						cur.symbols);
+				igd.s_ext_prob += prev.trans_probs [PredictionHandler.EXTERNAL].get(
+						cur.symbols);
+				prev = cur;
+			}
+			igd.ratio = igd.s_int_prob - igd.s_ext_prob;
+		}
+	}
+	
+	public void summarize (HashSet <IGD> igds, IGDSource typer) {
 		int [][] counts = new int [2][2];
 		try {
 			PrintStream out = new PrintStream (new FileOutputStream (
 					"c:\\mauvedata\\operon\\regdb\\preds.tab"));
-			Iterator <IGD> itty = predictions.keySet().iterator();
+			Iterator <IGD> itty = igds.iterator();
 			out.println ("start\tlength\treal\tpred\tprob");
 			while (itty.hasNext()) {
 				IGD igd = itty.next ();
 				int real = typer.getType(igd);
-				double prob = predictions.get(igd);
-				int pred  = prob > 0 ? INTERNAL : 
+				int pred  = igd.ratio > 0 ? INTERNAL : 
 					PredictionHandler.EXTERNAL;
 				out.println(igd.getStart() + "\t" + igd.getLength () + "\t" + 
-						real + "\t" + pred + "\t" + prob);
+						real + "\t" + pred + "\t" + MathUtils.infToExtreme(
+						igd.ratio));
 				counts [real][pred]++;
 			}
 			out.close();
 			int real_ints = counts [INTERNAL][0] +
 					counts [INTERNAL][1];
-			int real_exts = predictions.size() - real_ints;
+			int real_exts = igds.size() - real_ints;
 			double correct_int = counts [INTERNAL]
 			        [INTERNAL] / (double) real_ints; 
 			double correct_ext = counts [PredictionHandler.EXTERNAL]
@@ -96,7 +104,7 @@ public class ByKmer implements OperonConstants {
 			double correct_total = (counts [INTERNAL]
 			        [INTERNAL] +
 			        counts [PredictionHandler.EXTERNAL]
-			        [PredictionHandler.EXTERNAL]) / (double) predictions.size ();
+			        [PredictionHandler.EXTERNAL]) / (double) igds.size ();
 			double incorrect_int = counts [INTERNAL]
    			        [PredictionHandler.EXTERNAL] / (double) real_ints; 
    			double incorrect_ext = counts [PredictionHandler.EXTERNAL]
@@ -104,7 +112,7 @@ public class ByKmer implements OperonConstants {
    			double incorrect_total = (counts [INTERNAL]
    			        [PredictionHandler.EXTERNAL] +
    			        counts [PredictionHandler.EXTERNAL]
-   			        [INTERNAL]) / (double) predictions.size ();
+   			        [INTERNAL]) / (double) igds.size ();
 			System.out.println ("real internals: " + real_ints);
 			System.out.println ("real externals: " + real_exts);
 			System.out.println ("correct internals: " + correct_int);

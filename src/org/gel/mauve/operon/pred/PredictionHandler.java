@@ -30,6 +30,7 @@ public class PredictionHandler implements BioJavaConstants, OperonConstants {
 	protected int min_without = 250;
 	protected int max_within = 50;
 	protected IGDSource source;
+	protected MauveFeatureIGD mfi;
 	protected ByKmer bk;
 	
 	public static final String OPERON_DIR = "c:\\mauvedata\\operon\\regdb\\";
@@ -65,30 +66,36 @@ public class PredictionHandler implements BioJavaConstants, OperonConstants {
 	}
 	
 	public void getTrainByDistTestRegDB () {
-		MauveFeatureIGD mfi = new MauveFeatureIGD (this);
-		makeIGDs (mfi);
-		loadTestSet ("");
-		bk = new ByKmer (getData (true), this);
+		trainByDist ();
 		resetIGDs ();
 		makeIGDs(source);
 		loadTestSet ("kmer\\testall");
 		
 	}
 	
+	public void trainByDist () {
+		mfi = new MauveFeatureIGD (this);
+		makeIGDs (mfi);
+		loadTestSet ("");
+		bk = new ByKmer (getData (true), this);
+	}
+	
 	public void regDBIGDComparison () {
 		source = makeRegDBIGD(
 				"c:\\mauvedata\\operon\\regdb\\OperonSet.txt",
 				"c:\\mauvedata\\operon\\regdb\\GeneProductSet.tab");
-		getTrainByDistTestRegDB();
-		//getTrainAndTestRegDB ();
+		//getTrainByDistTestRegDB();
+		getTrainAndTestRegDB ();
 		
 		HashSet <IGD> tests = getData(false) [1];
 		tests.addAll(getData(false) [0]);
-		bk.summarize (bk.classify (tests), source);
+		bk.classify (tests);
+		bk.summarize (tests, source);
 	}
 	
 	public void operonComparison () {
-		
+		trainByDist ();
+		new JoperonIGD (this);
 	}
 	
 	public void loadTestSet (String dir) {
@@ -127,12 +134,7 @@ public class PredictionHandler implements BioJavaConstants, OperonConstants {
 		OperonGene prev = itty.next();
 		OperonGene current;
 		int under = 0;
-		/*long time = System.currentTimeMillis(); // no
-		int count = 0;*/
 		while (itty.hasNext()) {
-			/*count++;
-			if (count % 100 == 0)
-				System.out.println ((System.currentTimeMillis() - time) + " " + count);*/
 			current = itty.next();
 			IGD igd = new IGD (prev, current);
 			int type = typer.getType(igd);
@@ -157,6 +159,7 @@ public class PredictionHandler implements BioJavaConstants, OperonConstants {
 						frame.getModel ().getGenomeBySourceIndex(
 						0).getAnnotationSequence());
 				pred.regDBIGDComparison ();
+				//pred.operonComparison();
 			}
 		});
 		MauveModule.mainHook (args, mv);
@@ -168,11 +171,30 @@ public class PredictionHandler implements BioJavaConstants, OperonConstants {
 		protected OperonGene gene1;
 		protected OperonGene gene2;
 		protected String dna;
+		protected double ratio;
+		protected double s_int_prob;
+		protected double s_ext_prob;
+		protected double int_prob;
 
 		public IGD (OperonGene first, OperonGene second) {
 			gene1 = first;
 			gene2 = second;
+			int_prob = -1;
 			dna = genome.subStr((int) getStart (), (int) getEnd ());
+		}
+		
+		public double intProb () {
+			if (int_prob == -1) {
+				if (s_int_prob == 0)
+					int_prob = .9999;
+				else if (s_ext_prob == 0)
+					int_prob = .0001;
+				else
+					int_prob = 1 - (s_int_prob / (s_int_prob + s_ext_prob));
+			}
+			if (int_prob <= 0 || int_prob >= 1)
+				System.out.println ("int prob " + int_prob);
+			return int_prob;
 		}
 		
 		public long getStart () {
@@ -215,7 +237,9 @@ public class PredictionHandler implements BioJavaConstants, OperonConstants {
 		
 		public OperonGene (StrandedFeature feat) {
 			this.feat = feat;
-			name = BioJavaUtils.getName (feat);
+			name = BioJavaUtils.getLocus (feat);
+			if (name == null)
+				name = BioJavaUtils.getName(feat);
 		}
 		
 		protected boolean isReversed () {

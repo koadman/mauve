@@ -19,6 +19,15 @@ public class MathUtils {
 		return ((double) length - hang) / length * 100;
 	}
 	
+	public static double infToExtreme (double val) {
+		if (val == Double.POSITIVE_INFINITY)
+			return Double.MAX_VALUE;
+		else if (val == Double.NEGATIVE_INFINITY)
+			return Double.MIN_VALUE;
+		else
+			return val;
+	}
+	
 	public static int compareByStartThenLength (int start1, int end1, int start2,
 			int end2) {
 		/*rval = a.starts[i] - b.starts[i];

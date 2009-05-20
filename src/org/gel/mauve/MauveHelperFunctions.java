@@ -207,8 +207,8 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 			else if (feat.getAnnotation ().containsProperty ("gene")) {
 				val = (String) feat.getAnnotation ().getProperty ("gene");
 			}
-			else if (feat.getAnnotation().containsProperty("locus_tag"))
-				val = (String) feat.getAnnotation ().getProperty ("locus_tag");
+			else if (feat.getAnnotation().containsProperty (LOCUS_TAG))
+				val = (String) feat.getAnnotation ().getProperty (LOCUS_TAG);
 		}
 		return val;
 	}
