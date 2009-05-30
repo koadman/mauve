@@ -64,6 +64,9 @@ public class BaseViewerModel {
 	// Whether to draw contig/chromosome boundary lines.
 	private boolean drawChromosomeBoundaries = true;
 
+	// Whether or not to draw the mouse cursor
+	private boolean drawMouseHighlighting = true;
+	
 	// Original source file for this model.
 	private File src;
 
@@ -718,6 +721,17 @@ public class BaseViewerModel {
 
 	public boolean getDrawChromosomeBoundaries () {
 		return drawChromosomeBoundaries;
+	}
+
+	public void setDrawMouseCursor (boolean value) {
+		if (value != drawMouseHighlighting) {
+			this.drawMouseHighlighting = value;
+			this.fireDrawingSettingsEvent ();
+		}
+	}
+
+	public boolean getDrawMouseHighlighting () {
+		return drawMouseHighlighting;
 	}
 
 	public void setFocus (String sequenceID, long start, long end, String contig) {
