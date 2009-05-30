@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -35,6 +36,7 @@ public class ExportMenu extends JMenu implements ActionListener {
         jMenuFileExportImage.setText("Export Image...");
         jMenuFileExportImage.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK));
         jMenuFileExportImage.setMnemonic('E');
+        jMenuFileExportImage.setActionCommand("ExportImage");
         jMenuFileExportImage.addActionListener(this);
 
         jMenuFileExportSnps.setToolTipText("Export a tabular listing of polymorphic sites and their locations site");
@@ -106,22 +108,11 @@ public class ExportMenu extends JMenu implements ActionListener {
         }
         if (e.getActionCommand().equals("ExportOrthologs"))
         {
-        	final JFileChooser fc = new JFileChooser();
-        	fc.setDialogTitle("Export ortholog file to...");
-            if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION)
-            {
-				try{
-	            	BufferedWriter bw = new BufferedWriter( new FileWriter(fc.getSelectedFile()));
-	            	XmfaViewerModel xvm = (XmfaViewerModel)model;
-					OneToOneOrthologExporter.export(xvm, bw);
-	    			bw.flush();
-	    			bw.close();
-            	}catch(IOException ioe){ioe.printStackTrace();}
-            }
+        	XmfaViewerModel xvm = (XmfaViewerModel)model;
+        	OneToOneOrthologExporter.ExportFrame pef = new OneToOneOrthologExporter.ExportFrame(xvm);
         }
         if (e.getActionCommand().equals("ExportSNPs"))
         {
-        	//temporary, write a snp export
         	JFileChooser fc = new JFileChooser();
         	fc.setDialogTitle("Export SNP file to...");
             if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION)
