@@ -194,12 +194,12 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFileOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
         jMenuFileOpen.setMnemonic('O');
         
-        jMenuFileAlign.setToolTipText("Align sequences...");
+        jMenuFileAlign.setToolTipText("Align sequences with the mauveAligner algorithm...");
         jMenuFileAlign.setVisible(true);
-        jMenuFileAlign.setText("Align...");
+        jMenuFileAlign.setText("Align sequences...");
         jMenuFileAlign.setMnemonic('A');
         
-        jMenuFileProgressiveAlign.setToolTipText("Align sequences with progressiveMauve (slower, more sensitive)...");
+        jMenuFileProgressiveAlign.setToolTipText("Align sequences with progressiveMauve (more accurate)...");
         jMenuFileProgressiveAlign.setVisible(true);
         jMenuFileProgressiveAlign.setText("Align with progressiveMauve...");
         jMenuFileProgressiveAlign.setMnemonic('M');
