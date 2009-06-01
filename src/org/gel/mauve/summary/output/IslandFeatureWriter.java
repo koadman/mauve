@@ -6,8 +6,8 @@ import java.util.Vector;
 import org.gel.air.util.GroupHelpers;
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MauveHelperFunctions;
+import org.gel.mauve.analysis.Segment;
 import org.gel.mauve.gui.sequence.FlatFileFeatureConstants;
-import org.gel.mauve.summary.Segment;
 
 public class IslandFeatureWriter extends AbstractIslandWriter implements
 		MauveConstants, FlatFileFeatureConstants {

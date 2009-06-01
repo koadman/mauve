@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Hashtable;
 
 public class IOUtils {
 	
@@ -29,6 +30,34 @@ public class IOUtils {
 	          if (in != null)          in.close();
 	          if (out != null)     out.close();
 	     }
+	}
+	
+	/**
+	 * for each arg that starts with a '-', puts it in as key with next arg as value
+	 * @param args
+	 * @return
+	 */
+	public static Hashtable <String, String> parseDashPairedArgs (String [] args) {
+		int i = 0;
+		Hashtable <String, String> pairs = new Hashtable <String, String> ();
+		while (i < args.length) {
+			if (args [i].charAt (0) == '-') {
+				if (args [i].charAt(1) == '-') {
+				int equals = args [i].indexOf('=');
+				if (equals == -1)
+					equals = args [i].length();
+				pairs.put(args [i].substring(0, equals), 
+						equals == args [i].length() ? "" :
+						args [i].substring(equals + 1));
+				i++;
+				}
+				else if (i + 1 < args.length)
+					pairs.put(args [i++], args [i++]);
+			}
+			else
+				i++;
+		}
+		return pairs;
 	}
 	
 	public static void deleteDir (File dir) {

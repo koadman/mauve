@@ -12,7 +12,7 @@ import org.biojava.bio.symbol.Location;
 import org.gel.air.util.MathUtils;
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.MauveHelperFunctions;
-import org.gel.mauve.summary.Segment;
+import org.gel.mauve.analysis.Segment;
 
 public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 	

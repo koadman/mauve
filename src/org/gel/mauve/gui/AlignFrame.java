@@ -44,7 +44,7 @@ public class AlignFrame extends java.awt.Frame
     JPanel parameterPanel = new JPanel();
     JCheckBox defaultSeedCheckBox = new JCheckBox();
     JCheckBox determineLCBsCheckBox = new JCheckBox();
-    JSlider seedLengthSlider = new JSlider();
+    protected JSlider seedLengthSlider = new JSlider();
     JLabel seedLengthLabel = new JLabel();
     JCheckBox recursiveCheckBox = new JCheckBox();
     JLabel minLcbWeightLabel = new JLabel();
@@ -416,7 +416,6 @@ public class AlignFrame extends java.awt.Frame
             {
                 JOptionPane.showMessageDialog(null, "The aligner failed to produce an alignment.  The sequences may not contain any homologous regions.", "An error occurred", JOptionPane.ERROR_MESSAGE);
             }
-
             mauve.loadFile(new File(read_filename));
             setVisible(false);
         }

@@ -10,13 +10,13 @@ import org.biojava.bio.seq.io.StreamWriter;
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.MauveHelperFunctions;
 import org.gel.mauve.XmfaViewerModel;
+import org.gel.mauve.analysis.Segment;
+import org.gel.mauve.analysis.SegmentComparator;
 import org.gel.mauve.backbone.BackboneListBuilder;
 import org.gel.mauve.gui.MauveFrame;
 import org.gel.mauve.module.MauveModule;
 import org.gel.mauve.module.ModuleListener;
 import org.gel.mauve.summary.ProcessBackboneFile;
-import org.gel.mauve.summary.Segment;
-import org.gel.mauve.summary.SegmentComparator;
 
 /**
  * writes out fastas for each genome containing only those sections that aligned to

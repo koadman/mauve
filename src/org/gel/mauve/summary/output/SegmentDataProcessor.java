@@ -9,9 +9,9 @@ import java.util.Vector;
 
 import org.gel.mauve.Match;
 import org.gel.mauve.MauveConstants;
+import org.gel.mauve.analysis.Segment;
+import org.gel.mauve.analysis.SegmentComparator;
 import org.gel.mauve.contigs.ContigHandler;
-import org.gel.mauve.summary.Segment;
-import org.gel.mauve.summary.SegmentComparator;
 
 public class SegmentDataProcessor extends Hashtable implements MauveConstants {
 

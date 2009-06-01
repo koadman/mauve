@@ -20,7 +20,7 @@ public class Segment implements Serializable {
 
 	public Segment [] nexts;
 	
-	public String id;
+	public String typed_id;
 
 	public static final Segment END = new Segment (0, false);
 

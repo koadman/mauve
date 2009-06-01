@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import org.gel.mauve.summary.Segment;
+import org.gel.mauve.analysis.Segment;
 
 /**
  * The LCB class tracks locally collinear blocks: regions of homologous sequence

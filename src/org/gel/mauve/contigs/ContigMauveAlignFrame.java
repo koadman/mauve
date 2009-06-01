@@ -5,6 +5,9 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Vector;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
@@ -19,6 +22,7 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 	protected ContigOrderer orderer;
 	protected boolean first;
 	protected File current_dir;
+	protected Hashtable more_args;
 
 	public ContigMauveAlignFrame(Mauve mauve, ContigOrderer orderer) {
 		super(mauve);
@@ -46,6 +50,44 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 		sequencesPanel.add(seq_label);
 	}
 	
+	public void setArgs (Hashtable <String, String> args) {
+		if (args.containsKey("--seed-family"))
+			seedFamiliesCheckBox.setSelected(true);
+		if (args.containsKey("--seed-weight"))
+			seedLengthSlider.setValue(Integer.parseInt(args.get("--seed-weight")));
+		args.remove("--output");
+		args.remove("--mums");
+		args.remove("--apply-backbone");
+		args.remove("--disable-backbone");
+		args.remove("--collinear");
+		args.remove("--output-guide-tree");
+		args.remove("--backbone-output");
+		more_args = args;
+	}
+	
+    protected String[] makeAlignerCommand() {
+    	String [] cmd = super.makeAlignerCommand();
+    	Vector <String> extra = new Vector <String> (); 
+    	Iterator  <String> itty = more_args.keySet().iterator();
+    	while (itty.hasNext()) {
+    		String val = itty.next();
+    		System.out.println ("val: " + val);
+    		if (val.charAt (1) == '-') {
+    			val += "=" + more_args.get(val);
+    			extra.add(val);
+    		}
+    	}
+    	String [] temp = new String [cmd.length + extra.size()];
+    	System.arraycopy(cmd, 0, temp, 0, cmd.length - 2);
+    	if (extra.size() > 0)
+    		System.arraycopy(extra.toArray(), 0, temp, cmd.length - 2, extra.size ());
+    	//two sequences are last
+    	System.arraycopy(cmd, cmd.length - 2, temp, temp.length - 2, 2);
+    	System.out.println ("temP: " + temp.length + " beore: " + cmd.length);
+    	return temp;
+    }
+    
+    
 	public void setVisible (boolean show) {
 		System.out.println ("done with init");
 		if (show) {
@@ -62,20 +104,27 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 	
 	public void displayFileInput () {
 		try {
-			sequenceListModel.clear ();
 			current_dir = orderer.getAlignDir ();
 			//current_dir.mkdirs ();
 			setOutput(current_dir.getParentFile ().getAbsolutePath ());
 			if (first) {
 				outputFileText.setEditable(false);
 				outputFileText.setBackground(Color.white);
+				
 			}
+			else
+				sequenceListModel.clear ();
 			current_dir = new File (current_dir, orderer.DIR_STUB + orderer.count);
 			JScrollBar scroller = listScrollPane.getHorizontalScrollBar ();
 			scroller.setValue (scroller.getMaximum ());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void addSequence (String file) {
+		DefaultListModel model = (DefaultListModel) sequenceList.getModel ();
+		model.addElement(file);
 	}
 	
 	public void alignButtonActionPerformed (ActionEvent e) {

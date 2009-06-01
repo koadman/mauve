@@ -2,7 +2,7 @@ package org.gel.mauve;
 
 import java.util.Comparator;
 
-import org.gel.mauve.summary.SegmentComparator;
+import org.gel.mauve.analysis.SegmentComparator;
 
 /**
  * Compare the start coordinates of ungapped local alignments in a particular

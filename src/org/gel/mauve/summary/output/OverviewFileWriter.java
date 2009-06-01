@@ -6,7 +6,7 @@ import java.util.Vector;
 
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MauveHelperFunctions;
-import org.gel.mauve.summary.Segment;
+import org.gel.mauve.analysis.Segment;
 
 public class OverviewFileWriter extends AbstractTabbedDataWriter implements MauveConstants {
 	
