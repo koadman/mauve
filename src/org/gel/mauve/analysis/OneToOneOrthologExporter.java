@@ -312,9 +312,13 @@ public class OneToOneOrthologExporter {
 		{
 			Genome g = model.getGenomeBySourceIndex(gI);
             Location loc = LocationTools.makeLocation(1, (int)g.getLength());
-			FeatureHolder fh = g.getAnnotationSequence().filter(new FeatureFilter.OverlapsLocation(loc));
-			Feature[] cdsi = getFeature(fh.features(), oep.featureType);
-			Arrays.sort(cdsi);
+            Feature[] cdsi = new Feature[0];
+            if(g.getAnnotationSequence() != null && loc != null )
+            {
+				FeatureHolder fh = g.getAnnotationSequence().filter(new FeatureFilter.OverlapsLocation(loc));
+				cdsi = getFeature(fh.features(), oep.featureType);
+				Arrays.sort(cdsi);
+            }
 			allCds.add(cdsi);
 		}
 
