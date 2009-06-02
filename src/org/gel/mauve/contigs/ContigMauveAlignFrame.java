@@ -22,7 +22,7 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 	protected ContigOrderer orderer;
 	protected boolean first;
 	protected File current_dir;
-	protected Hashtable more_args;
+	protected Hashtable <String, String> more_args;
 
 	public ContigMauveAlignFrame(Mauve mauve, ContigOrderer orderer) {
 		super(mauve);
@@ -54,10 +54,14 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 	}
 	
 	public void setArgs (Hashtable <String, String> args) {
-		if (args.containsKey("--seed-family"))
+		if (args.containsKey("--seed-family")) {
 			seedFamiliesCheckBox.setSelected(true);
-		if (args.containsKey("--seed-weight"))
+			args.remove("--seed-family");
+		}
+		if (args.containsKey("--seed-weight")) {
 			seedLengthSlider.setValue(Integer.parseInt(args.get("--seed-weight")));
+			args.remove("--seed-weight");
+		}
 		args.remove("--output");
 		args.remove("--mums");
 		args.remove("--apply-backbone");
@@ -77,7 +81,8 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
     	while (itty.hasNext()) {
     		String val = itty.next();
     		if (val.charAt (1) == '-') {
-    			val += "=" + more_args.get(val);
+    			if (more_args.get(val).length() > 0)
+    				val += "=" + more_args.get(val);
     			extra.add(val);
     		}
     	}
