@@ -63,6 +63,8 @@ public class ContigOrderer implements MauveConstants {
 					if (!directory.mkdirs())
 						error = "Couldn't create output directory";
 				}
+				else if (getAlignDir ().exists())
+					error = "Directory already contains reorder";
 			}
 			else
 				error = "Output dir not given";
@@ -148,10 +150,19 @@ public class ContigOrderer implements MauveConstants {
 		chooser.setDialogTitle("Choose location to keep output files and folders.");
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		chooser.setMultiSelectionEnabled (false);
-		int choice = chooser.showDialog(parent, "OK");
-		if (choice == JFileChooser.APPROVE_OPTION) {
-			directory = chooser.getSelectedFile();
-			/*Object val = JOptionPane.showInputDialog (parent, "Choose input type:", 
+		boolean active = true;
+		while (active) {
+			int choice = chooser.showDialog(parent, "OK");
+			if (choice == JFileChooser.APPROVE_OPTION) {
+				directory = chooser.getSelectedFile();
+				if (getAlignDir ().exists()) {
+					JOptionPane.showMessageDialog (parent, "Directory already " +
+							"contains reorder; please choose new directory", 
+							"Chooose new directory", 
+							JOptionPane.INFORMATION_MESSAGE);
+				}
+				else {
+					/*Object val = JOptionPane.showInputDialog (parent, "Choose input type:", 
 					"Start from:", JOptionPane.QUESTION_MESSAGE, null, new String [] {
 					SEQ_START, ALIGN_START}, SEQ_START);
 			if (val == null)
@@ -176,10 +187,13 @@ public class ContigOrderer implements MauveConstants {
 					reorderer.loadFile (align_dir);
 				}
 			}*/
-			return true;
+					return true;
+				}
+			}
+			else
+				return false;
 		}
-		else
-			return false;
+		return false;
 	}
 	
 	protected void setFilesFromAlignStart () {

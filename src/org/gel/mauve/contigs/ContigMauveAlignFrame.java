@@ -43,7 +43,10 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 		seq_label.setVisible(true);
 		seq_label.setSize(new Dimension (290, 25));
 		outputFileText.setLocation(new Point (85, 240));
-		outputButton.setLocation(new Point (310, 240));
+		outputFileText.setEditable(false);
+		outputFileText.setBackground(Color.white);
+		sequencesPanel.remove(outputButton);
+		//outputButton.setLocation(new Point (310, 240));
 		outputLabel.setText("Output: ");
 		outputLabel.setLocation(new Point (10, 240));
 		alignButton.setText("Start");
@@ -73,7 +76,6 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
     	Iterator  <String> itty = more_args.keySet().iterator();
     	while (itty.hasNext()) {
     		String val = itty.next();
-    		System.out.println ("val: " + val);
     		if (val.charAt (1) == '-') {
     			val += "=" + more_args.get(val);
     			extra.add(val);
@@ -85,13 +87,11 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
     		System.arraycopy(extra.toArray(), 0, temp, cmd.length - 2, extra.size ());
     	//two sequences are last
     	System.arraycopy(cmd, cmd.length - 2, temp, temp.length - 2, 2);
-    	System.out.println ("temP: " + temp.length + " beore: " + cmd.length);
     	return temp;
     }
     
     
 	public void setVisible (boolean show) {
-		System.out.println ("done with init");
 		if (show) {
 			String text = "Cancel ";
 			if (orderer.count < orderer.iterations)
@@ -109,12 +109,7 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 			current_dir = orderer.getAlignDir ();
 			//current_dir.mkdirs ();
 			setOutput(current_dir.getParentFile ().getAbsolutePath ());
-			if (first) {
-				outputFileText.setEditable(false);
-				outputFileText.setBackground(Color.white);
-				
-			}
-			else
+			if (!first)
 				sequenceListModel.clear ();
 			current_dir = new File (current_dir, orderer.DIR_STUB + orderer.count);
 			JScrollBar scroller = listScrollPane.getHorizontalScrollBar ();
