@@ -66,6 +66,8 @@ public class HighlightPanel extends AbstractSequencePanel implements
 	 */
 	public void paintComponent (Graphics graphics) {
 		long highlightCoord = Match.NO_MATCH;
+		if(!model.getDrawMouseHighlighting())
+			return;
 		// get the highlighted coordinate in this genome
 		if (model instanceof XmfaViewerModel)
 			highlightCoord = ((XmfaViewerModel) model)

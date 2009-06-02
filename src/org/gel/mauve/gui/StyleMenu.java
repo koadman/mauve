@@ -18,6 +18,7 @@ public class StyleMenu extends JMenu implements ActionListener {
     JCheckBoxMenuItem jMenuViewStyleLcbStrikethroughLines = new JCheckBoxMenuItem();
     JCheckBoxMenuItem jMenuViewStyleLcbConnectingLines = new JCheckBoxMenuItem();
     JCheckBoxMenuItem jMenuViewStyleChromosomeBoundaries = new JCheckBoxMenuItem();
+    JCheckBoxMenuItem jMenuViewStyleMouseHighlighting = new JCheckBoxMenuItem();
     
     BaseViewerModel model;
     RearrangementPanel rrpanel;
@@ -66,12 +67,20 @@ public class StyleMenu extends JMenu implements ActionListener {
         jMenuViewStyleChromosomeBoundaries.setActionCommand("ToggleChromosomeBoundaries");
         jMenuViewStyleChromosomeBoundaries.addActionListener(this);
 
+        jMenuViewStyleMouseHighlighting.setToolTipText("Define whether the mouse cursor should show orthologous regions");
+        jMenuViewStyleMouseHighlighting.setVisible(true);
+        jMenuViewStyleMouseHighlighting.setText("Show mouse highlighting");
+        jMenuViewStyleMouseHighlighting.setMnemonic('m');
+        jMenuViewStyleMouseHighlighting.setActionCommand("ToggleMouseCursor");
+        jMenuViewStyleMouseHighlighting.addActionListener(this);
+
         add(jMenuViewStyleLcbOutlines);
         add(jMenuViewStyleSimilarityPlot);
         add(jMenuViewStyleSolidBlocks);
         add(jMenuViewStyleLcbStrikethroughLines);
         add(jMenuViewStyleLcbConnectingLines);
         add(jMenuViewStyleChromosomeBoundaries);
+        add(jMenuViewStyleMouseHighlighting);
     }
     
     /**
@@ -100,6 +109,7 @@ public class StyleMenu extends JMenu implements ActionListener {
             jMenuViewStyleSimilarityPlot.setSelected(true);
             jMenuViewStyleSolidBlocks.setSelected(false);
             jMenuViewStyleChromosomeBoundaries.setSelected(true);
+            jMenuViewStyleMouseHighlighting.setSelected(true);
     	}else
     		setEnabled(false);
     }
@@ -158,6 +168,14 @@ public class StyleMenu extends JMenu implements ActionListener {
             {
                 model.setDrawChromosomeBoundaries(!model.getDrawChromosomeBoundaries());
                 jMenuViewStyleChromosomeBoundaries.setSelected(model.getDrawChromosomeBoundaries());
+            }
+        }
+        else if (e.getActionCommand().equals("ToggleMouseCursor"))
+        {
+            if (model != null)
+            {
+                model.setDrawMouseCursor(!model.getDrawMouseHighlighting());
+                jMenuViewStyleMouseHighlighting.setSelected(model.getDrawMouseHighlighting());
             }
         }
     	
