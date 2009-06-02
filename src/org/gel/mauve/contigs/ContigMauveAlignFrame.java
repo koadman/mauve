@@ -67,6 +67,8 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 	
     protected String[] makeAlignerCommand() {
     	String [] cmd = super.makeAlignerCommand();
+    	if (more_args == null)
+    		return cmd;
     	Vector <String> extra = new Vector <String> (); 
     	Iterator  <String> itty = more_args.keySet().iterator();
     	while (itty.hasNext()) {
