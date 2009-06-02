@@ -10,6 +10,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.gel.mauve.MauveConstants;
+import org.gel.mauve.analysis.Segment;
 import org.gel.mauve.summary.output.SegmentDataProcessor;
 
 public class ProcessBackboneFile implements MauveConstants {

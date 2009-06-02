@@ -8,6 +8,7 @@ import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.Chromosome;
 import org.gel.mauve.Genome;
 import org.gel.mauve.MauveConstants;
+import org.gel.mauve.analysis.Segment;
 import org.gel.mauve.contigs.ContigHandler;
 import org.gel.mauve.contigs.DefaultContigHandler;
 import org.gel.mauve.gui.Mauve;

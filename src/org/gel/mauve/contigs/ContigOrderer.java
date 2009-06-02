@@ -2,6 +2,7 @@ package org.gel.mauve.contigs;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Vector;
 
@@ -34,9 +35,73 @@ public class ContigOrderer implements MauveConstants {
 	public static final String SEQ_START = "Start from sequence files.";
 	protected boolean align_start;
 	protected Vector past_orders;
+	protected boolean gui;
+	protected static final String OUTPUT_DIR = "-output";
+	protected static final String REF_FILE = "-ref";
+	protected static final String DRAFT_FILE = "-draft";
 
 	
+	public ContigOrderer (String [] args, Vector frames, boolean gui) {
+		init (args, frames, gui);
+		if (gui)
+			initGUI ();
+		else
+			initParams (args);
+	}
+	
 	public ContigOrderer (String [] args, Vector frames) {
+		this (args, frames, true);
+	}
+	
+	public void initParams (String [] args) {
+		Hashtable <String, String> pairs = IOUtils.parseDashPairedArgs(args);
+		String error = null;
+		try {
+			if (pairs.containsKey(OUTPUT_DIR)) {
+				directory = new File (pairs.get(OUTPUT_DIR));
+				if (!directory.exists()) {
+					if (!directory.mkdirs())
+						error = "Couldn't create output directory";
+				}
+			}
+			else
+				error = "Output dir not given";
+			if (pairs.containsKey(REF_FILE)) {
+				System.out.println ("ref file: " + align);
+				align.addSequence(pairs.get(REF_FILE));
+			}
+			else
+				error = "no reference file given";
+			if (pairs.containsKey(DRAFT_FILE)) {
+				align.addSequence(pairs.get(DRAFT_FILE));
+			}
+			else
+				error = "no draft file given";
+		} catch (Exception e) {
+			e.printStackTrace();
+			error = e.getMessage();
+		}
+		if (error != null) {
+			JOptionPane.showMessageDialog(null, error);
+			System.exit(0);
+		}
+		else {
+			align.setArgs (pairs);
+			startAlignment (false);
+		}
+	}
+	
+	public void initGUI () {
+		reorderer.init();
+		if (getFiles ()) {
+			startAlignment (true);
+		}
+		else
+			iterations = 0;
+	}
+	
+	public void init (String [] args, Vector frames, boolean gui) {
+		this.gui = gui;
 		past_orders = new Vector ();
 		iterations = 25;//DEFAULT_ITERATIONS;
 		if (args != null && args.length > 0) {
@@ -46,21 +111,17 @@ public class ContigOrderer implements MauveConstants {
 			}
 		}
 		reorderer = new ContigReorderer (this, frames);
+		MyConsole.setUseSwing (gui);
+		MyConsole.showConsole ();
 		reorderer.ref_ind = 0;
 		reorderer.reorder_ind = 1;
-		reorderer.init();
 		align = new ContigMauveAlignFrame (
 				reorderer, this);
-		if (getFiles ()) {
-			startAlignment (true);
-		}
-		else
-			iterations = 0;
 	}
 	
 	protected void startAlignment (boolean show_message) {
 		align.displayFileInput ();
-		align.setVisible(true);
+		align.setVisible(gui);
 		if (show_message) {
 			JOptionPane.showMessageDialog (null, 
 					"The reordering will begin when the start button is pressed.  " +
@@ -162,10 +223,15 @@ public class ContigOrderer implements MauveConstants {
 				iterations = 0;
 				IOUtils.deleteDir (temp);
 				reorderer.active = false;
-				JOptionPane.showMessageDialog(parent, "The reordering process is done.\n" +
-						"Results are displayed, and data is in output directory.", 
-						"Reorder Done", JOptionPane.INFORMATION_MESSAGE);
-				reorderer.inverted_from_start.clear ();
+				if (gui) {
+					JOptionPane.showMessageDialog(parent, "The reordering process is done.\n" +
+							"Results are displayed, and data is in output directory.", 
+							"Reorder Done", JOptionPane.INFORMATION_MESSAGE);
+					reorderer.inverted_from_start.clear ();
+				}
+				else {
+					System.exit(0);
+				}
 			}
 			else {
 				past_orders.add(reorderer.ordered);
@@ -226,10 +292,8 @@ public class ContigOrderer implements MauveConstants {
 	}
 	
 	
-	public static void main (String [] args) {
-		MyConsole.setUseSwing (true);
-		MyConsole.showConsole ();
-		new ContigOrderer (args, null);
+	public static void main (String [] args) {	
+		new ContigOrderer (args, null, args.length == 0);
 	}
 
 }

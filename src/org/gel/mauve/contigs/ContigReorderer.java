@@ -26,11 +26,12 @@ import org.gel.mauve.LcbIdComparator;
 import org.gel.mauve.LcbViewerModel;
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MauveHelperFunctions;
+import org.gel.mauve.ModelBuilder;
+import org.gel.mauve.analysis.Segment;
 import org.gel.mauve.backbone.BackboneList;
 import org.gel.mauve.contigs.ContigGrouper.ContigGroup;
 import org.gel.mauve.gui.Mauve;
 import org.gel.mauve.gui.MauveFrame;
-import org.gel.mauve.summary.Segment;
 
 public class ContigReorderer extends Mauve implements MauveConstants {
 
@@ -119,7 +120,7 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 		}
 		else
 			return super.makeNewFrame ();
-	}
+	} 
 	
 	protected void initMauveData () {
 		if (inverted_from_start == null)
@@ -166,6 +167,16 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 		if (!directory.exists())
 			directory.mkdir();
 
+	}
+	
+	protected void initModelData () {
+		initMauveData ();
+		lcbs = ContigReorderer.this.model.getFullLcbList ();
+		if (orderer == null || (active && orderer.shouldReorder ())) {
+			fixContigs ();
+			if (orderer != null)
+				orderer.reorderDone ();
+		}
 	}
 	
 	protected void orderGenomes () {
@@ -486,11 +497,28 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 	
 	
 
+	@Override
+	public void loadFile(File rr_file) {
+		if (orderer.gui)
+			super.loadFile(rr_file);
+		else {
+			try {
+				model = (LcbViewerModel) ModelBuilder.buildModel (rr_file, null);
+				initModelData ();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	protected synchronized MauveFrame getNewFrame() {
 		return super.getNewFrame();
 	}
 	
 	/**
+	 * always starts with gui.  Files can be input from command line,
+	 * or entered via gui.
+	 * 
 	 * @param args			Index 0 should be the name of the alignment file,
 	 * 						  1 the reference genome's index, 2 the index of the
 	 * 						  genome to reorder.
@@ -515,13 +543,7 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 				ContigReorderer.this.model = (LcbViewerModel) mod;
 				new Thread (new Runnable () {
 					public void run () {
-						initMauveData ();
-						lcbs = ContigReorderer.this.model.getFullLcbList ();
-						if (orderer == null || (active && orderer.shouldReorder ())) {
-							fixContigs ();
-							if (orderer != null)
-								orderer.reorderDone ();
-						}
+						initModelData ();
 					}
 				}).start ();				
 			}
