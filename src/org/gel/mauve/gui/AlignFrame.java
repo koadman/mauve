@@ -618,6 +618,12 @@ public class AlignFrame extends java.awt.Frame
         outputFileText.setText(filename);
         outputFileText.setCaretPosition (filename.length ());
     }
+    
+    public void setSequences (String [] files) {
+    	sequenceListModel.clear();
+    	for (int i = 0; i < files.length; i++)
+    		sequenceListModel.addElement(files [i]);
+    }
 
     public String[] getSequences()
     {

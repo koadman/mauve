@@ -40,8 +40,10 @@ import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
 
+import org.gel.mauve.AlignmentUnreverser;
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.BrowserLauncher;
+import org.gel.mauve.MauveAlignmentViewerModel;
 import org.gel.mauve.ModelBuilder;
 import org.gel.mauve.ModelProgressListener;
 import org.gel.mauve.MyConsole;
@@ -94,6 +96,8 @@ public class MauvePanel extends JPanel implements ActionListener, ModelProgressL
     JMenuItem jMenuGoToSeqPos = new JMenuItem ();
     JMenuItem jMenuGoToFeatName = new JMenuItem ();
     JMenuItem jMenuGoToSearchFeatures = new JMenuItem ();
+    
+    JMenuItem jMenuForwardAlignment = new JMenuItem ();
     
     JFileChooser fc;
     RearrangementPanel rrpanel;
@@ -297,6 +301,9 @@ public class MauvePanel extends JPanel implements ActionListener, ModelProgressL
         jMenuGoToSearchFeatures.setMnemonic('i');
         jMenuGoToSearchFeatures.setAccelerator(KeyStroke.getKeyStroke(
         		KeyEvent.VK_I, ActionEvent.CTRL_MASK));
+        
+        jMenuForwardAlignment.setVisible(true);
+        jMenuForwardAlignment.setEnabled(false);
 
         add (jMenuBar1, BorderLayout.NORTH);
 
@@ -322,6 +329,8 @@ public class MauvePanel extends JPanel implements ActionListener, ModelProgressL
         jMenuGoTo.add (jMenuGoToSeqPos);
         jMenuGoTo.add (jMenuGoToFeatName);
         jMenuGoTo.add (jMenuGoToSearchFeatures);
+        
+        jMenuView.add(jMenuForwardAlignment);
         
         jMenuBar1.add(jMenuHelp);
         jMenuHelp.add(jMenuHelpAbout);
@@ -643,6 +652,10 @@ public class MauvePanel extends JPanel implements ActionListener, ModelProgressL
             jMenuFileExport.setEnabled(true);
             jMenuFileClose.setEnabled(true);
             jMenuGoTo.setEnabled(true);
+            jMenuForwardAlignment.setEnabled(true);
+            if (model instanceof MauveAlignmentViewerModel)
+            	jMenuForwardAlignment.addActionListener(new AlignmentUnreverser (
+            			this, jMenuForwardAlignment, mauve));
             if (SeqFeatureData.userSelectableGenomes (model, false, true).size () > 0) {
             	navigator = new SequenceNavigator(this, rrpanel, model);
             	jMenuGoToFeatName.setEnabled (true);
@@ -678,7 +691,7 @@ public class MauvePanel extends JPanel implements ActionListener, ModelProgressL
         alignFrame.setVisible(true);
     }
     
-    void doProgressiveAlign()
+    public void doProgressiveAlign()
     {
         if (progressiveAlignFrame == null)
         {
@@ -686,6 +699,15 @@ public class MauvePanel extends JPanel implements ActionListener, ModelProgressL
         	progressiveAlignFrame.initComponents();
         }
         progressiveAlignFrame.setVisible(true);
+    }
+    
+    public ProgressiveMauveAlignFrame getProgressiveAlignFrame () {
+        if (progressiveAlignFrame == null)
+        {
+        	progressiveAlignFrame = new ProgressiveMauveAlignFrame(mauve);
+        	progressiveAlignFrame.initComponents();
+        }
+        return (ProgressiveMauveAlignFrame) progressiveAlignFrame;
     }
     
     /** called when the user selects 'Open' from the file menu */

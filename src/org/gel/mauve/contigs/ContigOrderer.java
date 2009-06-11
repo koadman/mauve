@@ -136,7 +136,7 @@ public class ContigOrderer implements MauveConstants {
 		String name = new File (xmfa.getName (1)).getName ();
 		unordered = new File (align_dir, name);
 		File file = new File (align_dir,
-				reorderer.file + ContigReorderer.FEATURE_EXT);
+				reorderer.file + MauveConstants.FEATURE_EXT);
 		if (file.exists ())
 			parent.getPanel ().getFeatureImporter ().importAnnotationFile (
 					file, reorderer.fix);
@@ -188,7 +188,7 @@ public class ContigOrderer implements MauveConstants {
 				unordered = new File (to, MauveHelperFunctions.genomeNameToFasta (
 						reorderer.fix));
 				File feats = new File (to, reorderer.file + 
-						ContigReorderer.FEATURE_EXT);
+						MauveConstants.FEATURE_EXT);
 				if (feats.exists ())
 					reorderer.feature_file = feats.getAbsolutePath ();
 				else

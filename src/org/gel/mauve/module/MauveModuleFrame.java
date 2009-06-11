@@ -9,8 +9,12 @@ public class MauveModuleFrame extends MauveFrame {
 	MauveModule module;
 
 	public MauveModuleFrame(Mauve mauve) {
-		super(mauve);
-		module = (MauveModule) mauve;
+		this (mauve, (MauveModule) mauve);
+	}
+	
+	public MauveModuleFrame (Mauve parent, MauveModule mod) {
+		super(parent);
+		module = mod;
 	}
 
 	public void setModel(BaseViewerModel model) {

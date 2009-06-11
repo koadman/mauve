@@ -243,4 +243,8 @@ public interface MauveConstants extends BioJavaConstants {
 	};
 
 	public final static String DEFAULT_CONTIG = "chromosome";
+
+	public static final String FEATURE_EXT = "_features.tab";
+
+	public static final String CONTIG_EXT = "_contigs.tab";
 }

@@ -330,4 +330,8 @@ public class Mauve {
     public String getVersion(){
     	return release_version;
     }
+    
+    public Vector getFrames () {
+    	return frames;
+    }
 }

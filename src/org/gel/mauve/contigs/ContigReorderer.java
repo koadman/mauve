@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.biojava.bio.seq.Feature;
 import org.gel.air.util.GroupUtils;
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.Chromosome;
@@ -24,11 +25,13 @@ import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MauveHelperFunctions;
 import org.gel.mauve.analysis.Segment;
 import org.gel.mauve.backbone.BackboneList;
+import org.gel.mauve.contigs.ChangedFeatureWriter.FeatureReverser;
 import org.gel.mauve.contigs.ContigGrouper.ContigGroup;
 import org.gel.mauve.gui.Mauve;
 import org.gel.mauve.gui.MauveFrame;
 
-public class ContigReorderer extends Mauve implements MauveConstants {
+public class ContigReorderer extends Mauve implements FeatureReverser,
+		MauveConstants {
 
 	public static final int REF_IND = 1;
 	public static final int REORDER_IND = 2;
@@ -48,8 +51,6 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 	protected String input_file;
 	protected String slast_ordered;
 	protected String feature_file;
-	public static final String CONTIG_EXT = "_contigs.tab";
-	public static final String FEATURE_EXT = "_features.tab";
 	protected MauveFrame frame;
 	protected Hashtable args;
 	protected String file;
@@ -117,7 +118,7 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 		lcb_table = new Hashtable ();
 		comparator_table = new Hashtable ();
 		orderGenomes ();
-		if (input_file != null && input_file.indexOf (FEATURE_EXT) > 0) {
+		if (input_file != null && input_file.indexOf (MauveConstants.FEATURE_EXT) > 0) {
 			feature_file = input_file;
 			input_file = null;
 		}
@@ -127,18 +128,13 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 		if (feature_file != null)
 			frame.getPanel ().getFeatureImporter ().importAnnotationFile (
 					new File (feature_file), fix);
-		args.put (ContigFeatureWriter.REVERSES, inverters);
+		args.put (ContigFeatureWriter.REVERSES, this);
 		args.put (ContigFeatureWriter.ORDERED_CONTIGS, ordered);
 		args.put (ContigFeatureWriter.CONFLICTED_CONTIGS, conflicts);
-		file = fix.getDisplayName ();
-		int period = file.toLowerCase ().indexOf (".fas");
+		file = MauveHelperFunctions.getStrippedName(fix);
 		directory = MauveHelperFunctions.getChildOfRootDir (model, CONTIG_OUTPUT);
 		if (!directory.exists())
 			directory.mkdir();
-		if (period > -1)
-			file = file.substring (0, period);
-		if (file.endsWith("."))
-				file = file.substring (0, file.length() - 1);
 	}
 	
 	protected void orderGenomes () {
@@ -170,11 +166,11 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 	public void output () {
 		new FastAContigChangeWriter (this);
 		new ContigFeatureWriter (new File (
-				directory, file + CONTIG_EXT).getAbsolutePath (), args);
+				directory, file + MauveConstants.CONTIG_EXT).getAbsolutePath (), args);
 		Iterator feats = MauveHelperFunctions.getFeatures (model, reorder_ind);
 		if (feats.hasNext ()) {
 			new ChangedFeatureWriter (new File (
-					directory, file + FEATURE_EXT).getAbsolutePath (), args, feats, fix);
+					directory, file + MauveConstants.FEATURE_EXT).getAbsolutePath (), args, feats, fix);
 		}
 	}
 	
@@ -389,6 +385,18 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 				return ordered_genomes [i];
 		}
 		return null;
+	}
+	
+	public boolean isReversed (Feature feat, Chromosome chrom, Genome nome) {
+		return inverters.contains (chrom);
+	}
+	
+	public long reverseStart (Feature feat, Chromosome chrom, Genome nome) {
+		return 1;
+	}
+	
+	public long reverseEnd (Feature feat, Chromosome chrom, Genome nome) {
+		return chrom.getLength ();
 	}
 	
 	public void addGroupToInverters (ContigGroup group) {

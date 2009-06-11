@@ -43,6 +43,21 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 		return file;
 	}
 	
+	public static String getStrippedName (Genome genome) {
+		String name = genome.getDisplayName ();
+		int period = name.toLowerCase ().indexOf (".fas");
+		if (period > -1)
+			name = name.substring (0, period);
+		else {
+			period = name.toLowerCase ().indexOf (".gb");
+			if (period > -1)
+				name = name.substring (0, period);
+		}
+		if (name.endsWith("."))
+				name = name.substring (0, name.length() - 1);
+		return name;
+	}
+	
 	public static Hashtable <String, StrandedFeature> idsToFeats (
 			BaseViewerModel model) {
 		Hashtable <String, StrandedFeature> all = new Hashtable <

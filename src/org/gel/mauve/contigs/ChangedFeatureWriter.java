@@ -20,7 +20,8 @@ public class ChangedFeatureWriter extends AbstractTabbedDataWriter
 	protected Feature feature;
 	protected Genome genome;
 	protected Chromosome chrom;
-	protected Hashtable inverters;
+	//protected Hashtable inverters;
+	protected FeatureReverser reverser;
 	public static final int CONT_IND = 0;
 	public static final int LAB_IND = 1;
 	public static final int STR_IND = 2;
@@ -46,13 +47,13 @@ public class ChangedFeatureWriter extends AbstractTabbedDataWriter
 	}
 	
 	protected void initSubClassParticulars (Hashtable args) {
-		inverters = (Hashtable) args.get (ContigFeatureWriter.REVERSES);
+		reverser = (FeatureReverser) args.get (ContigFeatureWriter.REVERSES);
 		super.initSubClassParticulars(args);
 	}
 
 	protected String getData (int column, int row) {
 		long ret = 0;
-		boolean changed = inverters.contains (chrom);
+		boolean changed = reverser.isReversed(feature, chrom, genome);
 		boolean rev = changed;
 		if (feature.getAnnotation ().containsProperty (REVERSED)) {
 			rev = new Boolean ((String) feature.getAnnotation ().getProperty (
@@ -85,7 +86,8 @@ public class ChangedFeatureWriter extends AbstractTabbedDataWriter
 		}
 		ret = ret - chrom.getStart () + 1;
 		if (changed && column < OLD_L_IND)
-			ret = chrom.getLength () - ret + 1;
+			ret = reverser.reverseStart (feature, chrom, genome) + 
+			reverser.reverseEnd(feature, chrom, genome) - ret;
 		return ret + "";
 	}
 
@@ -105,6 +107,15 @@ public class ChangedFeatureWriter extends AbstractTabbedDataWriter
 		feature = (Feature) feats.next ();
 		chrom = genome.getChromosomeAt (feature.getLocation ().getMin ());
 		return true;
+	}
+	
+	public interface FeatureReverser {
+		
+		public boolean isReversed (Feature feat, Chromosome chrom, Genome gen);
+		
+		public long reverseStart (Feature feat, Chromosome chrom, Genome gen);
+		
+		public long reverseEnd (Feature feat, Chromosome chrom, Genome gen);
 	}
 
 }
