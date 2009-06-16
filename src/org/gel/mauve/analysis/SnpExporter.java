@@ -100,10 +100,12 @@ public class SnpExporter {
 				boolean [] gap = new boolean[seq_count];
 				xmfa.getColumnCoordinates (model, ivI, cc-1, seq_offsets, gap);
 				int refseq = model.getReference().getSourceIndex();
-				if(Math.abs(seq_offsets[refseq]) > 50000)
-					System.out.println("");
 				int lcbi = model.getLCBIndex(model.getGenomeBySourceIndex(refseq), seq_offsets[refseq]);
-				LCB lcb = model.getFullLcbList()[lcbi];
+				// don't use refseq if it's not aligned at the polymorphic site
+				while(lcbi >= xmfa.getSourceLcbList().length){
+					refseq = (refseq + 1) % model.getSequenceCount();
+					lcbi = model.getLCBIndex(model.getGenomeBySourceIndex(refseq), seq_offsets[refseq]);
+				}
 				boolean rev = xmfa.getSourceLcbList()[lcbi].getReverse(model.getReference());
 
 				StringBuilder sb = new StringBuilder();
