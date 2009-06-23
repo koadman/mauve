@@ -48,6 +48,46 @@ public class SnpExporter {
 	{
 		return revtab[b];
 	}
+	static char[] lowertab = initLowerTab();
+	static public char[] initLowerTab(){
+			lowertab= new char[255];
+			lowertab['a'] = 'a';
+			lowertab['A'] = 'a';
+			lowertab['t'] = 't';
+			lowertab['T'] = 't';
+			lowertab['c'] = 'c';
+			lowertab['C'] = 'c';
+			lowertab['g'] = 'g';
+			lowertab['G'] = 'g';
+			lowertab['r'] = 'r';
+			lowertab['R'] = 'r';
+			lowertab['y'] = 'y';
+			lowertab['Y'] = 'y';
+			lowertab['k'] = 'k';
+			lowertab['K'] = 'k';
+			lowertab['m'] = 'm';
+			lowertab['M'] = 'm';
+			lowertab['s']='s';
+			lowertab['S']='s';
+			lowertab['w']='w';
+			lowertab['W']='w';
+			lowertab['b'] = 'b';
+			lowertab['B'] = 'b';
+			lowertab['v'] = 'v';
+			lowertab['V'] = 'v';
+			lowertab['d'] = 'd';
+			lowertab['D'] = 'd';
+			lowertab['h'] = 'h';
+			lowertab['H'] = 'h';
+			lowertab['n']='n';
+			lowertab['N']='n';
+			lowertab['x']='x';
+	        return lowertab;
+	}
+	static public char lowerLookup(byte b)
+	{
+		return lowertab[b];
+	}
 	public static void export( XmfaViewerModel model, XMFAAlignment xmfa, BufferedWriter output ) throws IOException
 	{
 		int iv_count = (int)model.getLcbCount();
@@ -77,7 +117,7 @@ public class SnpExporter {
 			for(int colI = 0; colI < iv_length; colI++)
 			{
 				// first check whether the column contains a polymorphic site
-				byte b = 0;			
+				char b = 0;			
 				boolean poly = false;
 				for( int seqI = 0; seqI < seq_count; seqI++ )
 				{
@@ -85,8 +125,8 @@ public class SnpExporter {
 					if( c == '-' )
 						continue;
 					if( b == 0 )
-						b = c;
-					if( b != c )
+						b = lowerLookup(c);
+					if( b != lowerLookup(c) )
 						poly = true;
 				}
 				if( b != 0)
