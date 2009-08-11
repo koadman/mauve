@@ -42,6 +42,7 @@ public class SnpExporter {
 	        revtab['n']='n';
 	        revtab['N']='N';
 	        revtab['x']='x';
+	        revtab['-']='-';
 	        return revtab;
 	}
 	static public char revLookup(byte b)
@@ -82,6 +83,7 @@ public class SnpExporter {
 			lowertab['n']='n';
 			lowertab['N']='n';
 			lowertab['x']='x';
+			lowertab['-']='-';
 	        return lowertab;
 	}
 	static public char lowerLookup(byte b)
