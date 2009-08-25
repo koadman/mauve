@@ -152,7 +152,7 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 		File feats = new File (directory, file + ContigReorderer.FEATURE_EXT);
 		if (feats.exists ())
 			feature_file = feats.getAbsolutePath ();
-		if (feature_file != null)
+		if (feature_file != null && frame != null)
 			frame.getFeatureImporter ().importAnnotationFile (new File (
 					feature_file), fix);
 		if (ordered == null) {
