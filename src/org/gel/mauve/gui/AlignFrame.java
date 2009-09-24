@@ -345,7 +345,10 @@ public class AlignFrame extends java.awt.Frame
         {
             String mauve_path = System.getProperty("user.dir");
             mauve_path += "/Mauve.app/Contents/MacOS/" + name;
-            return mauve_path;
+        	File f = new File(mauve_path);
+        	if( f.exists())
+        		return mauve_path;
+    		return name;
         }
         else
         {
