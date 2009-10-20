@@ -134,7 +134,7 @@
 	</target>
 
 	<target name="weave" depends="rmic">
-		<retroweaver srcdir="${src}"/>
+		<retroweaver srcdir="${src}" target="1.4" verbose="true" failonerror="true"/>
 	</target>
 	
 	<target name="jar" depends="rmic,weave">
@@ -182,16 +182,58 @@
 		</jar>
 	</target>
 
+	<target name="jarweave" depends="jar,appletjar">
+		<retroweaver inputjar="Mauve.jar" outputjar="MauveWoven.jar" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="mauveApplet.jar" outputjar="mauveAppletWoven.jar" failonerror="true" verbose="true"/>
+		<move file="MauveWoven.jar" tofile="Mauve.jar"/>
+		<move file="mauveAppletWoven.jar" tofile="mauveApplet.jar"/>
+	</target>
+
+	<target name="extjarweave">
+		<retroweaver inputjar="ext/biojava-1.5.jar"  outputjar="ext/biojava-1.5.jar-woven" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="ext/bytecode.jar"  outputjar="ext/bytecode.jar-woven" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="ext/cinema-app_support.jar"  outputjar="ext/cinema-app_support.jar-woven" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="ext/cinema-gui.jar"  outputjar="ext/cinema-gui.jar-woven" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="ext/cinema-mxc.jar"  outputjar="ext/cinema-mxc.jar-woven" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="ext/cinema-sequence.jar"  outputjar="ext/cinema-sequence.jar-woven" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="ext/cinema-util.jar"  outputjar="ext/cinema-util.jar-woven" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="ext/commons-cli.jar"  outputjar="ext/commons-cli.jar-woven" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="ext/commons-collections-2.1.jar"  outputjar="ext/commons-collections-2.1.jar-woven" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="ext/commons-dbcp-1.1.jar"  outputjar="ext/commons-dbcp-1.1.jar-woven" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="ext/commons-pool-1.1.jar"  outputjar="ext/commons-pool-1.1.jar-woven" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="ext/gnu-getopt.jar"  outputjar="ext/gnu-getopt.jar-woven" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="ext/jakarta-regexp.jar"  outputjar="ext/jakarta-regexp.jar-woven" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="ext/xercesImpl.jar"  outputjar="ext/xercesImpl.jar-woven" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="ext/xml-apis.jar"  outputjar="ext/xml-apis.jar-woven" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="ext/zeus-jscl.jar"  outputjar="ext/zeus-jscl.jar-woven" failonerror="true" verbose="true"/>
+		<move file="ext/biojava-1.5.jar-woven"  tofile="ext/biojava-1.5.jar"/>
+		<move file="ext/bytecode.jar-woven"  tofile="ext/bytecode.jar"/>
+		<move file="ext/cinema-app_support.jar-woven"  tofile="ext/cinema-app_support.jar"/>
+		<move file="ext/cinema-gui.jar-woven"  tofile="ext/cinema-gui.jar"/>
+		<move file="ext/cinema-mxc.jar-woven"  tofile="ext/cinema-mxc.jar"/>
+		<move file="ext/cinema-sequence.jar-woven"  tofile="ext/cinema-sequence.jar"/>
+		<move file="ext/cinema-util.jar-woven"  tofile="ext/cinema-util.jar"/>
+		<move file="ext/commons-cli.jar-woven"  tofile="ext/commons-cli.jar"/>
+		<move file="ext/commons-collections-2.1.jar-woven"  tofile="ext/commons-collections-2.1.jar"/>
+		<move file="ext/commons-dbcp-1.1.jar-woven"  tofile="ext/commons-dbcp-1.1.jar"/>
+		<move file="ext/commons-pool-1.1.jar-woven"  tofile="ext/commons-pool-1.1.jar"/>
+		<move file="ext/gnu-getopt.jar-woven"  tofile="ext/gnu-getopt.jar"/>
+		<move file="ext/jakarta-regexp.jar-woven"  tofile="ext/jakarta-regexp.jar"/>
+		<move file="ext/xercesImpl.jar-woven"  tofile="ext/xercesImpl.jar"/>
+		<move file="ext/xml-apis.jar-woven"  tofile="ext/xml-apis.jar"/>
+		<move file="ext/zeus-jscl.jar-woven"  tofile="ext/zeus-jscl.jar"/>
+	</target>
+
 	<target name="checkkeyprops" unless="key.password">
 		<fail message="key.password must be set on command line, using -Dkey.password=&lt;password&gt;" />
 	</target>
 	
-	<target name="signjars" depends="checkkeyprops,jar,appletjar">
+	<target name="signjars" depends="checkkeyprops,jar,appletjar,jarweave">
 		<signjar jar="Mauve.jar" alias="${key.alias}" storepass="${key.password}" keystore="${key.keystore}" />
 		<signjar jar="mauveApplet.jar" alias="${key.alias}" storepass="${key.password}" keystore="${key.keystore}" />
 	</target>
 	
-	<target name="signextjars" depends="checkkeyprops">
+	<target name="signextjars" depends="checkkeyprops,extjarweave">
 		<signjar alias="${key.alias}" storepass="${key.password}" keystore="${key.keystore}">
 			<fileset dir="./ext">
 				<include name="*.jar" />
@@ -243,7 +285,7 @@
 	</target>
 
 	<!-- Create an OS X application and disk image -->
-	<target name="macdist" depends="jar,getChangeLog,getDoco,weave" description="Generate a Mac OS X disk image" >
+	<target name="macdist" depends="jar,getChangeLog,getDoco,jarweave,extjarweave" description="Generate a Mac OS X disk image" >
 		<!-- Create the distribution directory -->
 		<mkdir dir="${dist}" />
 		<delete dir="${dist}/Mauve.app"/>
@@ -254,11 +296,11 @@
 			name="Mauve"
 			mainclass="org.gel.mauve.gui.Mauve"
 			version="${release.version}"
-			infostring="Mauve ${release.version}, (c) 2003-2007  http://gel.ahabs.wisc.edu/mauve"
+			infostring="Mauve ${release.version}, (c) 2003-2009  http://gel.ahabs.wisc.edu/mauve"
 			stubfile="osx/JavaApplicationStub"
 			aboutmenuname="Mauve"
 			icon="osx/mauve.icns"
-			jvmversion="1.3+"
+			jvmversion="1.4+"
 			bundleid="org.gel.mauve.MauveBundle"
 			vmoptions="-Xmx500m"
 			smalltabs="true"
