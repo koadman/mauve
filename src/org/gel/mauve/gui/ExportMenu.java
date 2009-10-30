@@ -87,10 +87,13 @@ public class ExportMenu extends JMenu implements ActionListener {
     	this.rrpanel = rrpanel;
     	if(model instanceof XmfaViewerModel)
     	{
-			jMenuFileExportSnps.setEnabled(true);
-			jMenuFileExportSpas.setEnabled(true);
+    		if(((XmfaViewerModel)model).getBackboneList()!=null)
+    		{
+    			jMenuFileExportOrthologs.setEnabled(true);
+    			jMenuFileExportSpas.setEnabled(true);
+    			jMenuFileExportSnps.setEnabled(true);
+    		}
        		jMenuFileExportPermutation.setEnabled(true);
-			jMenuFileExportOrthologs.setEnabled(true);
     	}else{
 			jMenuFileExportSnps.setEnabled(false);
 			jMenuFileExportSpas.setEnabled(false);

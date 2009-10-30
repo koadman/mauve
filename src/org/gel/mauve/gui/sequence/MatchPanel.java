@@ -36,7 +36,6 @@ import org.gel.mauve.backbone.Backbone;
 import org.gel.mauve.backbone.BackboneList;
 import org.gel.mauve.gui.MauveRenderingHints;
 import org.gel.mauve.gui.RearrangementPanel;
-import org.gel.mauve.gui.editor.Editor;
 
 public class MatchPanel extends AbstractSequencePanel implements MouseListener, HighlightListener
 {
@@ -226,27 +225,6 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
 	{
 		public JMenuItem[] getItem(MouseEvent evt, final RearrangementPanel rrpanel, final BaseViewerModel model, final Genome g)
 		{
-	        if (model instanceof XmfaViewerModel)
-	        {
-	            XmfaViewerModel xm = (XmfaViewerModel) model;
-	            long coord = pixelToCenterSequenceCoordinate(evt.getX());
-	            try
-	            {
-	                final int lcbIndex = xm.getLCBIndex(getGenome(), coord);
-	            
-		            JMenuItem edit = new JMenuItem("Edit this LCB");
-		            edit.addActionListener(new ActionListener(){
-		                public void actionPerformed(ActionEvent e)
-		                {
-		                    new Editor((XmfaViewerModel) model, lcbIndex);
-		                }});
-		        	return new JMenuItem[]{edit};
-	            }
-	            catch (ArrayIndexOutOfBoundsException e)
-	            {
-	                // This happens when there is no LCB to edit.  Ignored.
-	            }
-	        }
 	        return new JMenuItem[0];
 		}
 	}
@@ -358,27 +336,6 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
 	        }
         }
 
-        if (model instanceof XmfaViewerModel)
-        {
-            XmfaViewerModel xm = (XmfaViewerModel) model;
-            long coord = pixelToCenterSequenceCoordinate(evt.getX());
-            try
-            {
-                final int lcbIndex = xm.getLCBIndex(getGenome(), coord);
-            
-	            MenuItem edit = new MenuItem("Edit this LCB");
-	            edit.addActionListener(new ActionListener(){
-	                public void actionPerformed(ActionEvent e)
-	                {
-	                    new Editor((XmfaViewerModel) model, lcbIndex);
-	                }});
-	            pop_menu.add(edit);
-            }
-            catch (ArrayIndexOutOfBoundsException e)
-            {
-                // This happens when there is no LCB to edit.  Ignored.
-            }
-        }
         MenuItem features = new MenuItem ("Filter Features");
         features.addActionListener (FeatureFilterer.getFilterer (model));
         pop_menu.add (features);
