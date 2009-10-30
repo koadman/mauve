@@ -106,11 +106,6 @@
 				${ext}/commons-collections-2.1.jar;
 				${support}/junit.jar;
 				${ext}/zeus-jscl.jar;
-				${ext}/cinema-app_support.jar;
-				${ext}/cinema-gui.jar;
-				${ext}/cinema-mxc.jar;
-				${ext}/cinema-sequence.jar;
-				${ext}/cinema-util.jar;
 				${ext}/xercesImpl.jar;
 				${ext}/xml-apis.jar;
 				${ext}/jakarta-regexp.jar"
@@ -124,9 +119,6 @@
 			<fileset dir="${src}/images"/>
 		</copy>
 		<copy file="${src}/version.properties" todir="${build}"/>
-		<copy todir="${build}/uk/ac/man/bioinf/apps/cinema/resources">
-			<fileset dir="${src}/uk/ac/man/bioinf/apps/cinema/resources"/>
-		</copy>
 	</target>
 
 	<target name="rmic" depends="compile">
@@ -192,11 +184,6 @@
 	<target name="extjarweave">
 		<retroweaver inputjar="ext/biojava-1.5.jar"  outputjar="ext/biojava-1.5.jar-woven" failonerror="true" verbose="true"/>
 		<retroweaver inputjar="ext/bytecode.jar"  outputjar="ext/bytecode.jar-woven" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="ext/cinema-app_support.jar"  outputjar="ext/cinema-app_support.jar-woven" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="ext/cinema-gui.jar"  outputjar="ext/cinema-gui.jar-woven" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="ext/cinema-mxc.jar"  outputjar="ext/cinema-mxc.jar-woven" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="ext/cinema-sequence.jar"  outputjar="ext/cinema-sequence.jar-woven" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="ext/cinema-util.jar"  outputjar="ext/cinema-util.jar-woven" failonerror="true" verbose="true"/>
 		<retroweaver inputjar="ext/commons-cli.jar"  outputjar="ext/commons-cli.jar-woven" failonerror="true" verbose="true"/>
 		<retroweaver inputjar="ext/commons-collections-2.1.jar"  outputjar="ext/commons-collections-2.1.jar-woven" failonerror="true" verbose="true"/>
 		<retroweaver inputjar="ext/commons-dbcp-1.1.jar"  outputjar="ext/commons-dbcp-1.1.jar-woven" failonerror="true" verbose="true"/>
@@ -208,11 +195,6 @@
 		<retroweaver inputjar="ext/zeus-jscl.jar"  outputjar="ext/zeus-jscl.jar-woven" failonerror="true" verbose="true"/>
 		<move file="ext/biojava-1.5.jar-woven"  tofile="ext/biojava-1.5.jar"/>
 		<move file="ext/bytecode.jar-woven"  tofile="ext/bytecode.jar"/>
-		<move file="ext/cinema-app_support.jar-woven"  tofile="ext/cinema-app_support.jar"/>
-		<move file="ext/cinema-gui.jar-woven"  tofile="ext/cinema-gui.jar"/>
-		<move file="ext/cinema-mxc.jar-woven"  tofile="ext/cinema-mxc.jar"/>
-		<move file="ext/cinema-sequence.jar-woven"  tofile="ext/cinema-sequence.jar"/>
-		<move file="ext/cinema-util.jar-woven"  tofile="ext/cinema-util.jar"/>
 		<move file="ext/commons-cli.jar-woven"  tofile="ext/commons-cli.jar"/>
 		<move file="ext/commons-collections-2.1.jar-woven"  tofile="ext/commons-collections-2.1.jar"/>
 		<move file="ext/commons-dbcp-1.1.jar-woven"  tofile="ext/commons-dbcp-1.1.jar"/>
