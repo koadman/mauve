@@ -36,6 +36,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JToolBar;
@@ -684,6 +685,12 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
                 }
             });
         }
+        int result = JOptionPane.showConfirmDialog(this, "<html>The mauveAligner algorithm has been superseded by progressiveMauve<br>and is being maintained here only for historical reasons.<p>It is suggested that you select File->\"Align with progressiveMauve\"<br>to compute the alignment instead.  Continue with mauveAligner<br>only if certain that it's the right tool for the job.", "mauveAligner is obsolete", JOptionPane.OK_CANCEL_OPTION,JOptionPane.WARNING_MESSAGE);
+        if (result == JOptionPane.CANCEL_OPTION)
+        {
+            return;
+        }
+        
         alignFrame.setVisible(true);
     }
     
@@ -693,6 +700,14 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         {
         	progressiveAlignFrame = new ProgressiveMauveAlignFrame(mauve);
         	progressiveAlignFrame.initComponents();
+       		// notify the alignment frame if the parent window is closed...
+            addWindowListener(new java.awt.event.WindowAdapter()
+            {
+                public void windowClosed(java.awt.event.WindowEvent e)
+                {
+                	alignFrame.thisWindowClosed(e);
+                }
+            });
         }
         progressiveAlignFrame.setVisible(true);
     }
