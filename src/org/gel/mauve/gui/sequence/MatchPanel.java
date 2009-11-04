@@ -881,6 +881,12 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
             }
             else if (xm.getDrawLcbBounds())
             {
+                // workaround for an OpenJDK 6 bug which can't handle offscreen coords bigger than 30k
+                if(r.getMaxX()>getWidth() && r.getMaxX()>20000){
+                	double newx = -100 > r.getX() ? -100 : r.getX();
+                	double newwidth = getWidth() + 100 < r.getWidth() ? getWidth() + 100 : r.getWidth();
+                	r.setRoundRect(newx, r.getY(), newwidth, r.getHeight(), r.getArcWidth(), r.getArcHeight());
+                }
                 g.setColor(lcb.color);
                 g.draw(r);
             }
