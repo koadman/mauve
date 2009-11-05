@@ -641,7 +641,7 @@ public class OneToOneOrthologExporter {
 	private static String format80(String sequence)
 	{
 		StringBuilder sb = new StringBuilder();
-		sequence.replaceAll("[\r\n]", "");
+		sequence = sequence.replaceAll("[\\r\\n]", "");
 		for(int i=0; i<sequence.length(); i+=80)
 		{
 			int j = i+80 < sequence.length() ? i+80 : sequence.length();
