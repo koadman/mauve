@@ -83,10 +83,10 @@ public class Mauve {
 		// so
 		// many different looks and feels. Set it to Metal.
 		try {
-//			javax.swing.UIManager
-//					.setLookAndFeel ("javax.swing.plaf.metal.MetalLookAndFeel");
-			javax.swing.UIManager.setLookAndFeel(
-				    javax.swing.UIManager.getSystemLookAndFeelClassName()
+			javax.swing.UIManager
+					.setLookAndFeel ("javax.swing.plaf.metal.MetalLookAndFeel");
+//			javax.swing.UIManager.setLookAndFeel(
+//				    javax.swing.UIManager.getSystemLookAndFeelClassName()
 				);
 		} catch (InstantiationException e) {
 		} catch (ClassNotFoundException e) {
