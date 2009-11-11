@@ -6,7 +6,7 @@
 	
 	<!-- set the release version, unless making a snapshot -->
 	<target name="release_properties" unless="env.MAUVE_SNAPSHOT">
-		<property name="release.version" value="2.3.0"/>
+		<property name="release.version" value="2.3.1"/>
 	</target>
 
 	<!-- deployment locations for production ASAP integration -->
