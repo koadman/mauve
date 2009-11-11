@@ -496,6 +496,8 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
 
             if (lm.getDrawLcbBounds())
             {
+            	openJdkSafeRect(lcb_rect);
+                System.out.println("Drawing bananas " + lcb_rect.getBounds2D().toString());
             	matchGraphics.draw(lcb_rect);
             }
             
@@ -574,6 +576,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
         int pixelWidth = rightPixel - leftPixel;
         int lcb_top = lcb.getReverse(getGenome()) ? half_height : 0;
         RoundRectangle2D.Double lcb_rect = new RoundRectangle2D.Double(leftPixel + HALF_PEN_WIDTH, lcb_top + HALF_PEN_WIDTH, pixelWidth - LCB_BOUNDARY_WIDTH, half_height - LCB_BOUNDARY_WIDTH, arc_size, arc_size);
+    	openJdkSafeRect(lcb_rect);
         return lcb_rect;
     }
 
@@ -777,11 +780,13 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
                 if (xm.getFillLcbBoxes())
                 {
                     g.setColor(lcb.color);
+                	openJdkSafeRect(r);
                     g.fill(r);
                 }
                 else if (xm.getDrawLcbBounds())
                 {
                     g.setColor(lcb.color);
+                	openJdkSafeRect(r);
                     g.draw(r);
                 }
                 
@@ -818,6 +823,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
     	            {
     	                RoundRectangle2D delRec = this.getLcbRectangle(deletedLCB, half_height);
     	                g.setColor(DELETED_COLOR);
+                    	openJdkSafeRect(r);
     	                g.fill(delRec);
     	            }
     	        }
@@ -854,6 +860,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
                     Shape oldClip = g.getClip();
                     if (xm.getDrawLcbBounds() || xm.getFillLcbBoxes())
                     {
+                    	openJdkSafeRect(r);
                         g.setClip(r);
                     }
                     boolean reverse = lcb.getReverse(getGenome());
@@ -876,21 +883,27 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
             // Finish previous rectangle.
             if (xm.getFillLcbBoxes())
             {
+            	openJdkSafeRect(r);
                 g.setColor(lcb.color);
                 g.fill(r);
             }
             else if (xm.getDrawLcbBounds())
             {
-                // workaround for an OpenJDK 6 bug which can't handle offscreen coords bigger than 30k
-                if(r.getMaxX()>getWidth() && r.getMaxX()>20000){
-                	double newx = -100 > r.getX() ? -100 : r.getX();
-                	double newwidth = getWidth() + 100 < r.getWidth() ? getWidth() + 100 : r.getWidth();
-                	r.setRoundRect(newx, r.getY(), newwidth, r.getHeight(), r.getArcWidth(), r.getArcHeight());
-                }
+            	openJdkSafeRect(r);
                 g.setColor(lcb.color);
                 g.draw(r);
             }
         }
+    }
+    
+    // workaround for an OpenJDK 6 bug which can't handle offscreen coords bigger than 30k
+    private void openJdkSafeRect(RoundRectangle2D r){
+    	double newx = 0.0 > r.getMinX() ? 0 : r.getMinX();
+    	newx = getWidth() < newx ? getWidth() : newx;
+    	double newx2 = 0.0 > r.getMaxX() ? 0.0 : r.getMaxX();
+    	newx2 = getWidth() < newx2 ? getWidth() : newx2;
+    	double newwidth = newx2-newx;
+    	r.setRoundRect(newx, r.getY(), newwidth, r.getHeight(), r.getArcWidth(), r.getArcHeight());
     }
 
     private void drawWhiteBackgrounds(int half_height, Graphics2D matchGraphics, double arc_size)
