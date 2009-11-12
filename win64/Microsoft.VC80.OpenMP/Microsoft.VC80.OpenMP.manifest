@@ -5,7 +5,7 @@
     <assemblyIdentity 
 	type="win32" 
 	name="Microsoft.VC80.OpenMP" 
-	version="8.0.50727.762" 
+	version="8.0.50727.4053" 
 	processorArchitecture="amd64" 
 	publicKeyToken="1fc8b3b9a1e18e3b"/>
     <file name="vcomp.dll" hash="10618bb179e993fb56231712b60918d34cc3b283" hashalg="SHA1"/>
