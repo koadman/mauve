@@ -119,7 +119,7 @@ public class Mauve {
 			ioe.printStackTrace (MyConsole.err ());
 		}
 
-        about_message = "<html><center>Mauve version " + release_version + " build " + build_number + " (c) 2003-2009 Aaron Darling, Paul Infield-Harm, and Anna Rissman<br>" + "<a href=\"http://gel.ahabs.wisc.edu\">http://gel.ahabs.wisc.edu/mauve</a><br>" + "<p>Mauve is free, open-source software.  See COPYING for details.</center></p><p>CITATION:<br>Mauve: Multiple Alignment of Conserved Genomic Sequence With Rearrangements.<br>Aaron C. E. Darling, Bob Mau, Frederick R. Blattner, Nicole T. Perna.<br><i>Genome Research</i> <b>14</b>(7):1394-1403</p><p>Mauve uses the Cinema-MX alignment editing modules written by Phillip Lord<br>DCJ rearrangement history inference contributed by Mike Tsai</p>";
+        about_message = "<html><center>Mauve version " + release_version + " build " + build_number + " (c) 2003-2009 Aaron Darling, Paul Infield-Harm, and Anna Rissman<br>" + "<a href=\"http://gel.ahabs.wisc.edu\">http://gel.ahabs.wisc.edu/mauve</a><br>" + "<p>Mauve is free, open-source software.  See COPYING for details.</center></p><p>CITATION:<br>Mauve: Multiple Alignment of Conserved Genomic Sequence With Rearrangements.<br>Aaron C. E. Darling, Bob Mau, Frederick R. Blattner, Nicole T. Perna.<br><i>Genome Research</i> <b>14</b>(7):1394-1403</p><p>DCJ rearrangement history inference contributed by Mike Tsai</p>";
 
         // check for updates in a separate thread so as not to
         // stall the GUI if the network is down
