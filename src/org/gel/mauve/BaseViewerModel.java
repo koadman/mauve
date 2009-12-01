@@ -2,9 +2,12 @@ package org.gel.mauve;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Vector;
 
@@ -909,4 +912,23 @@ public class BaseViewerModel {
 		fireHighlightEvent ();
 	}
 
+	private HashMap<Genome,List> attributes = new HashMap<Genome,List>();
+	public void addGenomeAttribute(Genome g, Object o){
+		List l = attributes.get(g);
+		if(l==null){
+			l = new ArrayList();
+			attributes.put(g,l);
+		}
+		l.add(o);
+	}
+	public List getGenomeAttributes(Genome g){
+		return attributes.get(g);
+	}
+	boolean drawAttributes = false;
+	public boolean getDrawAttributes() {
+		return drawAttributes;
+	}
+	public void setDrawAttributes(boolean drawAttributes) {
+		this.drawAttributes = drawAttributes;
+	}
 }

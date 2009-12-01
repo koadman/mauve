@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 import org.gel.mauve.backbone.Backbone;
 import org.gel.mauve.backbone.BackboneList;
+import org.gel.mauve.histogram.ZoomHistogram;
 
 /**
  * SimilarityIndex generates a queryable in-memory index of the similarity among
@@ -17,15 +18,6 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 	/** object format version */
 	static final long serialVersionUID = 3;
 
-	int index_factor = 8;
-
-	/** < Index granularity grows in multiples of this number */
-	int min_index_values = 500;
-
-	/** < Never create a resolution level with fewer than this many values */
-	int max_index_mb = 300;
-
-	/** < Maximum size in MB for the index */
 
 	int window_size = 100;
 
@@ -33,23 +25,16 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 	
 	
 
-	/** < The similarity index, similarity values are discretized to a byte value */
-	protected byte [] sim_index;
-
-
-	long seq_length;
-
 
 	SimilarityIndex (Genome g, XMFAAlignment xmfa, BackboneList bb_list)
 			throws IOException {
-		this.seq_length = g.getLength ();
-		allocateIndex ();
+		super(g);
 		calculateIndex (g, xmfa, bb_list);
 	}
 	
-	public SimilarityIndex(int level, int max_res, long[] sizes, long[] res,
+	public SimilarityIndex(long seq_length, int level, int max_res, long[] sizes, long[] res,
 			byte [] sims) {
-		init (level, max_res, sizes, res);
+		init (seq_length, level, max_res, sizes, res);
 		sim_index = sims;
 	}
 
@@ -58,43 +43,6 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 		this.seq_length = g.getLength ();
 	}
 
-	/**
-	 * Allocates space for the similarity index
-	 */
-	void allocateIndex () {
-		// calculate the number of index levels
-		long level_one = seq_length / max_resolution;
-		long level_tmp = level_one;
-		levels = seq_length > min_index_values ? 1 : 0;
-		while (level_tmp > min_index_values) {
-			level_tmp /= index_factor;
-			levels++;
-		}
-		// nothing to allocate if there are no levels
-		if (levels == 0)
-			return;
-
-		resolutions = new long [levels];
-		level_sizes = new long [levels];
-		level_tmp = level_one;
-		long size_sum = 0;
-		int levelI;
-		long cur_resolution = max_resolution;
-		for (levelI = 0; levelI < levels; levelI++) {
-			resolutions[levelI] = cur_resolution;
-			level_sizes[levelI] = level_tmp;
-			size_sum += level_tmp;
-			level_tmp /= index_factor;
-			cur_resolution *= index_factor;
-		}
-
-		// check whether the index will fit in the max size
-		if (size_sum > ((long) max_index_mb * 1024l * 1024l)) {
-			throw new RuntimeException ("Similarity index is too large.");
-		}
-
-		sim_index = new byte [(int) size_sum];
-	}
 
 	void advanceIndex (String [] cols, int [] col_index, int seq) {
 		while (true) {
@@ -283,50 +231,9 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 				sim_index[indexI] = -128;
 			cur_offset += max_resolution;
 		}
-
-		// calculate subsequent levels using the previous level
-		for (int levelI = 1; levelI < levels; levelI++) {
-			int componentI = (int) getLevelOffset (levelI - 1);
-			int level_offset = (int) getLevelOffset (levelI);
-			for (int indexI = 0; indexI < level_sizes[levelI]; indexI++) {
-				int sim_sum = 0;
-				for (int subI = 0; subI < index_factor; subI++) {
-					sim_sum += sim_index[componentI];
-					componentI++;
-				}
-				// set to the average of its components
-				sim_index[level_offset + indexI] = (byte) (sim_sum / index_factor);
-			}
-		}
+		calculateHigherLevels();
 	}
 	
-	/**
-	 * Set an individual similarity value
-	 */
-	protected void setSimilarity (int level, int index, byte sim_value) {
-		int level_offset = 0;
-		for (int levelI = 0; levelI < level; levelI++) {
-			level_offset += level_sizes[levelI];
-		}
-		if (index > level_sizes[level])
-			throw new ArrayIndexOutOfBoundsException ();
-
-		sim_index[level_offset + index] = sim_value;
-	}
-	
-	/**
-	 * get an individual similarity
-	 */
-	public byte getSimilarity (int level, int index) {
-		int level_offset = 0;
-		for (int levelI = 0; levelI < level; levelI++) {
-			level_offset += level_sizes[levelI];
-		}
-		if (index >= level_sizes[level])
-			throw new ArrayIndexOutOfBoundsException ();
-
-		return sim_index[level_offset + index];
-	}
 
 
 	public static final int [] char_map = initCharMap();
@@ -461,13 +368,6 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 	 */
 	public boolean writeAllVals (OutputStream out) {
 		return writeVals (out, 0, sim_index.length - 1);
-	}
-
-	/**
-	 * 
-	 */
-	public byte getValue(int index) {
-		return sim_index [index];
 	}
 	
 	

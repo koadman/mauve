@@ -13,6 +13,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.geom.Rectangle2D;
 import java.util.EventListener;
@@ -679,9 +680,21 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
      */
     private static Color getFillColor( Color lcb_color )
     {
+        return getFillColorChangeHSB(lcb_color, 0f,-0.2f,0.2f);
+    }
+
+    /**
+     * Creates a similarity plot fill color for an LCB of a given color
+     * @param lcb_color The color of the LCB bounding rectangle
+     * @param brighter A floating point value in range [-1,1] by which the brightness will be adjusted
+     * @return
+     */
+    private static Color getFillColorChangeHSB( Color lcb_color, float h, float s, float b )
+    {
     	float[] hsbvals = Color.RGBtoHSB(lcb_color.getRed(), lcb_color.getGreen(), lcb_color.getBlue(), null);
-    	hsbvals[1] = hsbvals[1] - .2f > 0 ? hsbvals[1] - .2f : 0;
-    	hsbvals[2] = hsbvals[2] + .2f < 1 ? hsbvals[2] + .2f : 1;
+    	hsbvals[0] = hsbvals[0] + h > 0 ? hsbvals[0] : 0;
+    	hsbvals[1] = hsbvals[1] + s > 0 ? hsbvals[1] + s : 0;
+    	hsbvals[2] = hsbvals[2] + b < 1 ? hsbvals[2] + b : 1;
     	return Color.getHSBColor( hsbvals[0], hsbvals[1], hsbvals[2]);
     }
 
@@ -758,6 +771,7 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
             	sim_color = getFillColor(bb.getColor());
         }
         
+        double prevh = half_height*2;
         for (double pixelD = 0; pixelD < getWidth(); pixelD += increment)
         {
             // Determine the range of sequence coordinates with which we are working.
@@ -865,12 +879,23 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
                     }
                     boolean reverse = lcb.getReverse(getGenome());
                     double s = ((XmfaViewerModel) model).getSim(getGenome()).getValueForRange(seq_left, seq_right);
+                    double smin = ((XmfaViewerModel) model).getSim(getGenome()).getValueForRange(seq_left, seq_right,-1);
+                    double smax = ((XmfaViewerModel) model).getSim(getGenome()).getValueForRange(seq_left, seq_right,1);
+                    // normalize to a box_height
+                    double heightmin = (((double) smin + 127d) / 256d * sim_height);
+                    double heightmax = (((double) smax + 127d) / 256d * sim_height);
                     // normalize to a box_height
                     double height = (((double) s + 127d) / 256d * sim_height);
-                    double match_top = reverse ? half_height + HALF_PEN_WIDTH : HALF_PEN_WIDTH + sim_height - height;
-                    Rectangle2D.Double match_rect = new Rectangle2D.Double(pixelD, match_top, increment, height);
-                	g.setColor(sim_color);
+                    double match_top = reverse ? 2*half_height - HALF_PEN_WIDTH - height: HALF_PEN_WIDTH + sim_height - height;
+                    double range_top = reverse ? 2*half_height - HALF_PEN_WIDTH - heightmax: HALF_PEN_WIDTH + sim_height - heightmax;
+                    double range_bot = reverse ? 2*half_height - HALF_PEN_WIDTH - heightmin: HALF_PEN_WIDTH + sim_height - heightmin;
+                    Rectangle2D.Double match_rect = new Rectangle2D.Double(pixelD, range_top, increment, range_bot - range_top);
+                	g.setColor(getFillColorChangeHSB(sim_color, 0f, 0f, 0.3f));
                     g.fill(match_rect);
+                    g.setColor(getFillColorChangeHSB(sim_color, 0f, 0f, -0.2f));
+                    Line2D.Double l2d = new Line2D.Double(pixelD, prevh, pixelD+increment, match_top);
+                    prevh = match_top;
+                    g.draw(l2d);
                     g.setClip(oldClip);
                 }
             }

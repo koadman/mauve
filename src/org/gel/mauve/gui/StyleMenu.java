@@ -19,6 +19,7 @@ public class StyleMenu extends JMenu implements ActionListener {
     JCheckBoxMenuItem jMenuViewStyleLcbConnectingLines = new JCheckBoxMenuItem();
     JCheckBoxMenuItem jMenuViewStyleChromosomeBoundaries = new JCheckBoxMenuItem();
     JCheckBoxMenuItem jMenuViewStyleMouseHighlighting = new JCheckBoxMenuItem();
+    JCheckBoxMenuItem jMenuViewStyleDrawAttributes = new JCheckBoxMenuItem();
     
     BaseViewerModel model;
     RearrangementPanel rrpanel;
@@ -73,6 +74,13 @@ public class StyleMenu extends JMenu implements ActionListener {
         jMenuViewStyleMouseHighlighting.setMnemonic('m');
         jMenuViewStyleMouseHighlighting.setActionCommand("ToggleMouseCursor");
         jMenuViewStyleMouseHighlighting.addActionListener(this);
+        
+        jMenuViewStyleDrawAttributes.setToolTipText("Should attributes such as genome-wide histograms be drawn");
+        jMenuViewStyleDrawAttributes.setVisible(true);
+        jMenuViewStyleDrawAttributes.setText("Draw attributes (histograms)");
+        jMenuViewStyleDrawAttributes.setMnemonic('a');
+        jMenuViewStyleDrawAttributes.setActionCommand("ToggleDrawAttributes");
+        jMenuViewStyleDrawAttributes.addActionListener(this);
 
         add(jMenuViewStyleLcbOutlines);
         add(jMenuViewStyleSimilarityPlot);
@@ -81,6 +89,7 @@ public class StyleMenu extends JMenu implements ActionListener {
         add(jMenuViewStyleLcbConnectingLines);
         add(jMenuViewStyleChromosomeBoundaries);
         add(jMenuViewStyleMouseHighlighting);
+        add(jMenuViewStyleDrawAttributes);
     }
     
     /**
@@ -112,6 +121,8 @@ public class StyleMenu extends JMenu implements ActionListener {
             jMenuViewStyleMouseHighlighting.setSelected(true);
     	}else
     		setEnabled(false);
+        rrpanel.addKeyMapping("typed h", "ToggleDrawAttributes", this);
+        jMenuViewStyleDrawAttributes.setSelected(model.getDrawAttributes());
     }
     
     public void actionPerformed(ActionEvent e)
@@ -176,6 +187,14 @@ public class StyleMenu extends JMenu implements ActionListener {
             {
                 model.setDrawMouseCursor(!model.getDrawMouseHighlighting());
                 jMenuViewStyleMouseHighlighting.setSelected(model.getDrawMouseHighlighting());
+            }
+        }
+        else if (e.getActionCommand().equals("ToggleDrawAttributes"))
+        {
+            if (model != null)
+            {
+                model.setDrawAttributes(!model.getDrawAttributes());
+                jMenuViewStyleDrawAttributes.setSelected(model.getDrawAttributes());
             }
         }
     	

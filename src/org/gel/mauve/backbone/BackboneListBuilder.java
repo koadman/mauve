@@ -14,12 +14,12 @@ import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.format.FileFinder;
 
 public class BackboneListBuilder {
-	public static File getBbFile (XmfaViewerModel model, XMFAAlignment xmfa) {
+	public static File getFileByKey (XmfaViewerModel model, XMFAAlignment xmfa, String key) {
 		Properties meta = xmfa.metadata;
 		// Find the backbone data
 		String bb_fname;
-		if (meta.containsKey ("BackboneFile")) {
-			bb_fname = meta.getProperty ("BackboneFile");
+		if (meta.containsKey (key)) {
+			bb_fname = meta.getProperty (key);
 		} else {
 			return null; // no backbone information
 		}
@@ -34,7 +34,7 @@ public class BackboneListBuilder {
 	public static BackboneList build (XmfaViewerModel model, XMFAAlignment xmfa)
 			throws IOException {
 		int sequenceCount = model.getSequenceCount ();
-		File src = getBbFile (model, xmfa);
+		File src = getFileByKey (model, xmfa, "BackboneFile");
 		if (src == null)
 			return null;
 		Vector bbvect = new Vector ();

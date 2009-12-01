@@ -2,6 +2,9 @@ package org.gel.mauve.gui.sequence;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Panel;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.JLayeredPane;
 
@@ -10,14 +13,17 @@ import org.gel.mauve.Genome;
 import org.gel.mauve.ModelEvent;
 import org.gel.mauve.ModelListener;
 import org.gel.mauve.ViewerMode;
+import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.gui.FillLayout;
 import org.gel.mauve.gui.RearrangementPanel;
+import org.gel.mauve.histogram.ZoomHistogram;
 
 public class RRSequencePanel extends JLayeredPane implements ModelListener
 {
     private MatchPanel matchPanel;
     private HighlightPanel highlightPanel;
     public RangeHighlightPanel rangeHighlightPanel;
+    public Panel[] otherPanels = null;
     public RRSequencePanel(RearrangementPanel rrpanel, BaseViewerModel model, Genome genome)
     {
         setLayout(new FillLayout());
@@ -27,6 +33,15 @@ public class RRSequencePanel extends JLayeredPane implements ModelListener
         add(highlightPanel, new Integer(2));
         rangeHighlightPanel = new RangeHighlightPanel(model, genome);
         add(rangeHighlightPanel, new Integer(3));
+        // find other panels for the data
+    	List attribs = model.getGenomeAttributes(genome);
+    	if(attribs != null && attribs.iterator().hasNext()){
+    		Object o = attribs.iterator().next();
+    		if(o instanceof ZoomHistogram){
+    			HistogramPanel hp = new HistogramPanel(model, genome, (ZoomHistogram)o);
+    			add(hp,new Integer(4));
+    		}
+    	}
         setMinimumSize( new Dimension( 10000, 100 ) );
         setMaximumSize( new Dimension( 10000, 175 ) );
         addMouseListener(matchPanel);

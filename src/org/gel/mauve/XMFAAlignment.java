@@ -826,6 +826,21 @@ public class XMFAAlignment implements Serializable {
 
 		}
 	}
+	/**
+	 * Returns a sequence coordinate aligned in a given column for a specific genome
+	 * 
+	 * @return 	The sequence coordinate
+	 */
+	public long getCoordinate (XmfaViewerModel model, Genome g, int lcb,
+			long column, Boolean gap) {
+
+		long seq_offset = gis_tree[lcb][g.getSourceIndex ()]
+				.columnToSeqPos (column);
+		gap = column != gis_tree[lcb][g.getSourceIndex ()]
+				.seqPosToColumn (seq_offset);
+		seq_offset = LCBToGlobal (seq_offset, g, lcb);
+		return seq_offset;
+	}
 	
 	/**
 	 * Returns the length in alignment columns of a particular LCB

@@ -9,13 +9,19 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.prefs.BackingStoreException;
 
 import org.gel.mauve.backbone.BackboneList;
 import org.gel.mauve.backbone.BackboneListBuilder;
 import org.gel.mauve.color.BackboneLcbColor;
 import org.gel.mauve.color.LCBColorScheme;
+import org.gel.mauve.histogram.HistogramBuilder;
+import org.gel.mauve.remote.MauveDisplayCommunicator;
+import org.gel.mauve.remote.WargDisplayCommunicator;
 
 /**
  * @author pinfield
@@ -165,7 +171,7 @@ public class XmfaViewerModel extends LcbViewerModel {
         	if( bb_list != null )
         	{
             	// if the backbone is newer than the cache then clear the cache
-	        	File bb_file = BackboneListBuilder.getBbFile(this,xmfa);
+	        	File bb_file = BackboneListBuilder.getFileByKey(this,xmfa,"BackboneFile");
 	            if(	ModelBuilder.getUseDiskCache() && bb_file.lastModified() > cache_file.lastModified())
 	            	cache_instream = null;
         	}
@@ -222,7 +228,25 @@ public class XmfaViewerModel extends LcbViewerModel {
         if( bb_list != null )
         	setColorScheme(new BackboneLcbColor());
         initModelLCBs();
+        
+        // check if there's a histogram
+        File histFile = BackboneListBuilder.getFileByKey(this, xmfa, "HistogramFile");
+        if(histFile != null){
+	        RandomAccessFile raf = new RandomAccessFile(histFile, "r");
+	        HistogramBuilder.build(raf, this);
+        }
+        
+        // try publishing this viewer model via DBus
+        try{
+        	mdCommunicator = new MauveDisplayCommunicator(this);
+        }catch(Exception e){/*maybe DBus doesn't exist*/ e.printStackTrace();}
+        // try connecting to a warg instance
+        try{
+        	wdCommunicator = new WargDisplayCommunicator(this);
+        }catch(Exception e){/*maybe DBus doesn't exist*/ e.printStackTrace();}
     }
+    MauveDisplayCommunicator mdCommunicator = null;
+    WargDisplayCommunicator wdCommunicator = null;
 
 	protected void referenceUpdated () {
 		super.referenceUpdated ();

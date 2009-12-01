@@ -59,8 +59,8 @@ public class AlignedSequenceWriter implements ModuleListener {
 	 */
 	public void startModule(MauveFrame frame) {
 		model = (XmfaViewerModel) frame.getModel ();
-		backbone = new ProcessBackboneFile (BackboneListBuilder.getBbFile(model, 
-				model.getXmfa()).getAbsolutePath()).getBackboneSegments();
+		backbone = new ProcessBackboneFile (BackboneListBuilder.getFileByKey(model, 
+				model.getXmfa(),"BackboneFile").getAbsolutePath()).getBackboneSegments();
 		pareContigs ();
 		for (int i = 0; i < model.getSequenceCount(); i++) {
 			SegmentComparator comp = new SegmentComparator (i);
