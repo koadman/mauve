@@ -108,7 +108,9 @@
 				${ext}/zeus-jscl.jar;
 				${ext}/xercesImpl.jar;
 				${ext}/xml-apis.jar;
-				${ext}/jakarta-regexp.jar"
+				${ext}/jakarta-regexp.jar;
+				${ext}/dbus-2.6.jar;
+				${ext}/unix-0.5.jar"
 			srcdir="${src}"
 			destdir="${build}"
 			target="1.5"
@@ -193,6 +195,8 @@
 		<retroweaver inputjar="ext/xercesImpl.jar"  outputjar="ext/xercesImpl.jar-woven" failonerror="true" verbose="true"/>
 		<retroweaver inputjar="ext/xml-apis.jar"  outputjar="ext/xml-apis.jar-woven" failonerror="true" verbose="true"/>
 		<retroweaver inputjar="ext/zeus-jscl.jar"  outputjar="ext/zeus-jscl.jar-woven" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="ext/dbus-2.6.jar"  outputjar="ext/dbus-2.6.jar-woven" failonerror="true" verbose="true"/>
+		<retroweaver inputjar="ext/unix-0.5.jar"  outputjar="ext/unix-0.5.jar-woven" failonerror="true" verbose="true"/>
 		<move file="ext/biojava-1.5.jar-woven"  tofile="ext/biojava-1.5.jar"/>
 		<move file="ext/bytecode.jar-woven"  tofile="ext/bytecode.jar"/>
 		<move file="ext/commons-cli.jar-woven"  tofile="ext/commons-cli.jar"/>
@@ -204,6 +208,8 @@
 		<move file="ext/xercesImpl.jar-woven"  tofile="ext/xercesImpl.jar"/>
 		<move file="ext/xml-apis.jar-woven"  tofile="ext/xml-apis.jar"/>
 		<move file="ext/zeus-jscl.jar-woven"  tofile="ext/zeus-jscl.jar"/>
+		<move file="ext/dbus-2.6.jar-woven"  tofile="ext/dbus-2.6.jar"/>
+		<move file="ext/unix-0.5.jar-woven"  tofile="ext/unix-0.5.jar"/>
 	</target>
 
 	<target name="checkkeyprops" unless="key.password">
