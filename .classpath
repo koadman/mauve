@@ -12,5 +12,7 @@
 	<classpathentry kind="lib" path="ext/zeus-jscl.jar"/>
 	<classpathentry kind="lib" path="ext/jakarta-regexp.jar"/>
 	<classpathentry kind="lib" path="ext/biojava-1.5.jar"/>
+	<classpathentry kind="lib" path="ext/dbus-2.6.jar"/>
+	<classpathentry kind="lib" path="ext/unix-0.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
