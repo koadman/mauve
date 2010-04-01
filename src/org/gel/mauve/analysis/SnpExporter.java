@@ -2,7 +2,9 @@ package org.gel.mauve.analysis;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.Vector;
 
+import org.gel.mauve.Genome;
 import org.gel.mauve.LCB;
 import org.gel.mauve.XMFAAlignment;
 import org.gel.mauve.XmfaViewerModel;
@@ -105,6 +107,19 @@ public class SnpExporter {
 		}
 		output.write("\n");
 		
+		SNP[] snps = getSNPs(model, xmfa);
+		for (int i = 0; i < snps.length; i++){
+			output.write(snps[i].toString()+"\n");
+			
+		}
+	}
+	
+	public static SNP[] getSNPs( XmfaViewerModel model, XMFAAlignment xmfa){
+		int iv_count = (int)model.getLcbCount();
+		int seq_count = model.getSequenceCount();
+
+		Vector<SNP> snps = new Vector<SNP>();
+		
 		for(int ivI = 0; ivI < iv_count; ivI++ )
 		{
 			int iv_length = (int)xmfa.getLcbLength(ivI);
@@ -141,7 +156,8 @@ public class SnpExporter {
 				long [] seq_offsets = new long[seq_count];
 				boolean [] gap = new boolean[seq_count];
 				xmfa.getColumnCoordinates (model, ivI, cc-1, seq_offsets, gap);
-				int refseq = model.getReference().getSourceIndex();
+				Genome g = model.getReference();
+				int refseq = g.getSourceIndex();
 				int lcbi = model.getLCBIndex(model.getGenomeBySourceIndex(refseq), seq_offsets[refseq]);
 				// don't use refseq if it's not aligned at the polymorphic site
 				while(lcbi >= xmfa.getSourceLcbList().length){
@@ -149,28 +165,126 @@ public class SnpExporter {
 					lcbi = model.getLCBIndex(model.getGenomeBySourceIndex(refseq), seq_offsets[refseq]);
 				}
 				boolean rev = xmfa.getSourceLcbList()[lcbi].getReverse(model.getReference());
-
+				SNP tmp = new SNP(seq_count);
 				StringBuilder sb = new StringBuilder();
 				for( int seqI = 0; seqI < seq_count; seqI++ )
 				{
+					char c = '-';
 					if(rev)
-						sb.append(revLookup(bytebuf[seqI][colI]));
+						c = revLookup(bytebuf[seqI][colI]);
 					else
-						sb.append((char)bytebuf[seqI][colI]);
+						c = (char)bytebuf[seqI][colI];
+
+					long pos = 0;
+					if(!gap[seqI])
+						pos = seq_offsets[seqI];
+					tmp.addTaxa(seqI, c, pos);
 				}
-				output.write(sb.toString());
-				String zero = "0";
-				for( int seqI = 0; seqI < seq_count; seqI++ )
-				{
-					output.write('\t');
-					if(gap[seqI])
-						output.write(zero);
-					else
-						output.write(Long.toString(seq_offsets[seqI]));
-				}
-				output.write("\n");
+				snps.add(tmp);
 			}
 		}
-		output.flush();
+		return snps.toArray(new SNP[snps.size()]);
 	}
+	
+	private static int countGapLen(byte[] seq, int gapStart){
+		int len = gapStart;
+		while(seq[len] == '-')
+			len++;
+		return len-gapStart;
+	}
+	
+	public static Gap[][] getGaps(XmfaViewerModel model, XMFAAlignment xmfa){
+		int iv_count = (int)model.getLcbCount();
+		int seq_count = model.getSequenceCount();
+
+		Vector[] gaps = new Vector[seq_count];
+		 for (int i = 0; i < gaps.length; i++)
+			gaps[i] = new Vector();
+		
+		LCB[] lcbs = xmfa.getSourceLcbList();
+		
+		Genome[] genomes = (Genome[]) model.getGenomes().toArray(new Genome[seq_count]); 
+		
+		for (int genI = 0; genI < genomes.length; genI++){
+			Genome g = genomes[genI];
+			for (int lcbI = 0; lcbI < lcbs.length; lcbI++){
+				
+				int lcbLen = (int) xmfa.getLcbLength(lcbI);
+				byte[] tmp = xmfa.readRawSequence(lcbI, genI, 0, lcbLen);
+				tmp = XMFAAlignment.filterNewlines(tmp);
+				long[] seq_offset = new long[genomes.length];
+				boolean[] gap = new boolean[genomes.length];
+				
+				int colI = 0;
+				while (colI < tmp.length){
+					if (tmp[colI]=='-'){
+						long start = colI;
+						// this will move colI to the position immediately following the gap
+						while(tmp[colI]=='-')
+							colI++;
+						long end = colI-1;
+						long len = end - start + 1;
+						if (lcbs[lcbI].getReverse(g))
+							xmfa.getColumnCoordinates(model, lcbI, end+1, seq_offset, gap);
+						else
+							xmfa.getColumnCoordinates(model, lcbI, start-1, seq_offset, gap);
+						
+						gaps[genI].add(new Gap(genI,lcbI,seq_offset[genI],len));	
+					} else	
+						colI++;
+				}	
+			}
+		}
+		Gap[][] ret = new Gap[gaps.length][];
+		for (int i = 0; i < ret.length; i++){
+			ret[i] = (Gap[]) gaps[i].toArray(new Gap[gaps[i].size()]);
+		}
+		return ret;
+	}
+	
+	/**
+	 * Returns a 4x4 matrix of counts of substitution types between 
+	 * genome <code>src_i</code> and <code>src_j</code>
+	 * 
+	 * <code>
+	 *      A  C  T  G
+	 *    A -
+	 *    C    -
+	 *    T       -
+	 *    G          -
+	 * </code>
+	 * 
+	 * @param model <code>XmfaViewerModel</code> holding alignment data
+	 * @param src_i source index of a genome 
+	 * @param src_j source index of a genome 
+	 * @return a 4x4 matrix of substitution counts
+	 */
+	public static int[][] countSubstitutions(XmfaViewerModel model, int src_i, int src_j){
+		int[][] subs = new int[4][4];
+		
+		SNP[] snps = getSNPs(model, model.getXmfa());
+		
+		for (int k = 0; k < snps.length; k++){ 
+			char c_i = snps[k].getChar(src_i);
+			char c_j = snps[k].getChar(src_j);
+			if (c_i != c_j)
+				subs[getBaseIdx(c_i)][getBaseIdx(c_j)]++;
+		}
+		return subs;
+	}
+	
+	private static int getBaseIdx(char c){
+		switch(c){
+		  case 'a': return 0; 
+		  case 'A': return 0;
+		  case 'c': return 1;
+		  case 'C': return 1;
+		  case 't': return 2;
+		  case 'T': return 2;
+		  case 'g': return 3;
+	 	  case 'G': return 3;
+		  default: return -1;
+		}
+	}
+
 }

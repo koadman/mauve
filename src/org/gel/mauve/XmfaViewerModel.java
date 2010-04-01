@@ -288,12 +288,13 @@ public class XmfaViewerModel extends LcbViewerModel {
 	 * 
 	 * Returns column coordinates in source genome order
 	 * 
-	 * @param lcb
-	 * @param column
+	 * @param lcb LCB id
+	 * @param column column of interest
+	 * @param seq_coords  The sequence coordinates (output)
+	 * @param gap True whenever a given sequence has a gap in the query column
 	 * @return
 	 */
-	public void getColumnCoordinates (int lcb, long column, long [] seq_coords,
-			boolean [] gap) {
+	public void getColumnCoordinates (int lcb, long column, long [] seq_coords, boolean [] gap) {
 		xmfa.getColumnCoordinates (this, lcb, column, seq_coords, gap);
 	}
 

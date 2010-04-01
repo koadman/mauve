@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
+import org.gel.mauve.analysis.PermutationExporter;
 import org.gel.mauve.color.LCBColorScheme;
 
 /**
@@ -556,9 +557,9 @@ public class LcbViewerModel extends BaseViewerModel {
 	/**
 	 * Uses currently visible LCBs to launch a DCJ window
 	 */
-	public void launchDCJ () {
+/*	public void launchDCJ () {
 		String lcb_input = "";
-
+s
 		// first construct a matrix of chromosome lengths
 		int max_chr_count = 0;
 		for (int seqI = 0; seqI < getSequenceCount (); seqI++) {
@@ -600,10 +601,16 @@ public class LcbViewerModel extends BaseViewerModel {
 			if (seqI + 1 < getSequenceCount ())
 				lcb_input += " $,\n";
 		}
-
+		System.err.print(lcb_input);
+		if (this instanceof XmfaViewerModel){
+			lcb_input = PermutationExporter.getPermStrings((XmfaViewerModel) this,  genomes);			
+		}
+		System.err.print(lcb_input);
 		org.gel.mauve.dcj.DCJWindow.startDCJ (lcb_input);
 	}
-
+*/
+	
+	
 	public void launchGrimmMGR () {
 		String grimm_url = "http://nbcr.sdsc.edu/GRIMM/grimm.cgi?";
 		String url_data = "ismult=1&ngenomewins=" + getSequenceCount ();

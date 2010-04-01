@@ -381,16 +381,17 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         findFeatureButton.setIcon(MauveFrame.find_feature_icon);
         toolbar.add(findFeatureButton);
 
+        JButton dcj_button = new JButton(MauveFrame.dcj_icon);
+	    dcj_button.setToolTipText("Perform a Block-Interchange (DCJ) rearrangement history analysis (Ctrl+D)");
+	    dcj_button.setActionCommand("DCJ");
+	    dcj_button.addActionListener(this);
+	    toolbar.add(dcj_button);
+        
         // When clicked, the zoom out button zooms the display 50% (doubles the
         // displayed area)
-        if (haveNwayLcbData())
-        {
-        	JButton dcj_button = new JButton(MauveFrame.dcj_icon);
-	        dcj_button.setToolTipText("Perform a Block-Interchange (DCJ) rearrangement history analysis (Ctrl+D)");
-	        dcj_button.setActionCommand("DCJ");
-	        dcj_button.addActionListener(this);
-	        toolbar.add(dcj_button);
 
+	    if (haveNwayLcbData())
+	    {
 	        JButton grimm_button = new JButton(MauveFrame.grimm_icon);
 	        grimm_button.setToolTipText("Perform a GRIMM rearrangement history analysis (DCJ generalizes the GRIMM model)");
 	        grimm_button.setActionCommand("GRIMM");
@@ -550,7 +551,10 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     }
 
     // ACTION LISTENER METHODS
-
+    
+    /**
+     * 
+     */
     public void actionPerformed(ActionEvent e)
     {
     	if (e.getActionCommand().equals("Home"))
@@ -593,9 +597,12 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         {
         	if( model instanceof LcbViewerModel )
         	{
-        		LcbViewerModel lvm = (LcbViewerModel)model;
-        		lvm.launchDCJ();
+        		org.gel.mauve.dcjx.dcjWindow.launchDCJ(model);
         	}
+        }
+        else if (e.getActionCommand().equals("ScoreAssembly"))
+        {
+        	
         }
         else if (e.getActionCommand().equals("GRIMM"))
         {

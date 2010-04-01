@@ -78,6 +78,11 @@ public class Genome {
 		this.displayName = displayName;
 	}
 
+	/**
+	 * Returns an unmodifiable sorted list of the chromosomes comprising this genome.
+	 * 
+	 * @return an unmodifiable sorted list of chromosomes.
+	 */
 	public List getChromosomes () {
 		return Collections.unmodifiableList (chromosomes);
 	}

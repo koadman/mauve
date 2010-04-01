@@ -7,7 +7,11 @@ import javax.swing.*;
 import javax.swing.tree.*;
 import javax.swing.text.*;
 import java.applet.Applet;
-
+/**
+ * @deprecated
+ * @author Mike Tsai
+ *
+ */
 public class DCJWindow extends JWindow {
 
 	TextArea input, output, log, ops;
@@ -27,9 +31,9 @@ public class DCJWindow extends JWindow {
 	String defaultInput = ""
 			+ "1 -32 17 2 23 12 3 20 6 30 7 8 21 31 24 9 -10 -18 11 33 -28 19 14 34 13 25 4 22 -29 26 5 35 -15 -27 -16 -36 $,\n1 30 7 2 23 12 3 -32 6 8 21 31 9 -10 11 19 14 18 33 -13 -5 -22 -4 -25 -20 -36 17 -26 34 -16 -35 15 -24 -27 29 -28 $,\n1 30 7 2 23 12 3 -32 6 8 21 31 9 -10 11 19 14 18 33 28 -29 27 24 -15 35 16 -34 26 -17 36 20 25 4 22 5 13 $,\n1 25 2 23 17 12 3 20 6 15 30 27 31 18 -19 -9 -21 -8 -7 33 -28 10 11 32 -4 -24 -13 -34 -14 22 -29 26 5 35 -16 -36 $,\n1 25 2 23 17 12 3 20 6 15 30 27 31 18 -19 -9 -21 -8 -7 33 -28 10 11 32 -4 -24 -13 -34 -14 26 5 35 -22 -29 -16 -36 $,\n1 34 13 24 28 15 10 9 4 7 11 17 16 19 2 36 35 20 21 -29 -25 -27 -12 -30 -18 -14 -26 -6 -32 31 8 -33 -3 22 5 23 $,\n1 34 13 24 15 10 28 9 4 7 11 17 16 19 2 36 35 20 21 -29 -25 -27 -12 -30 -18 -14 26 -6 -32 -33 -3 31 8 22 5 23 $,\n1 17 2 12 -19 -9 -21 -8 -7 33 -32 -11 -10 28 -4 -25 -24 -13 -34 -14 -26 -16 -36 -35 -29 -20 -18 3 23 15 30 27 22 6 31 5 $,\n1 27 2 17 36 20 3 29 10 11 35 12 30 21 9 19 18 28 33 7 8 16 26 14 34 13 24 15 32 25 4 22 23 6 31 5 $,\n1 16 26 17 20 2 21 13 6 9 15 28 34 10 7 35 18 14 32 27 36 4 12 23 25 31 5 22 30 29 19 11 24 3 33 8 $,\n1 35 10 30 29 11 24 3 23 15 25 27 26 7 14 36 4 19 12 22 20 2 21 13 6 16 32 28 17 34 9 18 31 5 33 8";
 
-	public static void startDCJ (String s) {
+	public static void startDCJ (String s1) {
 		DCJWindow w = new DCJWindow ();
-		w.performDCJ (s);
+		w.performDCJ (s1);
 	}
 
 	private Vector parseInput (String s) {
@@ -48,6 +52,7 @@ public class DCJWindow extends JWindow {
 
 	public void performDCJ (String s) {
 		build ();
+		
 		String box2 = "";
 		output.setText (box2);
 		log.setText (box2);
@@ -75,15 +80,16 @@ public class DCJWindow extends JWindow {
 				boxc.append (d.getOpBuf ());
 			}// end for j
 		}// end for i
-		for (int i = 0; i < v.size (); i++) {
+	/*	for (int i = 0; i < v.size (); i++) {
 			for (int j = 0; j < v.size (); j++) {
 				boxb.append (distances[i][j] + "	");
 			}
 			boxb.append ("\n");
-		}
+		}*/
 		output.setText (boxb.toString ());
 		ops.setText (boxc.toString ());
 		log.setText (boxa.toString ());
+		
 
 	}// end actionPerformed
 

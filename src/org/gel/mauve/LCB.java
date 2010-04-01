@@ -1,6 +1,7 @@
 package org.gel.mauve;
 
 import java.awt.Color;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;

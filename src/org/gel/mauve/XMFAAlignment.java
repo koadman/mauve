@@ -77,6 +77,7 @@ public class XMFAAlignment implements Serializable {
 	 * Constructor reads an XMFA alignment from an input file and indexes the
 	 * location of alignment bounds
 	 */
+	@SuppressWarnings(/*"deprecation"*/ "unchecked")
 	public XMFAAlignment (RandomAccessFile ir) throws java.io.IOException {
 		xmfa_file = ir;
 		// simple parse of the input
@@ -583,6 +584,7 @@ public class XMFAAlignment implements Serializable {
 
 	/**
 	 * reverse entries in a byte array
+	 * 
 	 */
 	void reverse (byte [] byte_buf) {
 		for (int byteI = 0; byteI < byte_buf.length / 2; byteI++) {
@@ -768,16 +770,22 @@ public class XMFAAlignment implements Serializable {
 			return -1;
 		}
 	}
-
-	// converts an LCB local coordinate to a global sequence coordinate, taking
-	// rev. comp. into account
+	
+	/**
+	 * converts a global sequence coordinate to an LCB local coordinate, taking
+	 * rev. comp. into account
+	 */
 	long globalToLCB (long position, Genome g, int ivI) {
 		long offset = position - intervals[ivI].getStart (g);
 		return revCompify (offset, g, ivI);
 	}
 
-	// converts a global sequence coordinate to an LCB local coordinate, taking
-	// rev. comp. into account
+	// 
+	
+	/**
+	 *  converts an LCB local coordinate to a global sequence coordinate, taking
+	 *  rev. comp. into account
+	 */
 	long LCBToGlobal (long position, Genome g, int ivI) {
 		long offset = revCompify (position, g, ivI);
 		offset += intervals[ivI].getStart (g);
@@ -789,6 +797,9 @@ public class XMFAAlignment implements Serializable {
 	/**
 	 * Identifies the LCB and the column within the LCB of a given sequence
 	 * position
+	 * 
+	 * @return an array of 2 longs. The first being the LCB by index,
+	 *         and the second the column 
 	 */
 	public long [] getLCBAndColumn (Genome g, long position) {
 		// determine the LCB
@@ -823,7 +834,8 @@ public class XMFAAlignment implements Serializable {
 			gap[seqI] = column != gis_tree[lcb][g.getSourceIndex ()]
 					.seqPosToColumn (seq_offsets[seqI]);
 			seq_offsets[seqI] = LCBToGlobal (seq_offsets[seqI], g, lcb);
-
+			if(seq_offsets[seqI]>g.getLength())
+				gap[seqI]=true;
 		}
 	}
 	/**

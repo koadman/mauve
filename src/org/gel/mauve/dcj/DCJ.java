@@ -2,7 +2,11 @@ package org.gel.mauve.dcj;
 
 import java.util.*;
 import java.io.*;
-
+/**
+ * @deprecated
+ * @author Mike Tsai
+ *
+ */
 public class DCJ {
 
 	/***************************************************************************
