@@ -13,6 +13,7 @@ import org.biojava.bio.seq.StrandedFeature;
 import org.biojava.bio.seq.io.SimpleAssemblyBuilder;
 import org.biojava.bio.symbol.RangeLocation;
 import org.biojava.utils.ChangeVetoException;
+import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.RichSequenceIterator;
 import org.gel.mauve.format.FastaFormat;
 import org.gel.mauve.format.FileFinder;
@@ -171,9 +172,12 @@ public class GenomeBuilder
                 {
                     chromoName = cft.location.toString();
                 }
-                boolean circular = s.getAnnotation().containsProperty("CIRCULAR");
+                boolean circular = s.getAnnotation().containsProperty("CIRCULAR");                
+                if(s instanceof RichSequence){
+                	circular = ((RichSequence)s).getCircular();
+                }
                 chromo.add(new Chromosome(cft.location.getMin(), cft.location.getMax(), chromoName, circular));
-                start += s.length();
+                start += s.length();                
             }
             counter++;
         }
