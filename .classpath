@@ -14,5 +14,6 @@
 	<classpathentry kind="lib" path="ext/biojava-1.5.jar"/>
 	<classpathentry kind="lib" path="ext/dbus-2.6.jar"/>
 	<classpathentry kind="lib" path="ext/unix-0.5.jar"/>
+	<classpathentry kind="lib" path="ext/jsc.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
