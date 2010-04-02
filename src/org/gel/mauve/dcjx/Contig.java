@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
+import org.gel.mauve.MauveConstants;
+
 //import org.halophiles.assembly.stat.LCB;
 
 // This might just be over kill, but it might help.
@@ -30,7 +32,7 @@ public class Contig {
 	private String name = "";
 	
 	public Contig (String ch){
-		if (ch.endsWith(Constants.CIRCULAR_CHAR)) {
+		if (ch.endsWith(MauveConstants.CIRCULAR_CHAR)) {
 			isCirc = true;
 			ch = ch.substring(0,ch.length()-1);
 		} else {
@@ -95,7 +97,7 @@ public class Contig {
 			}
 		}
 		if(isCirc){
-			sb.append(Constants.CIRCULAR_CHAR);
+			sb.append(MauveConstants.CIRCULAR_CHAR);
 		}
 		return sb.toString();
 	}

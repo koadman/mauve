@@ -1,6 +1,7 @@
 package org.gel.mauve;
 
 import java.util.ArrayList;
+
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -163,4 +164,14 @@ public class Genome {
 	public String toString () {
 		return getDisplayName ();
 	}
+	/**
+	 * Returns true if the specified chromosome is circular.
+	 * 
+	 * @param chrI the chromosome of interest
+	 * @return true if chromosome <code>chrI</code> is circular, false otherwise.
+	 */
+	public boolean isCircular(int chrI){
+		return ((Chromosome) chromosomes.get(chrI)).circular;
+	}
+	
 }

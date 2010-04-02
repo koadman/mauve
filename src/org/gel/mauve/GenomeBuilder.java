@@ -1,6 +1,7 @@
 package org.gel.mauve;
 
 import java.io.File;
+
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Properties;
@@ -176,6 +177,8 @@ public class GenomeBuilder
                 if(s instanceof RichSequence){
                 	circular = ((RichSequence)s).getCircular();
                 }
+               
+                System.err.println(s.getName() + " in " + g.getDisplayName() + " is " + (circular ? "circular" : "linear"));
                 chromo.add(new Chromosome(cft.location.getMin(), cft.location.getMax(), chromoName, circular));
                 start += s.length();                
             }

@@ -2,7 +2,7 @@ package org.gel.mauve.dcjx;
 
 public interface Constants {
 
-	public static final String CIRCULAR_CHAR = "*";
+	//public static final String CIRCULAR_CHAR = "*";
 	
 	public static final String TELOMERE = "<>";
 	

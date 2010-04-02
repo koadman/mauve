@@ -47,6 +47,7 @@ import org.gel.mauve.Chromosome;
 import org.gel.mauve.Genome;
 import org.gel.mauve.LCB;
 import org.gel.mauve.LCBlist;
+import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MyConsole;
 import org.gel.mauve.XMFAAlignment;
 import org.gel.mauve.XmfaViewerModel;
@@ -415,6 +416,8 @@ public class PermutationExporter {
 						sb.append(",");
 					sb.append(cur.elementAt(k).toString());
 				}
+				if (genomes[i].isCircular(j))
+					sb.append(MauveConstants.CIRCULAR_CHAR);
 				sb.append("$ ");
 			}
 			sb.append("\n");

@@ -84,5 +84,9 @@ public class DCJ {
 		return computeDCJ(x, y, blockIdMap);
 	}
 	
+	public static void main(String[] args){
+		
+	}
+	
 
 }

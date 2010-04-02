@@ -7,7 +7,9 @@ public class MauveDisplayCommunicator {
     DBusConnection bus = null;
     public MauveDisplayCommunicator(XmfaViewerModel model) throws org.freedesktop.dbus.exceptions.DBusException {
     	
-        bus = DBusConnection.getConnection(DBusConnection.SESSION);
+    	int tmp = DBusConnection.SESSION;
+    	
+        bus = DBusConnection.getConnection(tmp);
         bus.requestBusName("org.gel.mauve.remote.MauveInterface");
         bus.exportObject("/MauveInterface", new MauveInterfaceImpl(model));
     }

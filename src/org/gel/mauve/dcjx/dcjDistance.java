@@ -10,6 +10,7 @@ import java.util.Scanner;
 /**
  * 
  * @author atritt
+ * @deprecated 
  */
 public class dcjDistance {
 

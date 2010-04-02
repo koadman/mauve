@@ -71,6 +71,9 @@ public interface MauveConstants {
 	
 	public static final String TOTALS = "totals";
 	
+	/** */
+	public static final String CIRCULAR_CHAR = "*";
+	
 	/**
 	 * Strings representing annotation types
 	 */
