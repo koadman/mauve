@@ -16,7 +16,7 @@ import org.gel.mauve.tree.TreeStore;
  */
 public class XMFAAlignment implements Serializable {
 	/** Versioning for serializations of this object */
-	static final long serialVersionUID = 4;
+	static final long serialVersionUID = 5;
 
 	// The file containing alignment data (transient, can't be serialized)
 	protected transient RandomAccessFile xmfa_file;
