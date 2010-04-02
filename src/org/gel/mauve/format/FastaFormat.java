@@ -8,12 +8,13 @@ import java.io.FileReader;
 import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.seq.SequenceIterator;
 import org.biojava.bio.seq.io.SeqIOTools;
+import org.biojavax.bio.seq.RichSequence;
 import org.gel.mauve.FilterCacheSpec;
 
 public class FastaFormat extends BaseFormat {
 	public SequenceIterator readFile (File file) {
 		BufferedReader reader = openFile (file);
-		return SeqIOTools.readFastaDNA (reader);
+		return RichSequence.IOTools.readFastaDNA(reader, null);
 	}
 
 	protected BufferedReader openFile (File file) {

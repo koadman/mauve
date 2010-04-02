@@ -7,6 +7,7 @@ import java.io.FileReader;
 
 import org.biojava.bio.seq.SequenceIterator;
 import org.biojava.bio.seq.io.SeqIOTools;
+import org.biojavax.bio.seq.RichSequence;
 
 class GenbankFileFormat extends GenbankEmblFormat {
 	public SequenceIterator readFile (File file) {
@@ -18,7 +19,8 @@ class GenbankFileFormat extends GenbankEmblFormat {
 			// exist.
 			throw new RuntimeException (e);
 		}
-		return SeqIOTools.readGenbank (reader);
+		
+		return RichSequence.IOTools.readGenbankDNA(reader, null);
 	}
 
 	public boolean isRich(){ return false; }
