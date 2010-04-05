@@ -2,13 +2,17 @@ package org.gel.mauve.dcjx;
 
 import java.awt.BorderLayout;
 
+import gr.zeus.ui.JConsole;
+
 
 import java.awt.Button;
 import java.awt.CardLayout;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Panel;
 import java.awt.TextArea;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -32,6 +36,10 @@ public class dcjWindow extends JFrame {
 
 //	private JTextArea matrix;
 	
+	private static final String temp = "Running...";
+	
+	private static final String error = "Error computing DCJ distances! Please report bug to atritt@ucdavis.edu";
+	
 	private TextArea nwayTA, pwiseTA, nblksTA;
 	
 	private int fWIDTH = 600;
@@ -54,58 +62,73 @@ public class dcjWindow extends JFrame {
 //	private JTextArea log;
 	// event listener
 	
-	public static void launchDCJ(BaseViewerModel model){
+	public static void launchDCJ(BaseViewerModel model) {
 		if (model instanceof XmfaViewerModel){
 			dcjWindow win = new dcjWindow((XmfaViewerModel)model);
-		//	win.loadMatrices((XmfaViewerModel)model);
-		//	win.setSize(100, 100);
-		//	win.setVisible(true);
-			
-			
 		} else {
 			System.err.println("Can't compute DCJ distance without contig boundaries.");
-		/*	dcjWindow win = new dcjWindow();
-			win.nwayOut.append("Can't compute DCJ distances without contig boundaries.");
-			win.pwiseOut.append("Can't compute DCJ distances without contig boundaries.");
-			win.nblksOut.append("Can't compute DCJ distances without contig boundaries.");
-			win.setVisible(true); */
 		}
 		
 	}
 	
-	public dcjWindow (XmfaViewerModel model){
-		build(model);
-		String temp = "Running...";
-		nwayTA.append(temp);
-		pwiseTA.append(temp);
-		nblksTA.append(temp);
-		Vector<Genome> v = model.getGenomes();
-		Genome[] genomes = v.toArray(new Genome[v.size()]);
-		int numGen = genomes.length;
-		nWayDist = new DCJ[numGen][numGen];
-		pWiseDist = new DCJ[numGen][numGen];
-		loadMatrices(model, nWayDist, pWiseDist);
-		nwayTA.replaceRange("", 0, temp.length());
-		pwiseTA.replaceRange("", 0, temp.length());
-		nblksTA.replaceRange("", 0, temp.length());
-		nwayTA.append("# DCJ distances based on N-way LCBs : ");
-		nwayTA.append("no. of blocks = " + nWayDist[1][0].numBlocks()+" #\n\n");
-		pwiseTA.append("# DCJ distances based on pairwise LCBs #\n\n");
-		nblksTA.append("# Pairwise breakpoint distances #\n\n");
-		printHeader(nblksTA,model);
-		printHeader(pwiseTA,model);
-		printHeader(nwayTA,model);
-	//	PrintStream out = new PrintStream(textArea2OutputStream(nwayOut));
-		nwayTA.append("\n");
-		pwiseTA.append("\n");
-		nblksTA.append("\n");
-
-		PrintStream out = new PrintStream(textArea2OutputStream(nwayTA));
-		printDist(out,nWayDist);
-		out = new PrintStream(textArea2OutputStream(pwiseTA));
-		printDist(out, pWiseDist);
-		out = new PrintStream(textArea2OutputStream(nblksTA));
-		printNBlks(out, pWiseDist);
+	public dcjWindow (XmfaViewerModel model) {
+		int numGenomes = model.getGenomes().size();
+		if (numGenomes > 2){
+			build(model);
+			Vector<Genome> v = model.getGenomes();
+			Genome[] genomes = v.toArray(new Genome[v.size()]);
+			int numGen = genomes.length;
+			nWayDist = new DCJ[numGen][numGen];
+			pWiseDist = new DCJ[numGen][numGen];
+			nwayTA.append(temp);
+			pwiseTA.append(temp);
+			nblksTA.append(temp);
+			try {
+				loadMatrices(model, nWayDist, pWiseDist);
+				nwayTA.replaceRange("", 0, temp.length());
+				pwiseTA.replaceRange("", 0, temp.length());
+				nblksTA.replaceRange("", 0, temp.length());
+				nwayTA.append("# DCJ distances based on N-way LCBs : ");
+				nwayTA.append("no. of blocks = " + nWayDist[1][0].numBlocks()+" #\n\n");
+				pwiseTA.append("# DCJ distances based on pairwise LCBs #\n\n");
+				nblksTA.append("# Pairwise breakpoint distances #\n\n");
+				printHeader(nblksTA,model);
+				printHeader(pwiseTA,model);
+				printHeader(nwayTA,model);
+			//	PrintStream out = new PrintStream(textArea2OutputStream(nwayOut));
+				nwayTA.append("\n");
+				pwiseTA.append("\n");
+				nblksTA.append("\n");
+		
+				PrintStream out = new PrintStream(textArea2OutputStream(nwayTA));
+				printDist(out,nWayDist);
+				out = new PrintStream(textArea2OutputStream(pwiseTA));
+				printDist(out, pWiseDist);
+				out = new PrintStream(textArea2OutputStream(nblksTA));
+				printNBlks(out, pWiseDist);
+			} catch (Exception e){
+				nwayTA.replaceRange(error, 0, temp.length());
+				pwiseTA.replaceRange(error, 0, temp.length());
+				nblksTA.replaceRange(error, 0, temp.length());
+				e.printStackTrace();
+			}
+		} else {
+			build2Gen(model);
+			nwayTA.append(temp);
+			try {
+				String[] perms = PermutationExporter.getPermStrings(model);
+				DCJ dcj = new DCJ(perms[0], perms[1]);
+				nwayTA.replaceRange("", 0, temp.length());
+				nwayTA.append("# DCJ distance : ");
+				nwayTA.append("no. of blocks = " + dcj.numBlocks()+" #\n\n");
+				printHeader(nwayTA, model);
+				nwayTA.append("\n0\n"+dcj.dcjDistance()+"\t0\n");
+			} catch (Exception e){
+				nwayTA.replaceRange(error, 0, temp.length());
+				e.printStackTrace();
+				
+			}
+		}
 		
 	}
 
@@ -164,8 +187,12 @@ public class dcjWindow extends JFrame {
 	
 	
 	private void build (XmfaViewerModel model) {
+		//JConsole jcons = new  JConsole
 		JFrame frame = new JFrame ("DCJ - " + model.getSrc().getName());
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		int xPos = dim.width - fWIDTH;
 		frame.setSize (fWIDTH, fHEIGHT);
+		frame.setLocation(xPos, 0);
 		JPanel content = new JPanel (new BorderLayout ());
 		frame.getContentPane ().add (content, BorderLayout.CENTER);
 		box = "";
@@ -218,33 +245,39 @@ public class dcjWindow extends JFrame {
 		nblksTA.setEditable (false);
 		nblksTA.setFont (new Font ("monospaced", Font.PLAIN, 12));
 		toptopPanel.add ("Number of blocks between each pair", nblksTA);
-		// //////////////////////////////////////////////////////////////
-		// /Create bottom panel
-		/** ************************************************************* */
-/*		Panel textInputField = new Panel ();
-		Panel forTheButtons = new Panel ();
-		textInputField.setLayout (new BorderLayout ());
-		forTheButtons.setLayout (new GridLayout (1, 0));
-		add (textInputField);
-		// /create submit button for bottom pane
-		Button submitB = new Button ("Submit");
-		Button clear = new Button ("Clear");
-		forTheButtons.add (submitB);
-		forTheButtons.add (clear);
-		textInputField.add (forTheButtons, BorderLayout.SOUTH);
-		// /Here's the text area for it.
-		input = new TextArea ();
-		textInputField.add (input);
-		// /add listener submitButton
-		ClearData clearit = new ClearData ();
-		SubmitData submitButton = new SubmitData ();
-		// /register listener to button
-		submitB.addActionListener (submitButton);
-		clear.addActionListener (clearit);
+		nwayTA.setText ("");
+		frame.setVisible (true);
+	}
+	
+	private void build2Gen (XmfaViewerModel model) {
+		JFrame frame = new JFrame ("DCJ - " + model.getSrc().getName());
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		int xPos = dim.width - fWIDTH;
+		frame.setSize (fWIDTH, fHEIGHT);
+		frame.setLocation(xPos, 0);
+		JPanel content = new JPanel (new BorderLayout ());
+		frame.getContentPane ().add (content, BorderLayout.CENTER);
+		box = "";
+		setLayout (new BorderLayout ());
+		// /create top panel
+		Panel topPanel = new Panel ();
 
-		input.setText (defaultInput);*/
-		/** *************************************************************** */
-		
+		topPanel.setLayout (new BorderLayout ());
+		// top top panel with cards
+		cards = new CardLayout ();
+		toptopPanel = new Panel ();
+		toptopPanel.setLayout (cards);
+		topPanel.add (toptopPanel, BorderLayout.CENTER);
+		// /add the top panel
+		add (topPanel, BorderLayout.NORTH);
+		content.add (topPanel, BorderLayout.CENTER);
+
+		// /Add output text to cards panel
+		nwayTA = new TextArea (box, 25, 40);
+		nwayTA.setEditable (false);
+		nwayTA.setFont (new Font ("monospaced", Font.PLAIN, 12));
+		toptopPanel.add ("Distances based on N-Way LCBs", nwayTA);
+		cards.show (toptopPanel, "Distances based on N-Way LCBs");
 		nwayTA.setText ("");
 		frame.setVisible (true);
 	}
@@ -271,66 +304,7 @@ public class dcjWindow extends JFrame {
 			nblksTA.setText ("");
 		}// end actionPerformed
 	}// end clearData
-/*
-	private class SubmitData implements ActionListener {
 
-		private Vector parseInput (String s) {
-			StringTokenizer token = new StringTokenizer (s, ",");
-			StringTokenizer newtoken;
-			Vector v = new Vector ();
-			String st;
-			while (token.hasMoreTokens ()) {
-				st = (token.nextToken ().trim ());
-				if (st.length () > 0)
-					v.add (st);
-			}
-			return v;
-
-		}// end parseInput
-
-		public void actionPerformed (ActionEvent e) {
-			String box2 = "";
-			nwayOut.setText (box2);
-			pwiseOut.setText (box2);
-			blksOut.setText (box2);
-			StringBuffer boxa = new StringBuffer (256);
-			StringBuffer boxb = new StringBuffer ();
-			StringBuffer boxc = new StringBuffer ();
-			Vector v = parseInput ((input.getText ()).trim ());
-			DCJ d;
-			int [][] distances = new int [v.size ()] [v.size ()];
-			for (int i = 0; i < v.size (); i++) {
-				distances[i][i] = 0;
-			}
-			for (int i = 0; i < v.size (); i++) {
-				for (int j = i + 1; j < v.size (); j++) {
-					boxa.append (i
-							+ " to "
-							+ j
-							+ "\n"
-							+ (d = new DCJ (new StringTokenizer ((String) v
-									.elementAt (i), "$"), new StringTokenizer (
-									(String) v.elementAt (j), "$"))).getLog ());
-					distances[i][j] = d.getCount ();
-					distances[j][i] = d.getCount ();
-					boxc.append ("\n" + i + " to " + j + "\n");
-					boxc.append (d.getOpBuf ());
-				}// end for j
-			}// end for i
-			for (int i = 0; i < v.size (); i++) {
-				for (int j = 0; j < v.size (); j++) {
-					boxb.append (distances[i][j] + "	");
-				}
-				boxb.append ("\n");
-			}
-			output.setText (boxb.toString ());
-			ops.setText (boxc.toString ());
-			log.setText (boxa.toString ());
-
-		}// end actionPerformed
-
-	}// end SubmitData */
-	
 	 public OutputStream textArea2OutputStream(final TextArea t)
 	    { return new OutputStream()
 	       { TextArea ta = t;

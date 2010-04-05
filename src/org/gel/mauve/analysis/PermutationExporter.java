@@ -231,35 +231,32 @@ public class PermutationExporter {
  *         
  *         I don't believe this results in erroneous results in the 
  *         permutation. 
- *          
-		boolean print = false;
+ *    
+		boolean doPrint = false;
 		for (int i = 0; i < genomes.length; i++){
 			Genome g = genomes[i];
 			if (g.getLength() < start_coords[g.getSourceIndex()]){
-				
+				long bad = start_coords[g.getSourceIndex()];
 				start_coords[g.getSourceIndex()] = g.getLength();
 				
-				print = true;
-				System.err.print("Bad Mauve! (at start_coords)");
-				if (col >= lcbLen)
-					System.err.print(" contig boundary at end of LCB  ");
-				else
-					System.err.print(" Ends work.   ");
+				doPrint = true;
+				System.err.print("Bad Mauve! (at start_coords) genome " + g.getSourceIndex() 
+						+" Length = " + g.getLength()+ " coord = " + bad+ " ");
+			
 			}
 			if (g.getLength() < end_coords[g.getSourceIndex()]){
+				long bad = end_coords[g.getSourceIndex()];
 				
 				end_coords[g.getSourceIndex()] = g.getLength();
 				
-				System.err.print("Bad Mauve! (at end_coords)");
-				if (col >= lcbLen)
-					System.err.println(" contig boundary at end of LCB");
-				else
-					System.err.println(" Ends work.");
+				System.err.println("Bad Mauve! (at end_coords) genome " + g.getSourceIndex() 
+						+" Length = " + g.getLength()+ " coord = " + bad+ " ");
+			
 				
-			} else if (print)
+			} else if (doPrint)
 				System.err.println();
 			
-			print = false;
+			doPrint = false;
 		}
 		
 */

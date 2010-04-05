@@ -54,6 +54,8 @@ class DelegatingSequence implements Sequence {
 	protected Map filterCache = new HashMap ();
 
 	protected SupportedFormat format;
+	
+	protected boolean circular;
 
 	// Delegate changeable stuff to unchangeable implementation
 	Changeable ch = new Unchangeable ();

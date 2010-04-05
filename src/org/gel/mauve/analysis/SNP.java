@@ -1,5 +1,7 @@
 package org.gel.mauve.analysis;
 
+import org.gel.mauve.Genome;
+
 public class SNP {
 
 	private char[] pattern;
@@ -90,4 +92,67 @@ public class SNP {
 		else
 			return pos[genomeSrcIdx];
 	}
+	
+	/**
+	 * Returns true if any genomes have a gap in this SNP.
+	 * 
+	 * @return false if all genomes have a base present here, true otherwise
+	 */
+	public boolean hasGap(){
+		for (int i = 0; i < pattern.length; i++){
+			if (pattern[i] == '-')
+				return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns true if the specified genome has a gap in this SNP
+	 * 
+	 * @param idx the genome source index 
+	 * @return true if genome <code>idx</code> has a gap here, false otherwise
+	 */
+	public boolean hasGap(int idx){
+		return pattern[idx] == '-';
+	}
+	
+	public boolean hasAmbiguities(){
+		for (int i = 0; i < pattern.length; i++){
+			char c = pattern[i];
+			switch(c){
+			case 'k': return true;
+			case 'K': return true;
+			case 'm': return true;
+			case 'M': return true;
+			case 'r': return true;
+			case 'R': return true;
+			case 'y': return true;
+			case 'Y': return true;
+			case 's': return true;
+			case 'S': return true;
+			case 'w': return true;
+			case 'W': return true;
+			case 'b': return true;
+			case 'B': return true;
+			case 'v': return true;
+			case 'V': return true;
+			case 'h': return true;
+			case 'H': return true;
+			case 'd': return true;
+			case 'D': return true;
+			case 'x': return true;
+			case 'X': return true;
+			case 'n': return true;
+			case 'N': return true;
+			case '-': return true;
+				default :
+			}
+		}
+		return false;
+	}
+	
+	public boolean areEqual(Genome x, Genome y){
+		return pattern[x.getSourceIndex()] == pattern[y.getSourceIndex()];
+	}
+	
 }

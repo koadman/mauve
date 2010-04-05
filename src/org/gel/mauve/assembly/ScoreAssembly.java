@@ -114,7 +114,7 @@ public class ScoreAssembly {
 				
 		sumOut.print("DCJ_distance\tNum_Blocks\tNum_SNPs" +
 				"\tNum_Gaps_Reference\tNum_Gaps_Assembly\n");
-		sumOut.print(sa.dcj.dcjDistance()+"\t"+sa.dcj.numBlocks()+"\t"+
+		sumOut.println(sa.dcj.dcjDistance()+"\t"+sa.dcj.numBlocks()+"\t"+
 				sa.snps.length+"\t"+sa.refGaps.length+"\t"+sa.assGaps.length);
 		sumOut.close();
 	}
@@ -195,13 +195,18 @@ public class ScoreAssembly {
 		for (int k = 0; k < snps.length; k++){ 
 			char c_0 = snps[k].getChar(0);
 			char c_1 = snps[k].getChar(1);
+			
+			try {
 			if (c_0 != c_1)
 				subs[getBaseIdx(c_0)][getBaseIdx(c_1)]++;
+			} catch (IllegalArgumentException e){
+				System.err.println("Skipping ambiguity: ref = " +c_0 +" assembly = " + c_1 );
+			}
 		}
 		return subs;
 	}
 	
-	private static int getBaseIdx(char c){
+	private static int getBaseIdx(char c) throws IllegalArgumentException {
 		switch(c){
 		  case 'a': return A; 
 		  case 'A': return A;
@@ -211,7 +216,7 @@ public class ScoreAssembly {
 		  case 'T': return T;
 		  case 'g': return G;
 	 	  case 'G': return G;
-		  default: return -1;
+		  default:{ throw new IllegalArgumentException("char " + c);}
 		}
 	}
 	

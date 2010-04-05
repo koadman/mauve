@@ -115,13 +115,17 @@ public class SnpExporter {
 	}
 	
 	public static SNP[] getSNPs( XmfaViewerModel model, XMFAAlignment xmfa){
-		int iv_count = (int)model.getLcbCount();
+		return getSNPs(model,xmfa,xmfa.getSourceLcbList());
+	}
+	
+	public static SNP[] getSNPs( XmfaViewerModel model, XMFAAlignment xmfa, LCB[] lcbs){
+	//	int iv_count = (int)model.getLcbCount();
 		int seq_count = model.getSequenceCount();
-
 		Vector<SNP> snps = new Vector<SNP>();
 		
-		for(int ivI = 0; ivI < iv_count; ivI++ )
+		for(int i = 0;i  < lcbs.length; i++ )
 		{
+			int ivI = lcbs[i].id;
 			int iv_length = (int)xmfa.getLcbLength(ivI);
 			byte[][] bytebuf = new byte[seq_count][iv_length];
 			for( int seqI = 0; seqI < seq_count; seqI++ )
@@ -184,6 +188,12 @@ public class SnpExporter {
 			}
 		}
 		return snps.toArray(new SNP[snps.size()]);
+	}
+	
+	public static SNP[] getLocalSNPs( XmfaViewerModel model, XMFAAlignment xmfa, LCB lcb){
+		LCB[] tmp = new LCB[1];
+		tmp[0] = lcb;
+		return getSNPs(model,xmfa,tmp);
 	}
 	
 	private static int countGapLen(byte[] seq, int gapStart){
@@ -262,7 +272,7 @@ public class SnpExporter {
 	public static int[][] countSubstitutions(XmfaViewerModel model, int src_i, int src_j){
 		int[][] subs = new int[4][4];
 		
-		SNP[] snps = getSNPs(model, model.getXmfa());
+		SNP[] snps = getSNPs(model, model.getXmfa(), model.getXmfa().getSourceLcbList());
 		
 		for (int k = 0; k < snps.length; k++){ 
 			char c_i = snps[k].getChar(src_i);

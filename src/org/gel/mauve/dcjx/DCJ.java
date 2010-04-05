@@ -47,7 +47,7 @@ public class DCJ {
 	}
 	
 	public static void loadBlockIDMap(String perm, Map<String,Integer> map){
-		String[] blks = perm.split("[$, ]+");
+		String[] blks = perm.split("[\\*$, ]+");
 		for (int i = 0; i < blks.length; i++){
 			blks[i] = blks[i].trim();
 			if (blks[i].length() == 0) // empty contig

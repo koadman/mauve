@@ -238,7 +238,7 @@ public class XmfaViewerModel extends LcbViewerModel {
         
         // try publishing this viewer model via DBus
         try{
-        	mdCommunicator = new MauveDisplayCommunicator(this);
+	       	mdCommunicator = new MauveDisplayCommunicator(this);
         }catch(Exception e){/*maybe DBus doesn't exist*/ e.printStackTrace();}
         // try connecting to a warg instance
         try{

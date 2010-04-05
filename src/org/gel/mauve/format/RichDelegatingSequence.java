@@ -1,9 +1,11 @@
 package org.gel.mauve.format;
 
 import java.io.File;
+
 import java.io.FileNotFoundException;
 import java.util.Set;
 
+import org.biojava.bio.seq.Feature;
 import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.symbol.SymbolList;
 import org.biojava.utils.ChangeVetoException;
@@ -11,6 +13,7 @@ import org.biojavax.Comment;
 import org.biojavax.Namespace;
 import org.biojavax.RankedCrossRef;
 import org.biojavax.RankedDocRef;
+import org.biojavax.RichAnnotation;
 import org.biojavax.bio.BioEntryRelationship;
 import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.taxa.NCBITaxon;
@@ -44,6 +47,7 @@ public class RichDelegatingSequence extends DelegatingSequence implements
     	bioVersion = rs.getVersion();
     	noteSet = rs.getNoteSet();
     	rankedCrossRefs = rs.getRankedCrossRefs();
+    	circular = rs.getCircular();
     }
 
     Set featureSet = null;
@@ -67,7 +71,7 @@ public class RichDelegatingSequence extends DelegatingSequence implements
         throw new ChangeVetoException();
 	}
 	public boolean getCircular(){
-		throw new RuntimeException("implement me!");
+		return circular;
 	}
 	public SymbolList getInternalSymbolList(){
 		return intSymList;
@@ -159,4 +163,9 @@ public class RichDelegatingSequence extends DelegatingSequence implements
     {		
 		throw new ChangeVetoException();
     }
+
+	public RichAnnotation getRichAnnotation() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

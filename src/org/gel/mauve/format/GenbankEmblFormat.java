@@ -160,7 +160,7 @@ public abstract class GenbankEmblFormat extends BaseFormat {
         		name = null;
         }
         if (name == null && s.getAnnotation() != null) {
-        	name = (String) s.getAnnotation().getProperty(MauveConstants.LOCUS);
+        	name = (String) s.getName();
         }
         if (name == null && 
         		AnnotationContainsFilter.getKeyIgnoreCase ("definition",
