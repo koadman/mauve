@@ -1,6 +1,7 @@
 package org.gel.mauve.assembly;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.NumberFormat;
