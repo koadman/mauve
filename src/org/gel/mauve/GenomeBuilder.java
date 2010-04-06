@@ -176,7 +176,6 @@ public class GenomeBuilder
                 boolean circular = s.getAnnotation().containsProperty("CIRCULAR");                
                 if(s instanceof RichSequence){
                 	circular = ((RichSequence)s).getCircular();
-                    System.err.println(s.getName() + " in " + g.getDisplayName() + " is " + (circular ? "circular" : "linear"));
                 }
                
                 chromo.add(new Chromosome(cft.location.getMin(), cft.location.getMax(), chromoName, circular));

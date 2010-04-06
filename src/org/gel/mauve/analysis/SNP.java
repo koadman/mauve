@@ -1,6 +1,8 @@
 package org.gel.mauve.analysis;
 
+import org.gel.mauve.Chromosome;
 import org.gel.mauve.Genome;
+import org.gel.mauve.XmfaViewerModel;
 
 public class SNP {
 
@@ -8,19 +10,31 @@ public class SNP {
 	
 	private long[] pos;
 	
+	private boolean[] present;
+	
+	private Chromosome[] chrom;
+	
+	private int[] posInCtg;
+	
+	private XmfaViewerModel model;
+	
 	/**
 	 * Creates a <code>SNP</code> object with <code>numTaxa</code> taxa
 	 * 
 	 * @param numTaxa the number of taxa at this SNP
 	 */
-	public SNP(int numTaxa){
+	public SNP(XmfaViewerModel model){
+		int numTaxa = model.getSequenceCount();
+		present = new boolean[numTaxa];
 		pattern = new char[numTaxa];
 		pos = new long[numTaxa];
-		
 		for (int i = 0; i < numTaxa; i++){
 			pattern[i] = '-';
 			pos[i] = 0;
 		}
+		this.model = model;
+		chrom = new Chromosome[numTaxa];
+		posInCtg = new int[numTaxa];
 	}
 	
 	/**
@@ -30,16 +44,20 @@ public class SNP {
 	 * @param pat the pattern at this SNP
 	 * @param pos the positions in each of the genomes
 	 */
-	public SNP(char[] pat, long[] pos){
+	private SNP(char[] pat, long[] pos, XmfaViewerModel model){
 		this.pattern = pat;
 		this.pos = pos;
+		this.model = model;
 	}
 	
 	/**
-	 * Returns a tab-delimited description of SNP
-	 * 
-	 * Example:
-	 * 		ACCA	12354	1658	-13558	986
+	 * <p>
+	 * Returns a tab-delimited description of the SNP
+	 * </p><p>
+	 * SNP_pattern seq0-Contig seq0-Position_in_Contig seq0-GenomeWide_Position...
+	 * </p><p>
+	 * Example:<br/>
+	 * 		AC	contig_0087 -1658 -1235 Chromosome 1090 1090</p>
 	 * 
 	 * @return a String representation of this SNP
 	 * 		
@@ -48,7 +66,8 @@ public class SNP {
 		StringBuilder sb = new StringBuilder();
 		sb.append(pattern);
 		for (int i = 0; i < pos.length; i++){
-			sb.append("\t"+Long.toString(pos[i]));
+			sb.append("\t"+chrom[i].getName()
+					  +"\t"+posInCtg[i]+"\t"+pos[i]);
 		}
 		return sb.toString();
 	}
@@ -56,28 +75,55 @@ public class SNP {
 	/**
 	 * Add the base for the specified genome.
 	 * 
-	 * @param genomeSrcIdx the source index of the genome to be added
-	 * @param base the base to be added for genome <code>genomeSrcIdx</code>
-	 * @param position the position where this base is located in genome <code>genomeSrcIdx</code> 
+	 * @param genSrcIdx the source index of the genome to be added
+	 * @param base the base to be added for genome <code>genSrcIdx</code>
+	 * @param position the position where this base is located in genome <code>genSrcIdx</code> 
 	 */
-	public void addTaxa(int genomeSrcIdx, char base, long position){
-		if (genomeSrcIdx >= pattern.length)
-			throw new IllegalArgumentException(genomeSrcIdx+" : source index out of bounds");
-		pattern[genomeSrcIdx] = base;
-		pos[genomeSrcIdx] = position;
+	public void addTaxa(int genSrcIdx, char base, long position){
+		if (genSrcIdx >= pattern.length)
+			throw new IllegalArgumentException(genSrcIdx+" : source index out of bounds");
+		present[genSrcIdx] = true;
+		pattern[genSrcIdx] = base;
+		pos[genSrcIdx] = position;
+		chrom[genSrcIdx] =
+			model.getGenomeBySourceIndex(genSrcIdx).getChromosomeAt(position);
+		posInCtg[genSrcIdx] = (int) (position - chrom[genSrcIdx].getStart() + 1);
+		
 	}
 	
 	/**
-	 * Returns the character for genome <code>genomeSrcIdx</code>
+	 * Returns the character for genome <code>genSrcIdx</code>
 	 * 
-	 * @param genomeSrcIdx the source index of the genome in query
-	 * @return the character for genome <code>genomeSrcIdx</code> at this SNP
+	 * @param genSrcIdx the source index of the genome in query
+	 * @return the character for genome <code>genSrcIdx</code> at this SNP
 	 */
-	public char getChar(int genomeSrcIdx){
-		if (genomeSrcIdx >= pattern.length)
-			throw new IllegalArgumentException(genomeSrcIdx+" : source index out of bounds");
+	public char getChar(int genSrcIdx){
+		if (genSrcIdx >= pattern.length)
+			throw new IllegalArgumentException(genSrcIdx+" : source index out of bounds");
 		else
-			return pattern[genomeSrcIdx];
+			return pattern[genSrcIdx];
+	}
+	
+	/**
+	 * Returns the contig this SNP lies on in the given genome
+	 * 
+	 * @param genSrcIdx the source index of the genome of interest
+	 * @return the contig in genome <code>genSrcIdx</code> where this SNP lies
+	 */
+	public Chromosome getContig(int genSrcIdx){
+		return model.getGenomeBySourceIndex(genSrcIdx).
+							getChromosomeAt(pos[genSrcIdx]);
+	}
+	
+	/**
+	 * Returns the position in the respective contig of this SNP
+	 * for the given genome.
+	 * 
+	 * @param genSrcIdx the source index of the genome of interest
+	 * @return the position in the contig of genome <code>genSrcIdx</code> where this SNP lies
+	 */
+	public int getPositionInContig(int genSrcIdx){
+		return (int) (pos[genSrcIdx]-getContig(genSrcIdx).getStart() + 1);
 	}
 	
 	/**

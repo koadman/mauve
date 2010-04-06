@@ -2,6 +2,7 @@ package org.gel.mauve.dcjx;
 
 import java.awt.BorderLayout;
 
+
 import gr.zeus.ui.JConsole;
 
 
@@ -36,13 +37,25 @@ public class dcjWindow extends JFrame {
 
 //	private JTextArea matrix;
 	
+	private static final String NWAY_COMMAND = "N-Way";
+	
+	private static final String NWAY_DESC = "Distances based on N-Way LCBs";
+	
+	private static final String PWISE_COMMAND = "Pairwise";
+	
+	private static final String PWISE_DESC = "Distances based on Pairwise LCBs";
+	
+	private static final String NBLKS_COMMAND = "NoBlocks";
+	
+	private static final String NBLKS_DESC = "Number of blocks between each pair";
+	
 	private static final String temp = "Running...";
 	
 	private static final String error = "Error computing DCJ distances! Please report bug to atritt@ucdavis.edu";
 	
 	private TextArea nwayTA, pwiseTA, nblksTA;
 	
-	private int fWIDTH = 600;
+	private int fWIDTH = 400;
 
 	private int fHEIGHT = 400;
 	
@@ -51,8 +64,6 @@ public class dcjWindow extends JFrame {
 	private CardLayout cards;
 
 	private String box;
-
-	private String pattern;
 	
 	private DCJ[][] nWayDist;
 	
@@ -213,9 +224,9 @@ public class dcjWindow extends JFrame {
 		toplowerPanel.setLayout (butts);
 		topPanel.add (toplowerPanel, BorderLayout.SOUTH);
 		// make buttons
-		Button Bnway = new Button ("N-Way");
-		Button Bpwise = new Button ("Pairwise");
-		Button Bnblks = new Button ("No. Blocks");
+		Button Bnway = new Button (NWAY_COMMAND);
+		Button Bpwise = new Button (PWISE_COMMAND);
+		Button Bnblks = new Button (NBLKS_COMMAND);
 		toplowerPanel.add (Bnway);
 		toplowerPanel.add (Bpwise);
 		toplowerPanel.add (Bnblks);
@@ -233,18 +244,18 @@ public class dcjWindow extends JFrame {
 		nwayTA = new TextArea (box, 25, 40);
 		nwayTA.setEditable (false);
 		nwayTA.setFont (new Font ("monospaced", Font.PLAIN, 12));
-		toptopPanel.add ("Distances based on N-Way LCBs", nwayTA);
-		cards.show (toptopPanel, "Distances based on N-Way LCBs");
+		toptopPanel.add (NWAY_DESC, nwayTA);
+		cards.show (toptopPanel, NWAY_DESC);
 		// /Add DCJ Operations text to cards panel
 		pwiseTA = new TextArea (box, 25, 40);
 		pwiseTA.setEditable (false);
 		pwiseTA.setFont (new Font ("monospaced", Font.PLAIN, 12));
-		toptopPanel.add ("Distances based on Pairwise LCBs", pwiseTA);
+		toptopPanel.add (PWISE_DESC, pwiseTA);
 		// /Add log text area
 		nblksTA = new TextArea (box, 25, 40);
 		nblksTA.setEditable (false);
 		nblksTA.setFont (new Font ("monospaced", Font.PLAIN, 12));
-		toptopPanel.add ("Number of blocks between each pair", nblksTA);
+		toptopPanel.add (NBLKS_DESC, nblksTA);
 		nwayTA.setText ("");
 		frame.setVisible (true);
 	}
@@ -276,34 +287,27 @@ public class dcjWindow extends JFrame {
 		nwayTA = new TextArea (box, 25, 40);
 		nwayTA.setEditable (false);
 		nwayTA.setFont (new Font ("monospaced", Font.PLAIN, 12));
-		toptopPanel.add ("Distances based on N-Way LCBs", nwayTA);
-		cards.show (toptopPanel, "Distances based on N-Way LCBs");
+		toptopPanel.add (NWAY_DESC, nwayTA);
+		cards.show (toptopPanel, NWAY_DESC);
 		nwayTA.setText ("");
 		frame.setVisible (true);
 	}
 
 	private class ChangeCards implements ActionListener {
 		public void actionPerformed (ActionEvent e) {
-			if (e.getActionCommand () == "N-Way") {
-				cards.show (toptopPanel, "Distances based on N-Way LCBs");
+			if (e.getActionCommand().equalsIgnoreCase(NWAY_COMMAND)) {
+				cards.show (toptopPanel, NWAY_DESC);
 			}
-			if (e.getActionCommand () == "Pairwise") {
-				cards.show (toptopPanel, "Distances based on Pairwise LCBs");
+			if (e.getActionCommand().equalsIgnoreCase(PWISE_COMMAND)) {
+				cards.show (toptopPanel, PWISE_DESC);
 			}
-			if (e.getActionCommand () == "No. Blocks") {
-				cards.show (toptopPanel, "Number of blocks between each pair");
+			if (e.getActionCommand().equalsIgnoreCase(NBLKS_COMMAND)) {
+				cards.show (toptopPanel, NBLKS_DESC);
 			}
 		}// end actionPerformed
 	}// end ChangeCards
 
-	private class ClearData implements ActionListener {
-		public void actionPerformed (ActionEvent e) {
-			//input.setText ("");
-			nwayTA.setText ("");
-			pwiseTA.setText ("");
-			nblksTA.setText ("");
-		}// end actionPerformed
-	}// end clearData
+	
 
 	 public OutputStream textArea2OutputStream(final TextArea t)
 	    { return new OutputStream()

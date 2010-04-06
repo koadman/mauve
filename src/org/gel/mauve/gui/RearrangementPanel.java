@@ -398,6 +398,14 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
 	        grimm_button.addActionListener(this);
 	        toolbar.add(grimm_button);
         }
+	    
+	    if (model.getGenomes().size() == 2){
+	    	JButton scAss_button = new JButton(MauveFrame.scAss_icon);
+	    	scAss_button.setToolTipText("Score an assembly by DCJ, SNP, and Gap analysis");
+	    	scAss_button.setActionCommand("ScoreAssembly");
+	    	scAss_button.addActionListener(this);
+	    	toolbar.add(scAss_button);
+	    }
         
         // Fill out the toolbar
         Dimension minSize = new Dimension(5, 3);
@@ -602,7 +610,9 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         }
         else if (e.getActionCommand().equals("ScoreAssembly"))
         {
-        	
+        	if( model instanceof LcbViewerModel ){
+        		org.gel.mauve.assembly.ScoreAssembly.launchWindow(model);
+        	}
         }
         else if (e.getActionCommand().equals("GRIMM"))
         {

@@ -101,8 +101,9 @@ public class SnpExporter {
 		// then extract and write out all snps
 		output.write("SNP pattern");
 		for( int seqI = 0; seqI < seq_count; seqI++ )
-		{
-			output.write("\tsequence_");
+		{	
+			String seq = "sequence_"+Integer.valueOf(seqI+1).toString()+"_";
+			output.write("\t"+seq+"Contig\t"+seq+"PosInContg\t"+seq+"GenWidePos");
 			output.write(Integer.valueOf(seqI+1).toString());
 		}
 		output.write("\n");
@@ -169,7 +170,7 @@ public class SnpExporter {
 					lcbi = model.getLCBIndex(model.getGenomeBySourceIndex(refseq), seq_offsets[refseq]);
 				}
 				boolean rev = xmfa.getSourceLcbList()[lcbi].getReverse(model.getReference());
-				SNP tmp = new SNP(seq_count);
+				SNP tmp = new SNP(model);
 				StringBuilder sb = new StringBuilder();
 				for( int seqI = 0; seqI < seq_count; seqI++ )
 				{
@@ -239,7 +240,7 @@ public class SnpExporter {
 						else
 							xmfa.getColumnCoordinates(model, lcbI, start-1, seq_offset, gap);
 						
-						gaps[genI].add(new Gap(genI,lcbI,seq_offset[genI],len));	
+						gaps[genI].add(new Gap(genI,lcbI,seq_offset[genI],len, model));	
 					} else	
 						colI++;
 				}	
