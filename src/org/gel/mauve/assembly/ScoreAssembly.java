@@ -1,7 +1,6 @@
 package org.gel.mauve.assembly;
 
 import java.awt.BorderLayout;
-
 import java.awt.Button;
 import java.awt.CardLayout;
 import java.awt.Dimension;
@@ -12,6 +11,7 @@ import java.awt.TextArea;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -20,8 +20,10 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Vector;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import org.gel.mauve.BaseViewerModel;
@@ -33,6 +35,10 @@ import org.gel.mauve.analysis.PermutationExporter;
 import org.gel.mauve.analysis.SNP;
 import org.gel.mauve.analysis.SnpExporter;
 import org.gel.mauve.dcjx.DCJ;
+import org.gel.mauve.gui.AnalysisDisplayWindow;
+
+
+import gr.zeus.ui.JConsole;
 
 public class ScoreAssembly extends JFrame{
 	
@@ -55,13 +61,13 @@ public class ScoreAssembly extends JFrame{
 	
 	private static final String error = "Error computing DCJ distances! Please report bug to atritt@ucdavis.edu";
 	
-	private TextArea sumTA, snpTA, gapTA;
+	private JTextArea sumTA, snpTA, gapTA;
 	
 	private int fWIDTH = 400;
 
 	private int fHEIGHT = 400;
 	
-	private Panel toptopPanel;
+	private JPanel toptopPanel;
 
 	private CardLayout cards;
 
@@ -70,6 +76,8 @@ public class ScoreAssembly extends JFrame{
 	private AssemblyScorer assScore;
 
 	private JFrame frame;
+	
+	private AnalysisDisplayWindow win;
 	
 	private static final String USAGE = 
 		"Usage: java -cp Mauve.jar org.gel.mauve.assemlbly.ScoreAssembly [options]\n" +
@@ -214,17 +222,38 @@ public class ScoreAssembly extends JFrame{
 	
 
 	public ScoreAssembly(XmfaViewerModel model){
-		build(model);
+	//	build(model);
+		win = new AnalysisDisplayWindow("Score Assembly - "+model.getSrc().getName(), fWIDTH, fHEIGHT);
+		sumTA = win.addContentPanel(SUM_CMD, SUM_DESC, true);
+		snpTA = win.addContentPanel(SNP_CMD, SNP_DESC, false);
+		gapTA = win.addContentPanel(GAP_CMD, GAP_DESC, false);
+		win.showWindow();
+/*		
+  		sumTA = new JTextArea(5,20);
+		snpTA = new JTextArea(5,20);
+		gapTA = new JTextArea(5,20);
+		sumTA.setEditable(false);
+		snpTA.setEditable(false);
+		gapTA.setEditable(false);
+*/
 		sumTA.append(temp);
 		snpTA.append(temp);
 		gapTA.append(temp);
 		assScore = new AssemblyScorer(model);
-		
 		sumTA.replaceRange("", 0, temp.length());
 		setSumText(assScore,true,false);
 		snpTA.replaceRange("", 0, temp.length());
 		gapTA.replaceRange("", 0, temp.length());
 		setInfoText(assScore);
+		sumTA.setCaretPosition(0);
+		snpTA.setCaretPosition(0);
+		gapTA.setCaretPosition(0);
+		
+//		JScrollPane sp = new JScrollPane(sumTA);
+		
+//		win.showWindow();
+		
+		
 	}
 
 	private void setInfoText(AssemblyScorer as){
@@ -293,40 +322,39 @@ public class ScoreAssembly extends JFrame{
 	
 	private void build (XmfaViewerModel model) {
 		frame = new JFrame ("Assembly Score - " + model.getSrc().getName());
-		
-		
-		
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		int xPos = dim.width - fWIDTH;
 		frame.setSize (fWIDTH, fHEIGHT);
 		frame.setLocation(xPos, 0);
+		
 		JPanel content = new JPanel (new BorderLayout ());
+		
 		frame.getContentPane ().add (content, BorderLayout.CENTER);
 		box = "";
-		setLayout (new BorderLayout ());
 		// /create top panel
-		Panel topPanel = new Panel ();
+		JPanel topPanel = new JPanel ();
 
 		topPanel.setLayout (new BorderLayout ());
 		// top top panel with cards
 		cards = new CardLayout ();
-		toptopPanel = new Panel ();
+		toptopPanel = new JPanel ();
 		toptopPanel.setLayout (cards);
 		topPanel.add (toptopPanel, BorderLayout.CENTER);
 		
 		// top lower panel of buttons
-		Panel toplowerPanel = new Panel ();
+		JPanel toplowerPanel = new JPanel ();
 		GridLayout butts = new GridLayout (1, 0);
 		butts.setHgap (50);
 		toplowerPanel.setLayout (butts);
 		topPanel.add (toplowerPanel, BorderLayout.SOUTH);
 		// make buttons
-		Button Bsum = new Button (SUM_CMD);
-		Button Bsnps = new Button (SNP_CMD);
-		Button Bgaps = new Button (GAP_CMD);
+		JButton Bsum = new JButton (SUM_CMD);
+		JButton Bsnps = new JButton (SNP_CMD);
+		JButton Bgaps = new JButton (GAP_CMD);
 		toplowerPanel.add (Bsum);
 		toplowerPanel.add (Bsnps);
 		toplowerPanel.add (Bgaps);
+		
 		// make listener
 		ChangeCards cc = new ChangeCards ();
 		// register buttons
@@ -334,31 +362,40 @@ public class ScoreAssembly extends JFrame{
 		Bsnps.addActionListener (cc);
 		Bgaps.addActionListener (cc);
 		// /add the top panel
-		add (topPanel, BorderLayout.NORTH);
+		
+		
 		content.add (topPanel, BorderLayout.CENTER);
 
 		Font font = new Font ("monospaced", Font.PLAIN, 12);
 		font.getSize2D();
 		
 		// /Add output text to cards panel
-		sumTA = new TextArea (box, 25, 160);
+		sumTA = new JTextArea (box, 0, 0);
 		sumTA.setEditable (false);
 		sumTA.setFont (font);
 		toptopPanel.add (SUM_DESC, sumTA);
 		
+		
 		cards.show (toptopPanel, SUM_DESC);
 		// /Add DCJ Operations text to cards panel
-		snpTA = new TextArea (box, 25, 160);
+		snpTA = new JTextArea (box, 0, 0);
 		snpTA.setEditable (false);
 		snpTA.setFont (font);
 		toptopPanel.add (SNP_DESC, snpTA);
 		// /Add log text area
-		gapTA = new TextArea (box, 25, 160);
+		gapTA = new JTextArea (box, 0, 0);
 		gapTA.setEditable (false);
 		gapTA.setFont (font);
 		toptopPanel.add (GAP_DESC, gapTA);
 		sumTA.setText ("");
 		frame.setVisible (true);
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setViewportView(content);
+		scrollPane.setSize(fWIDTH, fHEIGHT);
+		scrollPane.setVisible(true);
+		frame.add(scrollPane);
+		frame.pack();
+		
 	}
 
 	

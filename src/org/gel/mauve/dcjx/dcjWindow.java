@@ -3,6 +3,7 @@ package org.gel.mauve.dcjx;
 import java.awt.BorderLayout;
 
 
+
 import gr.zeus.ui.JConsole;
 
 
@@ -32,6 +33,7 @@ import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.Genome;
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.analysis.PermutationExporter;
+import org.gel.mauve.gui.AnalysisDisplayWindow;
 
 public class dcjWindow extends JFrame {
 
@@ -53,7 +55,9 @@ public class dcjWindow extends JFrame {
 	
 	private static final String error = "Error computing DCJ distances! Please report bug to atritt@ucdavis.edu";
 	
-	private TextArea nwayTA, pwiseTA, nblksTA;
+	private JTextArea nwayTA, pwiseTA, nblksTA;
+	
+	private AnalysisDisplayWindow adw;
 	
 	private int fWIDTH = 400;
 
@@ -69,13 +73,20 @@ public class dcjWindow extends JFrame {
 	
 	private DCJ[][] pWiseDist;
 	
+	private static dcjWindow curr;
+	
 	
 //	private JTextArea log;
 	// event listener
 	
 	public static void launchDCJ(BaseViewerModel model) {
 		if (model instanceof XmfaViewerModel){
-			dcjWindow win = new dcjWindow((XmfaViewerModel)model);
+			if (curr != null){
+				
+			} else {
+				curr = new dcjWindow((XmfaViewerModel)model);
+			}
+				
 		} else {
 			System.err.println("Can't compute DCJ distance without contig boundaries.");
 		}
@@ -85,7 +96,11 @@ public class dcjWindow extends JFrame {
 	public dcjWindow (XmfaViewerModel model) {
 		int numGenomes = model.getGenomes().size();
 		if (numGenomes > 2){
-			build(model);
+			adw = new AnalysisDisplayWindow("DCJ - "+model.getSrc().getName(), fWIDTH, fHEIGHT);
+			nwayTA = adw.addContentPanel(NWAY_COMMAND, NWAY_DESC, true);
+			pwiseTA = adw.addContentPanel(PWISE_COMMAND, PWISE_DESC, false);
+			nblksTA = adw.addContentPanel(NBLKS_COMMAND, NBLKS_DESC, false);
+			adw.showWindow();
 			Vector<Genome> v = model.getGenomes();
 			Genome[] genomes = v.toArray(new Genome[v.size()]);
 			int numGen = genomes.length;
@@ -124,16 +139,20 @@ public class dcjWindow extends JFrame {
 				e.printStackTrace();
 			}
 		} else {
-			build2Gen(model);
+			adw = new AnalysisDisplayWindow("DCJ - "+model.getSrc().getName(), fWIDTH, fHEIGHT);
+			nwayTA = adw.addContentPanel("DCJ", NWAY_DESC, true);
+			adw.showWindow();
 			nwayTA.append(temp);
 			try {
 				String[] perms = PermutationExporter.getPermStrings(model);
 				DCJ dcj = new DCJ(perms[0], perms[1]);
 				nwayTA.replaceRange("", 0, temp.length());
-				nwayTA.append("# DCJ distance : ");
-				nwayTA.append("no. of blocks = " + dcj.numBlocks()+" #\n\n");
-				printHeader(nwayTA, model);
-				nwayTA.append("\n0\n"+dcj.dcjDistance()+"\t0\n");
+				StringBuilder sb = new StringBuilder();
+				sb.append("# DCJ distance : ");
+				sb.append("no. of blocks = " + dcj.numBlocks()+" #\n\n");
+				printHeader(sb, model);
+				sb.append("\n0\n"+dcj.dcjDistance()+"\t0\n");
+				nwayTA.setText(sb.toString());
 			} catch (Exception e){
 				nwayTA.replaceRange(error, 0, temp.length());
 				e.printStackTrace();
@@ -161,11 +180,19 @@ public class dcjWindow extends JFrame {
 		}
 	}
 	
-	private static void printHeader(TextArea out, XmfaViewerModel model){
+	private static void printHeader(JTextArea nblksTA2, XmfaViewerModel model){
 		Vector<Genome> v = model.getGenomes();
 		Genome[] genomes = v.toArray(new Genome[v.size()]);
 		for (int i = 0; i < genomes.length; i++){
-			out.append("# "+(i+1)+": " + genomes[i].getDisplayName()+"\n");
+			nblksTA2.append("# "+(i+1)+": " + genomes[i].getDisplayName()+"\n");
+		}
+	}
+	
+	private static void printHeader(StringBuilder sb, XmfaViewerModel model){
+		Vector<Genome> v = model.getGenomes();
+		Genome[] genomes = v.toArray(new Genome[v.size()]);
+		for (int i = 0; i < genomes.length; i++){
+			sb.append("# "+(i+1)+": " + genomes[i].getDisplayName()+"\n");
 		}
 	}
 	
@@ -241,18 +268,18 @@ public class dcjWindow extends JFrame {
 		content.add (topPanel, BorderLayout.CENTER);
 
 		// /Add output text to cards panel
-		nwayTA = new TextArea (box, 25, 40);
+		nwayTA = new JTextArea (box, 25, 40);
 		nwayTA.setEditable (false);
 		nwayTA.setFont (new Font ("monospaced", Font.PLAIN, 12));
 		toptopPanel.add (NWAY_DESC, nwayTA);
 		cards.show (toptopPanel, NWAY_DESC);
 		// /Add DCJ Operations text to cards panel
-		pwiseTA = new TextArea (box, 25, 40);
+		pwiseTA = new JTextArea (box, 25, 40);
 		pwiseTA.setEditable (false);
 		pwiseTA.setFont (new Font ("monospaced", Font.PLAIN, 12));
 		toptopPanel.add (PWISE_DESC, pwiseTA);
 		// /Add log text area
-		nblksTA = new TextArea (box, 25, 40);
+		nblksTA = new JTextArea (box, 25, 40);
 		nblksTA.setEditable (false);
 		nblksTA.setFont (new Font ("monospaced", Font.PLAIN, 12));
 		toptopPanel.add (NBLKS_DESC, nblksTA);
@@ -284,7 +311,7 @@ public class dcjWindow extends JFrame {
 		content.add (topPanel, BorderLayout.CENTER);
 
 		// /Add output text to cards panel
-		nwayTA = new TextArea (box, 25, 40);
+		nwayTA = new JTextArea (box, 25, 40);
 		nwayTA.setEditable (false);
 		nwayTA.setFont (new Font ("monospaced", Font.PLAIN, 12));
 		toptopPanel.add (NWAY_DESC, nwayTA);
@@ -309,9 +336,9 @@ public class dcjWindow extends JFrame {
 
 	
 
-	 public OutputStream textArea2OutputStream(final TextArea t)
+	 public OutputStream textArea2OutputStream(final JTextArea t)
 	    { return new OutputStream()
-	       { TextArea ta = t;
+	       { JTextArea ta = t;
 	         public void write(int b) //minimum implementation of an OutputStream
 	          { byte[] bs = new byte[1]; bs[0] = (byte) b;
 	            ta.append(new String(bs));
