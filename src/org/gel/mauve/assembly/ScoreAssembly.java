@@ -40,7 +40,7 @@ import org.gel.mauve.gui.AnalysisDisplayWindow;
 
 import gr.zeus.ui.JConsole;
 
-public class ScoreAssembly extends JFrame{
+public class ScoreAssembly {
 	
 	private static String SUM_CMD = "Summary";
 	private static String SUM_DESC = "Summary of scoring assembly";
@@ -48,6 +48,8 @@ public class ScoreAssembly extends JFrame{
 	private static String SNP_DESC = "SNPs between reference and assembly";
 	private static String GAP_CMD = "Gaps";
 	private static String GAP_DESC = "Gaps in reference and assembly";
+	
+	private static ScoreAssembly curr;
 	
 	private static int A = 0;
 	
@@ -406,7 +408,7 @@ public class ScoreAssembly extends JFrame{
 	 * @param reorder
 	 * @return
 	 */
-	public static File runPMauveAlnmt(String refPath, String assPath, String outDirPath, boolean reorder){
+	private static File runPMauveAlnmt(String refPath, String assPath, String outDirPath, boolean reorder){
 		if (reorder){
 			
 		} else {
@@ -471,9 +473,11 @@ public class ScoreAssembly extends JFrame{
 	
 	public static void launchWindow(BaseViewerModel model){
 		ScoreAssembly sa = null;
-		if (model instanceof XmfaViewerModel) {
+		if (curr != null){
+			curr.win.showWindow();
+		} else if (model instanceof XmfaViewerModel) {
 			System.out.println("Scoring assembly " + model.getSrc().getName());
-			sa = new ScoreAssembly((XmfaViewerModel)model);
+			curr = new ScoreAssembly((XmfaViewerModel)model);
 		} else {
 			System.err.println("Can't score assembly -- Please report this bug!");
 		}

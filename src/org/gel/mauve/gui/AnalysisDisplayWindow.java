@@ -1,23 +1,18 @@
 package org.gel.mauve.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.CardLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.Panel;
-import java.awt.TextArea;
 // these are needed to grab the users display screen size
 import java.awt.Toolkit;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.HashMap;
-import java.util.Vector;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -26,8 +21,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
+import javax.swing.border.BevelBorder;
 
-import org.gel.mauve.XmfaViewerModel;
 //import org.gel.mauve.assembly.ScoreAssembly.ChangeCards;
 
 public class AnalysisDisplayWindow extends JFrame {
@@ -61,6 +56,7 @@ public class AnalysisDisplayWindow extends JFrame {
 	public AnalysisDisplayWindow(String name, int width, int height) {
 		font = new Font ("monospaced", Font.PLAIN, 12);
 		frame = new JFrame(name);
+		
 		setLayout(new BorderLayout());
 		this.name = name;
 		this.width = width;
@@ -74,16 +70,24 @@ public class AnalysisDisplayWindow extends JFrame {
 		topBar.setLayout(tmp);
 		saveBtn = new JButton("Save");
 		topBar.add(saveBtn);
+		topBar.setSize(100, 100);
 		saveBtn.addActionListener(cc);
 		GridLayout tmp1 = new GridLayout(1,0);
 		tmp1.setHgap(10);
 		botBar = new JPanel(tmp1,true);
 		content = new JPanel(new BorderLayout());
-		frame.getContentPane ().add (content, BorderLayout.CENTER);
-		frame.getContentPane().add(botBar,BorderLayout.SOUTH);
-		frame.getContentPane().add(topBar,BorderLayout.NORTH);
+		topBar.setBorder(BorderFactory.createEmptyBorder(2,1,4,1));
+		botBar.setBorder(BorderFactory.createEmptyBorder(4,4,4,4));
 		cardMngr = new CardLayout();
 		content.setLayout(cardMngr);
+		content.setBorder(BorderFactory.createEmptyBorder(1,1,1,1));
+		JPanel tempPanel = new JPanel(new BorderLayout());
+		tempPanel.add(topBar, BorderLayout.NORTH);
+		tempPanel.add(botBar,BorderLayout.SOUTH);
+		tempPanel.add(content, BorderLayout.CENTER);
+		tempPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+		frame.getContentPane().add(tempPanel, BorderLayout.CENTER);
+		
 	}
 	
 	public void showWindow(){

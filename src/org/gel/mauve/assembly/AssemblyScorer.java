@@ -49,8 +49,8 @@ public class AssemblyScorer {
 	}
 	
 	public AssemblyScorer(String[] args, boolean reorder) throws IOException{
-		File xmfaFile = ScoreAssembly.runPMauveAlnmt(args[0],args[1],args[2],reorder);
-		model = new XmfaViewerModel(xmfaFile, null);
+	//	File xmfaFile = ScoreAssembly.runPMauveAlnmt(args[0],args[1],args[2],reorder);
+	//	model = new XmfaViewerModel(xmfaFile, null);
 		refPath = args[0];
 		assPath = args[1];
 		outDirPath = args[2]; 	
