@@ -22,14 +22,14 @@ public class Gap implements Comparable<Gap>{
 	
 	private long length;
 	
-	private XmfaViewerModel model;
+//	private XmfaViewerModel model;
 	
 	public Gap(int genomeSrcIdx, int lcb, long pos, long len, XmfaViewerModel model){
 		this.genSrcIdx = genomeSrcIdx;
 		this.position = pos;
 		this.length = len;
 		this.lcbId = lcb;
-		this.model = model;
+	//	this.model = model;
 		this.chrom = model.getGenomeBySourceIndex(genSrcIdx).getChromosomeAt(position);
 		this.posInCtg = (int) (position - this.chrom.getStart()+1);
 	}

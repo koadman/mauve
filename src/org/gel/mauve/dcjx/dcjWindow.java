@@ -113,7 +113,7 @@ public class dcjWindow {
 			adw.showWindow();
 			nwayTA.append(temp);
 			try {
-				String[] perms = PermutationExporter.getPermStrings(model);
+				String[] perms = PermutationExporter.getPermStrings(model,true);
 				DCJ dcj = new DCJ(perms[0], perms[1]);
 				nwayTA.replaceRange("", 0, temp.length());
 				StringBuilder sb = new StringBuilder();
@@ -170,7 +170,7 @@ public class dcjWindow {
 		Genome[] genomes = new Genome[v.size()];
 		v.toArray(genomes);
 		Genome[] pair = new Genome[2];
-		String[] nWayPerms = PermutationExporter.getPermStrings(model, genomes);
+		String[] nWayPerms = PermutationExporter.getPermStrings(model, genomes,true);
 		String[] pairPerm = null;
 		DCJ[][] nWayDist = nway;
 		DCJ[][] pWiseDist = pwise;
@@ -178,7 +178,7 @@ public class dcjWindow {
 			for (int j = 0; j < i; j++){
 				pair[0] = genomes[i];
 				pair[1] = genomes[j];
-				pairPerm = PermutationExporter.getPermStrings(model, pair);
+				pairPerm = PermutationExporter.getPermStrings(model, pair,true);
 				
 				if (!Permutation.equalContents(pairPerm[0], pairPerm[1])){
 					System.err.println("Unequal contents between genomes "+

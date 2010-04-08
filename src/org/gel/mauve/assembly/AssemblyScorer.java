@@ -39,11 +39,27 @@ public class AssemblyScorer {
 	
 	private void loadInfo(){
 		model.setReference(model.getGenomeBySourceIndex(0));
-		String[] perms = PermutationExporter.getPermStrings(model);
+		
+		System.out.print("Computing signed permutations....");
+		String[] perms = PermutationExporter.getPermStrings(model, true); 
+		System.out.print("done!\n");
+		
+		System.out.print("Performing DCJ rearrangement analysis...");
 		this.dcj = new DCJ(perms[0], perms[1]);
+		System.out.print("done!\n");
+		
+		System.out.print("Getting SNPs...");
 		this.snps = SnpExporter.getSNPs(model, model.getXmfa());
+		System.out.print("done!\n");
+		
+		System.out.print("Counting base substitutions...");
 		this.subs = ScoreAssembly.countSubstitutions(snps);
+		System.out.print("done!\n");
+		
+		System.out.print("Counting gaps...");
 		Gap[][] tmp = SnpExporter.getGaps(model, model.getXmfa());
+		System.out.print("done!\n");
+		
 		refGaps = tmp[0];
 		assGaps = tmp[1];
 	}

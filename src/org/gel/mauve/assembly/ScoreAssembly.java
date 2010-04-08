@@ -234,38 +234,26 @@ public class ScoreAssembly {
 		snpTA = win.addContentPanel(SNP_CMD, SNP_DESC, false);
 		gapTA = win.addContentPanel(GAP_CMD, GAP_DESC, false);
 		win.showWindow();
-/*		
-  		sumTA = new JTextArea(5,20);
-		snpTA = new JTextArea(5,20);
-		gapTA = new JTextArea(5,20);
-		sumTA.setEditable(false);
-		snpTA.setEditable(false);
-		gapTA.setEditable(false);
-*/
+
 		sumTA.append(temp);
 		snpTA.append(temp);
 		gapTA.append(temp);
 		assScore = new AssemblyScorer(model);
 		sumTA.replaceRange("", 0, temp.length());
-		setSumText(assScore,true,false);
+		setSumText(true,false);
 		snpTA.replaceRange("", 0, temp.length());
 		gapTA.replaceRange("", 0, temp.length());
-		setInfoText(assScore);
+		setInfoText();
 		sumTA.setCaretPosition(0);
 		snpTA.setCaretPosition(0);
 		gapTA.setCaretPosition(0);
 		
-//		JScrollPane sp = new JScrollPane(sumTA);
-		
-//		win.showWindow();
-		
-		
 	}
 
-	private void setInfoText(AssemblyScorer as){
+	private void setInfoText(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("SNP_Pattern\tRef_Contig\tRef_PosInContig\tRef_PosGenomeWide\tAssembly_Contig\tAssembly_PosInContig\tAssembly_PosGenomeWide\n");
-		SNP[] snps = as.getSNPs();
+		SNP[] snps = assScore.getSNPs();
 		for (int i = 0; i < snps.length; i++)
 			sb.append(snps[i].toString()+"\n");
 		
@@ -273,17 +261,17 @@ public class ScoreAssembly {
 		
 		sb = new StringBuilder();
 		sb.append("Sequence\tContig\tPosition_in_Contig\tGenomeWide_Position\tLength\n");
-		Gap[] gaps = as.getReferenceGaps();
+		Gap[] gaps = assScore.getReferenceGaps();
 		for (int i = 0; i < gaps.length; i++)
 			sb.append(gaps[i].toString("reference")+"\n");
-		gaps = as.getAssemblyGaps();
+		gaps = assScore.getAssemblyGaps();
 		for (int i = 0; i < gaps.length; i++)
 			sb.append(gaps[i].toString("assembly")+"\n");
 		gapTA.setText(sb.toString());
 		
 	}
 	
-	private void setSumText(AssemblyScorer as, boolean header, boolean singleLine){
+	private void setSumText(boolean header, boolean singleLine){
 		NumberFormat nf = NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(4);
 		StringBuilder sb = new StringBuilder();
@@ -293,38 +281,57 @@ public class ScoreAssembly {
 						"TotalBasesMissed\tPercentBasesMissed\tExtraBases\tPercentExtraBases\n");
 			}
 			
-			sb.append(as.getDCJDist()+"\t"+as.numBlocks()+"\t"+as.getSNPs().length+"\t"+
-						as.getReferenceGaps().length+"\t"+as.getAssemblyGaps().length+"\t"+
-					 	as.totalMissedBases()+"\t"+nf.format(as.percentMissedBases()*100)+"\t"+
-					 	as.totalExtraBases()+"\t"+nf.format(as.percentExtraBases()*100)+"\n");
+			sb.append(assScore.getDCJDist()+"\t"+assScore.numBlocks()+"\t"+assScore.getSNPs().length+"\t"+
+						assScore.getReferenceGaps().length+"\t"+assScore.getAssemblyGaps().length+"\t"+
+					 	assScore.totalMissedBases()+"\t"+nf.format(assScore.percentMissedBases()*100)+"\t"+
+					 	assScore.totalExtraBases()+"\t"+nf.format(assScore.percentExtraBases()*100)+"\n");
 			
 		} else {
-			if (header)
-				sb.append("DCJ Distance:\t"+as.getDCJDist()+"\n"+
-					 "Number of Blocks:\t"+as.numBlocks()+"\n"+
-					 "Number of SNPs:\t"+as.getSNPs().length+"\n"+
-					 "Number of Gaps in Reference:\t"+as.getReferenceGaps().length+"\n"+
-					 "Number of Gaps in Assembly:\t"+as.getAssemblyGaps().length+"\n" +
-					 "Total bases missed:\t" + as.totalMissedBases() +"\n"+
-					 "Percent bases missed:\t" + nf.format(as.percentMissedBases()*100)+" %\n"+
-					 "Total bases extra:\t" + as.totalExtraBases()+"\n" +
-					 "Percent bases extra:\t" + nf.format(as.percentExtraBases()*100)+ " %\n");
-			else 
-				sb.append(as.getDCJDist()+"\n"+
-						 as.numBlocks()+"\n"+
-						 as.getSNPs().length+"\n"+
-						 as.getReferenceGaps().length+"\n"+
-						 as.getAssemblyGaps().length+"\n" +
-						 as.totalMissedBases() +"\n"+
-						 nf.format(as.percentMissedBases()*100)+"\n"+
-						 as.totalExtraBases()+"\n" +
-						 nf.format(as.percentExtraBases()*100)+ "\n");
-			
+			if (header) {
+				sb.append("DCJ Distance:\t"+assScore.getDCJDist()+"\n\n"+
+					 "Number of Blocks:\t"+assScore.numBlocks()+"\n\n"+
+					 "Number of SNPs:\t"+assScore.getSNPs().length+"\n\n"+
+					 "Number of Gaps in Reference:\t"+assScore.getReferenceGaps().length+"\n\n"+
+					 "Number of Gaps in Assembly:\t"+assScore.getAssemblyGaps().length+"\n\n" +
+					 "Total bases missed:\t" + assScore.totalMissedBases() +"\n\n"+
+					 "Percent bases missed:\t" + nf.format(assScore.percentMissedBases()*100)+" %\n\n"+
+					 "Total bases extra:\t" + assScore.totalExtraBases()+"\n\n" +
+					 "Percent bases extra:\t" + nf.format(assScore.percentExtraBases()*100)+ " %\n\n"+
+					 "Substitutions (Ref on Y, Assembly on X):\n"+subsToString());
+				
+				
+			} else { 
+				sb.append(assScore.getDCJDist()+"\n"+
+						 assScore.numBlocks()+"\n"+
+						 assScore.getSNPs().length+"\n"+
+						 assScore.getReferenceGaps().length+"\n"+
+						 assScore.getAssemblyGaps().length+"\n" +
+						 assScore.totalMissedBases() +"\n"+
+						 nf.format(assScore.percentMissedBases()*100)+"\n"+
+						 assScore.totalExtraBases()+"\n" +
+						 nf.format(assScore.percentExtraBases()*100)+ "\n"+
+						 subsToString());
+			}
 		}
 		
 		sumTA.setText(sb.toString());
 	}
 	
+	private String subsToString(){
+		// A C T G
+		StringBuilder sb = new StringBuilder();
+		sb.append("\tA\tC\tT\tG\n");
+		char[] ar = {'A','C','T','G'};
+		int[][] subs = assScore.getSubs();
+		for (int i = 0; i < subs.length; i++){
+			sb.append(ar[i]);
+			for (int j = 0; j < subs.length; j++){
+				sb.append("\t"+(i==j?"-":subs[i][j]));
+			}
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
 	
 	private void build (XmfaViewerModel model) {
 		frame = new JFrame ("Assembly Score - " + model.getSrc().getName());
@@ -434,14 +441,15 @@ public class ScoreAssembly {
 	 * Returns a 4x4 matrix of counts of substitution types between 
 	 * genome <code>src_i</code> and <code>src_j</code>
 	 * 
+	 * <p>
 	 * <code>
-	 *      A  C  T  G
-	 *    A -
-	 *    C    -
-	 *    T       -
-	 *    G          -
+	 *      A  C  T  G <br />
+	 *    A -          <br />
+	 *    C    -       <br />
+	 *    T       -    <br />
+	 *    G          - <br />
 	 * </code>
-	 * 
+	 * </p>
 	 * @param snps
 	 * @return a 4x4 matrix of substitution counts
 	 */

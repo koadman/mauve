@@ -204,6 +204,7 @@ public class SnpExporter {
 		return len-gapStart;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static Gap[][] getGaps(XmfaViewerModel model, XMFAAlignment xmfa){
 		int iv_count = (int)model.getLcbCount();
 		int seq_count = model.getSequenceCount();
@@ -231,8 +232,13 @@ public class SnpExporter {
 					if (tmp[colI]=='-'){
 						long start = colI;
 						// this will move colI to the position immediately following the gap
-						while(tmp[colI]=='-')
-							colI++;
+						while(tmp[colI]=='-'){
+							if (colI == tmp.length-1) {
+								colI++;
+								break;
+							} else 
+								colI++;
+						}
 						long end = colI-1;
 						long len = end - start + 1;
 						if (lcbs[lcbI].getReverse(g))

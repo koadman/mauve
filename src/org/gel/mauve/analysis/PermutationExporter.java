@@ -68,7 +68,7 @@ public class PermutationExporter {
 	 * @param genomes the genomes to work with
 	 * @return an array of <code>LCB</code>s 
 	 */
-	public static LCB[] projectLcbList(XmfaViewerModel model, LCB[] lcbList, Genome[] genomes)
+	public static LCB[] projectLcbList(XmfaViewerModel model, LCB[] lcbList, Genome[] genomes, boolean splitOnCtgBnds)
 	{
 		// make a list of undesired genomes
 		Genome[] others = new Genome[model.getSequenceCount()-genomes.length];
@@ -114,22 +114,20 @@ public class PermutationExporter {
 		int start = projlcbs.size();
 	
 		// split each LCB based on the each genome's contig boundaries
-		for (int g = 0; g < genomes.length; g++){
-			for (int i = 0; i < projlcbs.size(); i++){
-			// split each LCB based on each genome
-				LCB tmp = (LCB) projlcbs.elementAt(i);
-				Vector newlcbs = splitLCBbyGenome(model, tmp, genomes, g);
-				// replace the old LCB with the resulting split
-				projlcbs.remove(i);
-				projlcbs.addAll(i, newlcbs);
-				// move our "pointer" to the last element we inserted into the Vector
-				i = i + newlcbs.size() - 1; 
+		if (splitOnCtgBnds){
+			for (int g = 0; g < genomes.length; g++){
+				for (int i = 0; i < projlcbs.size(); i++){
+				// split each LCB based on each genome
+					LCB tmp = (LCB) projlcbs.elementAt(i);
+					Vector newlcbs = splitLCBbyGenome(model, tmp, genomes, g);
+					// replace the old LCB with the resulting split
+					projlcbs.remove(i);
+					projlcbs.addAll(i, newlcbs);
+					// move our "pointer" to the last element we inserted into the Vector
+					i = i + newlcbs.size() - 1; 
+				}
 			}
 		}
-		System.out.println("Split " + start + " LCBs from alignment into "
-				          + projlcbs.size() + " LCBs \nbased on chromosome/contig/plasmid boundaries.");
-		System.out.flush();
-		
 		LCB[] plist = new LCB[projlcbs.size()];
 		plist = (LCB[])projlcbs.toArray(plist);
 		// now that we've got all the LCBs we need, compute adjacencies
@@ -301,11 +299,11 @@ public class PermutationExporter {
 	 * @return an array of <code>Vector</code>s of <code>Vector</code>s of <code>String</code>s
 	 */
 	//@SuppressWarnings("unchecked")
-	public static Vector[] computeSignedPermutation(XmfaViewerModel model, Genome[] genomes)
+	public static Vector[] computeSignedPermutation(XmfaViewerModel model, Genome[] genomes, boolean splitOnCtgBnds)
 	{
 		int seq_count = genomes.length;
 		LCB[] lcbList = model.getVisibleLcbList();
-		lcbList = projectLcbList(model, lcbList, genomes);
+		lcbList = projectLcbList(model, lcbList, genomes,splitOnCtgBnds);
 		
 		Vector[] signed_perms = new Vector[seq_count];
 		
@@ -375,7 +373,7 @@ public class PermutationExporter {
 	 */
 	public static void export( XmfaViewerModel model, BufferedWriter output, Genome[] genomes ) throws IOException
 	{
-		String[] perms = getPermStrings(model,genomes);
+		String[] perms = getPermStrings(model,genomes, false);
 		
 		for (int i = 0; i < perms.length; i++){
 			output.write(perms[i]+"\n");
@@ -393,10 +391,10 @@ public class PermutationExporter {
 	 * @param genomes the genomes of interest.
 	 * @return an array of permutations, one for each element in <code>genomes</code>
 	 */
-	public static String[] getPermStrings(XmfaViewerModel model, Genome[] genomes ) 
+	public static String[] getPermStrings(XmfaViewerModel model, Genome[] genomes, boolean splitOnCtgBnds) 
 	{
 		// perms = an array of vectors of vectors. one array element per genome.
-		Vector[] perms = computeSignedPermutation(model, genomes); 
+		Vector[] perms = computeSignedPermutation(model, genomes, splitOnCtgBnds); 
 		StringBuilder sb = new StringBuilder();
 		
 		
@@ -428,9 +426,9 @@ public class PermutationExporter {
 	 * @param model the alignment to get permutations for
 	 * @return an array of permutations, indexed by genome source index
 	 */
-	public static String[] getPermStrings(XmfaViewerModel model){
+	public static String[] getPermStrings(XmfaViewerModel model, boolean splitOnCtgBnds){
 		Vector<Genome> v = model.getGenomes();
-		return getPermStrings(model, v.toArray(new Genome[v.size()]));
+		return getPermStrings(model, v.toArray(new Genome[v.size()]), splitOnCtgBnds);
 	}
 
 	public static class ExportFrame extends JFrame
