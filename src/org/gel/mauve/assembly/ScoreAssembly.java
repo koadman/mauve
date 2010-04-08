@@ -18,6 +18,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -49,7 +50,7 @@ public class ScoreAssembly {
 	private static String GAP_CMD = "Gaps";
 	private static String GAP_DESC = "Gaps in reference and assembly";
 	
-	private static ScoreAssembly curr;
+	private static HashMap<String,ScoreAssembly> modelMap;
 	
 	private static int A = 0;
 	
@@ -80,6 +81,8 @@ public class ScoreAssembly {
 	private JFrame frame;
 	
 	private AnalysisDisplayWindow win;
+	
+	private XmfaViewerModel model;
 	
 	private static final String USAGE = 
 		"Usage: java -cp Mauve.jar org.gel.mauve.assemlbly.ScoreAssembly [options]\n" +
@@ -225,6 +228,7 @@ public class ScoreAssembly {
 
 	public ScoreAssembly(XmfaViewerModel model){
 	//	build(model);
+		this.model = model;
 		win = new AnalysisDisplayWindow("Score Assembly - "+model.getSrc().getName(), fWIDTH, fHEIGHT);
 		sumTA = win.addContentPanel(SUM_CMD, SUM_DESC, true);
 		snpTA = win.addContentPanel(SNP_CMD, SNP_DESC, false);
@@ -472,16 +476,16 @@ public class ScoreAssembly {
 	}
 	
 	public static void launchWindow(BaseViewerModel model){
-		ScoreAssembly sa = null;
-		if (curr != null){
-			curr.win.showWindow();
+		if (modelMap == null) 
+			modelMap = new HashMap<String,ScoreAssembly>();
+		String key = model.getSrc().getAbsolutePath();
+		if (modelMap.containsKey(key)){
+			modelMap.get(key).win.showWindow();
 		} else if (model instanceof XmfaViewerModel) {
-			System.out.println("Scoring assembly " + model.getSrc().getName());
-			curr = new ScoreAssembly((XmfaViewerModel)model);
+			modelMap.put(key, new ScoreAssembly((XmfaViewerModel)model));
 		} else {
 			System.err.println("Can't score assembly -- Please report this bug!");
-		}
-		
+		}	
 	}
 	
 	private class ChangeCards implements ActionListener {

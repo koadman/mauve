@@ -4,6 +4,7 @@ import java.awt.CardLayout;
 import java.awt.Panel;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.HashMap;
 import java.util.Vector;
 
 import javax.swing.JTextArea;
@@ -19,20 +20,16 @@ public class dcjWindow {
 //	private JTextArea matrix;
 	
 	private static final String NWAY_COMMAND = "N-Way";
-	
 	private static final String NWAY_DESC = "Distances based on N-Way LCBs";
-	
 	private static final String PWISE_COMMAND = "Pairwise";
-	
 	private static final String PWISE_DESC = "Distances based on Pairwise LCBs";
-	
 	private static final String NBLKS_COMMAND = "NoBlocks";
-	
 	private static final String NBLKS_DESC = "Number of blocks between each pair";
 	
 	private static final String temp = "Running...";
-	
 	private static final String error = "Error computing DCJ distances! Please report bug to atritt@ucdavis.edu";
+	
+	private static HashMap<String,dcjWindow> modelMap;
 	
 	private JTextArea nwayTA, pwiseTA, nblksTA;
 	
@@ -52,18 +49,17 @@ public class dcjWindow {
 //	private JTextArea log;
 	// event listener
 	
-	public static void launchDCJ(BaseViewerModel model) {
-		if (model instanceof XmfaViewerModel){
-			if (curr != null){
-				curr.adw.showWindow();
-			} else {
-				curr = new dcjWindow((XmfaViewerModel)model);
-			}
-				
+	public static void launchWindow(BaseViewerModel model) {
+		if (modelMap == null)
+			modelMap = new HashMap<String,dcjWindow>();
+		String key = model.getSrc().getAbsolutePath();
+		if (modelMap.containsKey(key)) {	
+			modelMap.get(key).adw.showWindow();
+		}else if (model instanceof XmfaViewerModel){
+			modelMap.put(key, new dcjWindow((XmfaViewerModel)model));
 		} else {
 			System.err.println("Can't compute DCJ distance without contig boundaries.");
-		}
-		
+		}	
 	}
 	
 	public dcjWindow (XmfaViewerModel model) {
