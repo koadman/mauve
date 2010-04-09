@@ -11,12 +11,12 @@ import org.gel.mauve.MyConsole;
 public class AlignWorker extends SwingWorker
 {
     String[] mauve_cmd;
-    AlignFrame align_frame;
+    AlignmentProcessListener align_frame;
     int retcode = -1;
     private Process align_proc = null;
     private boolean killed = false;
     
-    public AlignWorker (AlignFrame align_frame, String[] mauve_cmd)
+    public AlignWorker (AlignmentProcessListener align_frame, String[] mauve_cmd)
     {
         this.mauve_cmd = mauve_cmd;
         this.align_frame = align_frame;

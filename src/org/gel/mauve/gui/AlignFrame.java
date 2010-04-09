@@ -35,7 +35,7 @@ import org.gel.mauve.gui.dnd.DnDList;
  * mauveAligner tool. Allows the user to manipulate various alignment options.
  * Originally created with Metrowerks java gui designer.
  */
-public class AlignFrame extends java.awt.Frame
+public class AlignFrame extends java.awt.Frame implements AlignmentProcessListener
 {
     // Use for post-alignment file loading
     protected String read_filename;
