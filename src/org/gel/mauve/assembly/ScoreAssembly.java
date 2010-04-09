@@ -277,31 +277,39 @@ public class ScoreAssembly {
 		StringBuilder sb = new StringBuilder();
 		if (singleLine){
 			if (header) {
-				sb.append("DCJ_Distance\tNum_Blocks\tNum_SNPs\tNumGaps_Ref\tNumGaps_Assembly\t" +
-						"TotalBasesMissed\tPercentBasesMissed\tExtraBases\tPercentExtraBases\n");
+				sb.append("NumContigs\tNumLCBs\tDCJ_Distance\tNum_Blocks\tNum_SNPs\tNumGaps_Ref\t" +
+						"NumGaps_Assembly\tTotalBasesMissed\tPercBasesMissed\tExtraBases\tPercExtraBases\n");
 			}
 			
-			sb.append(assScore.getDCJDist()+"\t"+assScore.numBlocks()+"\t"+assScore.getSNPs().length+"\t"+
+			sb.append(	assScore.numContigs()+"\t"+assScore.numLCBs()+"\t"+
+						assScore.getDCJDist()+"\t"+assScore.numBlocks()+"\t"+assScore.getSNPs().length+"\t"+
 						assScore.getReferenceGaps().length+"\t"+assScore.getAssemblyGaps().length+"\t"+
 					 	assScore.totalMissedBases()+"\t"+nf.format(assScore.percentMissedBases()*100)+"\t"+
 					 	assScore.totalExtraBases()+"\t"+nf.format(assScore.percentExtraBases()*100)+"\n");
 			
 		} else {
 			if (header) {
-				sb.append("DCJ Distance:\t"+assScore.getDCJDist()+"\n\n"+
-					 "Number of Blocks:\t"+assScore.numBlocks()+"\n\n"+
-					 "Number of SNPs:\t"+assScore.getSNPs().length+"\n\n"+
-					 "Number of Gaps in Reference:\t"+assScore.getReferenceGaps().length+"\n\n"+
-					 "Number of Gaps in Assembly:\t"+assScore.getAssemblyGaps().length+"\n\n" +
-					 "Total bases missed:\t" + assScore.totalMissedBases() +"\n\n"+
-					 "Percent bases missed:\t" + nf.format(assScore.percentMissedBases()*100)+" %\n\n"+
-					 "Total bases extra:\t" + assScore.totalExtraBases()+"\n\n" +
-					 "Percent bases extra:\t" + nf.format(assScore.percentExtraBases()*100)+ " %\n\n"+
-					 "Substitutions (Ref on Y, Assembly on X):\n"+subsToString());
+				sb.append(
+					"Number of Contigs:\t"+assScore.numContigs()+"\n\n"+
+					"Number of LCBs:\t" + assScore.numLCBs()+"\n\n"+
+					"DCJ Distance:\t"+assScore.getDCJDist()+"\n\n"+
+					"Number of Blocks:\t"+assScore.numBlocks()+"\n\n"+
+					"Number of SNPs:\t"+assScore.getSNPs().length+"\n\n"+
+					"Number of Gaps in Reference:\t"+assScore.getReferenceGaps().length+"\n\n"+
+					"Number of Gaps in Assembly:\t"+assScore.getAssemblyGaps().length+"\n\n" +
+					"Total bases missed in reference:\t" + assScore.totalMissedBases() +"\n\n"+
+					"Percent bases missed:\t" + nf.format(assScore.percentMissedBases()*100)+" %\n\n"+
+					"Total bases extra in assembly:\t" + assScore.totalExtraBases()+"\n\n" +
+					"Percent bases extra:\t" + nf.format(assScore.percentExtraBases()*100)+ " %\n\n"+
+					"Substitutions (Ref on Y, Assembly on X):\n"+subsToString()
+				);
 				
 				
 			} else { 
-				sb.append(assScore.getDCJDist()+"\n"+
+				sb.append(
+						assScore.numContigs()+"\n\n"+
+						assScore.numLCBs()+"\n\n"+
+						assScore.getDCJDist()+"\n"+
 						 assScore.numBlocks()+"\n"+
 						 assScore.getSNPs().length+"\n"+
 						 assScore.getReferenceGaps().length+"\n"+

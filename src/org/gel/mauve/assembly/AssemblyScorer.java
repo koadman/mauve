@@ -111,6 +111,14 @@ public class AssemblyScorer {
 		return dcj.numBlocks();
 	}
 	
+	public int numContigs(){
+		return model.getGenomeBySourceIndex(1).getChromosomes().size();
+	}
+	
+	public int numLCBs(){
+		return (int) model.getLcbCount();
+	}
+	
 	public double percentMissedBases(){
 		double totalBases = model.getGenomeBySourceIndex(0).getLength();
 		double missedBases = 0;
@@ -127,12 +135,13 @@ public class AssemblyScorer {
 		}
 		return missedBases;
 	}
+	
 	/**
 	 * 
 	 * @return numExtraBases/totalNumBases
 	 */
 	public double percentExtraBases(){
-		double totalBases = model.getGenomeBySourceIndex(0).getLength();
+		double totalBases = model.getGenomeBySourceIndex(1).getLength();
 		double extraBases = 0;
 		for (int i = 0; i < refGaps.length; i++){
 			extraBases += refGaps[i].getLength();
