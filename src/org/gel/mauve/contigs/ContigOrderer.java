@@ -2,6 +2,7 @@ package org.gel.mauve.contigs;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Vector;
@@ -40,7 +41,22 @@ public class ContigOrderer implements MauveConstants {
 	protected static final String REF_FILE = "-ref";
 	protected static final String DRAFT_FILE = "-draft";
 
+	private static final String USAGE = 
+		"Usage: java -cp path_to_jar/Mauve.jar org.gel.mauve.ContigOrderer [options]\n" +
+		"  where [options] are:\n" +
+		"\t"+OUTPUT_DIR+" <directory_path>\n" +
+		"\t\tthe directory to store output\n" +
+		"\t"+REF_FILE+" <file_path>\n" +
+		"\t\tthe path to the reference genome\n" +
+		"\t"+DRAFT_FILE+" <file_path>\n" +
+		"\t\tthe path to the draft genome\n";
 	
+	/**
+	 * 
+	 * @param args
+	 * @param frames 
+	 * @param gui true if instantiate GUI, false otherwise
+	 */
 	public ContigOrderer (String [] args, Vector frames, boolean gui) {
 		init (args, frames, gui);
 		if (gui)
@@ -92,6 +108,45 @@ public class ContigOrderer implements MauveConstants {
 			startAlignment (false);
 		}
 	}
+	// FIXME
+	private void initParamsNoGUI(String[] args){
+		Hashtable <String, String> pairs = IOUtils.parseDashPairedArgs(args);
+		String error = null;
+		try {
+			if (pairs.containsKey(OUTPUT_DIR)) {
+				directory = new File (pairs.get(OUTPUT_DIR));
+				if (!directory.exists()) {
+					if (!directory.mkdirs())
+						error = "Couldn't create output directory";
+				}
+				else if (getAlignDir ().exists())
+					error = "Directory already contains reorder";
+			}
+			else
+				error = "Output dir not given";
+			if (pairs.containsKey(REF_FILE)) {
+				System.out.println ("ref file: " );
+			}
+			else
+				error = "no reference file given";
+			if (pairs.containsKey(DRAFT_FILE)) {
+				align.addSequence(pairs.get(DRAFT_FILE));
+			}
+			else
+				error = "no draft file given";
+		} catch (Exception e) {
+			e.printStackTrace();
+			error = e.getMessage();
+		}
+		if (error != null) {
+			JOptionPane.showMessageDialog(null, error);
+			System.exit(0);
+		}
+		else {
+			align.setArgs (pairs);
+			startAlignment (false);
+		}
+	}
 	
 	public void initGUI () {
 		reorderer.init();
@@ -117,8 +172,7 @@ public class ContigOrderer implements MauveConstants {
 		MyConsole.showConsole ();
 		reorderer.ref_ind = 0;
 		reorderer.reorder_ind = 1;
-		align = new ContigMauveAlignFrame (
-				reorderer, this);
+		align = new ContigMauveAlignFrame (reorderer, this);
 	}
 	
 	protected void startAlignment (boolean show_message) {
@@ -218,11 +272,7 @@ public class ContigOrderer implements MauveConstants {
 		return ok;
 	}
 	
-	public void renameLastAlignment () {
-		File from = getAlignDir ();
-		File to = new File (directory, "final_" + DIR_STUB);
-		from.renameTo (to);
-	}
+
 	
 	public void reorderDone () {
 		try {
@@ -307,7 +357,46 @@ public class ContigOrderer implements MauveConstants {
 	
 	
 	public static void main (String [] args) {	
-		new ContigOrderer (args, null, args.length == 0);
+		if (args.length != 6){
+			System.err.print(USAGE);
+			System.exit(-1);
+		} else  {
+			String badArgs = badArgs(args);
+			if (badArgs.length()==0) {
+				ContigOrderer co = new ContigOrderer (args, null, false);
+				co.startAlignment(false);
+			} else {
+				System.err.println("The following arguments are missing or were used improperly:  " + badArgs);
+				System.err.print(USAGE);
+				System.exit(-1);
+			}
+				
+		}
+	}
+	
+	private static boolean argsGood(String[] args){
+		HashSet<String> tmp = new HashSet<String>();
+		tmp.add(args[0]);
+		tmp.add(args[2]);
+		tmp.add(args[4]);
+		return  tmp.contains(OUTPUT_DIR) && 
+				tmp.contains(DRAFT_FILE) && 
+				tmp.contains(REF_FILE);
+	}
+	
+	private static String badArgs(String[] args){
+		HashSet<String> tmp = new HashSet<String>();
+		tmp.add(args[0]);
+		tmp.add(args[2]);
+		tmp.add(args[4]);
+		String ret = "";
+		if (!tmp.contains(OUTPUT_DIR))
+			ret = ret +" "+OUTPUT_DIR;
+		if (!tmp.contains(DRAFT_FILE)) 
+			ret = ret + " " +DRAFT_FILE;
+		if (!tmp.contains(REF_FILE))
+			ret = ret + " " + REF_FILE;
+		return ret;
 	}
 
 }

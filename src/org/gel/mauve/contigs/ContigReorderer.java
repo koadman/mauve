@@ -523,11 +523,11 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 	 * 						  1 the reference genome's index, 2 the index of the
 	 * 						  genome to reorder.
 	 */
-	public static void main (String [] args) {
+	public static void main (String [] args) {		
 		if (args.length > 0)
 			new ContigReorderer ().init (args);
 		else
-			new ContigOrderer (null, null);
+			new ContigOrderer (null, null); 
 	}
 
 	 public class ReordererMauveFrame extends MauveFrame {
