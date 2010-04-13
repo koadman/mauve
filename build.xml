@@ -110,6 +110,7 @@
 				${ext}/xml-apis.jar;
 				${ext}/jakarta-regexp.jar;
 				${ext}/dbus-2.6.jar;
+				${ext}/pal_v1.4.jar;
 				${ext}/unix-0.5.jar"
 			srcdir="${src}"
 			destdir="${build}"
