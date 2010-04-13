@@ -3,20 +3,19 @@ package org.gel.mauve.analysis;
 import java.util.Vector;
 
 
+
 import org.gel.mauve.Genome;
 import org.gel.mauve.LCB;
 import org.gel.mauve.XMFAAlignment;
 import org.gel.mauve.XmfaViewerModel;
-
+/*
 import pal.distance.DistanceMatrix;
-import pal.misc.IdGroup;
-import pal.misc.Identifier;
 import pal.misc.SimpleIdGroup;
-
+*/
 public class TreeAnalysis {
 	
 	
-	
+	/*
 	
 	public static DistanceMatrix getLocalDistMat(XmfaViewerModel model, XMFAAlignment xmfa, LCB lcb){
 		long[] starts = lcb.starts;
@@ -54,6 +53,6 @@ public class TreeAnalysis {
 	}
 	
 	
-	
+	*/
 
 }
