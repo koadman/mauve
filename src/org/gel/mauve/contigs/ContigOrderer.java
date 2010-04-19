@@ -200,11 +200,42 @@ public class ContigOrderer implements MauveConstants {
 	
 	public void initGUI () {
 		reordererGUI.init();
-		if (getFiles ()) {
+		////////////////////////////////////////////////////////////
+		/*
+		 * This code was originally in getFiles(), which was only ever called here though.
+		 */
+		JFileChooser chooser = new JFileChooser ();
+		chooser.setDialogTitle("Choose location to keep output files and folders.");
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		chooser.setMultiSelectionEnabled (false);
+		boolean active = true;
+		while (active) {
+			int choice = chooser.showDialog(parent, "OK");
+			if (choice == JFileChooser.APPROVE_OPTION) {
+				directory = chooser.getSelectedFile();
+				if (getAlignDir ().exists()) {
+					JOptionPane.showMessageDialog (parent, "Directory already " +
+							"contains reorder; please choose new directory", 
+							"Chooose new directory", 
+							JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					active = false;
+				}
+				
+			}
+		}
+
+		startAlignment (true);
+		////////////////////////////////////////////////////////////
+	/*
+	 * Original code 
+	 * 	if (getFiles ()) {
 			startAlignment (true);
 		}
-		else
+		else{
+			
 			iterations = 0;
+		}*/
 	}
 	
 	/* I just moved this to the constructor. It never gets called from
@@ -233,7 +264,7 @@ public class ContigOrderer implements MauveConstants {
 	
 	/**
 	 * 
-	 * @param show_message if should pring GUI message
+	 * @param show_message if should print GUI message
 	 */
 	protected void startAlignment (boolean show_message) {
 		try{
@@ -250,25 +281,20 @@ public class ContigOrderer implements MauveConstants {
 		if (show_message) {
 			
 			JOptionPane.showMessageDialog (null, 
-					"The reordering will begin when the start button is pressed.  " +
-					"It is an iterative process,\nand may take anywhere " +
-					"from a half hour to several hours.  It may\nbe cancelled " +
-					"at any point (intermediary results will be viewable).\n" +
-					"If it is cancelled after the first reorder "
-					+ "the data will be\navailable in fasta files in the " +
-					"corresponding output directory, although\nan alignment of" +
-					" the last order will not be produced.  If the ordering" +
-					" process\n is not manually ended, it will terminate when it "
-					+ "finds an order has repeated.\nSometimes the order will" + 
-					" cycle through several possibilities; this\nindicates it" +
-					" cannot determine which of them is most likely.\n " +
-					"Alignment parameters may be changed before reorder starts or " +
-					"any time between alignments.");
+					"The reordering process will begin when the Start button is pressed."+ "\n\n"+
+
+					"Contig reordering is an iterative process, and may take anywhere from a half"+"\n"+ 
+					"hour to several hours.  It may be cancelled at any point (intermediary results"+ "\n"+
+					"will be viewable). If it is cancelled after the first reorder, the data will be"+ "\n"+
+					"available in fasta files in the corresponding output directory, although an"+ "\n"+
+					"alignment of the last order will not be produced.  If the ordering process is"+"\n"+
+					"not manually ended, it will terminate when it finds an order has repeated."+"\n"+
+					"Sometimes the order will cycle through several possibilities; this indicates it"+"\n"+
+					"cannot determine which of them is most likely. Alignment parameters may be"+ "\n"+
+					"changed before reorder starts or any time between alignments.");
 		}
 		else {
-			
 			align_frame.alignButtonActionPerformed (null);
-		//	System.err.println("DOH!");
 		}
 	}
 	/*
@@ -295,31 +321,7 @@ public class ContigOrderer implements MauveConstants {
 							JOptionPane.INFORMATION_MESSAGE);
 				}
 				else {
-					/*Object val = JOptionPane.showInputDialog (parent, "Choose input type:", 
-					"Start from:", JOptionPane.QUESTION_MESSAGE, null, new String [] {
-					SEQ_START, ALIGN_START}, SEQ_START);
-			if (val == null)
-				return false;
-			chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-			if (val == SEQ_START) {
-				return true;
-			}
-			else {
-				JOptionPane.showMessageDialog (parent, "Alignment should contain only the " +
-						"source and reference genome;\n the reference genome should be displayed " +
-						"above the genome to reorder.\n  Select the alignment file and not the " +
-						"directory containing the alignment.\n  For alignments generated from the " +
-						"contig reordering program,\n this is the file with the identical name to " +
-						"the containing directory\n (alignment followed by a number).",
-						"Start from alignment", JOptionPane.INFORMATION_MESSAGE);
-				chooser.setDialogTitle ("Select alignment file");
-				choice = chooser.showDialog (parent, "OK");
-				if (choice == JFileChooser.APPROVE_OPTION) {
-					align_start = true;
-					align_dir = chooser.getSelectedFile ();
-					reorderer.loadFile (align_dir);
-				}
-			}*/
+					
 					return true;
 				}
 			}
@@ -382,13 +384,14 @@ public class ContigOrderer implements MauveConstants {
 				count++;
 				File to = makeAlignDir ();
 				temp.renameTo (to);
-				temp = new File (to, reference.getName ());
+			/*	temp = new File (to, reference.getName ());
 				IOUtils.copyFile (reference, temp);
-				reference = temp; 
+				reference = temp; */
 				unordered = new File (to, MauveHelperFunctions.genomeNameToFasta (
 						reorderer.fix));
 				reorderer.feature_file = null;
-				startAlignment (align_start);
+				startAlignment(false);
+				//startAlignment (align_start);
 				align_start = false;
 			}
 		} catch (Exception e) {
@@ -412,10 +415,10 @@ public class ContigOrderer implements MauveConstants {
 		try {
 			File dir = makeAlignDir ();
 			dir.mkdirs ();
-			File file = new File (dir, reference.getName ());
+			/*File file = new File (dir, reference.getName ());
 			IOUtils.copyFile (reference, file);
-			reference = file;
-			file = new File (dir, unordered.getName ());
+			reference = file; */
+			File file = new File (dir, unordered.getName ());
 			IOUtils.copyFile (unordered, file);
 			unordered = file;
 		} catch (IOException e) {

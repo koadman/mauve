@@ -133,18 +133,7 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 	 * Makes a new Mauve frame that calls fixContigs once the alignment has
 	 * been set up.
 	 */
-/*	protected MauveFrame makeNewFrame () {
-		/*
-		 * FIXME TODO Figure out what this was used for originally.
-		 
-		if (active) {
-			frame = new ReordererMauveFrame (this);
-	//		frames.add (frame); 
-			return frame;
-		}
-		else
-			return super.makeNewFrame ();
-	}*/ 
+ 
 	
 	private void initMauveData () {
 		if (inverted_from_start == null)

@@ -35,37 +35,37 @@ public class ContigReordererGUI extends Mauve {
 	public static final double MIN_LENGTH_RATIO = .01;
 	protected int ref_ind = 0;
 	protected int reorder_ind = 1;
-	protected LcbViewerModel model;
-	public LcbIdComparator id_compare;
-	protected LCB dummy;
-	protected Hashtable inverters;
-	protected LinkedList<Chromosome> ordered;
-	protected Hashtable<Long,Chromosome> conflicts;
+	private LcbViewerModel model;
+	private LcbIdComparator id_compare;
+	private LCB dummy;
+	private Hashtable inverters;
+	private LinkedList<Chromosome> ordered;
+	private Hashtable<Long,Chromosome> conflicts;
 	
 	// this looks vestigial
-	protected Hashtable nexts;
-	protected LCBLeftComparator left_compare;
-	protected String input_file;
+	private Hashtable nexts;
+	private LCBLeftComparator left_compare;
+	private String input_file;
 //	protected String slast_ordered; // unused
-	protected String feature_file;
+	private String feature_file;
 	public static final String CONTIG_EXT = "_contigs.tab";
 	public static final String FEATURE_EXT = "_features.tab";
 	protected MauveFrame frame;
-	protected Hashtable<String,Object> args;
-	protected String file;
-	protected File directory;
-	protected LCB[] lcbs;
-	protected LCB [] fix_lcbs;
-	protected Genome ref;
-	protected Genome fix;
-	protected Hashtable<Genome,LCB[]>  lcb_table;
-	protected Hashtable<Genome,LCBLeftComparator> comparator_table;
-	protected Genome [] ordered_genomes;
-	protected ContigGrouper grouper;
+	private Hashtable<String,Object> args;
+	private String file;
+	private File directory;
+	private LCB[] lcbs;
+	private LCB [] fix_lcbs;
+	private Genome ref;
+	private Genome fix;
+	private Hashtable<Genome,LCB[]>  lcb_table;
+	private Hashtable<Genome,LCBLeftComparator> comparator_table;
+	private Genome [] ordered_genomes;
+	private ContigGrouper grouper;
 	protected ContigOrderer orderer;
 	protected boolean active;
-	protected HashSet inverted_from_start;
-	protected HashSet inverted_from_read;
+	private HashSet inverted_from_start;
+	private HashSet inverted_from_read;
 	
 	ContigReorderer reorderer;
 	
