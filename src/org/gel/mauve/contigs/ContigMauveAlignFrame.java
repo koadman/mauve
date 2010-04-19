@@ -142,6 +142,8 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 			orderer.reference = new File ((String) model.getElementAt (0));
 			orderer.unordered = new File ((String) model.getElementAt (1));
 			orderer.copyInputFiles ();
+			
+			
 			sequencesPanel.remove (addButton);
 			sequencesPanel.remove (removeButton);
 			first = false;

@@ -72,7 +72,7 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
     protected DefaultListModel sequenceListModel = new DefaultListModel();
     Dimension d;
 
-    Mauve mauve;
+    protected Mauve mauve;
     AlignWorker worker;
     
     public AlignFrame(Mauve mauve)
@@ -346,8 +346,14 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
             String mauve_path = System.getProperty("user.dir");
             mauve_path += "/Mauve.app/Contents/MacOS/" + name;
         	File f = new File(mauve_path);
-        	if( f.exists())
+        	if( f.exists()){
         		return mauve_path;
+        	} else {
+        		mauve_path = System.getProperty("user.dir") + "/osx/" + name;
+        		f = new File(mauve_path);
+        		if (f.exists())
+        			return mauve_path;
+        	}
     		return name;
         }
         else

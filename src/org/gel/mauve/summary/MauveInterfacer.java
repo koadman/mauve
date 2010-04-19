@@ -19,6 +19,8 @@ import org.gel.mauve.summary.output.SegmentDataProcessor;
  */
 // currently, is being allowed to instantiate gui; easier to do than not,
 // and i don't know if it will be necessary or not
+
+/* This should not be instantiated the gui. This should not be here. */
 public class MauveInterfacer extends Mauve implements MauveConstants {
 
 	public static LinkedList feat_files = new LinkedList ();

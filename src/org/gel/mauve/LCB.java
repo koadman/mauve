@@ -14,58 +14,72 @@ import org.gel.mauve.analysis.Segment;
  */
 public class LCB extends Segment {
 
-	// 'Pointers' (actually IDs) to the LCBs on the left in each sequence
+	/**
+	 *  'Pointers' (actually IDs) to the LCBs on the left in each sequence
+	 */
 	private int [] left_adjacency;
 
-	// 'Pointers' (actually IDs) to the LCBs on the right in each sequence
+	/**
+	 *  'Pointers' (actually IDs) to the LCBs on the right in each sequence
+	 */
 	private int [] right_adjacency;
 
-	// A numerical ID that can be assigned to this LCB
+	/**
+	 *  A numerical ID that can be assigned to this LCB
+	 */
 	public int id;
 
-	// The weight (or coverage) of this LCB
+	/**
+	 *  The weight (or coverage) of this LCB
+	 */
 	public long weight;
 
-	// The color of the LCB frame
+	/**
+	 *  The color of the LCB frame
+	 */
 	public Color color;
 
-	// The color of matches within the LCB
+	/**
+	 *  The color of matches within the LCB
+	 */
 	public Color match_color;
 
-	// set this to true to keep this LCB even when it's weight is too low
+	/**
+	 *  set this to true to keep this LCB even when it's weight is too low
+	 */
 	boolean keep;
 
 	public LCB (int seq_count) {
-		starts = new long [seq_count];
-		ends = new long [seq_count];
+		left = new long [seq_count];
+		right = new long [seq_count];
 		reverse = new boolean [seq_count];
 		left_adjacency = new int [seq_count];
 		right_adjacency = new int [seq_count];
 	}
 
 	public LCB (Match m, int id, int seq_count) {
-		starts = new long [seq_count];
-		ends = new long [seq_count];
+		left = new long [seq_count];
+		right = new long [seq_count];
 		reverse = new boolean [seq_count];
 		left_adjacency = new int [seq_count];
 		right_adjacency = new int [seq_count];
 		this.id = id;
 
-		m.copyArrays (this, starts, ends, reverse, seq_count);
+		m.copyArrays (this, left, right, reverse, seq_count);
 
 		// set weight to average lcb length for now...
 		long len_sum = 0;
 		for (int seqI = 0; seqI < seq_count; seqI++) {
-			len_sum += ends[seqI] - starts[seqI];
+			len_sum += right[seqI] - left[seqI];
 		}
 		weight = len_sum / seq_count;
 		keep = false;
 	}
 
 	public LCB (LCB l) {
-		int seq_count = l.starts.length;
-		starts = new long [seq_count];
-		ends = new long [seq_count];
+		int seq_count = l.left.length;
+		left = new long [seq_count];
+		right = new long [seq_count];
 		left_adjacency = new int [seq_count];
 		right_adjacency = new int [seq_count];
 		reverse = new boolean [seq_count];
@@ -75,15 +89,15 @@ public class LCB extends Segment {
 		match_color = l.match_color;
 		keep = l.keep;
 
-		System.arraycopy (l.starts, 0, starts, 0, seq_count);
-		System.arraycopy (l.ends, 0, ends, 0, seq_count);
+		System.arraycopy (l.left, 0, left, 0, seq_count);
+		System.arraycopy (l.right, 0, right, 0, seq_count);
 		System.arraycopy (l.left_adjacency, 0, left_adjacency, 0, seq_count);
 		System.arraycopy (l.right_adjacency, 0, right_adjacency, 0, seq_count);
 		System.arraycopy (l.reverse, 0, reverse, 0, seq_count);
 	}
 
 	public long midpoint (Genome g) {
-		return (ends[g.getSourceIndex ()] + starts[g.getSourceIndex ()]) / 2;
+		return (right[g.getSourceIndex ()] + left[g.getSourceIndex ()]) / 2;
 	}
 
 	public void setReference (Genome g) {
@@ -96,23 +110,23 @@ public class LCB extends Segment {
 	}
 
 	public long getLength (Genome g) {
-		return ends[g.getSourceIndex ()] - starts[g.getSourceIndex ()];
+		return right[g.getSourceIndex ()] - left[g.getSourceIndex ()];
 	}
 
 	public long getLeftEnd (Genome g) {
-		return starts[g.getSourceIndex ()];
+		return left[g.getSourceIndex ()];
 	}
 
 	public void setLeftEnd (Genome g, long leftEnd) {
-		starts[g.getSourceIndex ()] = leftEnd;
+		left[g.getSourceIndex ()] = leftEnd;
 	}
 
 	public long getRightEnd (Genome g) {
-		return ends[g.getSourceIndex ()];
+		return right[g.getSourceIndex ()];
 	}
 
 	public void setRightEnd (Genome g, long rightEnd) {
-		ends[g.getSourceIndex ()] = rightEnd;
+		right[g.getSourceIndex ()] = rightEnd;
 	}
 
 	public boolean getReverse (Genome g) {
@@ -146,10 +160,13 @@ public class LCB extends Segment {
 
 	public int multiplicity () {
 		int mult = 0;
-		for (int i = 0; i < starts.length; ++i) {
-			if (starts[i] != 0)
+		for (int i = 0; i < left.length; ++i) {
+			if (left[i] != 0)
 				mult++;
 		}
 		return mult;
 	}
+	
+
+	
 }

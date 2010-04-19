@@ -5,14 +5,14 @@ import java.util.Comparator;
 /**
  * Compares left end of LCBs.
  */
-public class LCBLeftComparator implements Comparator {
+public class LCBLeftComparator implements Comparator<LCB> {
 	private Genome g;
 
 	public LCBLeftComparator (Genome g) {
 		this.g = g;
 	}
 
-	public int compare (Object o_a, Object o_b) {
+	public int compare (LCB o_a, LCB o_b) {
 
 		LCB a = (LCB) o_a;
 		LCB b = (LCB) o_b;

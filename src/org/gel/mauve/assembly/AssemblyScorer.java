@@ -37,6 +37,25 @@ public class AssemblyScorer {
 	
 	private DCJ dcj;
 	
+	public AssemblyScorer(String[] args, boolean reorder) throws IOException{
+	//	File xmfaFile = ScoreAssembly.runPMauveAlnmt(args[0],args[1],args[2],reorder);
+	//	model = new XmfaViewerModel(xmfaFile, null);
+		refPath = args[0];
+		assPath = args[1];
+		outDirPath = args[2]; 	
+		loadInfo();
+		
+		Arrays.sort(assGaps);
+		Arrays.sort(refGaps);
+	}
+	
+	public AssemblyScorer(XmfaViewerModel model){
+		this.model = model;
+		loadInfo();
+		Arrays.sort(assGaps);
+		Arrays.sort(refGaps);
+	}
+	
 	private void loadInfo(){
 		model.setReference(model.getGenomeBySourceIndex(0));
 		
@@ -57,32 +76,13 @@ public class AssemblyScorer {
 		System.out.print("done!\n");
 		
 		System.out.print("Counting gaps...");
-		Gap[][] tmp = SnpExporter.getGaps(model, model.getXmfa());
+		Gap[][] tmp = SnpExporter.getGaps(model);
 		System.out.print("done!\n");
 		
 		refGaps = tmp[0];
 		assGaps = tmp[1];
 	}
-	
-	public AssemblyScorer(String[] args, boolean reorder) throws IOException{
-	//	File xmfaFile = ScoreAssembly.runPMauveAlnmt(args[0],args[1],args[2],reorder);
-	//	model = new XmfaViewerModel(xmfaFile, null);
-		refPath = args[0];
-		assPath = args[1];
-		outDirPath = args[2]; 	
-		loadInfo();
-		
-		Arrays.sort(assGaps);
-		Arrays.sort(refGaps);
-	}
-	
-	public AssemblyScorer(XmfaViewerModel model){
-		this.model = model;
-		loadInfo();
-		Arrays.sort(assGaps);
-		Arrays.sort(refGaps);
-	}
-	
+
 	public DCJ getDCJ(){
 		return dcj;
 	}
@@ -110,14 +110,28 @@ public class AssemblyScorer {
 	public int numBlocks(){
 		return dcj.numBlocks();
 	}
+
+	public int numLCBs(){
+		return (int) model.getLcbCount();
+	}
 	
 	public int numContigs(){
 		return model.getGenomeBySourceIndex(1).getChromosomes().size();
 	}
-	
-	public int numLCBs(){
-		return (int) model.getLcbCount();
+
+	public long numReplicons(){
+		return model.getGenomeBySourceIndex(0).getChromosomes().size();
 	}
+	
+	
+	public long numBasesAssembly(){
+		return model.getGenomeBySourceIndex(1).getLength();
+	}
+	
+	public long numBasesReference(){
+		return model.getGenomeBySourceIndex(0).getLength();
+	}
+	
 	
 	public double percentMissedBases(){
 		double totalBases = model.getGenomeBySourceIndex(0).getLength();

@@ -81,8 +81,8 @@ public class AnalysisModuleFrame extends MauveFrame implements FlatFileFeatureCo
 
 	public void fixSegmentByContigs (int sequence, Segment segment) {
 		Genome genome = model.getGenomeBySourceIndex (sequence);
-		Chromosome one = genome.getChromosomeAt (segment.starts [sequence]);
-		Chromosome end = genome.getChromosomeAt (segment.ends [sequence]);
+		Chromosome one = genome.getChromosomeAt (segment.left [sequence]);
+		Chromosome end = genome.getChromosomeAt (segment.right [sequence]);
 		if (one != end && SegmentDataProcessor.multiplicityForGenome (
 				sequence, model.getSequenceCount ()) != segment.multiplicityType ()) {
 			System.out.println ("seg: " + segment);
@@ -91,10 +91,10 @@ public class AnalysisModuleFrame extends MauveFrame implements FlatFileFeatureCo
 		//System.out.println ("original: " + segment);
 		int part = 1;
 		while (one != end) {
-			Segment piece = new Segment (segment.starts.length, true);
-			piece.starts [sequence] = segment.starts [sequence];
-			piece.ends [sequence] = one.getEnd ();
-			segment.starts [sequence] = one.getEnd () + 1;
+			Segment piece = new Segment (segment.left.length, true);
+			piece.left [sequence] = segment.left [sequence];
+			piece.right [sequence] = one.getEnd ();
+			segment.left [sequence] = one.getEnd () + 1;
 			piece.reverse [sequence] = segment.reverse [sequence];
 			if (segment.prevs [sequence] != null)
 				segment.prevs [sequence].nexts [sequence] = piece;

@@ -23,12 +23,20 @@ public class ContigInverter implements MauveConstants {
 	protected Hashtable befores;
 	protected Hashtable afters;
 	
+	/**
+	 * Does all the work of reordering contigs
+	 * 
+	 * @param mod the model of the alignment to reorder.
+	 * @param reorder
+	 */
 	public ContigInverter (LcbViewerModel mod, ContigReorderer reorder) {
+//		System.err.println("AJT0403 - ContigInverter(LcbViewerModel, ContigReorderer) called.");
 		init (mod, reorder);
 		reorderContigs ();
 	}
 	
 	public ContigInverter (LcbViewerModel mod, ContigReorderer reorder, String file) {
+//		System.err.println("AJT0403 - ContigInverter(LcbViewerModel, ContigReorderer, String) called.");
 		System.out.println ("reading order file");
 		init (mod, reorder);
 		central.readKeepers (file);
@@ -46,8 +54,10 @@ public class ContigInverter implements MauveConstants {
 		groups = new HashSet ();
 		grouper = central.grouper;
 	}
-	
-	public void placeUntouched () {
+	/**
+	 * Never called in original implementation.
+	 */
+	private void placeUntouched () {
 		long multiplicity = 0;
 		for (int i = 0; i < model.getSequenceCount (); i++) {
 			multiplicity <<= 1;
@@ -87,8 +97,12 @@ public class ContigInverter implements MauveConstants {
 		}
 	}
 	
+	
 	//method no longer necessary, does as ordering
-	public void invertContigs () {
+	/**
+	 * Never called in original implementation.
+	 */
+	private void invertContigs () {
 		LCB [] ordered_lcbs = central.fix_lcbs;
 		for (int i = 0; i < ordered_lcbs.length; i++) {
 			if (ordered_lcbs [i].getLeftEnd (central.ref) != 0 && 
@@ -111,13 +125,15 @@ public class ContigInverter implements MauveConstants {
 		}
 		System.out.println ("inverters: " + central.inverters.size());
 	}
-	
-	public boolean contigReversed (Chromosome contig, LCB lcb) {
+	/**
+	 * Never called in original implementation.
+	 */
+	private boolean contigReversed (Chromosome contig, LCB lcb) {
 		ContigGrouper.ContigGroup group = grouper.getContigGroup (lcb);
 		return group.isReversed ();
 	}
 	
-	public void reorderContigs () {
+	private void reorderContigs () {
 		int lcb_index = 0;
 		for (; lcb_index < central.lcbs.length; lcb_index++) {
 			if (central.lcbs [lcb_index].getLeftEnd(central.fix) != 0) {
@@ -130,7 +146,7 @@ public class ContigInverter implements MauveConstants {
 		matchEdges ();
 	}
 
-	public void matchEdges () {
+	private void matchEdges () {
 		System.out.println ("matching edges");
 		HashSet l_matched = new HashSet ();
 		HashSet r_matched = new HashSet ();
@@ -299,13 +315,13 @@ public class ContigInverter implements MauveConstants {
 			group.setReversed (reverse);
 	}
 	
-	public void removeContigGroup (ContigGrouper.ContigGroup group) {
+	private void removeContigGroup (ContigGrouper.ContigGroup group) {
 		Iterator itty = group.getNonEmpty ().iterator ();
 		while (itty.hasNext ())
 			central.ordered.remove (itty.next ());
 	}
 	
-	public void placeConflicts () {
+	private void placeConflicts () {
 		System.out.println ("placing conflicts");
 		int [] placements = new int [central.fix.getChromosomes ().size () + 1];
 		LinkedList [] cur_lcbs = new LinkedList [placements.length];
@@ -360,7 +376,7 @@ public class ContigInverter implements MauveConstants {
 		}
 	}
 	
-	public void putNextTo (ContigGrouper.ContigGroup one, ContigGrouper.ContigGroup two, boolean after) {
+	private void putNextTo (ContigGrouper.ContigGroup one, ContigGrouper.ContigGroup two, boolean after) {
 		int ind = -1;
 		boolean ordered = true;
 		if (one != null) {
@@ -378,7 +394,7 @@ public class ContigInverter implements MauveConstants {
 		addContigGroup (after ? two : one, true, ind);
 	}
 	
-	public void orderContigGroup (int lcb_index) {
+	private void orderContigGroup (int lcb_index) {
 		ContigGrouper.ContigGroup group = grouper.getContigGroup (central.lcbs [lcb_index]);
 		if (!groups.contains (group.toString ())) {
 			boolean ok = locationUnique (group, lcb_index);
@@ -391,7 +407,7 @@ public class ContigInverter implements MauveConstants {
 		}
 	}
 	
-	public void addContigGroup (ContigGrouper.ContigGroup group, boolean in_order, int index) {
+	private void addContigGroup (ContigGrouper.ContigGroup group, boolean in_order, int index) {
 		LinkedList contigs = group.getNonEmpty ();
 		groups.add (group.toString ());
 		boolean reversed = group.isReversed();
@@ -420,7 +436,7 @@ public class ContigInverter implements MauveConstants {
 		}
 	}
 	
-	public boolean locationUnique (ContigGrouper.ContigGroup group, int lcb_index) {
+	private boolean locationUnique (ContigGrouper.ContigGroup group, int lcb_index) {
 		LCB current = group.first;
 		boolean ok = true;
 		HashSet grouped_lcbs = group.getLCBs ();

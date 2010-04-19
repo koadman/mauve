@@ -38,7 +38,14 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 					two.getMin (), two.getMax ());
 		}
 	};
-
+	
+	/**
+	 * Returns a genome name with ".fas" appended to it
+	 * if it is not already there.
+	 * 
+	 * @param genome the genome whose name to convert
+	 * @return <code>genome.getDisplayName() + .fas</code>
+	 */
 	public static String genomeNameToFasta (Genome genome) {
 		String file = genome.getDisplayName ();
 		if (file.toLowerCase ().indexOf (".fas") == -1) {
@@ -107,7 +114,7 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 	}
 	
 	public static String getReadableMultiplicity (Segment segment) {
-		return getReadableMultiplicity (segment.multiplicityType (), segment.starts.length);
+		return getReadableMultiplicity (segment.multiplicityType (), segment.left.length);
 	}
 	
 	public static String getReadableMultiplicity (long multiplicity, int count) {

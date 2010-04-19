@@ -2,18 +2,26 @@ package org.gel.mauve.analysis;
 
 import java.io.Serializable;
 
+import java.util.Comparator;
+
 import org.gel.mauve.Match;
 
 public class Segment implements Serializable {
 	static final long serialVersionUID = 1;
 	
-	// The start coordinate of this match in each sequence
-	public long [] starts;
+	/**
+	 *  The start coordinate of this match in each sequence
+	 */
+	public long [] left;
 
-	// The ends of this match in each sequence
-	public long [] ends;
-
-	// The direction of each match. false is forward, true is reverse
+	/**
+	 *  The ends of this match in each sequence
+	 */
+	public long [] right;
+	
+	/**
+	 * The direction of each match. false is forward, true is reverse
+	 */
 	public boolean [] reverse;
 
 	public Segment [] prevs;
@@ -30,14 +38,14 @@ public class Segment implements Serializable {
 	protected long mult_type;
 
 	public Segment (long [] l, long [] r, boolean [] c) {
-		starts = l;
-		ends = r;
+		left = l;
+		right = r;
 		reverse = c;
 	}
 
 	public Segment (int count, boolean links) {
-		starts = new long [count];
-		ends = new long [count];
+		left = new long [count];
+		right = new long [count];
 		reverse = new boolean [count];
 		if (links) {
 			prevs = new Segment [count];
@@ -62,9 +70,9 @@ public class Segment implements Serializable {
 	public long multiplicityType () {
 		if (mult_type == 0) {
 			// determine the match's multiplicity type.
-			for (int seqI = 0; seqI < starts.length; seqI++) {
+			for (int seqI = 0; seqI < left.length; seqI++) {
 				mult_type <<= 1;
-				if (starts[seqI] != Match.NO_MATCH)
+				if (left[seqI] != Match.NO_MATCH)
 					mult_type |= 1;
 			}
 		}
@@ -72,12 +80,12 @@ public class Segment implements Serializable {
 	}
 
 	public void append (Segment add, boolean remove) {
-		for (int i = 0; i < starts.length; i++) {
+		for (int i = 0; i < left.length; i++) {
 			if (prevs[i] == add)
-				starts[i] = add.starts[i];
+				left[i] = add.left[i];
 			else if (nexts[i] == add)
-				ends[i] = add.ends[i];
-			else if (starts[i] != Match.NO_MATCH) {
+				right[i] = add.right[i];
+			else if (left[i] != Match.NO_MATCH) {
 				System.out.println ("Tried to add in inconsistent order: "
 						+ add + " " + this);
 			}
@@ -95,14 +103,14 @@ public class Segment implements Serializable {
 	/** format the ungapped local alignment coordinates into a string */
 	public String toString () {
 		String rval = new String ();
-		for (int seqI = 0; seqI < starts.length; seqI++) {
+		for (int seqI = 0; seqI < left.length; seqI++) {
 			rval += "<";
-			if (starts[seqI] != Match.NO_MATCH) {
+			if (left[seqI] != Match.NO_MATCH) {
 				if (reverse != null && reverse[seqI])
 					rval += "-";
-				rval += starts[seqI];
+				rval += left[seqI];
 				rval += ",";
-				rval += ends[seqI];
+				rval += right[seqI];
 			}
 			rval += "> ";
 		}
@@ -110,24 +118,24 @@ public class Segment implements Serializable {
 	}
 
 	public long [] getSegmentLengths () {
-		long [] sizes = new long [starts.length];
+		long [] sizes = new long [left.length];
 		for (int i = 0; i < sizes.length; i++)
 			sizes[i] = getSegmentLength (i);
 		return sizes;
 	}
 
 	public long getSegmentLength (int sequence) {
-		if (starts[sequence] == 0)
+		if (left[sequence] == 0)
 			return 0;
 		else
-			return ends[sequence] - starts[sequence] + 1;
+			return right[sequence] - left[sequence] + 1;
 	}
 
 	public double getAvgSegmentLength () {
 		long [] sizes = getSegmentLengths ();
 		long total = 0;
 		int present_in = 0;
-		for (int i = 0; i < starts.length; i++) {
+		for (int i = 0; i < left.length; i++) {
 			if (sizes[i] != 0) {
 				total += sizes[i];
 				present_in++;
@@ -135,5 +143,27 @@ public class Segment implements Serializable {
 		}
 		return ((double) total) / present_in;
 	}
+	
+	public static Comparator<Segment> getGenPositionComparator(int genSrcIdx){
+		return new GenomePositionComparator(genSrcIdx);
+	}
+	
+	private static class GenomePositionComparator implements Comparator<Segment> {
+		private int src;
+		
+		public GenomePositionComparator(int genSrcIdx){
+			src = genSrcIdx;
+		}
+		
+		public int compare(Segment a, Segment b){
+			long leftA = Math.abs(a.reverse[src]? a.right[src]:a.left[src]);
+			long leftB = Math.abs(b.reverse[src]? b.right[src]:b.left[src]);
+			return (int) (leftA - leftB);
+		}
+	}
+	
+	
+
 
 }
+

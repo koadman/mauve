@@ -134,7 +134,7 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 	public boolean shouldPrintRow (int row) {
 		Location loci = cur_feat.getLocation ();
 		boolean print = false;
-		while ((badType (cur_feat) || loci.getMax () <= current.starts [seq_index]) &&
+		while ((badType (cur_feat) || loci.getMax () <= current.left [seq_index]) &&
 				iterator.hasNext ()) {
 			//cur_feat = (Feature) iterator.next ();
 			performComplexIteration ();
@@ -144,12 +144,12 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 				loci = null;
 		}
 		if (loci != null && shouldPrintSegment (row) && loci.getMin () < 
-				current.ends [seq_index]) {
+				current.right [seq_index]) {
 			if (cur_feat instanceof StrandedFeature) {
 				cur_percent = MathUtils.percentContained (loci.getMin (), loci.getMax (), 
-						current.starts [seq_index], current.ends [seq_index]);
+						current.left [seq_index], current.right [seq_index]);
 				if (!(cur_percent >= minimum_percent)) {
-					if (loci.getMax () < current.ends [seq_index] || 
+					if (loci.getMax () < current.right [seq_index] || 
 							current.nexts [seq_index] == Segment.END) {
 						performComplexIteration ();
 					}
@@ -169,7 +169,7 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 	protected void performComplexIteration () {
 		cur_feat = iterator.hasNext () ? (Feature) iterator.next () : null;
 		while (cur_feat != null && cur_feat.getLocation ().getMin () < 
-				current.starts [seq_index] && current.prevs [seq_index] != Segment.END)
+				current.left [seq_index] && current.prevs [seq_index] != Segment.END)
 			current = current.prevs [seq_index];
 	}
 	
@@ -184,7 +184,7 @@ public class IslandGeneFeatureWriter extends IslandFeatureWriter {
 		if (cur_feat == null)
 			return false;
 		Location loci = cur_feat.getLocation ();
-		if (loci.getMin () >= current.ends [seq_index] || !shouldPrintSegment (row_number))
+		if (loci.getMin () >= current.right [seq_index] || !shouldPrintSegment (row_number))
 			return super.moreRowsToPrint ();
 		else
 			return true;

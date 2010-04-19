@@ -2,6 +2,9 @@ package org.gel.mauve.analysis;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Vector;
 
 import org.gel.mauve.Genome;
@@ -205,7 +208,8 @@ public class SnpExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Gap[][] getGaps(XmfaViewerModel model, XMFAAlignment xmfa){
+	public static Gap[][] getGaps(XmfaViewerModel model){
+		XMFAAlignment xmfa = model.getXmfa();
 		int iv_count = (int)model.getLcbCount();
 		int seq_count = model.getSequenceCount();
 
@@ -214,11 +218,16 @@ public class SnpExporter {
 			gaps[i] = new Vector();
 		
 		LCB[] lcbs = xmfa.getSourceLcbList();
+		LCB[] tmpLCBs = new LCB[lcbs.length];
+		System.arraycopy(lcbs, 0, tmpLCBs, 0, lcbs.length);
+		
 		
 		Genome[] genomes = (Genome[]) model.getGenomes().toArray(new Genome[seq_count]); 
 		
 		for (int genI = 0; genI < genomes.length; genI++){
 			Genome g = genomes[genI];
+
+			// First we need to get intra-LCB gaps
 			for (int lcbI = 0; lcbI < lcbs.length; lcbI++){
 				
 				int lcbLen = (int) xmfa.getLcbLength(lcbI);
@@ -251,12 +260,68 @@ public class SnpExporter {
 						colI++;
 				}	
 			}
+			
+			// Now we need to get inter-LCB gaps
+			
+			// sort based on left-end positions
+			Arrays.sort(tmpLCBs, Segment.getGenPositionComparator(genI));
+			
+			for (int lcbI = 0; lcbI < tmpLCBs.length-1; lcbI++){
+				LCB lcb1 = tmpLCBs[lcbI];
+				LCB lcb2 = tmpLCBs[lcbI+1];
+				long dist = lcb2.getLeftEnd(genomes[genI])-lcb1.getRightEnd(genomes[genI])-1;
+				if (dist > 0){ // there's gaps in other genomes
+					
+					for (int genJ = 0; genJ < genomes.length; genJ++){
+						if (genJ == genI) 
+							continue; 
+						else {
+							gaps[genJ].add(new Gap(genJ, -1,
+									lcb1.getRightEnd(genomes[genJ]), dist, model));
+						}
+					}
+				}
+			}
+			
+			
+			
 		}
+		
 		Gap[][] ret = new Gap[gaps.length][];
 		for (int i = 0; i < ret.length; i++){
+			mergeAdjacentGaps(gaps[i]);
 			ret[i] = (Gap[]) gaps[i].toArray(new Gap[gaps[i].size()]);
 		}
 		return ret;
+	}
+	
+	/**
+	 * Merges gaps that begin at the same position.
+	 * If two Gaps begin at the same position,
+	 * they are merged to create a new Gap object,
+	 * removed, and replaced with the resulting new Gap.
+	 * 
+	 * @param v list of gaps to merge (if necessary)
+	 */
+	private static void mergeAdjacentGaps(Vector<Gap> v){
+		// sort Gaps by their position in alignment
+		Collections.sort(v, Gap.getAlnmtPosComparator());
+		
+		int gapI = 0;
+		while (gapI < v.size()-1){
+			if (v.get(gapI).getPosition() == v.get(gapI+1).getPosition()){
+				System.err.print("\nMerging gap of size " + v.get(gapI).getLength() +
+						" with a gap of size " + v.get(gapI+1).getLength() + ". ");
+				
+				Gap merge = Gap.mergeGaps(v.get(gapI), v.get(gapI+1));
+				System.err.println("Created gap of size " + merge.getLength());
+				v.remove(gapI);
+				v.remove(gapI);
+				v.insertElementAt(merge, gapI);
+			} else {
+				gapI++;
+			}
+		}
 	}
 	
 	/**

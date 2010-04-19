@@ -33,8 +33,8 @@ public class Mauve {
 	static Properties props = new Properties ();
 	static String about_message = "";
 
-	protected MauveFrame availableFrame;
-	protected Vector frames; // List of open frames
+	private MauveFrame availableFrame;
+	protected Vector<MauveFrame> frames; // List of open frames
 	protected boolean check_updates = true;
 
 	protected Mauve () {
@@ -60,6 +60,10 @@ public class Mauve {
 				}
 			});
 		}
+	}
+	
+	public MauveFrame getFrame(){
+		return availableFrame;
 	}
 
 	public void init (String filename) {
@@ -219,16 +223,16 @@ public class Mauve {
 	        }
         }
     }
-
+	
 	private boolean hasRequiredJVM () {
 		String jvm_version = System.getProperty ("java.version");
 		int minor_version = Integer.parseInt (jvm_version.substring (2, 3));
 		if (jvm_version.charAt (0) == '1') {
-			if (minor_version < 4) {
+			if (minor_version < 5) {
 				MyConsole
 						.err ()
 						.println (
-								"Sorry, Mauve requires at least Java version 1.4 to operate correctly");
+								"Sorry, Mauve requires at least Java version 1.5 to operate correctly");
 				return false;
 			}
 		}

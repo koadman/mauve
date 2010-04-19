@@ -92,11 +92,11 @@ public class ProcessBackboneFile implements MauveConstants {
 	protected void storeRow () {
 		Segment segment = new Segment (count, true);
 		for (int i = 0, j = 0; j < count; i++, j++) {
-			segment.starts[j] = Long.parseLong (current_row[i]);
-			segment.ends[j] = Long.parseLong (current_row[++i]);
-			if (segment.starts[j] < 0) {
-				segment.starts[j] *= -1;
-				segment.ends[j] *= -1;
+			segment.left[j] = Long.parseLong (current_row[i]);
+			segment.right[j] = Long.parseLong (current_row[++i]);
+			if (segment.left[j] < 0) {
+				segment.left[j] *= -1;
+				segment.right[j] *= -1;
 				segment.reverse[j] = true;
 			}
 		}

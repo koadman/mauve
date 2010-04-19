@@ -53,6 +53,7 @@ import org.gel.mauve.SeqFeatureData;
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.analysis.SnpExporter;
 import org.gel.mauve.color.ColorMenu;
+import org.gel.mauve.contigs.ContigMauveAlignFrame;
 import org.gel.mauve.contigs.ContigOrderer;
 import org.gel.mauve.gui.dnd.FileDrop;
 import org.gel.mauve.gui.sequence.FeatureFilterer;
@@ -521,6 +522,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             if (source == jMenuToolsOrderContigs || ae.getActionCommand().equals(
             		jMenuToolsOrderContigs.getText()))
             	new ContigOrderer (null, mauve.frames);
+            	// GUIforReorderer.launchWindow(this);
         }
     }
 

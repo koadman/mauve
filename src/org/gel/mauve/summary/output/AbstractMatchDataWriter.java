@@ -132,13 +132,13 @@ abstract public class AbstractMatchDataWriter extends AbstractTabbedDataWriter
 		int divisor = contig_handler instanceof AbstractMatchDataWriter ? 2 : 3;
 		int seq = column / divisor;
 		if (column % divisor == 2)
-			return contig_handler.getContigName (seq, current.starts [seq]);
+			return contig_handler.getContigName (seq, current.left [seq]);
 		else if (column % divisor == 0) {
-			value = current.starts[seq];
+			value = current.left[seq];
 
 		}
 		else {
-			value = current.ends[seq];
+			value = current.right[seq];
 		}
 		value = adjustForContigs (seq, value);
 		if (current.reverse [seq])

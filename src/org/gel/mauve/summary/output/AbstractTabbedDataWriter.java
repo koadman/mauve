@@ -151,7 +151,7 @@ public abstract class AbstractTabbedDataWriter {
 	 * 
 	 * @param args
 	 *            Contains objects necessary to successfully initialize a
-	 *            subclass
+	 *            subclass. NOTE: can be null value
 	 */
 	protected void initSubClassParticulars (Hashtable args) {
 		setColumnHeaders (setColumnHeaders ());

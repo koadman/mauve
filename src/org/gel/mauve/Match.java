@@ -30,18 +30,18 @@ public class Match extends Segment //implements Serializable
 
     public Match(int sequenceCount)
     {
-        starts = new long[sequenceCount];
-        ends = new long[sequenceCount];
+        left = new long[sequenceCount];
+        right = new long[sequenceCount];
         reverse = new boolean[sequenceCount];
     }
 
     public Match(Match m)
     {
-        starts = new long[m.starts.length];
-        ends = new long[m.ends.length];
+        left = new long[m.left.length];
+        right = new long[m.right.length];
         reverse = new boolean[m.reverse.length];
-        System.arraycopy(m.starts, 0, starts, 0, starts.length);
-        System.arraycopy(m.ends, 0, ends, 0, ends.length);
+        System.arraycopy(m.left, 0, left, 0, left.length);
+        System.arraycopy(m.right, 0, right, 0, right.length);
         System.arraycopy(m.reverse, 0, reverse, 0, reverse.length);
 
         color = m.color;
@@ -50,7 +50,7 @@ public class Match extends Segment //implements Serializable
 
     public long getStart(Genome g)
     {
-        return starts[g.getSourceIndex()]; 
+        return left[g.getSourceIndex()]; 
     }
     
     /**
@@ -60,12 +60,12 @@ public class Match extends Segment //implements Serializable
      */
     public long getStart(int sourceIndex)
     {
-        return starts[sourceIndex];
+        return left[sourceIndex];
     }
     
     public void setStart(Genome g, long start)
     {
-        starts[g.getSourceIndex()] = start;
+        left[g.getSourceIndex()] = start;
     }
     
     /**
@@ -74,12 +74,12 @@ public class Match extends Segment //implements Serializable
      * @param start
      */public void setStart(int sourceIndex, long start)
     {
-        starts[sourceIndex] = start;
+        left[sourceIndex] = start;
     }
     
     public long getLength(Genome g)
     {
-        return ends[g.getSourceIndex()];
+        return right[g.getSourceIndex()];
     }
     
     /**
@@ -89,12 +89,12 @@ public class Match extends Segment //implements Serializable
      */
     public long getLength(int sourceIndex)
     {
-        return ends[sourceIndex];
+        return right[sourceIndex];
     }
     
     public void setLength(Genome g, long length)
     {
-        ends[g.getSourceIndex()] = length;
+        right[g.getSourceIndex()] = length;
     }
     
     /**
@@ -104,7 +104,7 @@ public class Match extends Segment //implements Serializable
      */
     public void setLength(int sourceIndex, long length)
     {
-        ends[sourceIndex] = length;
+        right[sourceIndex] = length;
     }
     
     public boolean getReverse(Genome g)
@@ -143,15 +143,15 @@ public class Match extends Segment //implements Serializable
         int seqI = 0;
         long ref;
         long g_offset = 0;
-        for (; seqI < starts.length; seqI++)
+        for (; seqI < left.length; seqI++)
         {
-            if (starts[seqI] != NO_MATCH)
+            if (left[seqI] != NO_MATCH)
                 break;
         }
-        ref = starts[seqI];
-        for (; seqI < starts.length; seqI++)
+        ref = left[seqI];
+        for (; seqI < left.length; seqI++)
         {
-            long cur_start = starts[seqI];
+            long cur_start = left[seqI];
             if (reverse[seqI])
                 cur_start = -cur_start;
             g_offset += ref - cur_start;
@@ -162,8 +162,8 @@ public class Match extends Segment //implements Serializable
 
     public void copyArrays(LCB lcb, long[] starts, long[] lengths, boolean[] reverse, int seq_count)
     {
-        System.arraycopy(this.starts, 0, starts, 0, seq_count);
-        System.arraycopy(this.ends, 0, lengths, 0, seq_count);
+        System.arraycopy(this.left, 0, starts, 0, seq_count);
+        System.arraycopy(this.right, 0, lengths, 0, seq_count);
         System.arraycopy(this.reverse, 0, reverse, 0, seq_count);
     }
 

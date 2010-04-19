@@ -87,7 +87,7 @@ public class AlignedSequenceWriter implements ModuleListener {
 	}
 	
 	public boolean useSegment (Segment seg, int index) {
-		return seg.starts [index] != 0 && seg.starts [genome_ind] != 0;
+		return seg.left [index] != 0 && seg.left [genome_ind] != 0;
 	}
 	
 	/**

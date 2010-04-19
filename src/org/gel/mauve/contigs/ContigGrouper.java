@@ -291,10 +291,10 @@ public class ContigGrouper implements MauveConstants {
 				//System.out.println ("got seg");
 				long total = 0;
 				do {
-					if (seg != null && current.getEnd() > seg.starts [genome_ind]) {
+					if (seg != null && current.getEnd() > seg.left [genome_ind]) {
 						long match_length = seg.getSegmentLength (genome_ind);
-						long end = Math.min (current.getEnd (), seg.ends [genome_ind]);
-						start = Math.max (seg.starts [genome_ind], current.getStart ());
+						long end = Math.min (current.getEnd (), seg.right [genome_ind]);
+						start = Math.max (seg.left [genome_ind], current.getStart ());
 						long length = end - start;
 						if (((length / (double) current.getLength() > .51) ||
 								(length / (double) match_length) > min_percent) && 
@@ -311,7 +311,7 @@ public class ContigGrouper implements MauveConstants {
 						}*/
 						//System.out.println ("in middle: " + seg);
 						if (!(seg.getRightEnd (fix) > current.getEnd ())) {
-							seg = bb.getNextBackbone (fix, seg.ends [genome_ind] + 1);
+							seg = bb.getNextBackbone (fix, seg.right [genome_ind] + 1);
 							//System.out.println ("new seg: " + seg);
 							if (seg == null || seg.getLeftEnd (fix) > lcb.getRightEnd (fix)) {
 								/*if ((onlyLCBOnContig (lcb, current) || onSingleContig (lcb))
@@ -336,7 +336,7 @@ public class ContigGrouper implements MauveConstants {
 							break;
 						}
 					}
-				} while (seg != null && seg.starts [genome_ind] < current.getEnd ());
+				} while (seg != null && seg.left [genome_ind] < current.getEnd ());
 				current = fix.getChromosomeAt(current.getEnd() + 1);
 			} while (current != null && current.getStart () < end.getEnd ());
 			if (contigs.size() < 1)

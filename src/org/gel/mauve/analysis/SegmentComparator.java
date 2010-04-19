@@ -39,13 +39,13 @@ public class SegmentComparator implements Comparator {
 			if (rval == 0 && i > BY_MULTIPLICITY) {
 				if (o1 instanceof Segment) {
 					seg = (Segment) o1;
-					one = seg.starts [i];
+					one = seg.left [i];
 				}
 				else
 					one = ((Long) o1).longValue ();
 				if (o2 instanceof Segment) {
 					seg = (Segment) o2;
-					two = seg.starts [i];
+					two = seg.left [i];
 				}
 				else
 					two = ((Long) o2).longValue ();
@@ -56,7 +56,7 @@ public class SegmentComparator implements Comparator {
 			else
 				ret = rval == 0 ? 0 : 1;
 			i++;
-			if (seg != null && i == seg.starts.length)
+			if (seg != null && i == seg.left.length)
 				i = 0;
 		} while (multiple && ret == 0 && i != index);
 		return ret;

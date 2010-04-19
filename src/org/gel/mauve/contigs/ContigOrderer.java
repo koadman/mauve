@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Vector;
+import java.util.prefs.BackingStoreException;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -13,6 +14,7 @@ import javax.swing.JOptionPane;
 import org.gel.air.util.IOUtils;
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MauveHelperFunctions;
+import org.gel.mauve.ModelBuilder;
 import org.gel.mauve.MyConsole;
 import org.gel.mauve.XMFAAlignment;
 import org.gel.mauve.XmfaViewerModel;
@@ -28,8 +30,9 @@ public class ContigOrderer implements MauveConstants {
 	protected int count = 1;
 	protected int start = 0;
 	protected ContigReorderer reorderer;
+	protected ContigReordererGUI reordererGUI;
 	protected MauveFrame parent;
-	protected ContigMauveAlignFrame align;
+	protected ContigMauveAlignFrame align_frame;
 	protected int iterations;
 	public static final int DEFAULT_ITERATIONS = 2;
 	public static final String ALIGN_START = "Start from alignment file.";
@@ -40,6 +43,8 @@ public class ContigOrderer implements MauveConstants {
 	protected static final String OUTPUT_DIR = "-output";
 	protected static final String REF_FILE = "-ref";
 	protected static final String DRAFT_FILE = "-draft";
+	
+	//private ContigMauveDataModel data;
 
 	private static final String USAGE = 
 		"Usage: java -cp path_to_jar/Mauve.jar org.gel.mauve.ContigOrderer [options]\n" +
@@ -58,18 +63,55 @@ public class ContigOrderer implements MauveConstants {
 	 * @param gui true if instantiate GUI, false otherwise
 	 */
 	public ContigOrderer (String [] args, Vector frames, boolean gui) {
-		init (args, frames, gui);
+		
+		// init (args, frames, gui);
+		
+		
+////////// The code below came from init(String[],Vector,boolean)
+		this.gui = gui;
+		past_orders = new Vector ();
+		iterations = 25;//DEFAULT_ITERATIONS;
+		if (args != null && args.length > 0) {
+			try {
+				iterations = Integer.parseInt (args [0]);
+			} catch (NumberFormatException e) {
+			}
+		}
+		reorderer = new ContigReorderer (this /*, frames*/);
+//		MyConsole.setUseSwing (gui);
+//		MyConsole.showConsole ();
+		if (gui) {
+			reordererGUI = new ContigReordererGUI(reorderer, frames);
+			align_frame = new ContigMauveAlignFrame (reordererGUI, this);
+		} else {
+		//	data = new ContigMauveDataModel();
+		}
+///////////////////////////////////////////////////////////////////
+		
 		if (gui)
 			initGUI ();
-		else
-			initParams (args);
+		else {
+			initParamsNoGUI (args);
+		}
 	}
 	
+	/**
+	 * Creates ContigOrderer with a GUI.
+	 * 
+	 * @param args
+	 * @param frames
+	 */
 	public ContigOrderer (String [] args, Vector frames) {
 		this (args, frames, true);
 	}
 	
-	public void initParams (String [] args) {
+	/**
+	 * This is what Anna has written to run the Reoderer without the GUI components.
+	 * Too bad it actually instantiates the GUI components.
+	 * 
+	 * @param args
+	 */
+	public void initParamsNoGUI (String[] args) {
 		Hashtable <String, String> pairs = IOUtils.parseDashPairedArgs(args);
 		String error = null;
 		try {
@@ -85,13 +127,18 @@ public class ContigOrderer implements MauveConstants {
 			else
 				error = "Output dir not given";
 			if (pairs.containsKey(REF_FILE)) {
-				System.out.println ("ref file: " + align);
-				align.addSequence(pairs.get(REF_FILE));
+				System.err.println("Setting reference file: " + pairs.get(REF_FILE));
+				if (gui)
+					align_frame.addSequence(pairs.get(REF_FILE));
+			//	data.setRefPath(pairs.get(REF_FILE));
 			}
 			else
 				error = "no reference file given";
 			if (pairs.containsKey(DRAFT_FILE)) {
-				align.addSequence(pairs.get(DRAFT_FILE));
+				System.err.println("Setting draft file: " + pairs.get(DRAFT_FILE));
+				if (gui)
+					align_frame.addSequence(pairs.get(DRAFT_FILE));
+			//	data.setDraftPath(pairs.get(DRAFT_FILE));
 			}
 			else
 				error = "no draft file given";
@@ -99,16 +146,18 @@ public class ContigOrderer implements MauveConstants {
 			e.printStackTrace();
 			error = e.getMessage();
 		}
-		if (error != null) {
-			JOptionPane.showMessageDialog(null, error);
+		if (error != null) { 
+			System.err.println(error);
+		//	JOptionPane.showMessageDialog(null, error);
 			System.exit(0);
-		}
+		} // if no errors, start the alignment
 		else {
-			align.setArgs (pairs);
+		//	System.err.println("Calling startAlignment()");
 			startAlignment (false);
 		}
 	}
-	// FIXME
+	
+/*	// FIXME
 	private void initParamsNoGUI(String[] args){
 		Hashtable <String, String> pairs = IOUtils.parseDashPairedArgs(args);
 		String error = null;
@@ -130,7 +179,7 @@ public class ContigOrderer implements MauveConstants {
 			else
 				error = "no reference file given";
 			if (pairs.containsKey(DRAFT_FILE)) {
-				align.addSequence(pairs.get(DRAFT_FILE));
+				align_frame.addSequence(pairs.get(DRAFT_FILE));
 			}
 			else
 				error = "no draft file given";
@@ -143,13 +192,14 @@ public class ContigOrderer implements MauveConstants {
 			System.exit(0);
 		}
 		else {
-			align.setArgs (pairs);
+			align_frame.setArgs (pairs);
 			startAlignment (false);
 		}
 	}
+*/
 	
 	public void initGUI () {
-		reorderer.init();
+		reordererGUI.init();
 		if (getFiles ()) {
 			startAlignment (true);
 		}
@@ -157,6 +207,8 @@ public class ContigOrderer implements MauveConstants {
 			iterations = 0;
 	}
 	
+	/* I just moved this to the constructor. It never gets called from
+	 * anywhere else anyway.
 	public void init (String [] args, Vector frames, boolean gui) {
 		this.gui = gui;
 		past_orders = new Vector ();
@@ -167,18 +219,36 @@ public class ContigOrderer implements MauveConstants {
 			} catch (NumberFormatException e) {
 			}
 		}
-		reorderer = new ContigReorderer (this, frames);
-		MyConsole.setUseSwing (gui);
-		MyConsole.showConsole ();
-		reorderer.ref_ind = 0;
-		reorderer.reorder_ind = 1;
-		align = new ContigMauveAlignFrame (reorderer, this);
+		reorderer = new ContigReorderer (this /*, frames);
+//		MyConsole.setUseSwing (gui);
+//		MyConsole.showConsole ();
+		if (gui) {
+			align_frame = new ContigMauveAlignFrame (new ContigReordererGUI(reorderer), this);
+		} else {
+			data = new ContigMauveDataModel();
+		}
 	}
+	*/
 	
+	
+	/**
+	 * 
+	 * @param show_message if should pring GUI message
+	 */
 	protected void startAlignment (boolean show_message) {
-		align.displayFileInput ();
-		align.setVisible(gui);
+		try{
+		//	System.err.println("AJT0403: Clearing alignment cache.");
+    		ModelBuilder.clearDataCache();
+    	}catch(BackingStoreException bse)
+    	{
+    		bse.printStackTrace();
+    	}
+		if (gui){
+			align_frame.displayFileInput ();
+			align_frame.setVisible(gui);
+		}
 		if (show_message) {
+			
 			JOptionPane.showMessageDialog (null, 
 					"The reordering will begin when the start button is pressed.  " +
 					"It is an iterative process,\nand may take anywhere " +
@@ -195,10 +265,19 @@ public class ContigOrderer implements MauveConstants {
 					"Alignment parameters may be changed before reorder starts or " +
 					"any time between alignments.");
 		}
-		else
-			align.alignButtonActionPerformed (null);
+		else {
+			
+			align_frame.alignButtonActionPerformed (null);
+		//	System.err.println("DOH!");
+		}
 	}
-	
+	/*
+	public void updateSrcFiles(File reference, File unordered){
+		this.unordered = unordered;
+		this.reference = reference;
+		copyInputFiles();
+	}
+	*/
 	public boolean getFiles () {
 		JFileChooser chooser = new JFileChooser ();
 		chooser.setDialogTitle("Choose location to keep output files and folders.");
@@ -286,7 +365,7 @@ public class ContigOrderer implements MauveConstants {
 			if (orderRepeated ()) {
 				iterations = 0;
 				IOUtils.deleteDir (temp);
-				reorderer.active = false;
+				reorderer.setInactive();
 				if (gui) {
 					JOptionPane.showMessageDialog(parent, "The reordering process is done.\n" +
 							"Results are displayed, and data is in output directory.", 
@@ -297,14 +376,15 @@ public class ContigOrderer implements MauveConstants {
 					System.exit(0);
 				}
 			}
-			else {
+			else { // 
+			//	System.err.println("AJT0403: Order not repeated.");
 				past_orders.add(reorderer.ordered);
 				count++;
 				File to = makeAlignDir ();
 				temp.renameTo (to);
 				temp = new File (to, reference.getName ());
 				IOUtils.copyFile (reference, temp);
-				reference = temp;
+				reference = temp; 
 				unordered = new File (to, MauveHelperFunctions.genomeNameToFasta (
 						reorderer.fix));
 				reorderer.feature_file = null;
@@ -318,6 +398,10 @@ public class ContigOrderer implements MauveConstants {
 	
 	protected boolean orderRepeated () {
 		for (int i = 0; i < past_orders.size(); i++) {
+			/*
+			 * TODO: Figure out a way to get reorderer.ordered
+			 * without having to use reorderer
+			 */
 			if (reorderer.ordered.equals(past_orders.get(i)))
 				return true;
 		}
@@ -347,7 +431,7 @@ public class ContigOrderer implements MauveConstants {
 			iterations++;
 			dir = getAlignDir ();
 		}
-		//dir.mkdirs ();
+		dir.mkdirs ();
 		return dir;
 	}
 	
@@ -357,14 +441,17 @@ public class ContigOrderer implements MauveConstants {
 	
 	
 	public static void main (String [] args) {	
+	//	System.err.println("Well, well, well.... I see you want me to reorder some contigs for you... good luck... HAH!");
 		if (args.length != 6){
 			System.err.print(USAGE);
 			System.exit(-1);
 		} else  {
 			String badArgs = badArgs(args);
+			System.err.println("Arguments look good!");
 			if (badArgs.length()==0) {
 				ContigOrderer co = new ContigOrderer (args, null, false);
-				co.startAlignment(false);
+				//System.err.println("CALLING startAlignment()");
+				//co.startAlignment(false);
 			} else {
 				System.err.println("The following arguments are missing or were used improperly:  " + badArgs);
 				System.err.print(USAGE);

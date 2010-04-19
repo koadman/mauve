@@ -48,7 +48,7 @@ public class SegmentDataProcessor extends Hashtable implements MauveConstants {
 		put (FILE_STUB, new File (dir, temp.getName ()).getAbsolutePath ());
 		backbone = (Vector) get (BACKBONE);
 		current = Segment.END;
-		count = ((Segment) backbone.get (0)).starts.length;
+		count = ((Segment) backbone.get (0)).left.length;
 		for (int i = 0; i < count; i++) {
 			all_seq_multiplicity <<= 1;
 			all_seq_multiplicity |= 1;
@@ -137,14 +137,14 @@ public class SegmentDataProcessor extends Hashtable implements MauveConstants {
 			for (int j = 0; j <= size; j++) {
 				Segment seg = (Segment) backbone.get (j);
 				if (j > 0
-						&& ((Segment) backbone.get (j - 1)).starts[i] != Match.NO_MATCH) {
+						&& ((Segment) backbone.get (j - 1)).left[i] != Match.NO_MATCH) {
 					seg.prevs[i] = (Segment) backbone.get (j - 1);
 					if (firsts[i] == null) {
 						firsts[i] = seg.prevs[i];
 						firsts[i].prevs[i] = Segment.END;
 					}
 				}
-				if (j < size && seg.starts[i] != Match.NO_MATCH)
+				if (j < size && seg.left[i] != Match.NO_MATCH)
 					seg.nexts[i] = (Segment) backbone.get (j + 1);
 			}
 			((Segment) backbone.get (size)).nexts[i] = Segment.END;
@@ -156,25 +156,25 @@ public class SegmentDataProcessor extends Hashtable implements MauveConstants {
 		long [] sizes = (long []) get (GENOME_LENGTHS);
 		for (int i = 0; i < count; i++) {
 			Segment prev = firsts[i];
-			if (prev.starts[i] != 1) {
+			if (prev.left[i] != 1) {
 				Segment seg = new Segment (count, true);
-				seg.ends[i] = prev.starts[i] - 1;
-				seg.starts[i] = 1;
+				seg.right[i] = prev.left[i] - 1;
+				seg.left[i] = 1;
 				firsts[i] = seg;
 				seg.nexts[i] = prev;
 				prev.prevs[i] = seg;
 			}
 			Segment cur = prev.nexts[i];
 			while (cur != firsts[i] && cur != Segment.END) {
-				if (prev.ends[i] + 1 != cur.starts[i]) {
-					if (prev.ends[i] == cur.starts[i]) {
+				if (prev.right[i] + 1 != cur.left[i]) {
+					if (prev.right[i] == cur.left[i]) {
 						/*System.out.println ("bp in two segments");
 						System.out.println ("segment: " + cur + " prev: "
 								+ prev);*/;
 					} else {
 						Segment island = new Segment (count, true);
-						island.starts[i] = prev.ends[i] + 1;
-						island.ends[i] = cur.starts[i] - 1;
+						island.left[i] = prev.right[i] + 1;
+						island.right[i] = cur.left[i] - 1;
 						prev.nexts[i] = island;
 						island.prevs[i] = prev;
 						island.nexts[i] = cur;
@@ -183,10 +183,10 @@ public class SegmentDataProcessor extends Hashtable implements MauveConstants {
 				}
 				prev = cur;
 				if (sizes != null && cur.nexts [i] == Segment.END &&
-						cur.ends [i] < sizes [i]) {
+						cur.right [i] < sizes [i]) {
 					Segment island = new Segment (count, true);
-					island.starts[i] = cur.ends[i] + 1;
-					island.ends[i] = sizes [i];
+					island.left[i] = cur.right[i] + 1;
+					island.right[i] = sizes [i];
 					cur.nexts[i] = island;
 					island.prevs[i] = cur;
 					island.nexts[i] = Segment.END;
@@ -222,12 +222,12 @@ public class SegmentDataProcessor extends Hashtable implements MauveConstants {
 										.multiplicityType ())
 							ok = false;
 						if (ok && comp == current.prevs[ind]) {
-							long dist = current.starts[j] - comp.ends[j] - 1;
+							long dist = current.left[j] - comp.right[j] - 1;
 							if (dist < 0
 									|| dist > backbone_min
-									|| dist > current.ends[j]
-											- current.starts[j] + 1
-									|| dist > comp.ends[j] - comp.starts[j]
+									|| dist > current.right[j]
+											- current.left[j] + 1
+									|| dist > comp.right[j] - comp.left[j]
 											+ 1)
 								ok = false;
 							else

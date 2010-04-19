@@ -1,5 +1,6 @@
 package org.gel.mauve.analysis;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -22,17 +23,38 @@ public class Gap implements Comparable<Gap>{
 	
 	private long length;
 	
-//	private XmfaViewerModel model;
+	private XmfaViewerModel model;
 	
+	
+	/**
+	 * Creates a gap with the given arguments.
+	 * 
+	 * @param genomeSrcIdx source index of Genome this Gap belongs to
+	 * @param lcb the ID of the LCB that this Gap belongs to
+	 * @param pos the position that this Gap starts at
+	 * @param len the length of the Gap
+	 * @param model the XmfaViewerModel holding the alignment that this Gap was determined under
+	 */
 	public Gap(int genomeSrcIdx, int lcb, long pos, long len, XmfaViewerModel model){
 		this.genSrcIdx = genomeSrcIdx;
 		this.position = pos;
 		this.length = len;
 		this.lcbId = lcb;
-	//	this.model = model;
+		this.model = model;
 		this.chrom = model.getGenomeBySourceIndex(genSrcIdx).getChromosomeAt(position);
 		this.posInCtg = (int) (position - this.chrom.getStart()+1);
 	}
+	
+	private Gap(Gap gap){
+		this.genSrcIdx = gap.genSrcIdx;
+		this.position = gap.position;
+		this.length = gap.length;
+		this.lcbId = gap.lcbId;
+		this.model = gap.model;
+		this.chrom = gap.chrom;
+		this.posInCtg = gap.posInCtg;
+	}
+	
 	
 	/**
 	 * Genome  Contig   Position_in_Contig   GenomeWide_Position   Length
@@ -113,6 +135,35 @@ public class Gap implements Comparable<Gap>{
 		} else {
 			return this.genSrcIdx < g.genSrcIdx ? -1 : 1;
 		}
+	}
+	
+
+	public static Gap mergeGaps(Gap a, Gap b){
+		if (a.genSrcIdx != b.genSrcIdx)
+			throw new IllegalArgumentException("Can't merge gaps that aren't from same genome");
+		if (a.position != b.position)
+			throw new IllegalArgumentException("Can't merge gaps that don't start at the same position");
+		
+		Gap ret = new Gap(a);
+		ret.length += b.length;
+		return ret;
+		
+	}
+	
+	public static Comparator<Gap> getAlnmtPosComparator(){
+		return new Comparator<Gap>(){
+			public int compare(Gap a, Gap b){
+				if (a.genSrcIdx == b.genSrcIdx){
+					if (a.position == b.position){
+						return (int) (a.length - b.length);
+					} else {
+						return (int) (a.position - b.position);
+					}
+				} else {
+					return a.genSrcIdx-b.genSrcIdx;
+				}
+			}
+		};
 	}
 	
 }

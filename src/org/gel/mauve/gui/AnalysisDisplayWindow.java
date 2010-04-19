@@ -118,6 +118,8 @@ public class AnalysisDisplayWindow extends JFrame {
 		tas.put(cmd, ta);
 		ta.setFont(font);
 		ta.setEditable(false);
+	//	JFrame tmp = new JFrame(cmd);
+	//	tmp.getContentPane().add(ta, BorderLayout.CENTER);
 		
 		// add the command desc
 		cc.addCard(cmd, desc);
@@ -125,7 +127,10 @@ public class AnalysisDisplayWindow extends JFrame {
 		if (setTop){
 			cardMngr.show(content, desc);
 		}
+		//JScrollPane jsp = new JScrollPane(tmp);
 		JScrollPane jsp = new JScrollPane(ta);
+//		jsp.setLayout(new BorderLayout());
+//		jsp.add(ta,BorderLayout.CENTER);
 		
 	//	jsp.setVisible(true);
 		content.add(desc, jsp);

@@ -68,7 +68,7 @@ public class ScoreAssembly {
 	
 	private int fWIDTH = 400;
 
-	private int fHEIGHT = 400;
+	private int fHEIGHT = 510;
 	
 	private JPanel toptopPanel;
 
@@ -85,7 +85,7 @@ public class ScoreAssembly {
 	private XmfaViewerModel model;
 	
 	private static final String USAGE = 
-		"Usage: java -cp Mauve.jar org.gel.mauve.assemlbly.ScoreAssembly [options]\n" +
+		"Usage: java -cp Mauve.jar org.gel.mauve.assembly.ScoreAssembly [options]\n" +
 		"  where [options] are:\n" +
 		"\t--alignment <path>\n\t\tthe alignment of the assembly to the reference to score\n" +
 //		"\t--reference <path>\n\t\tthe reference genome\n" +
@@ -233,11 +233,11 @@ public class ScoreAssembly {
 		sumTA = win.addContentPanel(SUM_CMD, SUM_DESC, true);
 		snpTA = win.addContentPanel(SNP_CMD, SNP_DESC, false);
 		gapTA = win.addContentPanel(GAP_CMD, GAP_DESC, false);
-		win.showWindow();
-
+		
 		sumTA.append(temp);
 		snpTA.append(temp);
 		gapTA.append(temp);
+		win.showWindow();
 		assScore = new AssemblyScorer(model);
 		sumTA.replaceRange("", 0, temp.length());
 		setSumText(true,false);
@@ -277,11 +277,13 @@ public class ScoreAssembly {
 		StringBuilder sb = new StringBuilder();
 		if (singleLine){
 			if (header) {
-				sb.append("NumContigs\tNumLCBs\tDCJ_Distance\tNum_Blocks\tNum_SNPs\tNumGaps_Ref\t" +
-						"NumGaps_Assembly\tTotalBasesMissed\tPercBasesMissed\tExtraBases\tPercExtraBases\n");
+				sb.append("NumContigs\tNumRefReplicons\tNumAssemblyBases\tNumReferenceBases\tNumLCBs\t" +
+						"DCJ_Distance\tNumDCJBlocks\tNumSNPs\tNumGapsRef\tNumGapsAssembly\t" +
+						"TotalBasesMissed\tPercBasesMissed\tExtraBases\tPercExtraBases\n");
 			}
 			
-			sb.append(	assScore.numContigs()+"\t"+assScore.numLCBs()+"\t"+
+			sb.append(	assScore.numContigs()+"\t"+assScore.numReplicons()+"\t"+
+						assScore.numBasesAssembly()+"\t"+assScore.numBasesReference()+"\t"+assScore.numLCBs()+"\t"+
 						assScore.getDCJDist()+"\t"+assScore.numBlocks()+"\t"+assScore.getSNPs().length+"\t"+
 						assScore.getReferenceGaps().length+"\t"+assScore.getAssemblyGaps().length+"\t"+
 					 	assScore.totalMissedBases()+"\t"+nf.format(assScore.percentMissedBases()*100)+"\t"+
@@ -291,9 +293,12 @@ public class ScoreAssembly {
 			if (header) {
 				sb.append(
 					"Number of Contigs:\t"+assScore.numContigs()+"\n\n"+
+					"Number reference replicons:\t" + assScore.numReplicons()+"\n\n"+
+					"Number of assembly bases:\t" + assScore.numBasesAssembly()+"\n\n"+
+					"Number of reference bases:\t" + assScore.numBasesReference()+"\n\n"+
 					"Number of LCBs:\t" + assScore.numLCBs()+"\n\n"+
+					"Number of DCJ Blocks:\t"+assScore.numBlocks()+"\n\n"+
 					"DCJ Distance:\t"+assScore.getDCJDist()+"\n\n"+
-					"Number of Blocks:\t"+assScore.numBlocks()+"\n\n"+
 					"Number of SNPs:\t"+assScore.getSNPs().length+"\n\n"+
 					"Number of Gaps in Reference:\t"+assScore.getReferenceGaps().length+"\n\n"+
 					"Number of Gaps in Assembly:\t"+assScore.getAssemblyGaps().length+"\n\n" +

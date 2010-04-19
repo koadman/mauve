@@ -51,20 +51,20 @@ public class Backbone extends Segment {
 
 	public long getLeftEnd (Genome g) {
 		int gi = g.getSourceIndex ();
-		return starts [gi];
+		return left [gi];
 	}
 
 	public void setLeftEnd (long [] left_end) {
-		this.starts = left_end;
+		this.left = left_end;
 	}
 
 	public long getRightEnd (Genome g) {
 		int gi = g.getSourceIndex ();
-		return ends [gi];
+		return right [gi];
 	}
 
 	public void setRightEnd (long [] right_end) {
-		this.ends = right_end;
+		this.right = right_end;
 	}
 
 	public boolean exists (Genome g) {

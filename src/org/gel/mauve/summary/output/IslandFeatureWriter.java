@@ -41,14 +41,14 @@ public class IslandFeatureWriter extends AbstractIslandWriter implements
 			case LABEL:
 				return current.typed_id;
 			case CONTIG:
-				return contig_handler.getContigName (seq_index, current.starts [seq_index]);
+				return contig_handler.getContigName (seq_index, current.left [seq_index]);
 			case STRAND:
 				return current.reverse [seq_index] ? COMPLEMENT : FORWARD;
 			case LEFT:
-				value = current.starts [seq_index];
+				value = current.left [seq_index];
 				break;
 			case RIGHT:
-				value = current.ends [seq_index];
+				value = current.right [seq_index];
 				break;
 			case MULTIPLICITY_INDEX:
 				return MauveHelperFunctions.getReadableMultiplicity (current);

@@ -188,7 +188,7 @@ public class OneToOneOrthologExporter {
 					cur = (int)(bcur.getLeftEnd(g_i));
 				continue;
 			}
-			Quad q = new Quad(bcur.starts, bcur.ends);
+			Quad q = new Quad(bcur.left, bcur.right);
 			if(q.left[g_i.getSourceIndex()] < cds.left)
 			{
 				long[] leftPos = xmfa.getLCBAndColumn(g_i, cds.left);
@@ -202,7 +202,7 @@ public class OneToOneOrthologExporter {
 						q.left[ii] = tmp[ii];
 					else
 						q.right[ii] = tmp[ii];
-					if(q.left[ii] < Math.abs(bcur.starts[ii]) || q.left[ii] > Math.abs(bcur.ends[ii]))
+					if(q.left[ii] < Math.abs(bcur.left[ii]) || q.left[ii] > Math.abs(bcur.right[ii]))
 					{
 						q.left[ii] = 0;
 						q.right[ii] = 0;
@@ -222,7 +222,7 @@ public class OneToOneOrthologExporter {
 						q.right[ii] = tmp[ii];
 					else
 						q.left[ii] = tmp[ii];
-					if(q.right[ii] < Math.abs(bcur.starts[ii]) || q.right[ii] > Math.abs(bcur.ends[ii]) || q.left[ii] == 0)
+					if(q.right[ii] < Math.abs(bcur.left[ii]) || q.right[ii] > Math.abs(bcur.right[ii]) || q.left[ii] == 0)
 					{
 						q.left[ii] = 0;
 						q.right[ii] = 0;

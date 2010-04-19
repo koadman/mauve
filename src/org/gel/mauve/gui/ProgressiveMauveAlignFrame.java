@@ -24,39 +24,47 @@ import org.gel.mauve.MyConsole;
 
 public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeListener {
 	
+	
+	/* 
+	 * These variables should be private. Before they had no modifier, which
+	 * means they were accessible to to everything else in this package.
+	 * There is no reason for these members to be directly accessible to 
+	 * the outside world. If you need to access them, make setters
+	 * and getters -- don't be lazy! 
+	 */
     // member declarations
-    Dimension d;
-    protected JCheckBox refineCheckBox = new JCheckBox();
-    protected JCheckBox seedFamiliesCheckBox = new JCheckBox();
+	protected Dimension d;
+	protected JCheckBox refineCheckBox = new JCheckBox();
+	protected JCheckBox seedFamiliesCheckBox = new JCheckBox();
     
-    JCheckBox sumOfPairsCheckBox = new JCheckBox();
-    JSlider breakpointWeightScaleSlider = new JSlider();
-    JLabel breakpointWeightScaleLabel = new JLabel();
-    JTextField breakpointWeightScaleText = new JTextField(5);
-    JSlider conservationWeightScaleSlider = new JSlider();
-    JLabel conservationWeightScaleLabel = new JLabel();
-    JTextField conservationWeightScaleText = new JTextField(5);
+	protected JCheckBox sumOfPairsCheckBox = new JCheckBox();
+	protected JSlider breakpointWeightScaleSlider = new JSlider();
+	protected JLabel breakpointWeightScaleLabel = new JLabel();
+	protected JTextField breakpointWeightScaleText = new JTextField(5);
+	protected JSlider conservationWeightScaleSlider = new JSlider();
+	protected JLabel conservationWeightScaleLabel = new JLabel();
+	protected JTextField conservationWeightScaleText = new JTextField(5);
 
     
-    JPanel scorePanel = new JPanel();
-    JComboBox matrixChoice = new JComboBox(new String[] {"HOXD (default)", "Custom"});
-    JLabel matrixChoiceLabel = new JLabel();
-    JTextField[][] scoreText = new JTextField[4][4];
-    JLabel[] scoreLabelRow = new JLabel[4];
-    JLabel[] scoreLabelCol = new JLabel[4];
-    String[] scoreLabels = {"A", "C", "G", "T"};
-    String[][] hoxd_matrix = {
+	protected JPanel scorePanel = new JPanel();
+	protected JComboBox matrixChoice = new JComboBox(new String[] {"HOXD (default)", "Custom"});
+	protected JLabel matrixChoiceLabel = new JLabel();
+	protected JTextField[][] scoreText = new JTextField[4][4];
+	protected JLabel[] scoreLabelRow = new JLabel[4];
+	protected JLabel[] scoreLabelCol = new JLabel[4];
+	protected String[] scoreLabels = {"A", "C", "G", "T"};
+	protected String[][] hoxd_matrix = {
     		{"91",   "-114", "-31",  "-123"},
     		{"-114", "100",  "-125", "-31" },
     		{"-31",  "-125", "100",  "-114"},
     		{"-123", "-31",  "-114", "91"  }
     };
-    String hoxd_go = "-400";
-    String hoxd_ge = "-30";
-    JTextField gapOpenText = new JTextField();
-    JLabel gapOpenLabel = new JLabel();
-    JTextField gapExtendText = new JTextField();
-    JLabel gapExtendLabel = new JLabel();
+	protected String hoxd_go = "-400";
+	protected String hoxd_ge = "-30";
+	protected JTextField gapOpenText = new JTextField();
+	protected JLabel gapOpenLabel = new JLabel();
+	protected JTextField gapExtendText = new JTextField();
+	protected JLabel gapExtendLabel = new JLabel();
     
     public ProgressiveMauveAlignFrame(Mauve mauve)
     {
