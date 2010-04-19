@@ -197,7 +197,7 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 	
 	protected void initModelData () {
 		initMauveData ();
-		lcbs = ContigReorderer.this.model.getFullLcbList ();
+		lcbs = model.getFullLcbList ();
 		if (orderer == null || (active && orderer.shouldReorder ())) {
 			if (orderer == null){
 		//		System.err.println("AJT0403: ContigOrderer orderer == null.");
