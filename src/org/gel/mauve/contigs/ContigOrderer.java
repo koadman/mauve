@@ -44,7 +44,7 @@ public class ContigOrderer implements MauveConstants {
 	protected static final String REF_FILE = "-ref";
 	protected static final String DRAFT_FILE = "-draft";
 	
-	//private ContigMauveDataModel data;
+	private ContigMauveDataModel data;
 
 	private static final String USAGE = 
 		"Usage: java -cp path_to_jar/Mauve.jar org.gel.mauve.ContigOrderer [options]\n" +
@@ -84,7 +84,7 @@ public class ContigOrderer implements MauveConstants {
 			reordererGUI = new ContigReordererGUI(reorderer, frames);
 			align_frame = new ContigMauveAlignFrame (reordererGUI, this);
 		} else {
-		//	data = new ContigMauveDataModel();
+			data = new ContigMauveDataModel();
 		}
 ///////////////////////////////////////////////////////////////////
 		
@@ -130,7 +130,7 @@ public class ContigOrderer implements MauveConstants {
 				System.err.println("Setting reference file: " + pairs.get(REF_FILE));
 				if (gui)
 					align_frame.addSequence(pairs.get(REF_FILE));
-			//	data.setRefPath(pairs.get(REF_FILE));
+				data.setRefPath(pairs.get(REF_FILE));
 			}
 			else
 				error = "no reference file given";
@@ -138,7 +138,7 @@ public class ContigOrderer implements MauveConstants {
 				System.err.println("Setting draft file: " + pairs.get(DRAFT_FILE));
 				if (gui)
 					align_frame.addSequence(pairs.get(DRAFT_FILE));
-			//	data.setDraftPath(pairs.get(DRAFT_FILE));
+				data.setDraftPath(pairs.get(DRAFT_FILE));
 			}
 			else
 				error = "no draft file given";
