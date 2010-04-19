@@ -64,13 +64,6 @@
 			<pathelement path="${support}/ant-contrib-1.0b3.jar"/>
 		</classpath>
 	</taskdef>
-
-	<!-- retroweaver supports backporting 1.5 code to java 1.4 -->
-	<taskdef name="retroweaver" classname="net.sourceforge.retroweaver.ant.RetroWeaverTask">
-		<classpath>
-			<fileset dir="${support}/retroweaver" includes="**/*"/>
-		</classpath>
-	</taskdef>
 	
 	<target name="init">
 		<!-- Create the time stamp -->
@@ -127,12 +120,8 @@
 	<target name="rmic" depends="compile">
 		<rmic base="${build}" classname="org.gel.mauve.remote.RemoteControlImpl" />
 	</target>
-
-	<target name="weave" depends="rmic">
-		<retroweaver srcdir="${src}" target="1.4" verbose="true" failonerror="true"/>
-	</target>
 	
-	<target name="jar" depends="rmic,weave">
+	<target name="jar" depends="rmic">
 		<!-- Make list of external dependencies -->
 		<fileset dir="${ext}" id="ext.jars">
 			<include name="**/*.jar"/>
@@ -168,7 +157,7 @@
 		 </jar>
 	</target>
 	
-	<target name="appletjar" depends="rmic,weave">
+	<target name="appletjar" depends="rmic">
 		<delete file="mauveApplet.jar" />
 		<jar jarfile="mauveApplet.jar">
 			<fileset dir="${build}">
@@ -177,52 +166,20 @@
 		</jar>
 	</target>
 
-	<target name="jarweave" depends="jar,appletjar">
-		<retroweaver inputjar="Mauve.jar" outputjar="MauveWoven.jar" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="mauveApplet.jar" outputjar="mauveAppletWoven.jar" failonerror="true" verbose="true"/>
-		<move file="MauveWoven.jar" tofile="Mauve.jar"/>
-		<move file="mauveAppletWoven.jar" tofile="mauveApplet.jar"/>
-	</target>
+	
 
-	<target name="extjarweave">
-		<retroweaver inputjar="ext/biojava-1.5.jar"  outputjar="ext/biojava-1.5.jar-woven" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="ext/bytecode.jar"  outputjar="ext/bytecode.jar-woven" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="ext/commons-cli.jar"  outputjar="ext/commons-cli.jar-woven" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="ext/commons-collections-2.1.jar"  outputjar="ext/commons-collections-2.1.jar-woven" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="ext/commons-dbcp-1.1.jar"  outputjar="ext/commons-dbcp-1.1.jar-woven" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="ext/commons-pool-1.1.jar"  outputjar="ext/commons-pool-1.1.jar-woven" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="ext/gnu-getopt.jar"  outputjar="ext/gnu-getopt.jar-woven" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="ext/jakarta-regexp.jar"  outputjar="ext/jakarta-regexp.jar-woven" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="ext/xercesImpl.jar"  outputjar="ext/xercesImpl.jar-woven" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="ext/xml-apis.jar"  outputjar="ext/xml-apis.jar-woven" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="ext/zeus-jscl.jar"  outputjar="ext/zeus-jscl.jar-woven" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="ext/dbus-2.6.jar"  outputjar="ext/dbus-2.6.jar-woven" failonerror="true" verbose="true"/>
-		<retroweaver inputjar="ext/unix-0.5.jar"  outputjar="ext/unix-0.5.jar-woven" failonerror="true" verbose="true"/>
-		<move file="ext/biojava-1.5.jar-woven"  tofile="ext/biojava-1.5.jar"/>
-		<move file="ext/bytecode.jar-woven"  tofile="ext/bytecode.jar"/>
-		<move file="ext/commons-cli.jar-woven"  tofile="ext/commons-cli.jar"/>
-		<move file="ext/commons-collections-2.1.jar-woven"  tofile="ext/commons-collections-2.1.jar"/>
-		<move file="ext/commons-dbcp-1.1.jar-woven"  tofile="ext/commons-dbcp-1.1.jar"/>
-		<move file="ext/commons-pool-1.1.jar-woven"  tofile="ext/commons-pool-1.1.jar"/>
-		<move file="ext/gnu-getopt.jar-woven"  tofile="ext/gnu-getopt.jar"/>
-		<move file="ext/jakarta-regexp.jar-woven"  tofile="ext/jakarta-regexp.jar"/>
-		<move file="ext/xercesImpl.jar-woven"  tofile="ext/xercesImpl.jar"/>
-		<move file="ext/xml-apis.jar-woven"  tofile="ext/xml-apis.jar"/>
-		<move file="ext/zeus-jscl.jar-woven"  tofile="ext/zeus-jscl.jar"/>
-		<move file="ext/dbus-2.6.jar-woven"  tofile="ext/dbus-2.6.jar"/>
-		<move file="ext/unix-0.5.jar-woven"  tofile="ext/unix-0.5.jar"/>
-	</target>
+	
 
 	<target name="checkkeyprops" unless="key.password">
 		<fail message="key.password must be set on command line, using -Dkey.password=&lt;password&gt;" />
 	</target>
 	
-	<target name="signjars" depends="checkkeyprops,jar,appletjar,jarweave">
+	<target name="signjars" depends="checkkeyprops,jar,appletjar">
 		<signjar jar="Mauve.jar" alias="${key.alias}" storepass="${key.password}" keystore="${key.keystore}" />
 		<signjar jar="mauveApplet.jar" alias="${key.alias}" storepass="${key.password}" keystore="${key.keystore}" />
 	</target>
 	
-	<target name="signextjars" depends="checkkeyprops,extjarweave">
+	<target name="signextjars" depends="checkkeyprops">
 		<signjar alias="${key.alias}" storepass="${key.password}" keystore="${key.keystore}">
 			<fileset dir="./ext">
 				<include name="*.jar" />
@@ -274,7 +231,7 @@
 	</target>
 
 	<!-- Create an OS X application and disk image -->
-	<target name="macdist" depends="jar,getChangeLog,getDoco,jarweave,extjarweave" description="Generate a Mac OS X disk image" >
+	<target name="macdist" depends="jar,getChangeLog,getDoco" description="Generate a Mac OS X disk image" >
 		<!-- Create the distribution directory -->
 		<mkdir dir="${dist}" />
 		<delete dir="${dist}/Mauve.app"/>
