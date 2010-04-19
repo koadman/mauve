@@ -635,6 +635,7 @@ public class OneToOneOrthologExporter {
 			xmfaEntry.append("=\n");
 			xmfaout.write(xmfaEntry.toString());
 		}
+		xmfaout.flush();
 	}
 	
 	/* reformats a string to be 80 column width */
