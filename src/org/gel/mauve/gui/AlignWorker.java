@@ -22,11 +22,7 @@ public class AlignWorker extends SwingWorker
         this.mauve_cmd = mauve_cmd;
         this.align_listener = align_listener;
     }
-    /*
-     * FIXME: Should MyConsole.err() be called or should
-     * System.err be called since that's redirected
-     * to the console anyway?
-     */
+   
     public Object construct()
     {
         try
