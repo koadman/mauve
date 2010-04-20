@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 
 import org.gel.mauve.MyConsole;
 
@@ -32,8 +33,8 @@ public class AlignWorker extends SwingWorker
         {
             align_proc = Runtime.getRuntime().exec(mauve_cmd);
 
-            OutStreamPrinter outP = new OutStreamPrinter(align_proc.getInputStream());
-            ErrStreamPrinter errP = new ErrStreamPrinter(align_proc.getErrorStream());
+            OutStreamPrinter outP = new OutStreamPrinter(align_proc.getInputStream(), MyConsole.out());
+            OutStreamPrinter errP = new OutStreamPrinter(align_proc.getErrorStream(), MyConsole.err());
             
             errP.start();
             outP.start();
@@ -91,10 +92,12 @@ public class AlignWorker extends SwingWorker
 class OutStreamPrinter extends Thread
 {
     InputStream in;
+    PrintStream ps;
    
-    OutStreamPrinter(InputStream in)
+    OutStreamPrinter(InputStream in, PrintStream ps)
     {
         this.in = in;
+        this.ps = ps;
     }
     
     public void run()
@@ -106,7 +109,8 @@ class OutStreamPrinter extends Thread
             String line=null;
             while ( (line = br.readLine()) != null)
             {
-                MyConsole.out().println(line);
+            	if(ps!=null)
+            		ps.println(line);
             }
         } 
     	catch (IOException ioe)
@@ -114,32 +118,4 @@ class OutStreamPrinter extends Thread
     	    ioe.printStackTrace(MyConsole.err());  
     	}
     }
-}
-
-class ErrStreamPrinter extends Thread
-{
-    InputStream in;
-    
-     ErrStreamPrinter(InputStream in)
-     {
-         this.in = in;
-     }
-     
-     public void run()
-     {
-         try
-         {
-             InputStreamReader isr = new InputStreamReader(in);
-             BufferedReader br = new BufferedReader(isr);
-             String line=null;
-             while ( (line = br.readLine()) != null)
-             {
-                 MyConsole.err().println(line);
-             }
-         } 
-     	catch (IOException ioe)
-     	{	
-     	    ioe.printStackTrace(MyConsole.err());  
-     	}
-     }
 }
