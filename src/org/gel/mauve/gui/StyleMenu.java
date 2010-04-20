@@ -12,6 +12,7 @@ import org.gel.mauve.XmfaViewerModel;
 
 public class StyleMenu extends JMenu implements ActionListener {
 
+    JCheckBoxMenuItem jMenuViewStyleSimilarityRanges = new JCheckBoxMenuItem();
     JCheckBoxMenuItem jMenuViewStyleLcbOutlines = new JCheckBoxMenuItem();
     JCheckBoxMenuItem jMenuViewStyleSimilarityPlot = new JCheckBoxMenuItem();
     JCheckBoxMenuItem jMenuViewStyleSolidBlocks = new JCheckBoxMenuItem();
@@ -26,6 +27,13 @@ public class StyleMenu extends JMenu implements ActionListener {
 
     public StyleMenu()
     {
+    	jMenuViewStyleSimilarityRanges.setToolTipText("Draw sequence similarity values as a range with mean value darkened");
+    	jMenuViewStyleSimilarityRanges.setVisible(true);
+    	jMenuViewStyleSimilarityRanges.setText("Similarity ranges");
+    	jMenuViewStyleSimilarityRanges.setMnemonic('i');
+    	jMenuViewStyleSimilarityRanges.setActionCommand("ToggleSimilarityRanges");
+    	jMenuViewStyleSimilarityRanges.addActionListener(this);
+
         jMenuViewStyleLcbOutlines.setToolTipText("Draw outlines around each Locally Collinear Block");
         jMenuViewStyleLcbOutlines.setVisible(true);
         jMenuViewStyleLcbOutlines.setText("LCB outlines");
@@ -84,6 +92,7 @@ public class StyleMenu extends JMenu implements ActionListener {
 
         add(jMenuViewStyleLcbOutlines);
         add(jMenuViewStyleSimilarityPlot);
+        add(jMenuViewStyleSimilarityRanges);
         add(jMenuViewStyleSolidBlocks);
         add(jMenuViewStyleLcbStrikethroughLines);
         add(jMenuViewStyleLcbConnectingLines);
@@ -112,8 +121,9 @@ public class StyleMenu extends JMenu implements ActionListener {
             rrpanel.addKeyMapping("typed w", "ToggleFillBoxes", this);
             rrpanel.addKeyMapping("typed e", "ToggleDrawMatches", this);
 
+            jMenuViewStyleSimilarityRanges.setSelected(true);
             jMenuViewStyleLcbConnectingLines.setSelected(true);
-            jMenuViewStyleLcbOutlines.setSelected(true);
+            jMenuViewStyleLcbOutlines.setSelected(false);
             jMenuViewStyleLcbStrikethroughLines.setSelected(true);
             jMenuViewStyleSimilarityPlot.setSelected(true);
             jMenuViewStyleSolidBlocks.setSelected(false);
@@ -127,6 +137,15 @@ public class StyleMenu extends JMenu implements ActionListener {
     
     public void actionPerformed(ActionEvent e)
     {
+        if (e.getActionCommand().equals("ToggleSimilarityRanges"))
+        {
+            if (model != null && model instanceof XmfaViewerModel)
+            {
+            	XmfaViewerModel xm = (XmfaViewerModel)model;
+                xm.setDrawSimilarityRanges(!xm.getDrawSimilarityRanges());
+                jMenuViewStyleDrawAttributes.setSelected(xm.getDrawSimilarityRanges());
+            }
+        }
         if (e.getActionCommand().equals("ToggleLCBlines"))
         {
         	if(rrpanel != null)

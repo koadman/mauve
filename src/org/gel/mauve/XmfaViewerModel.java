@@ -45,7 +45,7 @@ public class XmfaViewerModel extends LcbViewerModel {
 	public XmfaViewerModel (File src, ModelProgressListener listener)
 			throws IOException {
 		super (src);
-
+		super.setDrawLcbBounds(false);
 		init (listener, false);
 	}
 
@@ -404,6 +404,17 @@ public class XmfaViewerModel extends LcbViewerModel {
 				((ModelListener) listeners[i + 1])
 						.modelReloadStart (modelEvent);
 			}
+		}
+	}
+
+	boolean drawSimilarityRanges = true;	// whether or not the whole range of similarity values should be drawn
+	public boolean getDrawSimilarityRanges() {
+		return drawSimilarityRanges;
+	}
+	public void setDrawSimilarityRanges(boolean drawSimilarityRanges) {
+		if (this.drawSimilarityRanges != drawSimilarityRanges) {
+			this.drawSimilarityRanges = drawSimilarityRanges;
+			fireDrawingSettingsEvent ();
 		}
 	}
 }

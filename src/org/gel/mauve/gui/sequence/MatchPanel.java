@@ -889,14 +889,33 @@ public class MatchPanel extends AbstractSequencePanel implements MouseListener, 
                     double match_top = reverse ? 2*half_height - HALF_PEN_WIDTH - height: HALF_PEN_WIDTH + sim_height - height;
                     double range_top = reverse ? 2*half_height - HALF_PEN_WIDTH - heightmax: HALF_PEN_WIDTH + sim_height - heightmax;
                     double range_bot = reverse ? 2*half_height - HALF_PEN_WIDTH - heightmin: HALF_PEN_WIDTH + sim_height - heightmin;
-                    Rectangle2D.Double match_rect = new Rectangle2D.Double(pixelD, range_top, increment, range_bot - range_top);
-                	g.setColor(getFillColorChangeHSB(sim_color, 0f, 0f, 0.3f));
-                    g.fill(match_rect);
-                    g.setColor(getFillColorChangeHSB(sim_color, 0f, 0f, -0.2f));
-                    Line2D.Double l2d = new Line2D.Double(pixelD, prevh, pixelD+increment, match_top);
-                    prevh = match_top;
-                    g.draw(l2d);
+
+                    if(xm.getDrawSimilarityRanges()){
+	                    // draw a space fill box
+	                    Rectangle2D.Double match_rect = new Rectangle2D.Double(pixelD, range_bot, increment, heightmin);
+	                	g.setColor(getFillColorChangeHSB(sim_color, 0f, -0.4f, 0.5f));
+	                    g.fill(match_rect);
+	
+	                    // draw a sim range box
+	                    match_rect = new Rectangle2D.Double(pixelD, range_top, increment, range_bot - range_top);
+	                	g.setColor(getFillColorChangeHSB(sim_color, 0f, 0f, 0.3f));
+	                    g.fill(match_rect);
+	                    
+	                    // draw a mean value line
+	                    g.setColor(getFillColorChangeHSB(sim_color, 0f, 0f, -0.2f));
+	                    Line2D.Double l2d = new Line2D.Double(pixelD, prevh, pixelD+increment, match_top);
+	                    prevh = match_top;
+	                    g.draw(l2d);
+                    }else{
+                    	// just draw a rectangle filling to the mean value
+                        match_top = reverse ? half_height + HALF_PEN_WIDTH : HALF_PEN_WIDTH + sim_height - height;
+	                    Rectangle2D.Double match_rect = new Rectangle2D.Double(pixelD, match_top, increment, height);
+	                	g.setColor(sim_color);
+	                    g.fill(match_rect);
+                    }
                     g.setClip(oldClip);
+
+                    
                 }
             }
         }
