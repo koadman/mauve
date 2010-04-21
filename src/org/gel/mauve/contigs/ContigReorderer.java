@@ -127,6 +127,10 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 		comparator_table = new Hashtable<Genome, LCBLeftComparator> ();
 		orderGenomes ();
 		if (input_file != null && input_file.indexOf (FEATURE_EXT) > 0) {
+			/*
+			 * I don't think this condition ever gets satisfied
+			 *  -atritt
+			 */
 			feature_file = input_file;
 			input_file = null;
 		}
@@ -142,14 +146,15 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 			file = file.substring (0, period);
 		if (file.endsWith("."))
 				file = file.substring (0, file.length() - 1);
-		directory = MauveHelperFunctions.getRootDirectory (model);
+		//directory = MauveHelperFunctions.getRootDirectory (model);
+		directory = model.getSrc().getParentFile ();
 		File feats = new File (directory, file + ContigReorderer.FEATURE_EXT);
 		if (feats.exists ())
 			feature_file = feats.getAbsolutePath ();
 		if (feature_file != null && frame != null){
 			/* TODO: Figure out a way to import a new annotation file into
 			 * a genome without having to use a MauveFrame */ 
-			System.err.println("AJT0403: Importing features from " + feature_file + " to genome " + fix.getDisplayName());
+			//System.err.println("AJT0403: Importing features from " + feature_file + " to genome " + fix.getDisplayName());
 			frame.getFeatureImporter ().importAnnotationFile (new File (
 					feature_file), fix); 
 		}
@@ -210,7 +215,6 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 		 * of reordering contigs.... I think (04/18/10 atritt)
 		 */
 		process ();
-		
 		output (true);
 	}
 	
@@ -221,9 +225,13 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 		System.arraycopy (ids, 0, fix_lcbs, 0, ids.length);
 		Arrays.sort (fix_lcbs, id_compare);
 		if (input_file == null) {
-			System.err.println("AJT0403: input_file at ContigReorderer.process() == null");
+			//System.err.println("AJT0403: input_file at ContigReorderer.process() == null");
 			new ContigInverter (model, this);
 		}else{
+			/*
+			 * I don't think this condition is ever satisfied 
+			 *  - atritt
+			 */
 			System.err.println("AJT0403: input_file at ContigReorderer.process() != null");
 			new ContigInverter (model, this, input_file);
 		}
@@ -239,6 +247,7 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 				directory, file + CONTIG_EXT).getAbsolutePath (), args);
 		Iterator feats = MauveHelperFunctions.getFeatures (model, reorder_ind);
 		if (feats.hasNext ()) {
+		//	System.out.println("AJTO403: invoking ChangedFeatureWriter(File,Hashtable,Iterator,Genome)");
 			new ChangedFeatureWriter (new File (
 					directory, file + FEATURE_EXT).getAbsolutePath (), args, feats, fix);
 		}
@@ -404,7 +413,7 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 	
 	//from tab or comma separated file with contig names in first row; cuts off name before
 	//first underscore - specialized for projector output
-	public void readOrdered (String file) {
+	private void readOrdered (String file) {
 		try {
 			System.out.println ("getting ordered");
 			Hashtable <String, Chromosome> chroms = new Hashtable <String, Chromosome> 

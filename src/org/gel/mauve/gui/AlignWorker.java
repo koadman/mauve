@@ -17,10 +17,25 @@ public class AlignWorker extends SwingWorker
     private Process align_proc = null;
     private boolean killed = false;
     
+    private PrintStream out;
+    private PrintStream err;
+    
     public AlignWorker (AlignmentProcessListener align_listener, String[] mauve_cmd)
     {
-        this.mauve_cmd = mauve_cmd;
+    	this(align_listener,mauve_cmd,true);
+    }
+    
+    public AlignWorker (AlignmentProcessListener align_listener, String[] mauve_cmd, boolean verbose){
+    	this.mauve_cmd = mauve_cmd;
         this.align_listener = align_listener;
+        if (verbose) {
+        	this.out = MyConsole.out();
+        	this.err = MyConsole.err();
+        } else {
+        	this.out = null;
+        	this.err = null;
+        }
+    	
     }
    
     public Object construct()
@@ -29,8 +44,10 @@ public class AlignWorker extends SwingWorker
         {
             align_proc = Runtime.getRuntime().exec(mauve_cmd);
 
-            OutStreamPrinter outP = new OutStreamPrinter(align_proc.getInputStream(), MyConsole.out());
-            OutStreamPrinter errP = new OutStreamPrinter(align_proc.getErrorStream(), MyConsole.err());
+       //     OutStreamPrinter outP = new OutStreamPrinter(align_proc.getInputStream(), MyConsole.out());
+        //    OutStreamPrinter errP = new OutStreamPrinter(align_proc.getErrorStream(), MyConsole.err());
+            OutStreamPrinter outP = new OutStreamPrinter(align_proc.getInputStream(), out);
+            OutStreamPrinter errP = new OutStreamPrinter(align_proc.getErrorStream(), err);
             
             errP.start();
             outP.start();

@@ -78,6 +78,7 @@ public class ContigReordererGUI extends Mauve {
 		if (orderer.gui)
 			super.loadFile(rr_file);
 		else {
+			// I don't think this condition ever gets satisfied.
 			try {
 				reorderer.setModel((LcbViewerModel) ModelBuilder.buildModel (rr_file, null));
 				initModelData ();

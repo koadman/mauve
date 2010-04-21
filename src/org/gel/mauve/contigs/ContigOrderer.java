@@ -226,7 +226,7 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
     		bse.printStackTrace();
     	}
 		if (gui){
-			align_frame.displayFileInput ();
+			align_frame.setFileInput ();
 			align_frame.setVisible(gui);
 		}
 		if (show_message) {
@@ -254,18 +254,21 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 		}
 	}
 	
-	/**
+	/** 
 	 * Second function in iterative loop
 	 */
 	private void runReorderProcess(){
+		
 		File outDir = getAlignDir();
+		String outDirPath = outDir.getAbsolutePath();
 		//outDir.mkdir();
 		//copyInputFiles();
 		alnmtFile = new File(outDir, DIR_STUB+count);
+		String alnmtFilePath = alnmtFile.getAbsolutePath();
 		aln_cmd = makeAlnCmd();
-		System.out.println("AJT0403: Executing ");
+		System.out.println("Executing ");
 		AlignFrame.printCommand(aln_cmd,System.out);
-		AlignWorker worker = new AlignWorker(this,aln_cmd);
+		AlignWorker worker = new AlignWorker(this,aln_cmd,false);
 		worker.start();
 	}
 	
@@ -282,17 +285,19 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 		} else {
 			System.err.print("Failed to complete the following progressiveMauve alignment\n\n");
 			AlignFrame.printCommand(aln_cmd,System.err);
+			System.err.println();
 		}
 	}
 
 	private String[] makeAlnCmd(){
-		String[] ret = new String[4 + DEFAULT_ARGS.length];
+		String[] ret = new String[6 + DEFAULT_ARGS.length];
 		int j = 0;
 		ret[j++] = AlignFrame.getBinaryPath("progressiveMauve");
 		for (int i = 0; i < DEFAULT_ARGS.length; i++)
 			ret[j++] = DEFAULT_ARGS[i];
-	//	ret[j++] = 
 		ret[j++] = "--output="+alnmtFile.getAbsolutePath();
+		ret[j++] = "--backbone-output=" + alnmtFile.getAbsolutePath()+".backbone";
+		ret[j++] = "--output-guide-tree=" + alnmtFile.getAbsolutePath()+".guide_tree";
 		ret[j++] = reference.getAbsolutePath();
 		ret[j++] = unordered.getAbsolutePath();
 		return ret;
@@ -375,7 +380,7 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 		for (int i = 0; i < past_orders.size(); i++) {
 			/*
 			 * TODO: Figure out a way to get reorderer.ordered
-			 * without having to use reorderer
+			 * without having to use reorderer 
 			 */
 			if (reorderer.ordered.equals(past_orders.get(i)))
 				return true;
@@ -383,14 +388,16 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 		return false;
 	}
 	
+	/**
+	 * Copies the draft file over into the appropriate directory.
+	 */
 	public void copyInputFiles () {
 		try {
-			File dir = makeAlignDir ();
-			dir.mkdirs ();
-			/*File file = new File (dir, reference.getName ());
+			File dirTo = makeAlignDir ();
+		/*	File file = new File (dir, reference.getName ());
 			IOUtils.copyFile (reference, file);
-			reference = file; */
-			File file = new File (dir, unordered.getName ());
+			reference = file;*/ 
+			File file = new File (dirTo, unordered.getName ());
 			IOUtils.copyFile (unordered, file);
 			unordered = file;
 		} catch (IOException e) {

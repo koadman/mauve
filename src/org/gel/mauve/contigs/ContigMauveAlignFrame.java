@@ -106,17 +106,19 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 			cancelButton.setText(text);
 		}
 		super.setVisible(show);
-		System.out.println ("shown");
+	//	System.out.println ("shown");
 	}
 	
-	public void displayFileInput () {
+	public void setFileInput () {
 		try {
 			current_dir = orderer.getAlignDir ();
+			//System.err.println("AJT0403: current_dir was " + current_dir.getAbsolutePath());
 			//current_dir.mkdirs ();
 			setOutput(current_dir.getParentFile ().getAbsolutePath ());
 			if (!first)
 				sequenceListModel.clear ();
 			current_dir = new File (current_dir, orderer.DIR_STUB + orderer.count);
+			//System.err.println("AJT0403: now current_dir is " + current_dir.getAbsolutePath());
 			JScrollBar scroller = listScrollPane.getHorizontalScrollBar ();
 			scroller.setValue (scroller.getMaximum ());
 		} catch (Exception e) {
@@ -152,6 +154,9 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 		model.clear();
 		model.addElement (orderer.reference.getAbsolutePath ());
 		model.addElement (orderer.unordered.getAbsolutePath ());
+		/*
+		 * this call to setOutput may be redundant. It should have already been called in setFileInput 
+		 */
 		setOutput (current_dir.getAbsolutePath());
 		super.alignButtonActionPerformed(e);
 		setOutput (current_dir.getParentFile().getParentFile().getAbsolutePath());
