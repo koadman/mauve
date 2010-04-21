@@ -33,41 +33,15 @@ public class ContigReordererGUI extends Mauve {
 	public static final int FILE_IND = 3;
 	public static final int MAX_IGNORABLE_DIST = 50;
 	public static final double MIN_LENGTH_RATIO = .01;
-	protected int ref_ind = 0;
-	protected int reorder_ind = 1;
-	private LcbViewerModel model;
-	private LcbIdComparator id_compare;
-	private LCB dummy;
-	private Hashtable inverters;
-	private LinkedList<Chromosome> ordered;
-	private Hashtable<Long,Chromosome> conflicts;
 	
-	// this looks vestigial
-	private Hashtable nexts;
-	private LCBLeftComparator left_compare;
-	private String input_file;
-//	protected String slast_ordered; // unused
-	private String feature_file;
 	public static final String CONTIG_EXT = "_contigs.tab";
 	public static final String FEATURE_EXT = "_features.tab";
-	protected MauveFrame frame;
-	private Hashtable<String,Object> args;
-	private String file;
-	private File directory;
-	private LCB[] lcbs;
-	private LCB [] fix_lcbs;
-	private Genome ref;
-	private Genome fix;
-	private Hashtable<Genome,LCB[]>  lcb_table;
-	private Hashtable<Genome,LCBLeftComparator> comparator_table;
-	private Genome [] ordered_genomes;
-	private ContigGrouper grouper;
-	protected ContigOrderer orderer;
-	protected boolean active;
-	private HashSet inverted_from_start;
-	private HashSet inverted_from_read;
 	
-	ContigReorderer reorderer;
+	
+	private  MauveFrame frame;
+	private boolean active;
+	private ContigReorderer reorderer;
+	private ContigOrderer orderer;
 	
 	public ContigReordererGUI(ContigReorderer reorderer, Vector frames) {
 		active = true;
@@ -76,31 +50,12 @@ public class ContigReordererGUI extends Mauve {
 		this.frames = frames;
 	}
 	
-	
-	
 	/**
 	 * Set this.lcbs to the LCBs from the model stored by 
 	 * ContigReordererGUI
 	 */
 	protected void initModelData () {
 		reorderer.initModelData();
-		/*
-		initMauveData ();
-		/*
-		 * Set this.lcbs to that of the current model.
-		 *
-		lcbs = ContigReordererGUI.this.model.getFullLcbList ();
-		/*
-		 * now check to see if we should reorder again
-		 *
-		if (orderer == null || (active && orderer.shouldReorder ())) {
-			if (orderer == null){
-				System.out.println("AJT0403: ContigOrderer orderer == null.");
-			}
-			fixContigs ();
-			if (orderer != null)
-				orderer.reorderDone ();
-		}*/
 	}
 	
 	public void init () {
@@ -109,12 +64,9 @@ public class ContigReordererGUI extends Mauve {
 	}
 	
 	protected MauveFrame makeNewFrame () {
-		/*
-		 * FIXME TODO Figure out what this was used for originally.
-		 */
 		if (active) {
 			frame = new ReordererMauveFrame ();
-	//		frames.add (frame); 
+			frames.add (frame); 
 			return frame;
 		}
 		else

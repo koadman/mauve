@@ -14,6 +14,7 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -28,6 +29,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
 import org.gel.mauve.MyConsole;
+import org.gel.mauve.contigs.ContigOrderer;
 import org.gel.mauve.gui.dnd.DnDList;
 
 /**
@@ -322,7 +324,7 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
      * Build a platform-dependent path to the aligner binary
      * @param name	The name of the aligner binary
      */
-    protected String getBinaryPath(String name)
+    public static String getBinaryPath(String name)
     {
         String os_type = System.getProperty("os.name");
         String os_arch = System.getProperty("os.arch");
@@ -371,6 +373,21 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
         		return name;
         }
     }
+    
+    /**
+     * Prints an aligner command in an easily readable format.
+     * 
+     * @param cmd the command to print
+     * @param out the output stream to print to
+     */
+	public static void printCommand(String[] cmd, PrintStream out){
+		StringBuilder sb = new StringBuilder();
+		sb.append("  "+cmd[0]+"\n");
+		for (int i = 1; i < cmd.length; i++){
+			sb.append("    "+cmd[i]+"\n");
+		}
+		out.print(sb.toString());
+	}
 
     /**
      * Read the user's genome alignment parameters and start the alignment using
@@ -449,13 +466,14 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
     protected void printCommand(String[] mauve_cmd)
     {
         // Make a readable version of command.
-        String mauve_str = new String();
+  /*      String mauve_str = new String();
         for (int cmdI = 0; cmdI < mauve_cmd.length; cmdI++)
         {
             mauve_str += mauve_cmd[cmdI] + " ";
-        }
+        } */
         MyConsole.out().println("Executing: ");
-        MyConsole.out().println(mauve_str);
+//        MyConsole.out().println(mauve_str);
+        AlignFrame.printCommand(mauve_cmd, MyConsole.out());
     }
     
     private boolean mShown = false;

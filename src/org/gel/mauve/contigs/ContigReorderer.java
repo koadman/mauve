@@ -83,16 +83,7 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 	
 	
 	public ContigReorderer (ContigOrderer order /*, Vector parent*/) {
-		active = true;
-		
-		//FIXME we'll have to get rid of this when we disconnect completely from Mauve
-//		check_updates = false;
-		
-		/*
-		if (parent != null) {
-			// don't need even need to instantiate a Mauve component TODO
-			frames = parent; 
-		}*/
+		active = true;	
 		orderer = order;
 	}
 	
@@ -117,17 +108,7 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 				System.out.println ("ff: " + feature_file);
 			}
 		}
-		/*
-		 * initialize a Mauve environment to store data
-		 * TODO May be a source of problems
-		 *
-		super.init (args [0]); */ 
 	}
-	/*
-	public void initGUI () {
-		if (frames == null) 
-			super.init();
-	} */
 	
 	/**
 	 * Makes a new Mauve frame that calls fixContigs once the alignment has
@@ -165,11 +146,13 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 		File feats = new File (directory, file + ContigReorderer.FEATURE_EXT);
 		if (feats.exists ())
 			feature_file = feats.getAbsolutePath ();
-		if (feature_file != null && frame != null)
+		if (feature_file != null && frame != null){
 			/* TODO: Figure out a way to import a new annotation file into
 			 * a genome without having to use a MauveFrame */ 
+			System.err.println("AJT0403: Importing features from " + feature_file + " to genome " + fix.getDisplayName());
 			frame.getFeatureImporter ().importAnnotationFile (new File (
-					feature_file), fix);
+					feature_file), fix); 
+		}
 		if (ordered == null) {
 			ordered = new LinkedList (fix.getChromosomes());
 			args.put (ContigFeatureWriter.ORDERED_CONTIGS, ordered);
@@ -184,16 +167,19 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 
 	}
 	
+	/**
+	 * Third function in iterative loop
+	 */
 	protected void initModelData () {
 		initMauveData ();
 		lcbs = model.getFullLcbList ();
 		if (orderer == null || (active && orderer.shouldReorder ())) {
 			if (orderer == null){
-		//		System.err.println("AJT0403: ContigOrderer orderer == null.");
+				System.err.println("AJT0403: ContigOrderer orderer == null.");
 			}
 			fixContigs ();
 			if (orderer != null)
-				orderer.reorderDone ();
+				orderer.checkReorderDone ();
 		}
 	}
 	
@@ -234,10 +220,13 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 		fix_lcbs = new LCB [ids.length];
 		System.arraycopy (ids, 0, fix_lcbs, 0, ids.length);
 		Arrays.sort (fix_lcbs, id_compare);
-		if (input_file == null)
+		if (input_file == null) {
+			System.err.println("AJT0403: input_file at ContigReorderer.process() == null");
 			new ContigInverter (model, this);
-		else
+		}else{
+			System.err.println("AJT0403: input_file at ContigReorderer.process() != null");
 			new ContigInverter (model, this, input_file);
+		}
 	}
 	
 	public void output (boolean fasta) {

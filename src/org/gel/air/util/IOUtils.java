@@ -16,7 +16,7 @@ import java.util.Hashtable;
 public class IOUtils {
 	
 	public static void copyFile (File source, File dest) throws IOException {
-//		System.err.println("AJT0403: Copying...\n\t" + source.getAbsolutePath() +"\nto\n\t" + dest.getAbsolutePath());
+		System.out.println("AJT0403: Copying...\n\t" + source.getAbsolutePath() +"\nto\n\t" + dest.getAbsolutePath());
 	     FileChannel in = null, out = null;
 	     try {          
 	          in = new FileInputStream(source).getChannel();
