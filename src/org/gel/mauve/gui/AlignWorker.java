@@ -25,6 +25,12 @@ public class AlignWorker extends SwingWorker
     	this(align_listener,mauve_cmd,true);
     }
     
+    /**
+     * 
+     * @param align_listener
+     * @param mauve_cmd
+     * @param verbose true if redirect progressiveMauve output, false if suppress
+     */
     public AlignWorker (AlignmentProcessListener align_listener, String[] mauve_cmd, boolean verbose){
     	this.mauve_cmd = mauve_cmd;
         this.align_listener = align_listener;
@@ -35,7 +41,6 @@ public class AlignWorker extends SwingWorker
         	this.out = null;
         	this.err = null;
         }
-    	
     }
    
     public Object construct()
