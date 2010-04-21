@@ -159,7 +159,7 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 		 * this call to setOutput may be redundant. It should have already been called in setFileInput 
 		 */
 		setOutput (current_dir.getAbsolutePath());
-		super.worker = new AlignWorker(this, super.makeAlignerCommand());
+		super.worker = new AlignWorker(this, super.makeAlignerCommand(), false);
 		super.alignButtonActionPerformed(e);
 		setOutput (current_dir.getParentFile().getParentFile().getAbsolutePath());
 	}

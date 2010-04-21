@@ -423,16 +423,18 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
             return;
         }
         MyConsole.showConsole();
-        printCommand(mauve_cmd);
+      //  printCommand(mauve_cmd);
         if (worker == null)
         	worker = new AlignWorker(this, mauve_cmd);
+        System.out.println("Running alignment. Executing ");
+        AlignFrame.printCommand(worker.mauve_cmd, System.out);
         worker.start();
         cancelButton.setEnabled(true);
     }
     
     public void completeAlignment(int retcode)
     {
-    	System.out.println("Alignment complete.");
+    	System.out.println("Alignment complete!");
         alignButton.setEnabled(true);
         cancelButton.setEnabled(false);
         
