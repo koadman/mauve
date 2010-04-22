@@ -31,6 +31,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
 import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.stream.ImageOutputStream;
+import javax.management.RuntimeErrorException;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -47,23 +48,30 @@ import javax.swing.JTextField;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.PosixParser;
 import org.biojava.bio.seq.FeatureFilter;
 import org.biojava.bio.seq.FeatureHolder;
 import org.biojava.bio.seq.StrandedFeature;
 import org.biojava.bio.symbol.Location;
 import org.biojava.bio.symbol.LocationTools;
+import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.Genome;
 import org.gel.mauve.GenomeBuilder;
 import org.gel.mauve.LCB;
-import org.gel.mauve.MyConsole;
 import org.gel.mauve.SimilarityIndex;
 import org.gel.mauve.XMFAAlignment;
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.backbone.Backbone;
 import org.gel.mauve.backbone.BackboneList;
-import org.gel.mauve.gui.ExportFrame;
-import org.gel.mauve.gui.MauveRenderingHints;
 import org.gel.mauve.gui.RearrangementPanel;
+
 
 class Feature implements Comparable
 {
@@ -567,75 +575,77 @@ public class OneToOneOrthologExporter {
 		output.flush();
 		
 		// if requested to write a file of alignments then do that now
-		BufferedWriter xmfaout = new BufferedWriter(new FileWriter(oep.alignmentOutputFile));
-		for(int oI = 0; oI < orthologs.size(); oI++)
-		{
-			HashSet[] ortho = (HashSet[])orthologs.elementAt(oI);			
-			// for each sequence, construct the maximal coordinate range then select
-			// the maximal alignment column range among all sequences?
-			long maxalnRange = -1;
-			int maxalnSeq = -1;
-			long maxalnLeft = -1;
-			long maxalnRight = -1;
-			long[] seqlefts = new long[ortho.length];
-			long[] seqrights = new long[ortho.length];
-			for(int sI = 0; sI < ortho.length; sI++)
+		if(oep.alignmentOutputFile!=null){
+			BufferedWriter xmfaout = new BufferedWriter(new FileWriter(oep.alignmentOutputFile));
+			for(int oI = 0; oI < orthologs.size(); oI++)
 			{
-				long mincoord = 0;
-				long maxcoord = 0;
-				Iterator iter = ortho[sI].iterator();
-				while(iter.hasNext())
+				HashSet[] ortho = (HashSet[])orthologs.elementAt(oI);			
+				// for each sequence, construct the maximal coordinate range then select
+				// the maximal alignment column range among all sequences?
+				long maxalnRange = -1;
+				int maxalnSeq = -1;
+				long maxalnLeft = -1;
+				long maxalnRight = -1;
+				long[] seqlefts = new long[ortho.length];
+				long[] seqrights = new long[ortho.length];
+				for(int sI = 0; sI < ortho.length; sI++)
 				{
-					int osi = ((Integer)iter.next()).intValue();
-					Feature[] cdsi = (Feature[])allCds.elementAt(sI);
-					if(mincoord==0||mincoord>cdsi[osi].left)	mincoord=cdsi[osi].left;
-					if(maxcoord==0||maxcoord<cdsi[osi].right)	maxcoord=cdsi[osi].right;
-				}
-				seqlefts[sI]=mincoord;
-				seqrights[sI]=maxcoord;
-				Object[] aln = model.getXmfa().getRange(model.getGenomeBySourceIndex(sI), mincoord, maxcoord);
-				if(((byte[])aln[sI]).length > maxalnRange)
-				{
-					maxalnSeq=sI;
-					maxalnRange=((byte[])aln[sI]).length;
-					maxalnLeft = mincoord;
-					maxalnRight = maxcoord;
-				}
-			}
-			Object[] aln = model.getXmfa().getRange(model.getGenomeBySourceIndex(maxalnSeq), maxalnLeft, maxalnRight);
-			StringBuilder xmfaEntry = new StringBuilder();
-			for(int sI = 0; sI < ortho.length; sI++)
-			{
-				xmfaEntry.append(">");
-				xmfaEntry.append(sI);
-				Iterator iter = ortho[sI].iterator();
-				boolean first = true;
-				while(iter.hasNext())
-				{
-					if(first)
+					long mincoord = 0;
+					long maxcoord = 0;
+					Iterator iter = ortho[sI].iterator();
+					while(iter.hasNext())
 					{
-						xmfaEntry.append(":");
-						xmfaEntry.append(seqlefts[sI]);
-						xmfaEntry.append("-");
-						xmfaEntry.append(seqrights[sI]);
-						xmfaEntry.append(":");
-						first = false;
+						int osi = ((Integer)iter.next()).intValue();
+						Feature[] cdsi = (Feature[])allCds.elementAt(sI);
+						if(mincoord==0||mincoord>cdsi[osi].left)	mincoord=cdsi[osi].left;
+						if(maxcoord==0||maxcoord<cdsi[osi].right)	maxcoord=cdsi[osi].right;
 					}
-					else
-						xmfaEntry.append(",");
-					int osi = ((Integer)iter.next()).intValue();
-					Feature[] cdsi = (Feature[])allCds.elementAt(sI);
-					xmfaEntry.append(cdsi[osi].locus);
-					xmfaEntry.append(" ");
-					xmfaEntry.append(cdsi[osi].strand > 0 ? "+" : "-");
+					seqlefts[sI]=mincoord;
+					seqrights[sI]=maxcoord;
+					Object[] aln = model.getXmfa().getRange(model.getGenomeBySourceIndex(sI), mincoord, maxcoord);
+					if(((byte[])aln[sI]).length > maxalnRange)
+					{
+						maxalnSeq=sI;
+						maxalnRange=((byte[])aln[sI]).length;
+						maxalnLeft = mincoord;
+						maxalnRight = maxcoord;
+					}
 				}
-				xmfaEntry.append("\n");
-				xmfaEntry.append(format80(new String((byte[])aln[sI])));
+				Object[] aln = model.getXmfa().getRange(model.getGenomeBySourceIndex(maxalnSeq), maxalnLeft, maxalnRight);
+				StringBuilder xmfaEntry = new StringBuilder();
+				for(int sI = 0; sI < ortho.length; sI++)
+				{
+					xmfaEntry.append(">");
+					xmfaEntry.append(sI);
+					Iterator iter = ortho[sI].iterator();
+					boolean first = true;
+					while(iter.hasNext())
+					{
+						if(first)
+						{
+							xmfaEntry.append(":");
+							xmfaEntry.append(seqlefts[sI]);
+							xmfaEntry.append("-");
+							xmfaEntry.append(seqrights[sI]);
+							xmfaEntry.append(":");
+							first = false;
+						}
+						else
+							xmfaEntry.append(",");
+						int osi = ((Integer)iter.next()).intValue();
+						Feature[] cdsi = (Feature[])allCds.elementAt(sI);
+						xmfaEntry.append(cdsi[osi].locus);
+						xmfaEntry.append(" ");
+						xmfaEntry.append(cdsi[osi].strand > 0 ? "+" : "-");
+					}
+					xmfaEntry.append("\n");
+					xmfaEntry.append(format80(new String((byte[])aln[sI])));
+				}
+				xmfaEntry.append("=\n");
+				xmfaout.write(xmfaEntry.toString());
 			}
-			xmfaEntry.append("=\n");
-			xmfaout.write(xmfaEntry.toString());
+			xmfaout.flush();
 		}
-		xmfaout.flush();
 	}
 	
 	/* reformats a string to be 80 column width */
@@ -650,6 +660,141 @@ public class OneToOneOrthologExporter {
 			sb.append("\n");
 		}
 		return sb.toString();
+	}
+	
+	public static void main(String[] args){
+		Options opts = new Options();
+		opts.addOption( OptionBuilder
+			.withArgName("alignment file")
+			.hasArg()
+			.withDescription("A required parameter specifying an XMFA format file generated by progressiveMauve")
+			.isRequired()
+			.create('f')
+			);
+
+		opts.addOption( OptionBuilder
+				.withArgName("minimum nucleotide identity")
+				.hasArg()
+				.withDescription("Set the minimum nucleotide identity for homologs, ranges between [0,1]")
+				.create('n')
+				);
+
+		opts.addOption( OptionBuilder
+				.withArgName("maximum nucleotide identity")
+				.hasArg()
+				.withDescription("Set the maximum nucleotide identity for homologs, ranges between [0,1]")
+				.create('N')
+				);
+		
+		opts.addOption( OptionBuilder
+				.withArgName("minimum conserved length")
+				.hasArg()
+				.withDescription("Set the minimum fraction of the feature that must be conserved to consider it a homolog, ranges in [0.5,1]")
+				.create('l')
+				);
+
+		opts.addOption( OptionBuilder
+				.withArgName("maximum conserved length")
+				.hasArg()
+				.withDescription("Set the maximum fraction of the feature that must be conserved to consider it a homolog, ranges in [0.5,1]")
+				.create('L')
+				);
+
+		opts.addOption( OptionBuilder
+				.withArgName("feature type")
+				.hasArg()
+				.withDescription("Set the type of feature to use, possibilities include CDS, rRNA, tRNA, misc_RNA")
+				.create('t')
+				);
+
+		opts.addOption( OptionBuilder
+				.withArgName("predict unannotated")
+				.withDescription("Set this to include unannotated regions that meet the criteria for homology")
+				.create('p')
+				);
+		
+		opts.addOption( OptionBuilder
+				.withArgName("output alignments")
+				.withDescription("Should alignments of each region be generated?")
+				.create('a')
+				);
+		
+		opts.addOption( OptionBuilder
+				.withArgName("output file name")
+				.hasArg()
+				.withDescription("The name of the output file for the homologs")
+				.isRequired()
+				.create('o')
+				);
+
+		CommandLineParser parser = new GnuParser();
+		CommandLine line=null;
+		try{
+			line = parser.parse( opts, args );
+		}catch(org.apache.commons.cli.ParseException pe){
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp( 
+					"OneToOneOrthologExporter -f <XMFA alignment input> -o <ortholog output> [other options]", 
+					"The parameters -f and -o are required.  Other parameters include:",
+					opts,
+					"\nExample:\nOneToOneOrthologExporter -f my_aln.xmfa -o my_orthologs -n 0.6 -N 0.8 -a\n \n ");
+			
+			throw new RuntimeException("There was an error parsing your command-line options.  Please check them and try again.");
+		}
+		if(line.hasOption('a')){
+			System.out.println("it worked!!!");
+		}
+		
+		String alignment_xmfa = line.getOptionValue('f');
+		String output_file = line.getOptionValue('o');
+		OrthologExportParameters oep = new OrthologExportParameters();
+		if(line.hasOption('n')){
+			oep.min_nucleotide_id = Float.parseFloat(line.getOptionValue('n'));
+		}
+		if(line.hasOption('N')){
+			oep.max_nucleotide_id = Float.parseFloat(line.getOptionValue('N'));
+		}
+		if(line.hasOption('l')){
+			oep.min_conserved_length = Float.parseFloat(line.getOptionValue('l'));
+		}
+		if(line.hasOption('L')){
+			oep.max_conserved_length = Float.parseFloat(line.getOptionValue('L'));
+		}
+		if(line.hasOption('t')){
+			oep.featureType = line.getOptionValue('t');
+		}
+		if(line.hasOption('p')){
+			oep.predictUnannotated = true;
+		}else
+			oep.predictUnannotated = false;
+		if(line.hasOption('a')){
+			oep.alignmentOutputFile = new File(output_file + ".alignments");
+		}
+		
+		File xmfa_file = new File(alignment_xmfa);
+		BaseViewerModel bvm = null;
+		try{
+			bvm = org.gel.mauve.ModelBuilder.buildModel(xmfa_file, null);
+		}catch(Exception mfe){
+			mfe.printStackTrace();
+			throw new RuntimeException("Error reading input alignment file.");
+		}
+		if(!(bvm instanceof XmfaViewerModel)){
+			throw new RuntimeException("Error, alignment file must be in XMFA format");
+		}
+
+		BufferedWriter bw = null;
+		try{
+			bw = new BufferedWriter( new FileWriter(output_file));
+		}catch(Exception e){
+			throw new RuntimeException("Error opening output file " + output_file + " for writing.");
+		}
+		try{
+			export((XmfaViewerModel)bvm, bw, oep);
+		}catch(Exception e){
+			e.printStackTrace();
+			throw new RuntimeException("Error creating ortholog output.");			
+		}
 	}
 
 	static public class ExportFrame extends JFrame
