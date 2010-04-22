@@ -310,11 +310,11 @@ public class SnpExporter {
 		int gapI = 0;
 		while (gapI < v.size()-1){
 			if (v.get(gapI).getPosition() == v.get(gapI+1).getPosition()){
-				System.err.print("\nMerging gap of size " + v.get(gapI).getLength() +
-						" with a gap of size " + v.get(gapI+1).getLength() + ". ");
+		//		System.err.print("\nMerging gap of size " + v.get(gapI).getLength() +
+		//				" with a gap of size " + v.get(gapI+1).getLength() + ". ");
 				
 				Gap merge = Gap.mergeGaps(v.get(gapI), v.get(gapI+1));
-				System.err.println("Created gap of size " + merge.getLength());
+		//		System.err.println("Created gap of size " + merge.getLength());
 				v.remove(gapI);
 				v.remove(gapI);
 				v.insertElementAt(merge, gapI);

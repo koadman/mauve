@@ -1,6 +1,7 @@
 package org.gel.mauve.assembly;
 
 import java.awt.BorderLayout;
+
 import java.awt.Button;
 import java.awt.CardLayout;
 import java.awt.Dimension;
@@ -19,6 +20,8 @@ import java.io.PrintStream;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -27,22 +30,37 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.Genome;
 import org.gel.mauve.LCB;
+import org.gel.mauve.OptionsBuilder;
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.analysis.Gap;
 import org.gel.mauve.analysis.PermutationExporter;
 import org.gel.mauve.analysis.SNP;
 import org.gel.mauve.analysis.SnpExporter;
+import org.gel.mauve.contigs.ContigOrderer;
 import org.gel.mauve.dcjx.DCJ;
+import org.gel.mauve.gui.AlignFrame;
+import org.gel.mauve.gui.AlignWorker;
+import org.gel.mauve.gui.AlignmentProcessListener;
 import org.gel.mauve.gui.AnalysisDisplayWindow;
 
 
 import gr.zeus.ui.JConsole;
 
-public class ScoreAssembly {
+public class ScoreAssembly  {
 	
+	private static final String[] DEFAULT_ARGS = {"--skip-refinement",
+													"--weight=200"};
 	private static String SUM_CMD = "Summary";
 	private static String SUM_DESC = "Summary of scoring assembly";
 	private static String SNP_CMD = "SNPs";
@@ -70,19 +88,9 @@ public class ScoreAssembly {
 
 	private int fHEIGHT = 510;
 	
-	private JPanel toptopPanel;
-
-	private CardLayout cards;
-
-	private String box;
-	
 	private AssemblyScorer assScore;
-
-	private JFrame frame;
 	
 	private AnalysisDisplayWindow win;
-	
-	private XmfaViewerModel model;
 	
 	private static final String USAGE = 
 		"Usage: java -cp Mauve.jar org.gel.mauve.assembly.ScoreAssembly [options]\n" +
@@ -98,142 +106,142 @@ public class ScoreAssembly {
 		"\t--help\n\t\tprint this text.\n";
 	
 	public static void main(String[] args){
-		if (args.length == 0 || args[0].equalsIgnoreCase("--help") ){
-			System.err.println(USAGE);
-			System.exit(-1);
-		}
-		
-		RunTimeParam rtp = null;
+		Options OPTIONS = buildOptions();
+		CommandLine line = null;
 		try {
-			rtp = new RunTimeParam(args);
-		} catch (Exception e){
-			if (e.getMessage().equals(RunTimeParam.DUAL_MODE)){
-				System.err.println("You gave me an alignment along with a reference and/or assembly genome.\n" +
-						"Do not use use the \"--reference\" and \"--assembly\" flags with the \"--alignment\" flag.");
-				 
-			} else if (e.getMessage().startsWith(RunTimeParam.UNREC_ARG)){
-				System.err.println("Unrecognized argument: " + 
-						e.getMessage().substring(RunTimeParam.UNREC_ARG.length()));
-
-				System.err.println(USAGE);
-			} else if (e.getMessage().equals(RunTimeParam.HELP)){
-				System.err.println(USAGE);
-			} else {
-				e.printStackTrace();
-			}
+			CommandLineParser parser = new GnuParser();
+			line = parser.parse(OPTIONS, args);
+		} catch (ParseException exp){
+			System.err.println("Parsing Failed. Reason: " + exp.getMessage());
+		}
+		if (args.length == 0 || line == null || line.hasOption("help")){
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp(80,
+					"java -cp Mauve.jar org.gel.mauve.assembly.ScoreAssembly [options]",
+					"[options]", OPTIONS, "report bugs to me");
 			System.exit(-1);
 		}
+
+		File outDir =  null;
+		if (line.hasOption("outputDir"))
+			outDir = new File(line.getOptionValue("outputDir"));
+		else 
+			new File(System.getProperty("user.dir"));
 		
-		AssemblyScorer sa = null;
-		String basename = rtp.basename;
-		File outDir = rtp.outDir;		
+		boolean batch = false;
+		if (line.hasOption("batch"))
+			batch = true;
+		String basename = null;
+		if (line.hasOption("basename"))
+			basename = line.getOptionValue("basename");
+		
+		/*
+		 * have to get options here
+		 */
+		
+		File alnmtFile = null;
+		AssemblyScorer as = null;
+		
+		if (line.hasOption("alignment")){ 
+			if ((line.hasOption("reference") || line.hasOption("assembly"))){
+				System.err.println("You gave me an alignment along with a reference and/or assembly genome.\n" +
+				"Do not use use the \"-reference\" and \"-assembly\" flags with the \"-alignment\" flag.");
+				System.exit(-1);
+			}
+			alnmtFile = new File (line.getOptionValue("alignment"));
+			if (basename == null) {
+				basename = alnmtFile.getName();
+				basename = basename.substring(0,basename.lastIndexOf("."));
+			}
+			as = getAS(alnmtFile);
+			AssemblyScorer.printInfo(as,outDir,basename,batch);
+		} else {
+			if (!line.hasOption("reference")){
+				System.err.println("Reference file not given.");
+				System.exit(-1);
+			} else if (!line.hasOption("assembly")){
+				System.err.println("Assembly file not given.");
+				System.exit(-1);
+			}
+			File refFile = new File(line.getOptionValue("reference"));
+			File assPath = new File(line.getOptionValue("assembly"));
+			if (line.hasOption("reorder")){
+				String reorderDir = line.getOptionValue("reorder");
+				ContigOrderer co = new ContigOrderer(refFile, assPath,
+												new File(reorderDir));
+				alnmtFile = co.getFinalAlignmentFile();
+				as = getAS(alnmtFile);
+				AssemblyScorer.printInfo(as,outDir,basename,batch);
+			} else {
+				if (basename == null) {
+					basename = alnmtFile.getName();
+					basename = basename.substring(0,basename.lastIndexOf("."));
+				}
+				alnmtFile = new File(outDir, basename+".xmfa");
+				as = new AssemblyScorer(alnmtFile, outDir);
+				String[] cmd = makeAlnCmd(refFile,assPath, alnmtFile);
+				System.out.println("Executing");
+				AlignFrame.printCommand(cmd, System.out);
+				AlignWorker worker = new AlignWorker(as, cmd);
+				worker.start();
+			}
+			
+		}
+	} 
+	
+	private static AssemblyScorer getAS(File alnmtFile){
 		try {
 			//sa = new ScoreAssembly(args,true);
-			XmfaViewerModel model = new XmfaViewerModel(rtp.alnmtFile,null);
-			sa = new AssemblyScorer(model);
+			XmfaViewerModel model = new XmfaViewerModel(alnmtFile,null);
+			return new AssemblyScorer(model);
 		} catch (Exception e){
 			e.printStackTrace();
 			System.exit(-1);
 		}
-
-		
-		AssemblyScorer.printInfo(sa,outDir,basename,rtp.batch);
-		
-	} 
-	
-	private static class RunTimeParam{
-		static String UNREC_ARG = "unrecognized argument";
-		/**
-		 * If the user passes in both an alignment and
-		 * the reference and/or assembly genomes.
-		 */
-		static String DUAL_MODE = "dual mode";
-		static String HELP = "help";
-		
-		String basename;
-		File outDir;
-		boolean batch = false;
-		
-		boolean alnmtSet = false;
-		String alnmtPath;
-		File alnmtFile;
-		
-		boolean refSet = false;
-		String refPath;
-		File refFile;
-		boolean assSet = false;
-		String assPath;
-		File assFile;
-		
-		
-		RunTimeParam(String[] args) throws Exception {
-			int i = 0;
-			while (i < args.length){
-				if (args[i].equalsIgnoreCase("--alignment")){
-					i++;
-					alnmtSet = true;
-					if (refSet || assSet)
-						throw new Exception(DUAL_MODE);
-					alnmtPath = args[i];
-					i++;
-				} else if (args[i].equalsIgnoreCase("--reference")){
-					i++;
-					refSet = true;
-					if (alnmtSet)
-						throw new Exception(DUAL_MODE);
-					refPath = args[i];
-					i++;
-				} else if (args[i].equalsIgnoreCase("--assembly")){
-					i++;
-					assSet = true;
-					if (alnmtSet)
-						throw new Exception(DUAL_MODE);
-					assPath = args[i];
-					i++;
-				} else if (args[i].equalsIgnoreCase("--outDir")){
-					i++;
-					outDir = new File(args[i]);
-					if (!outDir.exists()){
-						outDir.mkdir();
-					}
-					i++;
-				} else if (args[i].equalsIgnoreCase("--batch")){
-					batch = true;
-					i++;
-				} else if (args[i].equalsIgnoreCase("--help")){
-					throw new Exception(HELP);
-				} else {
-					throw new Exception (UNREC_ARG+args[i]);
-				}
-			}
-			
-			if (outDir == null){
-				outDir = new File(System.getProperty("user.dir"));
-			}
-			
-			if (alnmtSet){
-				basename = alnmtPath.substring(alnmtPath.lastIndexOf("/")+1,alnmtPath.lastIndexOf("."));
-				alnmtFile = new File(alnmtPath);
-			} else if (refSet && assSet){
-				
-			} else {
-				System.err.println("Bad RunTimeParam.class");
-			}
-			
-			
-		}
-		
+		return null;
 	}
+	
+	private static String[] makeAlnCmd(File seq1, File seq2, File output){
+		String[] ret = new String[6 + DEFAULT_ARGS.length];
+		int j = 0;
+		ret[j++] = AlignFrame.getBinaryPath("progressiveMauve");
+		for (int i = 0; i < DEFAULT_ARGS.length; i++)
+			ret[j++] = DEFAULT_ARGS[i];
+		ret[j++] = "--output="+output.getAbsolutePath();
+		ret[j++] = "--backbone-output=" + output.getAbsolutePath()+".backbone";
+		ret[j++] = "--output-guide-tree=" + output.getAbsolutePath()+".guide_tree";
+		ret[j++] = seq1.getAbsolutePath();
+		ret[j++] = seq2.getAbsolutePath();
+		return ret;
+	}
+	
+	@SuppressWarnings("static-access")
+	private static Options buildOptions(){
+		OptionsBuilder ob = new OptionsBuilder();
+		ob.addBoolean("help", "print this message");
+		ob.addBoolean("batch", "run in batch mode i.e. print summary output " +
+											"on one line to standard output");
+		ob.addArgument("string", "basename for output files", "basename");
+		ob.addArgument("directory", "reorder contigs before scoring " +
+						"assembly and store output in <directory>", "reorder");
+		ob.addArgument("directory", "save output in <directory>. Default " +
+									"is current directory.", "outputDir");
+		ob.addArgument("file", "file containing alignment of assembly to " +
+											"reference genome", "alignment");
+		ob.addArgument("file", "file containing reference genome", "reference");
+		ob.addArgument("file", "file containing assembly/draft genome to score",
+																	"assembly");
+		
+		return ob.getOptions();
+	}
+	
 	
 
 	public ScoreAssembly(XmfaViewerModel model){
-	//	build(model);
-		this.model = model;
 		win = new AnalysisDisplayWindow("Score Assembly - "+model.getSrc().getName(), fWIDTH, fHEIGHT);
 		sumTA = win.addContentPanel(SUM_CMD, SUM_DESC, true);
 		snpTA = win.addContentPanel(SNP_CMD, SNP_DESC, false);
 		gapTA = win.addContentPanel(GAP_CMD, GAP_DESC, false);
-		
 		sumTA.append(temp);
 		snpTA.append(temp);
 		gapTA.append(temp);
@@ -345,86 +353,7 @@ public class ScoreAssembly {
 		}
 		return sb.toString();
 	}
-	
-	private void build (XmfaViewerModel model) {
-		frame = new JFrame ("Assembly Score - " + model.getSrc().getName());
-		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-		int xPos = dim.width - fWIDTH;
-		frame.setSize (fWIDTH, fHEIGHT);
-		frame.setLocation(xPos, 0);
-		
-		JPanel content = new JPanel (new BorderLayout ());
-		
-		frame.getContentPane ().add (content, BorderLayout.CENTER);
-		box = "";
-		// /create top panel
-		JPanel topPanel = new JPanel ();
 
-		topPanel.setLayout (new BorderLayout ());
-		// top top panel with cards
-		cards = new CardLayout ();
-		toptopPanel = new JPanel ();
-		toptopPanel.setLayout (cards);
-		topPanel.add (toptopPanel, BorderLayout.CENTER);
-		
-		// top lower panel of buttons
-		JPanel toplowerPanel = new JPanel ();
-		GridLayout butts = new GridLayout (1, 0);
-		butts.setHgap (50);
-		toplowerPanel.setLayout (butts);
-		topPanel.add (toplowerPanel, BorderLayout.SOUTH);
-		// make buttons
-		JButton Bsum = new JButton (SUM_CMD);
-		JButton Bsnps = new JButton (SNP_CMD);
-		JButton Bgaps = new JButton (GAP_CMD);
-		toplowerPanel.add (Bsum);
-		toplowerPanel.add (Bsnps);
-		toplowerPanel.add (Bgaps);
-		
-		// make listener
-		ChangeCards cc = new ChangeCards ();
-		// register buttons
-		Bsum.addActionListener (cc);
-		Bsnps.addActionListener (cc);
-		Bgaps.addActionListener (cc);
-		// /add the top panel
-		
-		
-		content.add (topPanel, BorderLayout.CENTER);
-
-		Font font = new Font ("monospaced", Font.PLAIN, 12);
-		font.getSize2D();
-		
-		// /Add output text to cards panel
-		sumTA = new JTextArea (box, 0, 0);
-		sumTA.setEditable (false);
-		sumTA.setFont (font);
-		toptopPanel.add (SUM_DESC, sumTA);
-		
-		
-		cards.show (toptopPanel, SUM_DESC);
-		// /Add DCJ Operations text to cards panel
-		snpTA = new JTextArea (box, 0, 0);
-		snpTA.setEditable (false);
-		snpTA.setFont (font);
-		toptopPanel.add (SNP_DESC, snpTA);
-		// /Add log text area
-		gapTA = new JTextArea (box, 0, 0);
-		gapTA.setEditable (false);
-		gapTA.setFont (font);
-		toptopPanel.add (GAP_DESC, gapTA);
-		sumTA.setText ("");
-		frame.setVisible (true);
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setViewportView(content);
-		scrollPane.setSize(fWIDTH, fHEIGHT);
-		scrollPane.setVisible(true);
-		frame.add(scrollPane);
-		frame.pack();
-		
-	}
-
-	
 	/**
 	 * 
 	 * @param refPath
@@ -476,7 +405,7 @@ public class ScoreAssembly {
 			if (c_0 != c_1)
 				subs[getBaseIdx(c_0)][getBaseIdx(c_1)]++;
 			} catch (IllegalArgumentException e){
-				System.err.println("Skipping ambiguity: ref = " +c_0 +" assembly = " + c_1 );
+				//System.err.println("Skipping ambiguity: ref = " +c_0 +" assembly = " + c_1 );
 			}
 		}
 		return subs;
@@ -508,32 +437,4 @@ public class ScoreAssembly {
 			System.err.println("Can't score assembly -- Please report this bug!");
 		}	
 	}
-	
-	private class ChangeCards implements ActionListener {
-		public void actionPerformed (ActionEvent e) {
-			if (e.getActionCommand () == SUM_CMD) {
-				cards.show (toptopPanel, SUM_DESC);
-			}
-			if (e.getActionCommand () == SNP_CMD) {
-				cards.show (toptopPanel, SNP_DESC);
-			}
-			if (e.getActionCommand () == GAP_CMD) {
-				cards.show (toptopPanel, GAP_DESC);
-			}
-		}// end actionPerformed
-	}// end ChangeCards
-
-	
-
-	 private static OutputStream ta2os(final TextArea t)
-	    { return new OutputStream()
-	       { TextArea ta = t;
-	         public void write(int b) //minimum implementation of an OutputStream
-	          { byte[] bs = new byte[1]; bs[0] = (byte) b;
-	            ta.append(new String(bs));
-	          }//write
-	       };
-	    }
-	
-	
 }

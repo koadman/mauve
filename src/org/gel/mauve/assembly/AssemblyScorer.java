@@ -14,16 +14,17 @@ import org.gel.mauve.analysis.PermutationExporter;
 import org.gel.mauve.analysis.SNP;
 import org.gel.mauve.analysis.SnpExporter;
 import org.gel.mauve.dcjx.DCJ;
+import org.gel.mauve.gui.AlignmentProcessListener;
 
-public class AssemblyScorer {
+public class AssemblyScorer implements AlignmentProcessListener {
 
-	private String refPath;
+	private File alnmtFile;
 	
-	private String assPath;
+	private File outputDir;
 	
-	private String xmfaPath;
-
-	private String outDirPath;
+	private boolean batch;
+	
+	private String basename;
 	
 	private XmfaViewerModel model; 
 	
@@ -37,25 +38,39 @@ public class AssemblyScorer {
 	
 	private DCJ dcj;
 	
-	public AssemblyScorer(String[] args, boolean reorder) throws IOException{
-	//	File xmfaFile = ScoreAssembly.runPMauveAlnmt(args[0],args[1],args[2],reorder);
-	//	model = new XmfaViewerModel(xmfaFile, null);
-		refPath = args[0];
-		assPath = args[1];
-		outDirPath = args[2]; 	
-		loadInfo();
-		
-		Arrays.sort(assGaps);
-		Arrays.sort(refGaps);
-	}
-	
 	public AssemblyScorer(XmfaViewerModel model){
 		this.model = model;
 		loadInfo();
-		Arrays.sort(assGaps);
-		Arrays.sort(refGaps);
 	}
 	
+	public AssemblyScorer(File alnmtFile, File outDir) {
+		this.alnmtFile = alnmtFile;
+		this.outputDir = outDir;
+		basename = alnmtFile.getName();
+		basename = basename.substring(0,basename.lastIndexOf("."));
+		batch = false;
+	}
+	
+	public void completeAlignment(int retcode){
+		if (retcode == 0) {
+			try {
+				this.model = new XmfaViewerModel(alnmtFile,null);
+			} catch (IOException e) {
+				System.err.println("Couldn't load alignment file " 
+									+ alnmtFile.getAbsolutePath());
+				e.printStackTrace();
+			}
+			loadInfo();
+			printInfo(this, outputDir, basename, batch);
+		} else { 
+			System.err.println("Alignment failed with error code "+ retcode);
+		}
+			
+	}
+	
+	/**
+	 * computes info. sorts gaps and snps
+	 */
 	private void loadInfo(){
 		model.setReference(model.getGenomeBySourceIndex(0));
 		
@@ -81,6 +96,8 @@ public class AssemblyScorer {
 		
 		refGaps = tmp[0];
 		assGaps = tmp[1];
+		Arrays.sort(assGaps);
+		Arrays.sort(refGaps);
 	}
 
 	public DCJ getDCJ(){

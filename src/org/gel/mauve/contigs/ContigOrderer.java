@@ -76,7 +76,6 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 	 * @param gui true if instantiate GUI, false otherwise
 	 */
 	public ContigOrderer (String [] args, Vector frames, boolean gui) {
-		
 		// init (args, frames, gui);
 		
 		
@@ -120,6 +119,22 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 		this (args, frames, true);
 	}
 	
+	public ContigOrderer (File reference, File draft, File directory){
+		this.reference = reference;
+		this.unordered = draft;
+		this.directory = directory;
+		copyInputFiles();
+		startAlignment(false);
+	}
+	
+	public File getFinalAlignmentFile(){
+		return alnmtFile;
+	}
+	
+	public File getFinalOrderFile(){
+		return unordered;
+	}
+	
 	/**
 		 * This is what Anna has written to run the Reoderer without the GUI components.
 		 * Too bad it actually instantiates the GUI components.
@@ -143,14 +158,14 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 					error = "Output dir not given";
 				if (pairs.containsKey(REF_FILE)) {
 					System.out.println("Setting reference file: " + pairs.get(REF_FILE));
-					data.setRefPath(pairs.get(REF_FILE));
+				//	data.setRefPath(pairs.get(REF_FILE));
 					reference = new File(pairs.get(REF_FILE));
 				}
 				else
 					error = "no reference file given";
 				if (pairs.containsKey(DRAFT_FILE)) {
 					System.out.println("Setting draft file: " + pairs.get(DRAFT_FILE));
-					data.setDraftPath(pairs.get(DRAFT_FILE));
+				//	data.setDraftPath(pairs.get(DRAFT_FILE));
 					unordered = new File(pairs.get(DRAFT_FILE));
 				}
 				else

@@ -329,7 +329,7 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
         String os_type = System.getProperty("os.name");
         String os_arch = System.getProperty("os.arch");
 
-        MyConsole.out().println("OS name is: " + os_type + " arch: " + os_arch);
+        //MyConsole.out().println("OS name is: " + os_type + " arch: " + os_arch);
         if (os_type.startsWith("Windows"))
         {
         	if(os_arch.indexOf("64") >= 0)

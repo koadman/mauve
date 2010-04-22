@@ -96,6 +96,8 @@ public class AnalysisDisplayWindow extends JFrame {
 
 		if (botBar.getComponentCount() <= 1)
 			botBar.setVisible(false);
+		if (!frame.isVisible())
+			frame.setLocation(xMax-this.width, 0);
 		frame.setVisible(true);
 	}
 
