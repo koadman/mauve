@@ -156,6 +156,7 @@ public class ScoreAssembly  {
 			as = getAS(alnmtFile);
 			AssemblyScorer.printInfo(as,outDir,basename,batch);
 		} else {
+			
 			if (!line.hasOption("reference")){
 				System.err.println("Reference file not given.");
 				System.exit(-1);
@@ -163,22 +164,26 @@ public class ScoreAssembly  {
 				System.err.println("Assembly file not given.");
 				System.exit(-1);
 			}
+			
 			File refFile = new File(line.getOptionValue("reference"));
 			File assPath = new File(line.getOptionValue("assembly"));
+			
 			if (line.hasOption("reorder")){
 				String reorderDir = line.getOptionValue("reorder");
 				ContigOrderer co = new ContigOrderer(refFile, assPath,
 												new File(reorderDir));
-				alnmtFile = co.getFinalAlignmentFile();
-				as = getAS(alnmtFile);
-				AssemblyScorer.printInfo(as,outDir,basename,batch);
+				if (basename != null)
+					as = new AssemblyScorer(co, outDir, basename);
+				else 
+					as = new AssemblyScorer(co, outDir);
+				co.addAlnmtListener(as);
 			} else {
 				if (basename == null) {
-					basename = alnmtFile.getName();
+					basename = assPath.getName();
 					basename = basename.substring(0,basename.lastIndexOf("."));
 				}
 				alnmtFile = new File(outDir, basename+".xmfa");
-				as = new AssemblyScorer(alnmtFile, outDir);
+				as = new AssemblyScorer(alnmtFile, outDir, basename);
 				String[] cmd = makeAlnCmd(refFile,assPath, alnmtFile);
 				System.out.println("Executing");
 				AlignFrame.printCommand(cmd, System.out);
@@ -248,7 +253,7 @@ public class ScoreAssembly  {
 		win.showWindow();
 		assScore = new AssemblyScorer(model);
 		sumTA.replaceRange("", 0, temp.length());
-		setSumText(true,false);
+		sumTA.setText(getSumText(assScore,true,false));
 		snpTA.replaceRange("", 0, temp.length());
 		gapTA.replaceRange("", 0, temp.length());
 		setInfoText();
@@ -279,7 +284,7 @@ public class ScoreAssembly  {
 		
 	}
 	
-	private void setSumText(boolean header, boolean singleLine){
+	public static String getSumText(AssemblyScorer assScore, boolean header, boolean singleLine){
 		NumberFormat nf = NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(4);
 		StringBuilder sb = new StringBuilder();
@@ -314,7 +319,7 @@ public class ScoreAssembly  {
 					"Percent bases missed:\t" + nf.format(assScore.percentMissedBases()*100)+" %\n\n"+
 					"Total bases extra in assembly:\t" + assScore.totalExtraBases()+"\n\n" +
 					"Percent bases extra:\t" + nf.format(assScore.percentExtraBases()*100)+ " %\n\n"+
-					"Substitutions (Ref on Y, Assembly on X):\n"+subsToString()
+					"Substitutions (Ref on Y, Assembly on X):\n"+subsToString(assScore)
 				);
 				
 				
@@ -331,14 +336,14 @@ public class ScoreAssembly  {
 						 nf.format(assScore.percentMissedBases()*100)+"\n"+
 						 assScore.totalExtraBases()+"\n" +
 						 nf.format(assScore.percentExtraBases()*100)+ "\n"+
-						 subsToString());
+						 subsToString(assScore));
 			}
 		}
 		
-		sumTA.setText(sb.toString());
+		return sb.toString();
 	}
 	
-	private String subsToString(){
+	private static String subsToString(AssemblyScorer assScore){
 		// A C T G
 		StringBuilder sb = new StringBuilder();
 		sb.append("\tA\tC\tT\tG\n");

@@ -13,11 +13,14 @@ import org.gel.mauve.analysis.Gap;
 import org.gel.mauve.analysis.PermutationExporter;
 import org.gel.mauve.analysis.SNP;
 import org.gel.mauve.analysis.SnpExporter;
+import org.gel.mauve.contigs.ContigOrderer;
 import org.gel.mauve.dcjx.DCJ;
 import org.gel.mauve.gui.AlignmentProcessListener;
 
 public class AssemblyScorer implements AlignmentProcessListener {
 
+	private ContigOrderer co;
+	
 	private File alnmtFile;
 	
 	private File outputDir;
@@ -51,8 +54,31 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		batch = false;
 	}
 	
+	public AssemblyScorer(File alnmtFile, File outDir, String basename) {
+		this(alnmtFile,outDir);
+		this.basename = basename;
+	}
+	
+	public AssemblyScorer(ContigOrderer co, File outDir) {
+		this.co = co;
+		this.outputDir = outDir;
+		batch = false;
+	}
+	
+	public AssemblyScorer(ContigOrderer co, File outDir, String basename) {
+		this(co,outDir);
+		this.basename = basename;
+	}
+	
 	public void completeAlignment(int retcode){
 		if (retcode == 0) {
+			if (co != null){
+				alnmtFile = co.getFinalAlignmentFile();
+				if (basename == null) {
+					basename = alnmtFile.getName();
+					basename = basename.substring(0,basename.lastIndexOf("."));
+				}
+			}
 			try {
 				this.model = new XmfaViewerModel(alnmtFile,null);
 			} catch (IOException e) {
@@ -208,10 +234,12 @@ public class AssemblyScorer implements AlignmentProcessListener {
 			System.exit(-1);    
 		}
 		printInfo(sa,snpOut,gapOut);
-		if (batch)
-			printSummary(sa,sumOut,false,true);
-		else 
-			printSummary(sa,sumOut,true,true);
+		if (batch){
+		    sumOut.print(ScoreAssembly.getSumText(sa, false, true));	
+		}else {
+		    sumOut.print(ScoreAssembly.getSumText(sa, true, true));
+		}
+		
 		gapOut.close();
 		snpOut.close();
 		sumOut.close();
@@ -250,7 +278,7 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		
 	}
 	
-	public static void printSummary(AssemblyScorer sa, PrintStream out, boolean header, boolean singleLine){
+	private static void printSummary(AssemblyScorer sa, PrintStream out, boolean header, boolean singleLine){
 		NumberFormat nf = NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(4);
 		StringBuilder sb = new StringBuilder();

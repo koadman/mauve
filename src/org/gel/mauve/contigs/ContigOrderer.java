@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Vector;
 import java.util.prefs.BackingStoreException;
@@ -37,6 +38,8 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 	protected static final String OUTPUT_DIR = "-output";
 	protected static final String REF_FILE = "-ref";
 	protected static final String DRAFT_FILE = "-draft";
+	
+	private Vector<AlignmentProcessListener> alnListeners;
 	
 	protected File directory;
 	protected File unordered;
@@ -98,6 +101,7 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 		} else {
 			data = new ContigMauveDataModel();
 		}
+		alnListeners = new Vector<AlignmentProcessListener>();
 ///////////////////////////////////////////////////////////////////
 		
 		if (gui) {
@@ -120,11 +124,20 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 	}
 	
 	public ContigOrderer (File reference, File draft, File directory){
+		this.gui = false;
+		this.iterations = 25;
+		this.past_orders = new Vector();
 		this.reference = reference;
 		this.unordered = draft;
 		this.directory = directory;
+		alnListeners = new Vector<AlignmentProcessListener>();
+		reorderer = new ContigReorderer(this);
 		copyInputFiles();
-		startAlignment(false);
+		startAlignment(false);	
+	}
+	
+	public void addAlnmtListener(AlignmentProcessListener listener){
+		alnListeners.add(listener);
 	}
 	
 	public File getFinalAlignmentFile(){
@@ -369,7 +382,12 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 							"Reorder Done", JOptionPane.INFORMATION_MESSAGE);
 					reorderer.inverted_from_start.clear ();
 				}
-				else {
+				else if (alnListeners != null){
+					Iterator<AlignmentProcessListener> it = alnListeners.iterator();
+					while (it.hasNext()){
+						it.next().completeAlignment(0);
+					}
+				} else {
 					System.exit(0);
 				}
 			}
