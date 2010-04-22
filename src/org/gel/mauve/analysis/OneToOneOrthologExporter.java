@@ -663,6 +663,7 @@ public class OneToOneOrthologExporter {
 	}
 	
 	public static void main(String[] args){
+		OrthologExportParameters oep = new OrthologExportParameters();
 		Options opts = new Options();
 		opts.addOption( OptionBuilder
 			.withArgName("alignment file")
@@ -675,35 +676,35 @@ public class OneToOneOrthologExporter {
 		opts.addOption( OptionBuilder
 				.withArgName("minimum nucleotide identity")
 				.hasArg()
-				.withDescription("Set the minimum nucleotide identity for homologs, ranges between [0,1]")
+				.withDescription("Set the minimum nucleotide identity for homologs, ranges between [0,1], default " + oep.min_nucleotide_id)
 				.create('n')
 				);
 
 		opts.addOption( OptionBuilder
 				.withArgName("maximum nucleotide identity")
 				.hasArg()
-				.withDescription("Set the maximum nucleotide identity for homologs, ranges between [0,1]")
+				.withDescription("Set the maximum nucleotide identity for homologs, ranges between [0,1], default " + oep.max_nucleotide_id)
 				.create('N')
 				);
 		
 		opts.addOption( OptionBuilder
 				.withArgName("minimum conserved length")
 				.hasArg()
-				.withDescription("Set the minimum fraction of the feature that must be conserved to consider it a homolog, ranges in [0.5,1]")
+				.withDescription("Set the minimum fraction of the feature that must be conserved to consider it a homolog, ranges in [0.5,1], default " + oep.min_conserved_length)
 				.create('l')
 				);
 
 		opts.addOption( OptionBuilder
 				.withArgName("maximum conserved length")
 				.hasArg()
-				.withDescription("Set the maximum fraction of the feature that must be conserved to consider it a homolog, ranges in [0.5,1]")
+				.withDescription("Set the maximum fraction of the feature that must be conserved to consider it a homolog, ranges in [0.5,1], default " + oep.max_conserved_length)
 				.create('L')
 				);
 
 		opts.addOption( OptionBuilder
 				.withArgName("feature type")
 				.hasArg()
-				.withDescription("Set the type of feature to use, possibilities include CDS, rRNA, tRNA, misc_RNA")
+				.withDescription("Set the type of feature to use, possibilities include CDS, rRNA, tRNA, misc_RNA, default " + oep.featureType)
 				.create('t')
 				);
 
@@ -747,7 +748,6 @@ public class OneToOneOrthologExporter {
 		
 		String alignment_xmfa = line.getOptionValue('f');
 		String output_file = line.getOptionValue('o');
-		OrthologExportParameters oep = new OrthologExportParameters();
 		if(line.hasOption('n')){
 			oep.min_nucleotide_id = Float.parseFloat(line.getOptionValue('n'));
 		}
