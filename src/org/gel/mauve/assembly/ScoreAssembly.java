@@ -1,62 +1,24 @@
 package org.gel.mauve.assembly;
 
-import java.awt.BorderLayout;
-
-import java.awt.Button;
-import java.awt.CardLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.Panel;
-import java.awt.TextArea;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.text.NumberFormat;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Vector;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.gel.mauve.BaseViewerModel;
-import org.gel.mauve.Genome;
-import org.gel.mauve.LCB;
 import org.gel.mauve.OptionsBuilder;
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.analysis.Gap;
-import org.gel.mauve.analysis.PermutationExporter;
 import org.gel.mauve.analysis.SNP;
-import org.gel.mauve.analysis.SnpExporter;
 import org.gel.mauve.contigs.ContigOrderer;
-import org.gel.mauve.dcjx.DCJ;
 import org.gel.mauve.gui.AlignFrame;
 import org.gel.mauve.gui.AlignWorker;
-import org.gel.mauve.gui.AlignmentProcessListener;
 import org.gel.mauve.gui.AnalysisDisplayWindow;
-
-
-import gr.zeus.ui.JConsole;
 
 public class ScoreAssembly  {
 	
