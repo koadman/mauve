@@ -19,6 +19,7 @@ import javax.swing.JOptionPane;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.gel.air.util.IOUtils;
@@ -42,9 +43,9 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 	public static final int DEFAULT_ITERATIONS = 25;
 	public static final String ALIGN_START = "Start from alignment file.";
 	public static final String SEQ_START = "Start from sequence files.";
-	protected static final String OUTPUT_DIR = "-output";
-	protected static final String REF_FILE = "-ref";
-	protected static final String DRAFT_FILE = "-draft";
+	protected static final String OUTPUT_DIR = "output";
+	protected static final String REF_FILE = "ref";
+	protected static final String DRAFT_FILE = "draft";
 	
 	private Vector<AlignmentProcessListener> alnListeners;
 	
@@ -85,8 +86,8 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 	 * @param frames 
 	 * @param gui true if instantiate GUI, false otherwise
 	 */
-	public ContigOrderer (String [] args, Vector frames, boolean gui) {
-		this.gui = gui;
+	public ContigOrderer (String [] args) {
+		this.gui = false;
 		past_orders = new Vector ();
 		iterations = DEFAULT_ITERATIONS;
 /*
@@ -107,20 +108,10 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 			}
 		}*/
 		reorderer = new ContigReorderer (this);
-		if (gui) {
-			reordererGUI = new ContigReordererGUI(reorderer, frames);
-			align_frame = new ContigMauveAlignFrame (reordererGUI, this);
-		} else {
-			data = new ContigMauveDataModel();
-		}
 		alnListeners = new Vector<AlignmentProcessListener>();
-		if (gui) {
-			initGUI ();
-			startAlignment(true);
-		} else {
-			initParamsNoGUI (args);
-			startAlignment(false);
-		}
+		initParamsNoGUI (args);
+		startAlignment(false);
+		
 	}
 	
 	/**
@@ -133,6 +124,7 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 		this.gui = true;
 		past_orders = new Vector ();
 		iterations = DEFAULT_ITERATIONS;
+		reorderer = new ContigReorderer(this);
 		reordererGUI = new ContigReordererGUI(reorderer, frames);
 		align_frame = new ContigMauveAlignFrame (reordererGUI, this);
 		alnListeners = new Vector<AlignmentProcessListener>();
@@ -498,33 +490,17 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 	
 	
 	public static void main (String [] args) {	
-	//	System.err.println("Well, well, well.... I see you want me to reorder some contigs for you... good luck... HAH!");
-		if (args.length != 6){
-			System.err.print(USAGE);
+		
+		CommandLine line = OptionsBuilder.getCmdLine(getOptions(), args);
+		if (args == null || line == null || line.hasOption("help")){	
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp(80,
+					"java -cp Mauve.jar org.gel.mauve.contigs.ContigOrderer [options]",
+					"[options]", getOptions(), "This feature of Mauve is not yet implemented");
 			System.exit(-1);
-		} else  {
-			String badArgs = badArgs(args);
-			if (badArgs.length()==0) {
-				ContigOrderer co = new ContigOrderer (args, null, false);
-				//System.err.println("CALLING startAlignment()");
-				//co.startAlignment(false);
-			} else {
-				System.err.println("The following arguments are missing or were used improperly:  " + badArgs);
-				System.err.print(USAGE);
-				System.exit(-1);
-			}
-				
+		} else {
+			new ContigOrderer(args);
 		}
-	}
-	
-	private static boolean argsGood(String[] args){
-		HashSet<String> tmp = new HashSet<String>();
-		tmp.add(args[0]);
-		tmp.add(args[2]);
-		tmp.add(args[4]);
-		return  tmp.contains(OUTPUT_DIR) && 
-				tmp.contains(DRAFT_FILE) && 
-				tmp.contains(REF_FILE);
 	}
 	
 	private static String badArgs(String[] args){

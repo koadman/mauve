@@ -574,10 +574,10 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 	 * NOTE I don't think this ever gets called or is even necessary
 	 */
 	public static void main (String [] args) {		
-		if (args.length > 0)
+	/*	if (args.length > 0)
 			new ContigReorderer ().init (args);
 		else
-			new ContigOrderer (null); 
+			new ContigOrderer (null);*/ 
 	}
 	
 	
