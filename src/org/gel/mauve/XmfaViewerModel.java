@@ -238,11 +238,19 @@ public class XmfaViewerModel extends LcbViewerModel {
         
         // try publishing this viewer model via DBus
         try{
+    	try{
+        try{
 	       	mdCommunicator = new MauveDisplayCommunicator(this);
+        }catch(UnsatisfiedLinkError ule){}
+        }catch(NoClassDefFoundError ncdfe){}
         }catch(Exception e){/*maybe DBus doesn't exist*/ }
         // try connecting to a warg instance
         try{
+    	try{
+        try{
         	wdCommunicator = new WargDisplayCommunicator(this);
+        }catch(UnsatisfiedLinkError ule){}
+        }catch(NoClassDefFoundError ncdfe){}
         }catch(Exception e){/*maybe DBus doesn't exist*/ }
     }
     MauveDisplayCommunicator mdCommunicator = null;
