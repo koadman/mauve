@@ -426,7 +426,7 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
       //  printCommand(mauve_cmd);
         if (worker == null)
         	worker = new AlignWorker(this, mauve_cmd);
-        System.out.println("Running alignment. Executing ");
+        System.out.println("Running alignment.\nExecuting ");
         AlignFrame.printCommand(worker.mauve_cmd, System.out);
         worker.start();
         cancelButton.setEnabled(true);
