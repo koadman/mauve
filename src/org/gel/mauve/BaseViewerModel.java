@@ -170,7 +170,7 @@ public class BaseViewerModel {
 	 * 
 	 * @return Vector of genomes
 	 */
-	public Vector getGenomes () {
+	public Vector<Genome> getGenomes () {
 		Vector ret = new Vector ();
 		for (int i = 0; i < genomes.length; i++)
 			ret.add (genomes[i]);

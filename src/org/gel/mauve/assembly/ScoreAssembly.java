@@ -36,6 +36,7 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.gel.mauve.BaseViewerModel;
@@ -92,33 +93,13 @@ public class ScoreAssembly  {
 	
 	private AnalysisDisplayWindow win;
 	
-	private static final String USAGE = 
-		"Usage: java -cp Mauve.jar org.gel.mauve.assembly.ScoreAssembly [options]\n" +
-		"  where [options] are:\n" +
-		"\t--alignment <path>\n\t\tthe alignment of the assembly to the reference to score\n" +
-//		"\t--reference <path>\n\t\tthe reference genome\n" +
-//		"\t--assembly <path>\n\t\tthe assembly to score\n" +
-		"\t--outDir <path>\n\t\tthe directory to store output in\n" +
-		"\t\tIf this is not set, the current working directory is used.\n" +
-		"\t--batch\n\t\ta flag to indicate running in batch mode.\n" +
-		"\t\tIf you call this flag, summary info will be printed in tab-delimited\n" +
-		"\t\tformat to standard output without any header text.\n" +
-		"\t--help\n\t\tprint this text.\n";
-	
 	public static void main(String[] args){
-		Options OPTIONS = buildOptions();
-		CommandLine line = null;
-		try {
-			CommandLineParser parser = new GnuParser();
-			line = parser.parse(OPTIONS, args);
-		} catch (ParseException exp){
-			System.err.println("Parsing Failed. Reason: " + exp.getMessage());
-		}
+		CommandLine line = OptionsBuilder.getCmdLine(getOptions(), args);
 		if (args.length == 0 || line == null || line.hasOption("help")){
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp(80,
 					"java -cp Mauve.jar org.gel.mauve.assembly.ScoreAssembly [options]",
-					"[options]", OPTIONS, "report bugs to me");
+					"[options]", getOptions(), "report bugs to me");
 			System.exit(-1);
 		}
 
@@ -135,14 +116,11 @@ public class ScoreAssembly  {
 		if (line.hasOption("basename"))
 			basename = line.getOptionValue("basename");
 		
-		/*
-		 * have to get options here
-		 */
 		
 		File alnmtFile = null;
 		AssemblyScorer as = null;
 		
-		if (line.hasOption("alignment")){ 
+		if (line.hasOption("alignment")){ // if we don't need to align
 			if ((line.hasOption("reference") || line.hasOption("assembly"))){
 				System.err.println("You gave me an alignment along with a reference and/or assembly genome.\n" +
 				"Do not use use the \"-reference\" and \"-assembly\" flags with the \"-alignment\" flag.");
@@ -155,7 +133,7 @@ public class ScoreAssembly  {
 			}
 			as = getAS(alnmtFile);
 			AssemblyScorer.printInfo(as,outDir,basename,batch);
-		} else {
+		} else { // we need to do some sort of alignment
 			
 			if (!line.hasOption("reference")){
 				System.err.println("Reference file not given.");
@@ -168,7 +146,7 @@ public class ScoreAssembly  {
 			File refFile = new File(line.getOptionValue("reference"));
 			File assPath = new File(line.getOptionValue("assembly"));
 			
-			if (line.hasOption("reorder")){
+			if (line.hasOption("reorder")){ // we need to reorder first
 				String reorderDir = line.getOptionValue("reorder");
 				ContigOrderer co = new ContigOrderer(refFile, assPath,
 												new File(reorderDir));
@@ -221,21 +199,24 @@ public class ScoreAssembly  {
 	}
 	
 	@SuppressWarnings("static-access")
-	private static Options buildOptions(){
+	private static Options getOptions(){
+		Options ret = new Options();
 		OptionsBuilder ob = new OptionsBuilder();
 		ob.addBoolean("help", "print this message");
 		ob.addBoolean("batch", "run in batch mode i.e. print summary output " +
 											"on one line to standard output");
-		ob.addArgument("string", "basename for output files", "basename");
+		ob.addArgument("string", "basename for output files", "basename",false);
 		ob.addArgument("directory", "reorder contigs before scoring " +
-						"assembly and store output in <directory>", "reorder");
+						"assembly and store output in <directory>", "reorder",false);
 		ob.addArgument("directory", "save output in <directory>. Default " +
-									"is current directory.", "outputDir");
-		ob.addArgument("file", "file containing alignment of assembly to " +
-											"reference genome", "alignment");
-		ob.addArgument("file", "file containing reference genome", "reference");
-		ob.addArgument("file", "file containing assembly/draft genome to score",
-																	"assembly");
+									"is current directory.", "outputDir",false);
+		Option alnOpt = ob.addArgument("file", "file containing alignment of assembly to " +
+											"reference genome", "alignment",false);
+		Option refOpt = ob.addArgument("file", "file containing reference genome", "reference",false);
+		Option assOpt = ob.addArgument("file", "file containing assembly/draft genome to score",
+																	"assembly",false);
+	//	ob.addMutExclOptions(refOpt, alnOpt);
+	//	ob.addMutExclOptions(assOpt, alnOpt);
 		
 		return ob.getOptions();
 	}

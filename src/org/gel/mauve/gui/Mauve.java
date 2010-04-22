@@ -27,6 +27,8 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import org.gel.mauve.MyConsole;
+import org.gel.mauve.assembly.ScoreAssembly;
+import org.gel.mauve.contigs.ContigOrderer;
 import org.gel.mauve.remote.RemoteControlImpl;
 
 public class Mauve {
@@ -42,9 +44,26 @@ public class Mauve {
 
 	// Main entry point
 	static public void main (String [] args) {
-		mainHook (args, new Mauve ());
+		if (args.length > 0) {
+			String firstArg = args[0];
+			if (firstArg.equalsIgnoreCase("ScoreAssembly"))
+				ScoreAssembly.main(trimFirstArg(args));
+			else if (firstArg.equalsIgnoreCase("OneToOneOrthologExporter"))
+				System.exit(-1);
+			else if (firstArg.equalsIgnoreCase("ContigOrderer")){			
+				ContigOrderer.main(trimFirstArg(args));
+			}
+		} else {
+			mainHook (args, new Mauve ());
+		}
 	}
 	
+	private static String[] trimFirstArg(String[] args){
+		String[] tmp = new String[args.length-1];
+		System.arraycopy(args, 1, tmp, 0, tmp.length);
+		return tmp;
+	}
+ 	
 	public static void mainHook (String args [], final Mauve mv) {
 		if (args.length >= 1) {
 			final String filename = args[0];

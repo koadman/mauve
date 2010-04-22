@@ -3,6 +3,7 @@ package org.gel.mauve.contigs;
 import java.io.File;
 
 
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashSet;
@@ -15,11 +16,17 @@ import java.util.prefs.BackingStoreException;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.gel.air.util.IOUtils;
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MauveHelperFunctions;
 import org.gel.mauve.ModelBuilder;
 import org.gel.mauve.MyConsole;
+import org.gel.mauve.OptionsBuilder;
 import org.gel.mauve.XMFAAlignment;
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.gui.AlignFrame;
@@ -32,7 +39,7 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 
 	private static String[] DEFAULT_ARGS = {"--skip-refinement","--weight=200"};
 	public static final String DIR_STUB = "alignment";
-	public static final int DEFAULT_ITERATIONS = 2;
+	public static final int DEFAULT_ITERATIONS = 25;
 	public static final String ALIGN_START = "Start from alignment file.";
 	public static final String SEQ_START = "Start from sequence files.";
 	protected static final String OUTPUT_DIR = "-output";
@@ -79,22 +86,27 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 	 * @param gui true if instantiate GUI, false otherwise
 	 */
 	public ContigOrderer (String [] args, Vector frames, boolean gui) {
-		// init (args, frames, gui);
-		
-		
-////////// The code below came from init(String[],Vector,boolean)
 		this.gui = gui;
 		past_orders = new Vector ();
-		iterations = 25;//DEFAULT_ITERATIONS;
-		if (args != null && args.length > 0) {
+		iterations = DEFAULT_ITERATIONS;
+/*
+ * NOTE I don't think this accomplishes anything
+ * 
+ * 		if (args != null && args.length > 0) {
+			
+			try {
+				if ((new GnuParser()).parse(opts, args).hasOption("iterations"));
+			} catch (ParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
 			try {
 				iterations = Integer.parseInt (args [0]);
 			} catch (NumberFormatException e) {
 			}
-		}
-		reorderer = new ContigReorderer (this /*, frames*/);
-//		MyConsole.setUseSwing (gui);
-//		MyConsole.showConsole ();
+		}*/
+		reorderer = new ContigReorderer (this);
 		if (gui) {
 			reordererGUI = new ContigReordererGUI(reorderer, frames);
 			align_frame = new ContigMauveAlignFrame (reordererGUI, this);
@@ -102,8 +114,6 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 			data = new ContigMauveDataModel();
 		}
 		alnListeners = new Vector<AlignmentProcessListener>();
-///////////////////////////////////////////////////////////////////
-		
 		if (gui) {
 			initGUI ();
 			startAlignment(true);
@@ -119,13 +129,28 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 	 * @param args
 	 * @param frames
 	 */
-	public ContigOrderer (String [] args, Vector frames) {
-		this (args, frames, true);
+	public ContigOrderer (Vector<MauveFrame> frames) {
+		this.gui = true;
+		past_orders = new Vector ();
+		iterations = DEFAULT_ITERATIONS;
+		reordererGUI = new ContigReordererGUI(reorderer, frames);
+		align_frame = new ContigMauveAlignFrame (reordererGUI, this);
+		alnListeners = new Vector<AlignmentProcessListener>();
+		initGUI ();
+		startAlignment(true);
 	}
 	
+	/**
+	 * Creates a non-GUI contig orderer with the given files.
+	 * 
+	 * @param reference
+	 * @param draft
+	 * @param directory
+	 * @param gui
+	 */
 	public ContigOrderer (File reference, File draft, File directory){
 		this.gui = false;
-		this.iterations = 25;
+		this.iterations = DEFAULT_ITERATIONS;
 		this.past_orders = new Vector();
 		this.reference = reference;
 		this.unordered = draft;
@@ -140,6 +165,13 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 		alnListeners.add(listener);
 	}
 	
+	private void notifyAlnmtListeners(){
+		Iterator<AlignmentProcessListener> it = alnListeners.iterator();
+		while (it.hasNext()){
+			it.next().completeAlignment(0);
+		}
+	}
+
 	public File getFinalAlignmentFile(){
 		return alnmtFile;
 	}
@@ -149,55 +181,65 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 	}
 	
 	/**
-		 * This is what Anna has written to run the Reoderer without the GUI components.
-		 * Too bad it actually instantiates the GUI components.
-		 * 
-		 * @param args
-		 */
-		private void initParamsNoGUI (String[] args) {
-			Hashtable <String, String> pairs = IOUtils.parseDashPairedArgs(args);
-			String error = null;
-			try {
-				if (pairs.containsKey(OUTPUT_DIR)) {
-					directory = new File (pairs.get(OUTPUT_DIR));
-					if (!directory.exists()) {
-						if (!directory.mkdirs())
-							error = "Couldn't create output directory";
-					}
-				//	else if (getAlignDir ().exists())
-				//		error = "Directory already contains reorder";
+	 * Initializes parameters for running ContigOrderer without
+	 * a GUI
+	 * 
+	 * @param args
+	 */
+	private void initParamsNoGUI (String[] args) {
+		CommandLine line = OptionsBuilder.getCmdLine(getOptions(),args);
+		String error = null;
+		try {
+			if (line.hasOption(OUTPUT_DIR)) {
+				directory = new File (line.getOptionValue(OUTPUT_DIR));
+				if (!directory.exists()) {
+					if (!directory.mkdirs())
+						error = "Couldn't create output directory";
 				}
-				else
-					error = "Output dir not given";
-				if (pairs.containsKey(REF_FILE)) {
-					System.out.println("Setting reference file: " + pairs.get(REF_FILE));
-				//	data.setRefPath(pairs.get(REF_FILE));
-					reference = new File(pairs.get(REF_FILE));
-				}
-				else
-					error = "no reference file given";
-				if (pairs.containsKey(DRAFT_FILE)) {
-					System.out.println("Setting draft file: " + pairs.get(DRAFT_FILE));
-				//	data.setDraftPath(pairs.get(DRAFT_FILE));
-					unordered = new File(pairs.get(DRAFT_FILE));
-				}
-				else
-					error = "no draft file given";
-			} catch (Exception e) {
-				e.printStackTrace();
-				error = e.getMessage();
 			}
-			if (error != null) { 
-				System.err.println(error);
-			//	JOptionPane.showMessageDialog(null, error);
-				System.exit(0);
-			} // if no errors, start the alignment
-	//		else {
-				//	System.err.println("Calling startAlignment()");
-	//				startAlignment (false);
-	//			}
-			copyInputFiles();
+			else
+				error = "Output dir not given";
+			
+			if (line.hasOption(REF_FILE)) {
+				System.out.println("Setting reference file: " + line.getOptionValue(REF_FILE));
+				reference = new File(line.getOptionValue(REF_FILE));
+			}
+			else
+				error = "no reference file given";
+			
+			if (line.hasOption(DRAFT_FILE)) {
+				System.out.println("Setting draft file: " + line.getOptionValue(DRAFT_FILE));
+				unordered = new File(line.getOptionValue(DRAFT_FILE));
+			}
+			else
+				error = "no draft file given";
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			error = e.getMessage();
 		}
+		
+		if (error != null) { 
+			System.err.println(error);
+			System.exit(0);
+		}
+		copyInputFiles();
+	}
+		
+	
+	private static Options getOptions(){
+		OptionsBuilder ob = new OptionsBuilder();
+		ob.addArgument("file", "the draft file to reorder", 
+													DRAFT_FILE, true);
+		ob.addArgument("file", "the reference file to reorder the draft " +
+				"								against", REF_FILE, true);
+		ob.addArgument("directory", "the directory to store output to",
+														OUTPUT_DIR,true);
+		ob.addArgument("number", "the maximum number of iterations to contig" +
+				" reordering. Default is 25", "iterations", false);
+		ob.addBoolean("help", "print this statement");
+		return ob.getOptions();
+	}
 
 	private void initGUI () {
 		reordererGUI.init();
@@ -383,10 +425,7 @@ public class ContigOrderer implements MauveConstants, AlignmentProcessListener {
 					reorderer.inverted_from_start.clear ();
 				}
 				else if (alnListeners != null){
-					Iterator<AlignmentProcessListener> it = alnListeners.iterator();
-					while (it.hasNext()){
-						it.next().completeAlignment(0);
-					}
+					notifyAlnmtListeners();
 				} else {
 					System.exit(0);
 				}

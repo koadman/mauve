@@ -570,12 +570,14 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 	 * @param args			Index 0 should be the name of the alignment file,
 	 * 						  1 the reference genome's index, 2 the index of the
 	 * 						  genome to reorder.
+	 * 
+	 * NOTE I don't think this ever gets called or is even necessary
 	 */
 	public static void main (String [] args) {		
 		if (args.length > 0)
 			new ContigReorderer ().init (args);
 		else
-			new ContigOrderer (null, null); 
+			new ContigOrderer (null); 
 	}
 	
 	

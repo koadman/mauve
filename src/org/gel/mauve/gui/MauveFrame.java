@@ -521,8 +521,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             }
             if (source == jMenuToolsOrderContigs || ae.getActionCommand().equals(
             		jMenuToolsOrderContigs.getText()))
-            	new ContigOrderer (null, mauve.frames);
-            	// GUIforReorderer.launchWindow(this);
+            	new ContigOrderer (mauve.frames);
         }
     }
 
