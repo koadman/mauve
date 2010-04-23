@@ -398,6 +398,7 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
     public void alignButtonActionPerformed(java.awt.event.ActionEvent evt)
     {
     	File outfile = new File(this.getOutput());
+    	// if outfile not selected, query until selected.
     	while(this.getOutput().length()==0 || outfile.isDirectory())
     	{
         	fc.setDialogTitle("Save alignment file");
@@ -425,7 +426,7 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
         MyConsole.showConsole();
       //  printCommand(mauve_cmd);
         if (worker == null)
-        	worker = new AlignWorker(this, mauve_cmd);
+        	worker = new AlignWorker(this, mauve_cmd, true);
         System.out.println("Running alignment.\nExecuting ");
         AlignFrame.printCommand(worker.mauve_cmd, System.out);
         worker.start();
@@ -434,7 +435,6 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
     
     public void completeAlignment(int retcode)
     {
-    	System.out.println("Alignment complete!");
         alignButton.setEnabled(true);
         cancelButton.setEnabled(false);
         
@@ -445,6 +445,7 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
             {
                 JOptionPane.showMessageDialog(null, "The aligner failed to produce an alignment.  The sequences may not contain any homologous regions.", "An error occurred", JOptionPane.ERROR_MESSAGE);
             }
+            System.out.println("Alignment complete!");
             mauve.loadFile(new File(read_filename));
             setVisible(false);
         }
