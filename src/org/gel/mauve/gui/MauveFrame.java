@@ -100,7 +100,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
     JMenuItem jMenuGoToSearchFeatures = new JMenuItem ();
     
     JMenu jMenuTools = new JMenu ();
-    JMenuItem jMenuToolsOrderContigs = new JMenuItem ();
+    protected JMenuItem jMenuToolsOrderContigs = new JMenuItem ();
     
     JFileChooser fc;
     RearrangementPanel rrpanel;
