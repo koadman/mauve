@@ -574,16 +574,19 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
     public void addButtonActionPerformed(java.awt.event.ActionEvent e)
     {
     	fc.setDialogTitle("Select a genome sequence");
+    	fc.setMultiSelectionEnabled(true);
         int returnVal = fc.showOpenDialog(this);
 
         if (returnVal == JFileChooser.APPROVE_OPTION)
         {
-            File seq_file = fc.getSelectedFile();
-            int sel_index = sequenceList.getSelectedIndex();
-            if (sel_index >= 0)
-                sequenceListModel.add(sel_index, seq_file.getPath());
-            else
-                sequenceListModel.addElement(seq_file.getPath());
+        	File[] sfs = fc.getSelectedFiles();
+        	for(File seq_file : sfs){
+	            int sel_index = sequenceList.getSelectedIndex();
+	            if (sel_index >= 0)
+	                sequenceListModel.add(sel_index, seq_file.getPath());
+	            else
+	                sequenceListModel.addElement(seq_file.getPath());
+        	}
         }
     }
 
