@@ -64,20 +64,20 @@ public class OptionsBuilder {
 		} catch (UnrecognizedOptionException e) { 
 			String opt = e.getOption();
 			System.err.println("Unrecognized option: " + opt);
-			System.exit(-1);
+		//	System.exit(-1);
 		} catch (MissingArgumentException e){
 			Option opt = e.getOption();
 			System.err.println("Error: " + opt.getOpt() + " not specified.");
-			System.exit(-1);
+		//	System.exit(-1);
 		} catch (MissingOptionException e){
 			Iterator it = e.getMissingOptions().iterator();
 			while (it.hasNext()){
 				System.err.println("Missing required option: " + it.next());
 			}
-			System.exit(-1);
+		//	System.exit(-1);
 		} catch (ParseException e){
 			System.err.println("Error parsing arguments. Reason: " + e.getMessage());
-			System.exit(-1);
+		//	System.exit(-1);
 		} 
 		return null;
 	}

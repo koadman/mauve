@@ -63,7 +63,7 @@ public class ContigFeatureWriter extends AbstractTabbedDataWriter
 	}
 
 	protected void printContigs (Collection conts, String descriptor) {
-		System.out.println ("printing");
+		System.out.println ("printing " + file_name);
 		if (conts.size() > 0) {
 			contigs = conts.iterator ();
 			out.println (descriptor);

@@ -27,7 +27,7 @@ public abstract class AbstractTabbedDataWriter {
 	/**
 	 * represents the file name (and path) the output stream writes to
 	 */
-	String file_name;
+	protected String file_name;
 
 	/**
 	 * Contains the header for each column. The headers can be printed on demand

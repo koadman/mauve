@@ -72,22 +72,13 @@ public class ContigReordererGUI extends Mauve {
 		else
 			return super.makeNewFrame ();
 	}	
-	
+/*	
 	@Override 
 	public void loadFile(File rr_file) {
 		if (orderer.gui)
 			super.loadFile(rr_file);
-		else {
-			// I don't think this condition ever gets satisfied.
-			try {
-				reorderer.setModel((LcbViewerModel) ModelBuilder.buildModel (rr_file, null));
-				initModelData ();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
 	}
-
+*/
 	protected synchronized MauveFrame getNewFrame() {
 		return super.getNewFrame();
 	}
@@ -99,17 +90,36 @@ public class ContigReordererGUI extends Mauve {
 		 		super (ContigReordererGUI.this);
 		 		if (orderer != null)
 					orderer.parent = this;
+				super.jMenuToolsOrderContigs.setEnabled(false);
 		 	}
 		 	
 		 /**
-		  * This is where the work for the iterative process is done.
+		  * This is where the work for the iterative process is done
+		  * 
+		  * this gets called by the FrameLoader created in 
+		  * Mauve.loadFile which gets called in completeAlignment
+		  * .
 		  */
 			public void setModel (BaseViewerModel mod) {
 				super.setModel (mod);
-				ContigReordererGUI.this.reorderer.setModel((LcbViewerModel) mod);
+				// we can just call completeAlignment because alnmtFile 
+				// will always be what is given here.
+				//ContigReordererGUI.this.reorderer.setModel((LcbViewerModel) mod);
 				new Thread (new Runnable () {
 					public void run () {
-						ContigReordererGUI.this.initModelData ();
+						/*
+						 * TODO
+						 * we should initialize everything for reorderer here
+						 * and then have a function to call that checks if we 
+						 * should reorder and then, if we need to reorder,
+						 * we call start alignment
+						 * 
+						 * this gets done in orderer.completeAlignment()
+						 * maybe we should just call that like so...
+						 * 				orderer.completeAlignment(0);
+						 */
+						//ContigReordererGUI.this.initModelData ();
+						orderer.completeAlignment(0);
 					}
 				}).start ();				
 			}

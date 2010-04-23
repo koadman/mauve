@@ -1,6 +1,7 @@
 package org.gel.air.util;
 
 import java.io.BufferedInputStream;
+
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -14,11 +15,19 @@ import java.nio.channels.FileChannel;
 import java.util.Hashtable;
 
 public class IOUtils {
-	
+	/**
+	 * Copies <code>source</code> to <code>dest</code>.
+	 * Overwrites or creates <code>dest</code> if necessary
+	 * @param source source file
+	 * @param dest destination file
+	 * @throws IOException 
+	 */
 	public static void copyFile (File source, File dest) throws IOException {
 		System.out.println("AJT0403: Copying...\n\t" + source.getAbsolutePath() +"\nto\n\t" + dest.getAbsolutePath());
 	     FileChannel in = null, out = null;
 	     try {          
+	    	 if (!dest.exists())
+	    		 dest.createNewFile();
 	          in = new FileInputStream(source).getChannel();
 	          out = new FileOutputStream(dest).getChannel();
 	 

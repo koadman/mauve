@@ -73,7 +73,7 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	public void completeAlignment(int retcode){
 		if (retcode == 0) {
 			if (co != null){
-				alnmtFile = co.getFinalAlignmentFile();
+				alnmtFile = co.getAlignmentFile();
 				if (basename == null) {
 					basename = alnmtFile.getName();
 					basename = basename.substring(0,basename.lastIndexOf("."));

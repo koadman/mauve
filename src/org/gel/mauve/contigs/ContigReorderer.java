@@ -66,7 +66,7 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 	public static final String FEATURE_EXT = "_features.tab";
 	protected MauveFrame frame;
 	protected Hashtable args;
-	protected String file;
+	protected String basename;
 	protected File directory;
 	protected LCB[] lcbs;
 	protected LCB [] fix_lcbs;
@@ -140,15 +140,17 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 		args.put (ContigFeatureWriter.REVERSES, inverters);
 		args.put (ContigFeatureWriter.CONFLICTED_CONTIGS, conflicts);
 		args.put(ContigFeatureWriter.COMPLEMENT, inverted_from_start);
-		file = fix.getDisplayName ();
-		int period = file.toLowerCase ().indexOf (".fas");
+		
+		// trim String file to get a display name. 
+		basename = fix.getDisplayName ();
+		int period = basename.toLowerCase ().lastIndexOf (".fas");
 		if (period > -1)
-			file = file.substring (0, period);
-		if (file.endsWith("."))
-				file = file.substring (0, file.length() - 1);
+			basename = basename.substring (0, period);
+		if (basename.endsWith("."))
+				basename = basename.substring (0, basename.length() - 1);
 		//directory = MauveHelperFunctions.getRootDirectory (model);
 		directory = model.getSrc().getParentFile ();
-		File feats = new File (directory, file + ContigReorderer.FEATURE_EXT);
+		File feats = new File (directory, basename + ContigReorderer.FEATURE_EXT);
 		if (feats.exists ())
 			feature_file = feats.getAbsolutePath ();
 		if (feature_file != null && frame != null){
@@ -178,14 +180,14 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 	protected void initModelData () {
 		initMauveData ();
 		lcbs = model.getFullLcbList ();
-		if (orderer == null || (active && orderer.shouldReorder ())) {
+	/*	if (orderer == null || (active && orderer.shouldReorder ())) {
 			if (orderer == null){
 				System.err.println("AJT0403: ContigOrderer orderer == null.");
 			}
 			fixContigs ();
 			if (orderer != null)
 				orderer.checkReorderDone ();
-		}
+		}*/
 	}
 	
 	public void setInactive(){
@@ -198,6 +200,7 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 	
 	public void setModel(LcbViewerModel model){
 		this.model = model;
+		lcbs = model.getFullLcbList();
 	}
 	
 	protected void orderGenomes () {
@@ -237,19 +240,21 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void output (boolean fasta) {
 		if (fasta){
 		//	new FastAContigChangeWriter (this);
 			new FastAContigChangeWriter(this.fix, this.inverters, 
 					this.ordered, this.conflicts, this.nexts, this.directory);
 		}
+		// prints a bunch of stuff to directory/file+CONTIG_EXT
 		new ContigFeatureWriter (new File (
-				directory, file + CONTIG_EXT).getAbsolutePath (), args);
+				directory, basename + CONTIG_EXT).getAbsolutePath (), args);
 		Iterator feats = MauveHelperFunctions.getFeatures (model, reorder_ind);
 		if (feats.hasNext ()) {
 		//	System.out.println("AJTO403: invoking ChangedFeatureWriter(File,Hashtable,Iterator,Genome)");
 			new ChangedFeatureWriter (new File (
-					directory, file + FEATURE_EXT).getAbsolutePath (), args, feats, fix);
+					directory, basename + FEATURE_EXT).getAbsolutePath (), args, feats, fix);
 		}
 	}
 	
@@ -258,6 +263,15 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 		lcbs = (LCB []) lcb_table.get(ref);
 		left_compare = (LCBLeftComparator) comparator_table.get(ref);
 	}
+	
+	public LinkedList<Chromosome> getOrderedCtgs(){
+		return ordered;
+	}
+	
+	public Genome getFix(){
+		return fix;
+	}
+	
 	
 	protected void removeBadLCBs () {
 		left_compare = new LCBLeftComparator (fix);
