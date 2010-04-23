@@ -708,12 +708,12 @@ public class OneToOneOrthologExporter {
 				.create('t')
 				);
 
-		opts.addOption( OptionBuilder
+/*		opts.addOption( OptionBuilder
 				.withArgName("predict unannotated")
 				.withDescription("Set this to include unannotated regions that meet the criteria for homology")
 				.create('p')
 				);
-		
+*/
 		opts.addOption( OptionBuilder
 				.withArgName("output alignments")
 				.withDescription("Should alignments of each region be generated?")
@@ -741,9 +741,6 @@ public class OneToOneOrthologExporter {
 					"\nExample:\nOneToOneOrthologExporter -f my_aln.xmfa -o my_orthologs -n 0.6 -N 0.8 -a\n \n ");
 			
 			throw new RuntimeException("There was an error parsing your command-line options.  Please check them and try again.");
-		}
-		if(line.hasOption('a')){
-			System.out.println("it worked!!!");
 		}
 		
 		String alignment_xmfa = line.getOptionValue('f');
