@@ -12,7 +12,7 @@ import java.util.Scanner;
  * @author atritt
  * @deprecated 
  */
-public class dcjDistance {
+public class DCJDistanceCalculator {
 
 	public static void main(String [] args)
 	{
