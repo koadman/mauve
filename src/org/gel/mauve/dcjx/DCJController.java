@@ -15,7 +15,7 @@ import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.analysis.PermutationExporter;
 import org.gel.mauve.gui.AnalysisDisplayWindow;
 
-public class dcjWindow {
+public class DCJController {
 
 //	private JTextArea matrix;
 	
@@ -29,7 +29,7 @@ public class dcjWindow {
 	private static final String temp = "Running...";
 	private static final String error = "Error computing DCJ distances! Please report bug to atritt@ucdavis.edu";
 	
-	private static HashMap<String,dcjWindow> modelMap;
+	private static HashMap<String,DCJController> modelMap;
 	
 	private JTextArea nwayTA, pwiseTA, nblksTA;
 	
@@ -43,7 +43,7 @@ public class dcjWindow {
 	
 	private DCJ[][] pWiseDist;
 	
-	private static dcjWindow curr;
+	private static DCJController curr;
 	
 	
 //	private JTextArea log;
@@ -51,18 +51,18 @@ public class dcjWindow {
 	
 	public static void launchWindow(BaseViewerModel model) {
 		if (modelMap == null)
-			modelMap = new HashMap<String,dcjWindow>();
+			modelMap = new HashMap<String,DCJController>();
 		String key = model.getSrc().getAbsolutePath();
 		if (modelMap.containsKey(key)) {	
 			modelMap.get(key).adw.showWindow();
 		}else if (model instanceof XmfaViewerModel){
-			modelMap.put(key, new dcjWindow((XmfaViewerModel)model));
+			modelMap.put(key, new DCJController((XmfaViewerModel)model));
 		} else {
 			System.err.println("Can't compute DCJ distance without contig boundaries.");
 		}	
 	}
 	
-	public dcjWindow (XmfaViewerModel model) {
+	public DCJController (XmfaViewerModel model) {
 		int numGenomes = model.getGenomes().size();
 		if (numGenomes > 2){
 			adw = new AnalysisDisplayWindow("DCJ - "+model.getSrc().getName(), fWIDTH, fHEIGHT);
