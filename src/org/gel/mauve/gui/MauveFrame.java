@@ -635,6 +635,10 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             rrpanel.init(model);
             validate();
             toFront();
+
+            if(model instanceof XmfaViewerModel)
+            	((XmfaViewerModel)model).initDbusCommunication();
+
             /*
              * go into visualization mode: set the title and enable the print
              * option

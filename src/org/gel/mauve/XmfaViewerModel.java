@@ -237,24 +237,32 @@ public class XmfaViewerModel extends LcbViewerModel {
         }
         
         // try publishing this viewer model via DBus
+    }
+
+    MauveDisplayCommunicator mdCommunicator = null;
+    WargDisplayCommunicator wdCommunicator = null;
+    /*
+     * Attempts to open two-way DBus communication with the weakarg app for this viewer model
+     * Warning, when this fails, it currently fails silently!!
+     */
+    public void initDbusCommunication(){
         try{
     	try{
         try{
 	       	mdCommunicator = new MauveDisplayCommunicator(this);
         }catch(UnsatisfiedLinkError ule){}
         }catch(NoClassDefFoundError ncdfe){}
-        }catch(Exception e){/*maybe DBus doesn't exist*/ }
+        }catch(Exception e){}
         // try connecting to a warg instance
         try{
     	try{
         try{
         	wdCommunicator = new WargDisplayCommunicator(this);
+        	
         }catch(UnsatisfiedLinkError ule){}
         }catch(NoClassDefFoundError ncdfe){}
-        }catch(Exception e){/*maybe DBus doesn't exist*/ }
+        }catch(Exception e){ }
     }
-    MauveDisplayCommunicator mdCommunicator = null;
-    WargDisplayCommunicator wdCommunicator = null;
 
 	protected void referenceUpdated () {
 		super.referenceUpdated ();
