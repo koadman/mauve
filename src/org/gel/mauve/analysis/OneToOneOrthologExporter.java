@@ -298,14 +298,22 @@ public class OneToOneOrthologExporter {
 	static public class OrthologExportParameters
 	{
 		// find all annotated orthologs that meet the following criteria:
-		public float min_conserved_length = 0.7f;  /**< minimum length of alignment as a fraction of feature */
-		public float max_conserved_length = 1.0f;  /**< max length of alignment coverage of feature */
-		public float min_nucleotide_id = 0.6f;		/**< min nucleotide identity in aligned region */
-		public float max_nucleotide_id = 1.0f;		/**< Max nucleotide identity over aligned region */
-		public boolean predictUnannotated = false;	/**< Include aligned regions that are not annotated with features (not yet implemented) */
-		public String featureType = "CDS";	/**< Type of features for which to find orthologs, e.g. CDS, tRNA, misc_RNA etc. */
-		public File alignmentOutputFile = null;	/**< If non-null, specifies a file where an XMFA alignment of features should be stored */
+		 /**< minimum length of alignment as a fraction of feature */
+		public float min_conserved_length = 0.7f; 
+		/**< max length of alignment coverage of feature */
+		public float max_conserved_length = 1.0f;  
+		/**< min nucleotide identity in aligned region */
+		public float min_nucleotide_id = 0.6f;	
+		/**< Max nucleotide identity over aligned region */
+		public float max_nucleotide_id = 1.0f;	
+		/**< Include aligned regions that are not annotated with features (not yet implemented) */
+		public boolean predictUnannotated = false;	
+		/**< Type of features for which to find orthologs, e.g. CDS, tRNA, misc_RNA etc. */
+		public String featureType = "CDS";	
+		/**< If non-null, specifies a file where an XMFA alignment of features should be stored */
+		public File alignmentOutputFile = null;	
 	}
+	
 	public static void export( XmfaViewerModel model, BufferedWriter output, OrthologExportParameters oep ) throws IOException
 	{
 		float min_conserved_length = oep.min_conserved_length;
