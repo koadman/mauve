@@ -72,13 +72,13 @@ import org.gel.mauve.backbone.Backbone;
 import org.gel.mauve.backbone.BackboneList;
 import org.gel.mauve.gui.RearrangementPanel;
 
-
-class Feature implements Comparable
+/*
+class LiteWeightFeature implements Comparable
 {
-	public Feature( int l, int r, int s, String ltag){ left = l; right = r; strand = s; locus = ltag; };
+	public LiteWeightFeature( int l, int r, int s, String ltag){ left = l; right = r; strand = s; locus = ltag; };
 	public int compareTo(Object o)
 	{
-		Feature c = (Feature)o;
+		LiteWeightFeature c = (LiteWeightFeature)o;
 		if(left < c.left)
 			return -1;
 		else if(left > c.left)
@@ -98,10 +98,10 @@ class Feature implements Comparable
 	int strand;
 	String locus;
 };
-
+*/
 public class OneToOneOrthologExporter {
 
-	private static Feature[] getFeature(Iterator i, String featureType)
+	public static LiteWeightFeature[] getFeaturesByType(int genSrcIdx, Iterator i, String featureType)
 	{
 		Vector cds = new Vector();
 		while(i.hasNext())
@@ -109,7 +109,7 @@ public class OneToOneOrthologExporter {
 			StrandedFeature f = (StrandedFeature)i.next();
 			if(f.getType().equalsIgnoreCase(GenomeBuilder.MAUVE_AGGREGATE))
 			{
-				Feature[] d = getFeature(f.features(), featureType);	// this is an aggregate, so recurse
+				LiteWeightFeature[] d = getFeaturesByType(genSrcIdx, f.features(), featureType);	// this is an aggregate, so recurse
 				for(int dI = 0; dI < d.length; dI++)
 					cds.add(d[dI]);
 				continue;
@@ -133,22 +133,22 @@ public class OneToOneOrthologExporter {
 				l = r;
 				r = t;
 			}
-			cds.add(new Feature(l, r, f.getStrand() == StrandedFeature.POSITIVE ? 1 : -1, ltag.toString()));
+			cds.add(new LiteWeightFeature(genSrcIdx, l, r, f.getStrand() == StrandedFeature.POSITIVE ? 1 : -1, ltag.toString(),featureType));
 		}
 		Collections.sort(cds);
 		// remove dupes
 		for(int j = 1; j < cds.size(); j++)
 		{
-			Feature cj = (Feature)cds.elementAt(j);
-			Feature cjm1 = (Feature)cds.elementAt(j-1);
-			if(cj.compareTo(cjm1) == 0 && cj.locus.equalsIgnoreCase(cjm1.locus))
+			LiteWeightFeature cj = (LiteWeightFeature)cds.elementAt(j);
+			LiteWeightFeature cjm1 = (LiteWeightFeature)cds.elementAt(j-1);
+			if(cj.compareTo(cjm1) == 0 && cj.getLocus().equalsIgnoreCase(cjm1.getLocus()))
 			{
 				cds.remove(j);
 				j--;
 			}
 		}
-		Feature[] c = new Feature[cds.size()];
-		return (c = (Feature[])cds.toArray(c));
+		LiteWeightFeature[] c = new LiteWeightFeature[cds.size()];
+		return (c = (LiteWeightFeature[])cds.toArray(c));
 	}
 	private static class Quad {
 		public Quad(long[] l, long[] r)
@@ -173,13 +173,13 @@ public class OneToOneOrthologExporter {
 		long[] right;
 	}
 
-	private static Quad[] getBackboneSegs(XmfaViewerModel model, Genome g_i, Feature cds)
+	private static Quad[] getBackboneSegs(XmfaViewerModel model, Genome g_i, LiteWeightFeature cds)
 	{
 		XMFAAlignment xmfa = model.getXmfa();
 		// extract the alignment of the region in question
 		BackboneList bbl = model.getBackboneList();
-		int cur = cds.left;
-		int max = cds.right;
+		int cur = cds.getLeft();
+		int max = cds.getRight();
 		boolean[] gap = new boolean[model.getSequenceCount()];
 		long[] tmp = new long[model.getSequenceCount()];
 		Vector bbsegs = new Vector();
@@ -197,9 +197,9 @@ public class OneToOneOrthologExporter {
 				continue;
 			}
 			Quad q = new Quad(bcur.left, bcur.right);
-			if(q.left[g_i.getSourceIndex()] < cds.left)
+			if(q.left[g_i.getSourceIndex()] < cds.getLeft())
 			{
-				long[] leftPos = xmfa.getLCBAndColumn(g_i, cds.left);
+				long[] leftPos = xmfa.getLCBAndColumn(g_i, cds.getLeft());
 				if(leftPos == null)
 					System.err.println("Null leftpos!");
 				xmfa.getColumnCoordinates(model, (int)leftPos[0], leftPos[1], tmp, gap);
@@ -217,9 +217,9 @@ public class OneToOneOrthologExporter {
 					}
 				}
 			}
-			if(q.right[g_i.getSourceIndex()] > cds.right)
+			if(q.right[g_i.getSourceIndex()] > cds.getRight())
 			{
-				long[] rightPos = xmfa.getLCBAndColumn(g_i, cds.right);
+				long[] rightPos = xmfa.getLCBAndColumn(g_i, cds.getRight());
 				if(rightPos == null)
 					System.err.println("Null rightpos!");
 				xmfa.getColumnCoordinates(model, (int)rightPos[0], rightPos[1], tmp, gap);
@@ -252,16 +252,16 @@ public class OneToOneOrthologExporter {
 		int left_i;
 		int right_i;
 	}
-	private static void addOverlappingCDS(XmfaViewerModel model, Feature[] cds, Quad bb, HashMap hm, int gI, int gJ)
+	private static void addOverlappingCDS(XmfaViewerModel model, LiteWeightFeature[] cds, Quad bb, HashMap hm, int gI, int gJ)
 	{
 		// this is really a awful search, need a stabbing query instead!
 		for(int bs = 0; bs < cds.length; bs++)
 		{
-			if(!(bb.left[gJ] < cds[bs].right && bb.right[gJ] > cds[bs].left))
+			if(!(bb.left[gJ] < cds[bs].getRight() && bb.right[gJ] > cds[bs].getLeft()))
 				continue;	// no overlap
 			// this one overlaps.  compute pct identity
-			long lefto = bb.left[gJ] > cds[bs].left ? bb.left[gJ] : cds[bs].left;
-			long righto = bb.right[gJ] < cds[bs].right ? bb.right[gJ] : cds[bs].right;
+			long lefto = bb.left[gJ] > cds[bs].getLeft() ? bb.left[gJ] : cds[bs].getLeft();
+			long righto = bb.right[gJ] < cds[bs].getRight() ? bb.right[gJ] : cds[bs].getRight();
 			// get alignment columns
 			long[] lblob = model.getXmfa().getLCBAndColumn(model.getGenomeBySourceIndex(gJ), lefto);
 			long[] rblob = model.getXmfa().getLCBAndColumn(model.getGenomeBySourceIndex(gJ), righto);
@@ -328,11 +328,11 @@ public class OneToOneOrthologExporter {
 		{
 			Genome g = model.getGenomeBySourceIndex(gI);
             Location loc = LocationTools.makeLocation(1, (int)g.getLength());
-            Feature[] cdsi = new Feature[0];
+            LiteWeightFeature[] cdsi = new LiteWeightFeature[0];
             if(g.getAnnotationSequence() != null && loc != null )
             {
 				FeatureHolder fh = g.getAnnotationSequence().filter(new FeatureFilter.OverlapsLocation(loc));
-				cdsi = getFeature(fh.features(), oep.featureType);
+				cdsi = getFeaturesByType(gI, fh.features(), oep.featureType);
 				Arrays.sort(cdsi);
             }
 			allCds.add(cdsi);
@@ -347,19 +347,19 @@ public class OneToOneOrthologExporter {
 		for(int gI = 0; gI < model.getSequenceCount(); gI++)
 		{
 			Genome g_i = model.getGenomeBySourceIndex(gI);
-			Feature[] cdsi = (Feature[])allCds.elementAt(gI);
+			LiteWeightFeature[] cdsi = (LiteWeightFeature[])allCds.elementAt(gI);
 			for(int cI = 0; cI < cdsi.length; cI++)
 			{
 				// extract the alignment of the region in question
 				Quad[] bbs;
 				bbs = getBackboneSegs(model, g_i, cdsi[cI]);
-				Object[] aln = model.getXmfa().getRange(g_i, (long)cdsi[cI].left, (long)cdsi[cI].right);
+				Object[] aln = model.getXmfa().getRange(g_i, (long)cdsi[cI].getLeft(), (long)cdsi[cI].getRight());
 				// for each of the other genomes, find the CDS that overlap the backbone segs and assess orthology
 				for(int gJ = gI+1; gJ < model.getSequenceCount(); gJ++)
 				{
 					// for each of the bb segs, find overlapping cds
 					HashMap hm = new HashMap();
-					Feature[] cdsj = (Feature[])allCds.elementAt(gJ);
+					LiteWeightFeature[] cdsj = (LiteWeightFeature[])allCds.elementAt(gJ);
 					for( int bbI = 0; bbI < bbs.length; bbI++)
 						addOverlappingCDS(model, cdsj, bbs[bbI], hm, gI, gJ);
 
@@ -386,17 +386,17 @@ public class OneToOneOrthologExporter {
 							if(co.right_i > right_max || right_max == -1)
 								right_max = co.right_i;
 						}
-						int cons_i = cdsi[cI].right - cdsi[cI].left;
+						int cons_i = cdsi[cI].getRight() - cdsi[cI].getLeft();
 						if(cov_i < min_conserved_length * cons_i ||
 								cov_i > max_conserved_length * cons_i)
 							continue;	// not enough covered
-						int cons_j = cdsj[cdsid.intValue()].right - cdsj[cdsid.intValue()].left;
+						int cons_j = cdsj[cdsid.intValue()].getRight() - cdsj[cdsid.intValue()].getLeft();
 						if(cov_j < min_conserved_length * cons_j ||
 								cov_j > max_conserved_length * cons_j)
 							continue;	// not enough covered
 						
 						// now compute percent id
-						int cur = cdsi[cI].left;
+						int cur = cdsi[cI].getLeft();
 						int col = 0;
 						byte[] aln_gI = (byte[])aln[gI];
 						byte[] aln_gJ = (byte[])aln[gJ];
@@ -486,8 +486,8 @@ public class OneToOneOrthologExporter {
 									continue;
 								Vector vv = (Vector)v2;
 								orthoPairs[cur][i].remove(skey);
-								Feature[] cdsi = (Feature[])allCds.elementAt(cur);
-								Feature[] cdsj = (Feature[])allCds.elementAt(i);
+								LiteWeightFeature[] cdsi = (LiteWeightFeature[])allCds.elementAt(cur);
+								LiteWeightFeature[] cdsj = (LiteWeightFeature[])allCds.elementAt(i);
 								if(((Integer)skey).intValue() > cdsi.length )
 									System.err.println("bug!!");
 								for(int x = 0; x < vv.size(); x++)
@@ -519,16 +519,16 @@ public class OneToOneOrthologExporter {
 					if(!first)	sb.append("\t");
 					if(first)	first = !first;
 					int osi = ((Integer)iter.next()).intValue();
-					Feature[] cdsi = (Feature[])allCds.elementAt(sI);
+					LiteWeightFeature[] cdsi = (LiteWeightFeature[])allCds.elementAt(sI);
 					if(osi > cdsi.length )
 						System.err.println("bug!!");
 					sb.append(sI);
 					sb.append(":");
-					sb.append(cdsi[osi].locus);
+					sb.append(cdsi[osi].getLocus());
 					sb.append(":");
-					sb.append(cdsi[osi].left);
+					sb.append(cdsi[osi].getLeft());
 					sb.append("-");
-					sb.append(cdsi[osi].right);
+					sb.append(cdsi[osi].getRight());
 				}
 			}
 			sb.append("\n");
@@ -541,7 +541,7 @@ public class OneToOneOrthologExporter {
 		Vector found = new Vector();
 		for(int sI = 0; sI < model.getSequenceCount(); sI++)
 		{
-			Feature[] cdsi = (Feature[])allCds.elementAt(sI);
+			LiteWeightFeature[] cdsi = (LiteWeightFeature[])allCds.elementAt(sI);
 			found.add( new boolean[cdsi.length] );
 		}
 	
@@ -564,18 +564,18 @@ public class OneToOneOrthologExporter {
 		for(int sI = 0; sI < model.getSequenceCount(); sI++)
 		{
 			boolean[] f = (boolean[])found.elementAt(sI);
-			Feature[] cdsi = (Feature[])allCds.elementAt(sI);
+			LiteWeightFeature[] cdsi = (LiteWeightFeature[])allCds.elementAt(sI);
 			for(int fI = 0; fI < f.length; fI++)
 			{
 				if(f[fI])
 					continue;	// this one has orthologs, skip it
 				sb.append(sI);
 				sb.append(":");
-				sb.append(cdsi[fI].locus);
+				sb.append(cdsi[fI].getLocus());
 				sb.append(":");
-				sb.append(cdsi[fI].left);
+				sb.append(cdsi[fI].getLeft());
 				sb.append("-");
-				sb.append(cdsi[fI].right);
+				sb.append(cdsi[fI].getRight());
 				sb.append("\n");
 			}
 		}
@@ -604,9 +604,9 @@ public class OneToOneOrthologExporter {
 					while(iter.hasNext())
 					{
 						int osi = ((Integer)iter.next()).intValue();
-						Feature[] cdsi = (Feature[])allCds.elementAt(sI);
-						if(mincoord==0||mincoord>cdsi[osi].left)	mincoord=cdsi[osi].left;
-						if(maxcoord==0||maxcoord<cdsi[osi].right)	maxcoord=cdsi[osi].right;
+						LiteWeightFeature[] cdsi = (LiteWeightFeature[])allCds.elementAt(sI);
+						if(mincoord==0||mincoord>cdsi[osi].getLeft())	mincoord=cdsi[osi].getLeft();
+						if(maxcoord==0||maxcoord<cdsi[osi].getRight())	maxcoord=cdsi[osi].getRight();
 					}
 					seqlefts[sI]=mincoord;
 					seqrights[sI]=maxcoord;
@@ -641,10 +641,10 @@ public class OneToOneOrthologExporter {
 						else
 							xmfaEntry.append(",");
 						int osi = ((Integer)iter.next()).intValue();
-						Feature[] cdsi = (Feature[])allCds.elementAt(sI);
-						xmfaEntry.append(cdsi[osi].locus);
+						LiteWeightFeature[] cdsi = (LiteWeightFeature[])allCds.elementAt(sI);
+						xmfaEntry.append(cdsi[osi].getLocus());
 						xmfaEntry.append(" ");
-						xmfaEntry.append(cdsi[osi].strand > 0 ? "+" : "-");
+						xmfaEntry.append(!cdsi[osi].isReverse() ? "+" : "-");
 					}
 					xmfaEntry.append("\n");
 					xmfaEntry.append(format80(new String((byte[])aln[sI])));

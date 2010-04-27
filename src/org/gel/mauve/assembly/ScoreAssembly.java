@@ -1,10 +1,13 @@
 package org.gel.mauve.assembly;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.text.NumberFormat;
 import java.util.HashMap;
 
+import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.table.DefaultTableModel;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -46,6 +49,8 @@ public class ScoreAssembly  {
 	private static final String error = "Error computing DCJ distances! Please report bug to atritt@ucdavis.edu";
 	
 	private JTextArea sumTA, snpTA, gapTA;
+	
+	private DefaultTableModel snpData, gapData;
 	
 	private int fWIDTH = 400;
 
@@ -186,6 +191,11 @@ public class ScoreAssembly  {
 	
 
 	public ScoreAssembly(XmfaViewerModel model){
+		//init(model);
+		initWithJTables(model);
+	}
+	
+	private void init(XmfaViewerModel model){
 		win = new AnalysisDisplayWindow("Score Assembly - "+model.getSrc().getName(), fWIDTH, fHEIGHT);
 		sumTA = win.addContentPanel(SUM_CMD, SUM_DESC, true);
 		snpTA = win.addContentPanel(SNP_CMD, SNP_DESC, false);
@@ -203,8 +213,45 @@ public class ScoreAssembly  {
 		sumTA.setCaretPosition(0);
 		snpTA.setCaretPosition(0);
 		gapTA.setCaretPosition(0);
+	}
+	
+	private void initWithJTables(XmfaViewerModel model){
+		win = new AnalysisDisplayWindow("Score Assembly - "+model.getSrc().getName(), fWIDTH, fHEIGHT);
+		sumTA = win.addContentPanel(SUM_CMD, SUM_DESC, true);
+		sumTA.append(temp);
+		assScore = new AssemblyScorer(model);
+		sumTA.replaceRange("", 0, temp.length());
+		sumTA.setText(getSumText(assScore,true,false));
+		//addJTables();
+		addTables();
+		win.showWindow();
+		sumTA.setCaretPosition(0);
+	}
+	
+	private void addTables(){
+		SNP[] snps = assScore.getSNPs();
+		Object[] snpHeader = {"SNP_Pattern","Ref_Contig","Ref_PosInContig",
+							"Ref_PosGenomeWide","Assembly_Contig",
+							"Assembly_PosInContig","Assembly_PosGenomeWide"};
+		
+		DefaultTableModel snpData = win.addContentTable(SNP_CMD, SNP_DESC, false);
+		snpData.setColumnIdentifiers(snpHeader);
+		for (int snpI = 0; snpI < snps.length; snpI++){
+			snpData.addRow(snps[snpI].toString().split("\t"));
+		}
+		
+		Gap[] refGaps = assScore.getReferenceGaps();
+		Gap[] assGaps = assScore.getAssemblyGaps();
+		Object[] gapHeader = {"Sequence","Contig","Position_in_Contig","GenomeWide_Position","Length"};
+		DefaultTableModel gapData = win.addContentTable(GAP_CMD, GAP_DESC, false);
+		gapData.setColumnIdentifiers(gapHeader);
+		for (int gapI = 0; gapI < refGaps.length; gapI++)
+			gapData.addRow(refGaps[gapI].toString("reference").split("\t"));
+		for (int gapI = 0; gapI < assGaps.length; gapI++)
+			gapData.addRow(assGaps[gapI].toString("assembly").split("\t"));
 		
 	}
+
 
 	private void setInfoText(){
 		StringBuilder sb = new StringBuilder();

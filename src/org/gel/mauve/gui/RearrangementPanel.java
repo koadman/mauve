@@ -606,7 +606,7 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         	if( model instanceof LcbViewerModel )
         	{
         		//org.gel.mauve.dcjx.DCJDistance.launchWindow(model);
-//        		org.gel.mauve.dcjx.DCJDistance.launchWindow(model);
+        		org.gel.mauve.dcjx.DCJDistance.launchWindow(model);
         	}
         }
         else if (e.getActionCommand().equals("ScoreAssembly"))

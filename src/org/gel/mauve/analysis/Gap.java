@@ -4,8 +4,10 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.biojava.bio.seq.FeatureHolder;
 import org.gel.mauve.Chromosome;
 import org.gel.mauve.Genome;
+import org.gel.mauve.LCB;
 import org.gel.mauve.XmfaViewerModel;
 
 public class Gap implements Comparable<Gap>{
@@ -14,6 +16,8 @@ public class Gap implements Comparable<Gap>{
 	private int genSrcIdx;
 	
 	private int lcbId;
+	
+	private int lcbCol;
 	
 	private long position;
 	
@@ -41,8 +45,10 @@ public class Gap implements Comparable<Gap>{
 		this.length = len;
 		this.lcbId = lcb;
 		this.model = model;
-		this.chrom = model.getGenomeBySourceIndex(genSrcIdx).getChromosomeAt(position);
+		Genome g = model.getGenomeBySourceIndex(genSrcIdx);
+		this.chrom = g.getChromosomeAt(position);
 		this.posInCtg = (int) (position - this.chrom.getStart()+1);
+		this.lcbCol = (int) model.getLCBAndColumn(g, position)[1];
 	}
 	
 	private Gap(Gap gap){
@@ -53,6 +59,7 @@ public class Gap implements Comparable<Gap>{
 		this.model = gap.model;
 		this.chrom = gap.chrom;
 		this.posInCtg = gap.posInCtg;
+		this.lcbCol = gap.lcbCol;
 	}
 	
 	
@@ -96,6 +103,20 @@ public class Gap implements Comparable<Gap>{
 	
 	public int getLCB(){
 		return lcbId;
+	}
+	
+	public FeatureHolder getFeatures(int genSrcIdx){
+		Genome genome = model.getGenomeBySourceIndex(genSrcIdx);
+		long[] starts = new long[model.getGenomes().size()];
+		boolean[] gapS = new boolean[starts.length];
+		long[] ends = new long[model.getGenomes().size()];
+		boolean[] gapE = new boolean[starts.length];
+		model.getColumnCoordinates(lcbId, lcbCol, starts, gapS);
+		model.getColumnCoordinates(lcbId, lcbCol+1, ends, gapE);
+		long left = Math.min(starts[genSrcIdx],ends[genSrcIdx]);
+		long right = Math.max(starts[genSrcIdx],ends[genSrcIdx]);
+		boolean rev = starts[genSrcIdx] > ends[genSrcIdx];
+		return genome.getAnnotationsAt(left, right, rev);
 	}
 	
 	

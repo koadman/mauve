@@ -283,8 +283,19 @@ public class XmfaViewerModel extends LcbViewerModel {
 		return sim[g.getSourceIndex ()];
 	}
 
+	/**
+	 * Identifies the LCB and the column within the LCB of a given sequence
+	 * position
+	 * 
+	 * @return an array of 2 longs. The first being the LCB by index,
+	 *         and the second the column 
+	 */
 	public long [] getLCBAndColumn (Genome g, long position) {
 		return xmfa.getLCBAndColumn (g, position);
+	}
+	
+	public long[] getLCBAndColumn(int genSrcIdx, long position){
+		return this.getLCBAndColumn(genomes[genSrcIdx], position);
 	}
 
 	public int getLCBIndex (Genome g, long position) {
@@ -312,6 +323,41 @@ public class XmfaViewerModel extends LcbViewerModel {
 	 */
 	public void getColumnCoordinates (int lcb, long column, long [] seq_coords, boolean [] gap) {
 		xmfa.getColumnCoordinates (this, lcb, column, seq_coords, gap);
+	}
+	
+	public char[] getSequence(long left, long right, int genSrcIdx){
+		/*
+		if (left > right){
+			return null;
+		}
+		int len = (int) right - (int) left + 1;
+		char[] ret = new char[len];
+		long[] ar = getLCBAndColumn(genomes[genSrcIdx], left);
+		int leftLCB = (int) ar[0];
+		long leftCol = ar[1];
+		ar = getLCBAndColumn(genomes[genSrcIdx], right);
+		int rightLCB = (int) ar[0];
+		long rightCol = ar[1];
+		if (rightLCB != leftLCB){
+			
+			
+		} else {
+			xmfa.readRawSequence(leftLCB, genSrcIdx, left_col, len);
+		}*/
+		
+		return null;
+		
+	}
+	
+	public long genPosToAlnCol(int genSrcIdx, long seqPos){
+		return getLCBAndColumn(genomes[genSrcIdx], seqPos)[1];
+	}
+	
+	public long alnColToGenPos(int genSrcIdx, int lcbIdx, long col){
+		long[] seq_offsets = new long[genomes.length];
+		boolean[] gap = new boolean[genomes.length];
+		getColumnCoordinates(lcbIdx, col, seq_offsets, gap);
+		return seq_offsets[genSrcIdx];
 	}
 
 	public void updateHighlight (Genome g, long coordinate) {

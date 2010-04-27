@@ -7,7 +7,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.biojava.bio.seq.FeatureFilter;
+import org.biojava.bio.seq.FeatureHolder;
 import org.biojava.bio.seq.Sequence;
+import org.biojava.bio.seq.StrandedFeature;
+import org.biojava.bio.symbol.LocationTools;
+import org.biojavax.bio.seq.Position;
+import org.biojavax.bio.seq.RichLocation;
+import org.biojavax.bio.seq.SimplePosition;
+import org.biojavax.bio.seq.SimpleRichLocation;
 
 public class Genome {
 	private long length;
@@ -69,6 +77,25 @@ public class Genome {
 
 	public SupportedFormat getAnnotationFormat () {
 		return format;
+	}
+	
+	/**
+	 * Returns annotations overlapping the given position of this 
+	 * genome
+	 * 
+	 * @param left left position 
+	 * @param right right position 
+	 * @param rev true of the query position lies on complementary strand, false otherwise
+	 * 
+	 * @return a FeatureHolder containing the features in this genome that overlap the given position.
+	 */
+	public FeatureHolder getAnnotationsAt(long left, long right, boolean rev){
+		Position min = new SimplePosition((int) left);
+		Position max = new SimplePosition((int) right);
+		RichLocation loc = new SimpleRichLocation (min,max,0,rev?
+								RichLocation.Strand.NEGATIVE_STRAND : 
+								RichLocation.Strand.POSITIVE_STRAND);
+		return annotationSequence.filter(new FeatureFilter.OverlapsLocation(loc));
 	}
 
 	public String getDisplayName () {

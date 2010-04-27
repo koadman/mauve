@@ -44,7 +44,7 @@ public class Mauve {
 
 	// Main entry point
 	static public void main (String [] args) {
-		if (args.length > 0) {
+		if (args.length > 1) {
 			String firstArg = args[0];
 			if (firstArg.equalsIgnoreCase("ScoreAssembly"))
 				ScoreAssembly.main(trimFirstArg(args));

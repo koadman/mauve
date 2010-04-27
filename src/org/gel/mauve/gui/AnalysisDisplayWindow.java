@@ -15,19 +15,25 @@ import java.util.HashMap;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 import javax.swing.border.BevelBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 //import org.gel.mauve.assembly.ScoreAssembly.ChangeCards;
 
 public class AnalysisDisplayWindow extends JFrame {
 	
 	private static int xMax = Toolkit.getDefaultToolkit().getScreenSize().width;
+	
+	private int contentCount;
 	
 	private JPanel topBar;
 	
@@ -41,7 +47,7 @@ public class AnalysisDisplayWindow extends JFrame {
 	
 	private Font font;
 	
-	private HashMap<String,JTextArea> tas;
+	private HashMap<String,JComponent> components;
 	
 	private String name;
 	
@@ -54,6 +60,7 @@ public class AnalysisDisplayWindow extends JFrame {
 	private ContentManager cc;
 	
 	public AnalysisDisplayWindow(String name, int width, int height) {
+		contentCount = 0;
 		font = new Font ("monospaced", Font.PLAIN, 12);
 		frame = new JFrame(name);
 		
@@ -63,7 +70,7 @@ public class AnalysisDisplayWindow extends JFrame {
 		this.height = height;
 		frame.setSize(this.width, this.height);
 		frame.setLocation(xMax-this.width, 0);
-		tas = new HashMap<String,JTextArea>();
+		components = new HashMap<String,JComponent>();
 		cc = new ContentManager();
 		topBar = new JPanel();
 		BoxLayout tmp = new BoxLayout(topBar, BoxLayout.X_AXIS);
@@ -91,13 +98,18 @@ public class AnalysisDisplayWindow extends JFrame {
 	}
 	
 	public void showWindow(){
-		if (tas.size() == 0)
+		if (components.size() == 0)
 			throw new RuntimeException("Can't call showWindow() unless there are Panels to show");
-
-		if (botBar.getComponentCount() <= 1)
+		
+		if (botBar.getComponentCount() <= 1){
 			botBar.setVisible(false);
-		if (!frame.isVisible())
+		} else {
+			botBar.setVisible(true);
+		}
+		if (!frame.isVisible()) {
 			frame.setLocation(xMax-this.width, 0);
+			frame.setSize(width, height);	
+		}
 		frame.setVisible(true);
 	}
 
@@ -114,30 +126,46 @@ public class AnalysisDisplayWindow extends JFrame {
 		JButton butn = new JButton(cmd);
 		botBar.add(butn);
 		butn.addActionListener(cc);
-		
-		// create a text area for the user to add text to
 		JTextArea ta = new JTextArea(25, 25); 
-		tas.put(cmd, ta);
+		components.put(cmd, ta);
 		ta.setFont(font);
 		ta.setEditable(false);
-	//	JFrame tmp = new JFrame(cmd);
-	//	tmp.getContentPane().add(ta, BorderLayout.CENTER);
-		
-		// add the command desc
 		cc.addCard(cmd, desc);
-		
 		if (setTop){
 			cardMngr.show(content, desc);
 		}
-		//JScrollPane jsp = new JScrollPane(tmp);
 		JScrollPane jsp = new JScrollPane(ta);
-//		jsp.setLayout(new BorderLayout());
-//		jsp.add(ta,BorderLayout.CENTER);
-		
-	//	jsp.setVisible(true);
 		content.add(desc, jsp);
+		contentCount++;
 		return ta;
 	}
+	
+	/**
+	 * Adds a table pane to this display window 
+	 * 
+	 * @param cmd
+	 * @param desc
+	 * @param setTop
+	 * @return the table that gets displayed in the created pane
+	 */
+	public DefaultTableModel addContentTable(String cmd, String desc, boolean setTop){
+		DefaultTableModel data = new DefaultTableModel();
+		JButton butn = new JButton(cmd);
+		botBar.add(butn);
+		butn.addActionListener(cc);
+		cc.addCard(cmd, desc);
+		if (setTop){
+			cardMngr.show(content, desc);
+		}
+		JTable table = new JTable(data);
+		components.put(cmd, table);
+		JScrollPane jsp = new JScrollPane(table);
+		table.setFillsViewportHeight(true);
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+		content.add(desc, jsp);
+		return data;
+	}
+	
 	
 	private class ContentManager implements ActionListener {
 		
@@ -181,7 +209,6 @@ public class AnalysisDisplayWindow extends JFrame {
 		}
 		
 		private void printText() throws Exception{
-			JTextArea toPrint = tas.get(lastCmd);
 			File file = null;
 			int option = -1;
 			boolean selectFile = true;
@@ -205,9 +232,31 @@ public class AnalysisDisplayWindow extends JFrame {
 			}
 			if (option != JFileChooser.CANCEL_OPTION){
 				System.err.println("Writing "+frame.getTitle()+" - "+lastCmd+ " to " + file.getAbsolutePath());
-				
+
 				PrintStream out = (new PrintStream(file));
-				out.print(toPrint.getText());
+				JComponent toPrint = components.get(lastCmd);
+				if (toPrint instanceof JTextArea){
+					out.print(((JTextArea)toPrint).getText());
+				} else if (toPrint instanceof JTable) {
+					DefaultTableModel data = (DefaultTableModel) 
+											((JTable) toPrint).getModel();
+					int numCol = data.getColumnCount();
+					int numRow = data.getRowCount();
+					out.print(data.getColumnName(0));
+					for (int colI = 1 ; colI < numCol; colI++){
+						out.print("\t"+data.getColumnName(colI));
+					}
+					out.print("\n");
+					for (int rowI = 0; rowI < numRow; rowI++){
+						out.print(data.getValueAt(rowI, 0).toString());
+						for (int colI = 0 ; colI < numCol; colI++){
+							out.print("\t"+data.getValueAt(rowI, colI).
+															toString());
+						}
+						out.print("\n");
+					}
+				}
+				out.flush();
 				out.close();
 			}
 				

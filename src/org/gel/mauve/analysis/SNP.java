@@ -1,5 +1,6 @@
 package org.gel.mauve.analysis;
 
+import org.biojava.bio.seq.FeatureHolder;
 import org.gel.mauve.Chromosome;
 import org.gel.mauve.Genome;
 import org.gel.mauve.XmfaViewerModel;
@@ -8,6 +9,10 @@ public class SNP {
 
 	private char[] pattern;
 	
+	/**
+	 * positions in each genome of the SNP. Negative values indicate
+	 * reverse strand.
+	 */
 	private long[] pos;
 	
 	private boolean[] present;
@@ -77,7 +82,13 @@ public class SNP {
 	 * 
 	 * @param genSrcIdx the source index of the genome to be added
 	 * @param base the base to be added for genome <code>genSrcIdx</code>
-	 * @param position the position where this base is located in genome <code>genSrcIdx</code> 
+	 * @param position the position where this base is located in genome <code>genSrcIdx</code>
+	 * 
+	 * <br></br>
+	 * <br>
+	 * NOTE: we should probably have a static SNPBuilder kind of class
+	 * to avoid this function getting called where it's not supposed to be.
+	 *  </br>
 	 */
 	public void addTaxa(int genSrcIdx, char base, long position){
 		if (genSrcIdx >= pattern.length)
@@ -137,6 +148,19 @@ public class SNP {
 			throw new IllegalArgumentException(genomeSrcIdx+" : source index out of bounds");
 		else
 			return pos[genomeSrcIdx];
+	}
+	
+	/**
+	 * Returns the features in the given genome that overlap with this SNP
+	 * 
+	 * @param genSrcIdx the source index of the genome of interest
+	 * @return the features overlapping this SNP in genome <code>genSrcIdx</code>	 
+	 */
+	public FeatureHolder getFeatures(int genSrcIdx){
+		long pos = this.pos[genSrcIdx];
+		return model.getGenomeBySourceIndex(genSrcIdx).
+							getAnnotationsAt(pos, pos, pos<0?true:false);
+		
 	}
 	
 	/**
