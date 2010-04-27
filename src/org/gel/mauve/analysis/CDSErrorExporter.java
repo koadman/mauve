@@ -25,12 +25,16 @@ public class CDSErrorExporter {
 	
 	private XmfaViewerModel model;
 	
-	private HashMap<LiteWeightFeature, Integer> aaSubCount;
+	private HashMap<LiteWeightFeature,Integer> aaSubCount;
+
+	private HashMap<LiteWeightFeature,Integer> prmtrStops;
 	
 	public CDSErrorExporter(XmfaViewerModel model, SNP[] snps, Gap[] assGaps){
 		snpErrors = new HashMap<LiteWeightFeature,Vector<SNP>>();
 		gapErrors = new HashMap<LiteWeightFeature,Vector<Gap>>();
 		this.model = model;
+		prmtrStops = new HashMap<LiteWeightFeature,Integer>();
+		aaSubCount = new HashMap<LiteWeightFeature,Integer>();
 		loadBrokenCDS(model, snps, assGaps);
 		loadAASubs();
 	}
@@ -92,7 +96,6 @@ public class CDSErrorExporter {
 			int l = feat.getLeft();
 			int r = feat.getRight();
 			char[] refSeq = model.getSequence(l, r, 0);
-			
 			long[] leftLCB = model.getLCBAndColumn(0, l);
 			long[] rightLCB = model.getLCBAndColumn(0,r);
 			long[] left_pos = new long[model.getGenomes().size()];
@@ -102,37 +105,41 @@ public class CDSErrorExporter {
 			model.getColumnCoordinates((int)rightLCB[0], rightLCB[1], right_pos, gap);
 			char[] assSeq = model.getSequence(left_pos[1], right_pos[1], 1);
 			try {
-				SymbolList refSymL = DNATools.createDNA(new String(refSeq));
-				SymbolList assSymL = DNATools.createDNA(new String(assSeq));
-				refSymL = DNATools.toRNA(refSymL);
-				assSymL = DNATools.toRNA(assSymL);
-				refSymL = RNATools.translate(refSymL);
-				assSymL = RNATools.translate(assSymL);
-				
-				refSeq = refSymL.seqString().toCharArray();
-				assSeq = assSymL.seqString().toCharArray();
+				refSeq = RNATools.translate(
+						 DNATools.toRNA(
+						 DNATools.createDNA(new String(refSeq))))
+						 .toString()
+						 .toCharArray();
+				assSeq = RNATools.translate(
+						 DNATools.toRNA(
+						 DNATools.createDNA(new String(assSeq))))
+						 .toString()
+						 .toCharArray();
 			} catch (IllegalSymbolException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IllegalAlphabetException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
 			if (refSeq.length != assSeq.length){
-				System.out.println("Early stop codon");
+				//System.out.println("Early stop codon");
 				if (aaSubCount.containsKey(feat)){
 					int count = aaSubCount.get(feat);
 					aaSubCount.put(feat, ++count);
 				} else {
 					aaSubCount.put(feat, 1);
 				}
-				continue;
+				// continue;
 			}
 			for (int i = 0; i < assSeq.length; i++){
 				if (assSeq[i] != refSeq[i]) {
-					System.out.println("Amino acid substitution");
-					if (aaSubCount.containsKey(feat)){
+					if (refSeq[i] == '*') {
+						if (prmtrStops.containsKey(feat)){
+							int count = prmtrStops.get(feat);
+							prmtrStops.put(feat, ++count);
+						} else {
+							prmtrStops.put(feat, 1);
+						}
+					} else if (aaSubCount.containsKey(feat)){
 						int count = aaSubCount.get(feat);
 						aaSubCount.put(feat, ++count);
 					} else {
@@ -140,9 +147,6 @@ public class CDSErrorExporter {
 					}
 				}                           
 			}
-			
-			
-			
 		}
 	}
 	
