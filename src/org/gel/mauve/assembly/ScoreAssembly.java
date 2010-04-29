@@ -5,6 +5,7 @@ import java.io.File;
 import java.text.NumberFormat;
 import java.util.HashMap;
 
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
@@ -16,6 +17,7 @@ import org.apache.commons.cli.Options;
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.OptionsBuilder;
 import org.gel.mauve.XmfaViewerModel;
+import org.gel.mauve.analysis.BrokenCDS;
 import org.gel.mauve.analysis.Gap;
 import org.gel.mauve.analysis.SNP;
 import org.gel.mauve.contigs.ContigOrderer;
@@ -33,8 +35,14 @@ public class ScoreAssembly  {
 	private static String SNP_DESC = "SNPs between reference and assembly";
 	private static String GAP_CMD = "Gaps";
 	private static String GAP_DESC = "Gaps in reference and assembly";
+	private static String CDS_CMD = "Broken CDS";
+	private static String CDS_DESC = "Broken CDS in assembly genome";
 	
 	private static HashMap<String,ScoreAssembly> modelMap;
+
+	private static final String temp = "Running...";
+	
+	private static final String error = "Error computing DCJ distances! Please report bug to atritt@ucdavis.edu";
 	
 	private static int A = 0;
 	
@@ -44,13 +52,9 @@ public class ScoreAssembly  {
 	
 	private static int G = 3;
 	
-	private static final String temp = "Running...";
+	private JTextArea sumTA;
 	
-	private static final String error = "Error computing DCJ distances! Please report bug to atritt@ucdavis.edu";
-	
-	private JTextArea sumTA, snpTA, gapTA;
-	
-	private DefaultTableModel snpData, gapData;
+	private XmfaViewerModel model;
 	
 	private int fWIDTH = 400;
 
@@ -60,151 +64,25 @@ public class ScoreAssembly  {
 	
 	private AnalysisDisplayWindow win;
 	
-	public static void main(String[] args){
-		CommandLine line = OptionsBuilder.getCmdLine(getOptions(), args);
-		if (args.length == 0 || line == null || line.hasOption("help")){
-			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp(80,
-					"java -cp Mauve.jar org.gel.mauve.assembly.ScoreAssembly [options]",
-					"[options]", getOptions(), "report bugs to me");
-			System.exit(-1);
-		}
-
-		File outDir =  null;
-		if (line.hasOption("outputDir"))
-			outDir = new File(line.getOptionValue("outputDir"));
-		else 
-			new File(System.getProperty("user.dir"));
-		
-		boolean batch = false;
-		if (line.hasOption("batch"))
-			batch = true;
-		String basename = null;
-		if (line.hasOption("basename"))
-			basename = line.getOptionValue("basename");
-		
-		
-		File alnmtFile = null;
-		AssemblyScorer as = null;
-		
-		if (line.hasOption("alignment")){ // if we don't need to align
-			if ((line.hasOption("reference") || line.hasOption("assembly"))){
-				System.err.println("You gave me an alignment along with a reference and/or assembly genome.\n" +
-				"Do not use use the \"-reference\" and \"-assembly\" flags with the \"-alignment\" flag.");
-				System.exit(-1);
-			}
-			alnmtFile = new File (line.getOptionValue("alignment"));
-			if (basename == null) {
-				basename = alnmtFile.getName();
-				basename = basename.substring(0,basename.lastIndexOf("."));
-			}
-			as = getAS(alnmtFile);
-			AssemblyScorer.printInfo(as,outDir,basename,batch);
-		} else { // we need to do some sort of alignment
-			
-			if (!line.hasOption("reference")){
-				System.err.println("Reference file not given.");
-				System.exit(-1);
-			} else if (!line.hasOption("assembly")){
-				System.err.println("Assembly file not given.");
-				System.exit(-1);
-			}
-			
-			File refFile = new File(line.getOptionValue("reference"));
-			File assPath = new File(line.getOptionValue("assembly"));
-			
-			if (line.hasOption("reorder")){ // we need to reorder first
-				String reorderDir = line.getOptionValue("reorder");
-				ContigOrderer co = new ContigOrderer(refFile, assPath,
-												new File(reorderDir));
-				if (basename != null)
-					as = new AssemblyScorer(co, outDir, basename);
-				else 
-					as = new AssemblyScorer(co, outDir);
-				co.addAlnmtListener(as);
-			} else {
-				if (basename == null) {
-					basename = assPath.getName();
-					basename = basename.substring(0,basename.lastIndexOf("."));
-				}
-				alnmtFile = new File(outDir, basename+".xmfa");
-				as = new AssemblyScorer(alnmtFile, outDir, basename);
-				String[] cmd = makeAlnCmd(refFile,assPath, alnmtFile);
-				System.out.println("Executing");
-				AlignFrame.printCommand(cmd, System.out);
-				AlignWorker worker = new AlignWorker(as, cmd);
-				worker.start();
-			}
-			
-		}
-	} 
+	private boolean getBrokenCDS;
 	
-	private static AssemblyScorer getAS(File alnmtFile){
-		try {
-			//sa = new ScoreAssembly(args,true);
-			XmfaViewerModel model = new XmfaViewerModel(alnmtFile,null);
-			return new AssemblyScorer(model);
-		} catch (Exception e){
-			e.printStackTrace();
-			System.exit(-1);
-		}
-		return null;
-	}
-	
-	private static String[] makeAlnCmd(File seq1, File seq2, File output){
-		String[] ret = new String[6 + DEFAULT_ARGS.length];
-		int j = 0;
-		ret[j++] = AlignFrame.getBinaryPath("progressiveMauve");
-		for (int i = 0; i < DEFAULT_ARGS.length; i++)
-			ret[j++] = DEFAULT_ARGS[i];
-		ret[j++] = "--output="+output.getAbsolutePath();
-		ret[j++] = "--backbone-output=" + output.getAbsolutePath()+".backbone";
-		ret[j++] = "--output-guide-tree=" + output.getAbsolutePath()+".guide_tree";
-		ret[j++] = seq1.getAbsolutePath();
-		ret[j++] = seq2.getAbsolutePath();
-		return ret;
-	}
-	
-	@SuppressWarnings("static-access")
-	private static Options getOptions(){
-		Options ret = new Options();
-		OptionsBuilder ob = new OptionsBuilder();
-		ob.addBoolean("help", "print this message");
-		ob.addBoolean("batch", "run in batch mode i.e. print summary output " +
-											"on one line to standard output");
-		ob.addArgument("string", "basename for output files", "basename",false);
-		ob.addArgument("directory", "reorder contigs before scoring " +
-						"assembly and store output in <directory>", "reorder",false);
-		ob.addArgument("directory", "save output in <directory>. Default " +
-									"is current directory.", "outputDir",false);
-		Option alnOpt = ob.addArgument("file", "file containing alignment of assembly to " +
-											"reference genome", "alignment",false);
-		Option refOpt = ob.addArgument("file", "file containing reference genome", "reference",false);
-		Option assOpt = ob.addArgument("file", "file containing assembly/draft genome to score",
-																	"assembly",false);
-	//	ob.addMutExclOptions(refOpt, alnOpt);
-	//	ob.addMutExclOptions(assOpt, alnOpt);
-		
-		return ob.getOptions();
-	}
-	
-	
-
-	public ScoreAssembly(XmfaViewerModel model){
+	public ScoreAssembly(XmfaViewerModel model, boolean getBrokenCDS){
 		//init(model);
+		this.model = model;
+		this.getBrokenCDS = getBrokenCDS;
 		initWithJTables(model);
 	}
-	
+	/*
 	private void init(XmfaViewerModel model){
 		win = new AnalysisDisplayWindow("Score Assembly - "+model.getSrc().getName(), fWIDTH, fHEIGHT);
 		sumTA = win.addContentPanel(SUM_CMD, SUM_DESC, true);
-		snpTA = win.addContentPanel(SNP_CMD, SNP_DESC, false);
-		gapTA = win.addContentPanel(GAP_CMD, GAP_DESC, false);
+		JTextArea snpTA = win.addContentPanel(SNP_CMD, SNP_DESC, false);
+		JTextArea gapTA = win.addContentPanel(GAP_CMD, GAP_DESC, false);
 		sumTA.append(temp);
 		snpTA.append(temp);
 		gapTA.append(temp);
 		win.showWindow();
-		assScore = new AssemblyScorer(model);
+		//assScore = new AssemblyScorer(model);
 		sumTA.replaceRange("", 0, temp.length());
 		sumTA.setText(getSumText(assScore,true,false));
 		snpTA.replaceRange("", 0, temp.length());
@@ -214,12 +92,22 @@ public class ScoreAssembly  {
 		snpTA.setCaretPosition(0);
 		gapTA.setCaretPosition(0);
 	}
-	
+	*/
 	private void initWithJTables(XmfaViewerModel model){
 		win = new AnalysisDisplayWindow("Score Assembly - "+model.getSrc().getName(), fWIDTH, fHEIGHT);
 		sumTA = win.addContentPanel(SUM_CMD, SUM_DESC, true);
 		sumTA.append(temp);
-		assScore = new AssemblyScorer(model);
+		this.win.showWindow();
+		new Thread( new Runnable (){ 
+			public void run(){
+				assScore = new AssemblyScorer(ScoreAssembly.this.model,
+										ScoreAssembly.this.getBrokenCDS);
+				ScoreAssembly.this.finish();
+			}
+		}).start();
+	}
+	
+	private synchronized void finish(){
 		sumTA.replaceRange("", 0, temp.length());
 		sumTA.setText(getSumText(assScore,true,false));
 		//addJTables();
@@ -235,6 +123,7 @@ public class ScoreAssembly  {
 							"Assembly_PosInContig","Assembly_PosGenomeWide"};
 		
 		DefaultTableModel snpData = win.addContentTable(SNP_CMD, SNP_DESC, false);
+		win.showWindow();
 		snpData.setColumnIdentifiers(snpHeader);
 		for (int snpI = 0; snpI < snps.length; snpI++){
 			snpData.addRow(snps[snpI].toString().split("\t"));
@@ -249,28 +138,13 @@ public class ScoreAssembly  {
 			gapData.addRow(refGaps[gapI].toString("reference").split("\t"));
 		for (int gapI = 0; gapI < assGaps.length; gapI++)
 			gapData.addRow(assGaps[gapI].toString("assembly").split("\t"));
-		
-	}
-
-
-	private void setInfoText(){
-		StringBuilder sb = new StringBuilder();
-		sb.append("SNP_Pattern\tRef_Contig\tRef_PosInContig\tRef_PosGenomeWide\tAssembly_Contig\tAssembly_PosInContig\tAssembly_PosGenomeWide\n");
-		SNP[] snps = assScore.getSNPs();
-		for (int i = 0; i < snps.length; i++)
-			sb.append(snps[i].toString()+"\n");
-		
-		snpTA.setText(sb.toString());
-		
-		sb = new StringBuilder();
-		sb.append("Sequence\tContig\tPosition_in_Contig\tGenomeWide_Position\tLength\n");
-		Gap[] gaps = assScore.getReferenceGaps();
-		for (int i = 0; i < gaps.length; i++)
-			sb.append(gaps[i].toString("reference")+"\n");
-		gaps = assScore.getAssemblyGaps();
-		for (int i = 0; i < gaps.length; i++)
-			sb.append(gaps[i].toString("assembly")+"\n");
-		gapTA.setText(sb.toString());
+		if (getBrokenCDS && assScore.hasBrokenCDS()){
+			Object[] cdsHeader = {"CDS_ID","Substituted_Positions","Substitution","Stop_Codon_Positions","Original_Residue"};
+			DefaultTableModel cdsData = win.addContentTable(CDS_CMD, CDS_DESC, false);
+			BrokenCDS[] cds = assScore.getBrokenCDS();
+			for (int cdsI = 0; cdsI < cds.length; cdsI++)
+				cdsData.addRow(cds.toString().split("\t"));
+		}
 		
 	}
 	
@@ -348,31 +222,6 @@ public class ScoreAssembly  {
 		}
 		return sb.toString();
 	}
-
-	/**
-	 * 
-	 * @param refPath
-	 * @param assPath
-	 * @param reorder
-	 * @return
-	 */
-	private static File runPMauveAlnmt(String refPath, String assPath, String outDirPath, boolean reorder){
-		if (reorder){
-			
-		} else {
-			File ref = new File(refPath);
-			File ass = new File(assPath);
-			File outDir = new File(outDirPath);
-			
-			if (!outDir.exists()){
-				outDir.mkdir();
-			} else if (!outDir.isDirectory()){
-				System.err.println(outDirPath + " already exists as a file.");
-				System.exit(-1);
-			} 
-		}
-		return null;
-	}
 	
 	/**
 	 * Returns a 4x4 matrix of counts of substitution types between 
@@ -427,9 +276,149 @@ public class ScoreAssembly  {
 		if (modelMap.containsKey(key)){
 			modelMap.get(key).win.showWindow();
 		} else if (model instanceof XmfaViewerModel) {
-			modelMap.put(key, new ScoreAssembly((XmfaViewerModel)model));
+			
+			int ret_val = JOptionPane.showConfirmDialog(null, "Do you want me " +
+					"to locate broken CDS. This can take awhile");
+			if (ret_val == JOptionPane.YES_OPTION) {
+				modelMap.put(key, 
+						new ScoreAssembly((XmfaViewerModel)model,true));
+			} else if (ret_val == JOptionPane.NO_OPTION) {
+				modelMap.put(key, 
+						new ScoreAssembly((XmfaViewerModel)model,false));
+			}
+			
 		} else {
 			System.err.println("Can't score assembly -- Please report this bug!");
 		}	
+	}
+
+	public static void main(String[] args){
+		CommandLine line = OptionsBuilder.getCmdLine(getOptions(), args);
+		if (args.length == 0 || line == null || line.hasOption("help")){
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp(80,
+					"java -cp Mauve.jar org.gel.mauve.assembly.ScoreAssembly [options]",
+					"[options]", getOptions(), "report bugs to me");
+			System.exit(-1);
+		}
+	
+		File outDir =  null;
+		if (line.hasOption("outputDir"))
+			outDir = new File(line.getOptionValue("outputDir"));
+		else 
+			new File(System.getProperty("user.dir"));
+		
+		boolean batch = false;
+		if (line.hasOption("batch"))
+			batch = true;
+		String basename = null;
+		if (line.hasOption("basename"))
+			basename = line.getOptionValue("basename");
+		boolean getBrokenCDS = false;
+		if (line.hasOption("brokenCDS")){
+			getBrokenCDS = true;
+		}
+		
+		
+		File alnmtFile = null;
+		AssemblyScorer as = null;
+		
+		if (line.hasOption("alignment")){ // if we don't need to align
+			if ((line.hasOption("reference") || line.hasOption("assembly"))){
+				System.err.println("You gave me an alignment along with a reference and/or assembly genome.\n" +
+				"Do not use use the \"-reference\" and \"-assembly\" flags with the \"-alignment\" flag.");
+				System.exit(-1);
+			}
+			alnmtFile = new File (line.getOptionValue("alignment"));
+			if (basename == null) {
+				basename = alnmtFile.getName();
+				basename = basename.substring(0,basename.lastIndexOf("."));
+			}
+			as = getAS(alnmtFile,getBrokenCDS);
+			AssemblyScorer.printInfo(as,outDir,basename,batch);
+		} else { // we need to do some sort of alignment
+			
+			if (!line.hasOption("reference")){
+				System.err.println("Reference file not given.");
+				System.exit(-1);
+			} else if (!line.hasOption("assembly")){
+				System.err.println("Assembly file not given.");
+				System.exit(-1);
+			}
+			
+			File refFile = new File(line.getOptionValue("reference"));
+			File assPath = new File(line.getOptionValue("assembly"));
+			
+			if (line.hasOption("reorder")){ // we need to reorder first
+				String reorderDir = line.getOptionValue("reorder");
+				ContigOrderer co = new ContigOrderer(refFile, assPath,
+												new File(reorderDir));
+				if (basename != null)
+					as = new AssemblyScorer(co, outDir, basename,getBrokenCDS);
+				else 
+					as = new AssemblyScorer(co, outDir,getBrokenCDS);
+				co.addAlnmtListener(as);
+			} else {
+				if (basename == null) {
+					basename = assPath.getName();
+					basename = basename.substring(0,basename.lastIndexOf("."));
+				}
+				alnmtFile = new File(outDir, basename+".xmfa");
+				as = new AssemblyScorer(alnmtFile, outDir, basename,getBrokenCDS);
+				String[] cmd = makeAlnCmd(refFile,assPath, alnmtFile);
+				System.out.println("Executing");
+				AlignFrame.printCommand(cmd, System.out);
+				AlignWorker worker = new AlignWorker(as, cmd);
+				worker.start();
+			}
+			
+		}
+	}
+
+	private static AssemblyScorer getAS(File alnmtFile, boolean getBrokenCDS){
+		try {
+			//sa = new ScoreAssembly(args,true);
+			XmfaViewerModel model = new XmfaViewerModel(alnmtFile,null);
+			return new AssemblyScorer(model, getBrokenCDS);
+		} catch (Exception e){
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return null;
+	}
+
+	private static String[] makeAlnCmd(File seq1, File seq2, File output){
+		String[] ret = new String[6 + DEFAULT_ARGS.length];
+		int j = 0;
+		ret[j++] = AlignFrame.getBinaryPath("progressiveMauve");
+		for (int i = 0; i < DEFAULT_ARGS.length; i++)
+			ret[j++] = DEFAULT_ARGS[i];
+		ret[j++] = "--output="+output.getAbsolutePath();
+		ret[j++] = "--backbone-output=" + output.getAbsolutePath()+".backbone";
+		ret[j++] = "--output-guide-tree=" + output.getAbsolutePath()+".guide_tree";
+		ret[j++] = seq1.getAbsolutePath();
+		ret[j++] = seq2.getAbsolutePath();
+		return ret;
+	}
+
+	@SuppressWarnings("static-access")
+	private static Options getOptions(){
+		Options ret = new Options();
+		OptionsBuilder ob = new OptionsBuilder();
+		ob.addBoolean("help", "print this message");
+		ob.addBoolean("batch", "run in batch mode i.e. print summary output " +
+											"on one line to standard output");
+		ob.addArgument("string", "basename for output files", "basename",false);
+		ob.addArgument("directory", "reorder contigs before scoring " +
+						"assembly and store output in <directory>", "reorder",false);
+		ob.addArgument("directory", "save output in <directory>. Default " +
+									"is current directory.", "outputDir",false);
+		ob.addArgument("file", "file containing alignment of assembly to " +
+											"reference genome", "alignment",false);
+		ob.addArgument("file", "file containing reference genome", "reference",false);
+		ob.addArgument("file", "file containing assembly/draft genome to score",
+																	"assembly",false);
+		ob.addBoolean("brokenCDS", "compute broken CDS in assembly. This can take awhile.");
+		return ob.getOptions();
 	}
 }

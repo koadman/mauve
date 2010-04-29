@@ -2,6 +2,7 @@ package org.gel.air.util;
 
 import java.io.BufferedInputStream;
 
+
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -10,7 +11,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Hashtable;
 
@@ -22,24 +22,26 @@ public class IOUtils {
 	 * @param dest destination file
 	 * @throws IOException 
 	 */
-	public static void copyFile (File source, File dest) throws IOException {
-		System.out.println("AJT0403: Copying...\n\t" + source.getAbsolutePath() +"\nto\n\t" + dest.getAbsolutePath());
-	     FileChannel in = null, out = null;
-	     try {          
-	    	 if (!dest.exists())
-	    		 dest.createNewFile();
-	          in = new FileInputStream(source).getChannel();
-	          out = new FileOutputStream(dest).getChannel();
-	 
-	          long size = in.size();
-	          MappedByteBuffer buf = in.map(FileChannel.MapMode.READ_ONLY, 0, size);
-	 
-	          out.write(buf);
-	 
-	     } finally {
-	          if (in != null)          in.close();
-	          if (out != null)     out.close();
-	     }
+	public static void copyFile (File sourceFile, File destFile) throws IOException {
+		System.out.println("AJT0403: Copying...\n\t" + sourceFile.getAbsolutePath() +"\nto\n\t" + destFile.getAbsolutePath());
+		if(!destFile.exists()) {
+			 destFile.createNewFile();
+		}
+			 
+		FileChannel source = null;
+		FileChannel destination = null;
+		try {
+			source = new FileInputStream(sourceFile).getChannel();
+			destination = new FileOutputStream(destFile).getChannel();
+			destination.transferFrom(source, 0, source.size());
+		} finally {
+			if(source != null) {
+				source.close();
+			}
+			if(destination != null) {
+				destination.close();
+			}
+		}
 	}
 	
 	/**

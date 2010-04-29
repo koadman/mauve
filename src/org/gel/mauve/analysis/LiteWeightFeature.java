@@ -71,4 +71,8 @@ public class LiteWeightFeature implements Comparable
 			return 1;
 		return 0;
 	}
+	
+	public String getID(){
+		return this.ID;
+	}
 }

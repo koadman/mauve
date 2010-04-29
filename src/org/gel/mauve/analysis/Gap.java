@@ -108,9 +108,9 @@ public class Gap implements Comparable<Gap>{
 	public FeatureHolder getFeatures(int genSrcIdx){
 		Genome genome = model.getGenomeBySourceIndex(genSrcIdx);
 		long[] starts = new long[model.getGenomes().size()];
-		boolean[] gapS = new boolean[starts.length];
+		boolean[] gapS = new boolean[model.getGenomes().size()];
 		long[] ends = new long[model.getGenomes().size()];
-		boolean[] gapE = new boolean[starts.length];
+		boolean[] gapE = new boolean[model.getGenomes().size()];
 		model.getColumnCoordinates(lcbId, lcbCol, starts, gapS);
 		model.getColumnCoordinates(lcbId, lcbCol+1, ends, gapE);
 		long left = Math.min(starts[genSrcIdx],ends[genSrcIdx]);

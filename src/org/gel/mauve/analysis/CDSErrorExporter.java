@@ -2,6 +2,7 @@ package org.gel.mauve.analysis;
  
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import org.biojava.bio.seq.DNATools;
@@ -25,18 +26,19 @@ public class CDSErrorExporter {
 	
 	private XmfaViewerModel model;
 	
-	private HashMap<LiteWeightFeature,Integer> aaSubCount;
-
-	private HashMap<LiteWeightFeature,Integer> prmtrStops;
+	private HashMap<LiteWeightFeature,BrokenCDS> cds; 
+	
 	
 	public CDSErrorExporter(XmfaViewerModel model, SNP[] snps, Gap[] assGaps){
 		snpErrors = new HashMap<LiteWeightFeature,Vector<SNP>>();
 		gapErrors = new HashMap<LiteWeightFeature,Vector<Gap>>();
 		this.model = model;
-		prmtrStops = new HashMap<LiteWeightFeature,Integer>();
-		aaSubCount = new HashMap<LiteWeightFeature,Integer>();
 		loadBrokenCDS(model, snps, assGaps);
 		loadAASubs();
+	}
+	
+	public BrokenCDS[] getBrokenCDS(){
+		return cds.values().toArray(new BrokenCDS[cds.size()]);
 	}
 	
 	/**
@@ -54,6 +56,7 @@ public class CDSErrorExporter {
 			FeatureHolder holder = s.getFeatures(0);
 			LiteWeightFeature[] feats = OneToOneOrthologExporter.
 							getFeaturesByType(0, holder.features(), "CDS");
+			
 			for (int featI = 0; featI < feats.length; featI++){
 				LiteWeightFeature feat = feats[featI];
 				if (snpErrors.containsKey(feat)){
@@ -86,7 +89,6 @@ public class CDSErrorExporter {
 	
 	private void loadAASubs(){
 		Iterator<LiteWeightFeature> it = snpErrors.keySet().iterator();
-		aaSubCount = new HashMap<LiteWeightFeature, Integer>();
 		while(it.hasNext()){
 			LiteWeightFeature feat = it.next();
 			if (gapErrors.containsKey(feat)){
@@ -121,35 +123,30 @@ public class CDSErrorExporter {
 				e.printStackTrace();
 			}
 			if (refSeq.length != assSeq.length){
-				//System.out.println("Early stop codon");
-				if (aaSubCount.containsKey(feat)){
-					int count = aaSubCount.get(feat);
-					aaSubCount.put(feat, ++count);
-				} else {
-					aaSubCount.put(feat, 1);
-				}
-				// continue;
+				System.err.println("Different lengths: refSeq = " +refSeq.length + " assSeq = " + assSeq.length);
+				continue;
 			}
 			for (int i = 0; i < assSeq.length; i++){
 				if (assSeq[i] != refSeq[i]) {
-					if (refSeq[i] == '*') {
-						if (prmtrStops.containsKey(feat)){
-							int count = prmtrStops.get(feat);
-							prmtrStops.put(feat, ++count);
+					if (assSeq[i] == '*') {
+						if (cds.containsKey(feat)){
+							cds.get(feat).addPrmtrStop(i+1, refSeq[i]);
 						} else {
-							prmtrStops.put(feat, 1);
+							BrokenCDS tmp = new BrokenCDS(feat);
+							tmp.addPrmtrStop(i+1, refSeq[i]);
+							cds.put(feat, tmp);
 						}
-					} else if (aaSubCount.containsKey(feat)){
-						int count = aaSubCount.get(feat);
-						aaSubCount.put(feat, ++count);
 					} else {
-						aaSubCount.put(feat, 1);
+						if (cds.containsKey(feat)){
+							cds.get(feat).addSubstitution(i+1, refSeq[i], assSeq[i]);
+						} else {
+							BrokenCDS tmp = new BrokenCDS(feat);
+							tmp.addSubstitution(i+1, refSeq[i], assSeq[i]);
+							cds.put(feat, tmp);
+						}
 					}
 				}                           
 			}
 		}
 	}
-	
-	
-	
 }

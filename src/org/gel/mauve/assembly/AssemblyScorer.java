@@ -1,14 +1,18 @@
 package org.gel.mauve.assembly;
 
 import java.io.File;
+import org.gel.mauve.Genome;
 
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import org.gel.mauve.XmfaViewerModel;
+import org.gel.mauve.analysis.BrokenCDS;
+import org.gel.mauve.analysis.CDSErrorExporter;
 import org.gel.mauve.analysis.Gap;
 import org.gel.mauve.analysis.PermutationExporter;
 import org.gel.mauve.analysis.SNP;
@@ -39,14 +43,19 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	
 	private Gap[] assGaps; 
 	
+	private BrokenCDS[] cds;
+	
 	private DCJ dcj;
 	
-	public AssemblyScorer(XmfaViewerModel model){
+	private boolean getBrokenCDS;
+	
+	public AssemblyScorer(XmfaViewerModel model, boolean getBrokenCDS){
 		this.model = model;
+		this.getBrokenCDS = getBrokenCDS;
 		loadInfo();
 	}
 	
-	public AssemblyScorer(File alnmtFile, File outDir) {
+	public AssemblyScorer(File alnmtFile, File outDir, boolean getBrokenCDS) {
 		this.alnmtFile = alnmtFile;
 		this.outputDir = outDir;
 		basename = alnmtFile.getName();
@@ -54,19 +63,19 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		batch = false;
 	}
 	
-	public AssemblyScorer(File alnmtFile, File outDir, String basename) {
-		this(alnmtFile,outDir);
+	public AssemblyScorer(File alnmtFile, File outDir, String basename, boolean getBrokenCDS) {
+		this(alnmtFile,outDir,getBrokenCDS);
 		this.basename = basename;
 	}
 	
-	public AssemblyScorer(ContigOrderer co, File outDir) {
+	public AssemblyScorer(ContigOrderer co, File outDir, boolean getBrokenCDS) {
 		this.co = co;
 		this.outputDir = outDir;
 		batch = false;
 	}
 	
-	public AssemblyScorer(ContigOrderer co, File outDir, String basename) {
-		this(co,outDir);
+	public AssemblyScorer(ContigOrderer co, File outDir, String basename, boolean getBrokenCDS) {
+		this(co,outDir,getBrokenCDS);
 		this.basename = basename;
 	}
 	
@@ -86,8 +95,11 @@ public class AssemblyScorer implements AlignmentProcessListener {
 									+ alnmtFile.getAbsolutePath());
 				e.printStackTrace();
 			}
-			loadInfo();
-			printInfo(this, outputDir, basename, batch);
+			if (model != null) {
+				loadInfo();
+				printInfo(this, outputDir, basename, batch);
+			}
+			
 		} else { 
 			System.err.println("Alignment failed with error code "+ retcode);
 		}
@@ -97,7 +109,7 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	/**
 	 * computes info. sorts gaps and snps
 	 */
-	private void loadInfo(){
+	private synchronized void loadInfo(){
 		model.setReference(model.getGenomeBySourceIndex(0));
 		
 		System.out.print("Computing signed permutations....");
@@ -109,7 +121,7 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		System.out.print("done!\n");
 		
 		System.out.print("Getting SNPs...");
-		this.snps = SnpExporter.getSNPs(model, model.getXmfa());
+		this.snps = SnpExporter.getSNPs(model);
 		System.out.print("done!\n");
 		
 		System.out.print("Counting base substitutions...");
@@ -124,6 +136,31 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		assGaps = tmp[1];
 		Arrays.sort(assGaps);
 		Arrays.sort(refGaps);
+		System.out.flush();
+		if (getBrokenCDS){
+			Iterator<Genome> it = model.getGenomes().iterator();
+			boolean haveAnnotations = true;
+			while(it.hasNext()){
+				haveAnnotations = haveAnnotations &&
+					(it.next().getAnnotationSequence() != null);
+			}
+			haveAnnotations = model.getGenomeBySourceIndex(0).getAnnotationSequence() != null;
+		//	haveAnnotations = false;
+			if (haveAnnotations){
+				System.out.print("Getting broken CDS...");
+				System.out.flush();
+				CDSErrorExporter cdsEE = new CDSErrorExporter(model, snps, assGaps);
+				try {
+					cds = cdsEE.getBrokenCDS();
+					System.out.print("done!\n");
+				} catch (Exception e){
+					System.err.print(" failed to compute broken CDS. Reason given below");
+					System.err.print(e.getMessage());
+					e.printStackTrace();
+					
+				} 
+			}
+		}
 	}
 
 	public DCJ getDCJ(){
@@ -144,6 +181,18 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	
 	public int[][] getSubs(){
 		return subs;
+	}
+	
+	public boolean hasBrokenCDS(){
+		if (cds == null) 
+			return false;
+		else {
+			return cds.length > 0;
+		}
+	}
+	
+	public BrokenCDS[] getBrokenCDS(){
+		return cds;
 	}
 	
 	public int getDCJDist(){

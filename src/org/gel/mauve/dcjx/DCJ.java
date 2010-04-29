@@ -13,9 +13,13 @@ public class DCJ {
 	
 	private AdjacencyGraph adjXY;
 	
-	private int numCyc;
+	private int dcjDist;
 	
-	private int numOdd;
+	private int scjDist;
+	
+	private int bpDist;
+	
+	private int bpReuse;
 	
 	public DCJ(String genomeX, String genomeY){
 		blockIdMap = new HashMap<String,Integer>();
@@ -24,29 +28,49 @@ public class DCJ {
 		x = new Permutation(genomeX,blockIdMap);
 		y = new Permutation(genomeY,blockIdMap);
 		adjXY = new AdjacencyGraph(x,y);
-		numCyc = adjXY.numCycles();
-		numOdd = adjXY.numOddPaths();
+		calculateDistances();
+	}
+	
+	private void calculateDistances(){
+		dcjDist = blockIdMap.size() - 
+			(adjXY.numCycles() + adjXY.numOddPaths()/2);
+		bpDist = blockIdMap.size() - 
+			(adjXY.numLen2Cycles() + adjXY.numLen1Paths()/1);
+		scjDist = 2*bpDist - adjXY.numPaths2();
 	}
 	
 	public int numBlocks(){
 		return blockIdMap.size();
 	}
 	
+	/**
+	 * dcj = N - (C-P(odd)/2)
+	 * @return
+	 */
 	public int dcjDistance(){
-		return blockIdMap.size() - (numCyc + numOdd/2);
+		return dcjDist;
 	}
-	
-	public double getBPReuseRate(){
-		double num = (1 - (numCyc+numOdd/2));
-		double den = blockIdMap.size();
-		return num/den;
+	/**
+	 * scj = 2*bp - P<sub>>=2</sub> 
+	 * @return
+	 */
+	public int scjDistance(){
+		return scjDist;
+	}
+	/**
+	 * bp = N - (C<sub>2</sub> + P<sub>1</sub>/2)
+	 *  
+	 * @return breakpoint distance
+	 */
+	public int bpDistance(){
+		return bpDist;
 	}
 	
 	public AdjacencyGraph getAdjacencyGraph(){
 		return adjXY;
 	}
 	
-	public static void loadBlockIDMap(String perm, Map<String,Integer> map){
+	private static void loadBlockIDMap(String perm, Map<String,Integer> map){
 		String[] blks = perm.split("[\\*$, ]+");
 		for (int i = 0; i < blks.length; i++){
 			blks[i] = blks[i].trim();

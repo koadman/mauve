@@ -12,6 +12,12 @@ public class AdjacencyGraph {
 	
 	private int numOddPaths;
 	
+	private int numLen2Cycles;
+	
+	private int numLen1Paths;
+	
+	private int numPathsGreaterThan2;
+	
 //	private boolean[] visitB;
 	
 	public AdjacencyGraph(Permutation A, Permutation B){
@@ -41,14 +47,76 @@ public class AdjacencyGraph {
 		}
 		numCycles = countCycles();
 		numOddPaths = countOddPaths();
+		numLen2Cycles = countLen2Cycles();
+		numLen1Paths = countSingleEdgePaths();
+		numPathsGreaterThan2 = countPathsGreaterThan2(); 
+		
 	}
 	
+	/**
+	 * Returns the number of paths in the adjacency
+	 * graph with an odd length
+	 * 
+	 * @return the number of paths with an odd length
+	 */
 	public int numOddPaths(){
 		return numOddPaths;
 	}
 	
+	/**
+	 * Returns the number of cycles in the adjacency graph
+	 * 
+	 * @return the number of cycles in the adjacency graph
+	 */
 	public int numCycles(){
 		return numCycles;
+	}
+	
+	/**
+	 * Returns the number of cycles in the adjacency
+	 * graph of length 2
+	 * 
+	 * @return the number of cycles of length 2
+	 */
+	public int numLen2Cycles(){
+		return numLen2Cycles;
+	}
+	
+	/**
+	 * Returns the number of paths in the adjacency
+	 * graph of length 1
+	 * 
+	 * @return the number of paths of length 1
+	 */
+	public int numLen1Paths(){
+		return numLen1Paths;
+	}
+	
+	/**
+	 * Returns the number of paths in the adjacency 
+	 * graph of length 2 or more
+	 * 
+	 * @return the number of paths of length 2 or more
+	 */
+	public int numPaths2(){
+		return numPathsGreaterThan2;
+	}
+	
+	private int countLen2Cycles(){
+		int numCyc = 0;	
+		for (int i = 0; i < adjA.length; i++){
+			if (adjA[i].wasVisited()){
+				continue;
+			} else {
+				if (isCycle(adjA[i])){
+					resetVisited(adjA[i]);
+					if (countEdges(adjA[i]) == 2)
+						numCyc++;
+				}
+			}
+		}
+		resetVisitedAll();
+		return numCyc;
 	}
 	
 	private int countCycles(){
@@ -57,8 +125,9 @@ public class AdjacencyGraph {
 			if (adjA[i].wasVisited()){
 				continue;
 			} else {
-				if (isCycle(adjA[i]))
+				if (isCycle(adjA[i])){
 					numCyc++;
+				}
 			}
 		}
 		resetVisitedAll();
@@ -77,6 +146,37 @@ public class AdjacencyGraph {
 		}
 		resetVisitedAll();
 		return numOddPath;
+	}
+	
+	private int countSingleEdgePaths(){
+		int numSingleEdgePath = 0;
+		for (int i = 0; i < adjA.length; i++){
+			if (adjA[i].wasVisited()) {
+				continue;
+			} else {
+				if (countEdges(adjA[i]) == 1)
+					numSingleEdgePath++;
+			}
+		}
+		resetVisitedAll();
+		return numSingleEdgePath;
+	}
+	
+	private int countPathsGreaterThan2(){
+		int numPathGreaterThan2 = 0;
+		for (int i = 0; i < adjA.length; i++){
+			if (adjA[i].wasVisited()) {
+				continue;
+			} else {
+				if (!isCycle(adjA[i])){
+					resetVisited(adjA[i]);
+					if (countEdges(adjA[i]) >= 2)
+						numPathGreaterThan2++;
+				} 
+			}
+		}
+		resetVisitedAll();
+		return numPathGreaterThan2;
 	}
 	
 	private int countEdges(Adjacency a){
@@ -130,6 +230,16 @@ public class AdjacencyGraph {
 		}
 	}
 	
+	private void resetVisited(Adjacency a){
+		if (!a.wasVisited()){
+			a.resetVisited();
+			resetVisited(a.getE1());
+			if (!a.isTelo()){
+				resetVisited(a.getE2());
+			}
+		} else
+			return;
+	}
 	
 	
 	

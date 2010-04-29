@@ -76,7 +76,8 @@ public class GenomeBuilder
     }
 
     // Left package-visible for testing.
-    static Genome buildGenome(long length, File annotationFile, SupportedFormat annotationFormat, BaseViewerModel model, int restrictedIndex, int sequenceIndex)
+    static Genome buildGenome(long length, 
+    		File annotationFile, SupportedFormat annotationFormat, BaseViewerModel model, int restrictedIndex, int sequenceIndex)
     {
         Genome g = new Genome(length, model, sequenceIndex);
 
@@ -95,7 +96,7 @@ public class GenomeBuilder
         int start = 1;
 
         // We will also build chromosome list simultaneously.
-        chromo = new ArrayList();
+        chromo = new ArrayList<Chromosome>();
 
         if (!annotationFile.exists())
         {
@@ -191,7 +192,7 @@ public class GenomeBuilder
         }
         catch (BioException e)
         {
-            // An unexpected exeception, since we are building this.
+            // An unexpected exception, since we are building this.
             throw new RuntimeException(e);
         }
 

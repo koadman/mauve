@@ -118,6 +118,10 @@ public class SnpExporter {
 		}
 	}
 	
+	public static SNP[] getSNPs(XmfaViewerModel model){
+		return getSNPs(model, model.getXmfa());
+	}
+	
 	public static SNP[] getSNPs( XmfaViewerModel model, XMFAAlignment xmfa){
 		return getSNPs(model,xmfa,xmfa.getSourceLcbList());
 	}

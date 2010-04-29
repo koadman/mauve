@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.prefs.BackingStoreException;
 
+import org.biojava.bio.seq.Sequence;
 import org.gel.mauve.backbone.BackboneList;
 import org.gel.mauve.backbone.BackboneListBuilder;
 import org.gel.mauve.color.BackboneLcbColor;
@@ -345,7 +346,14 @@ public class XmfaViewerModel extends LcbViewerModel {
 			xmfa.readRawSequence(leftLCB, genSrcIdx, left_col, len);
 		}*/
 		
-		return null;
+		
+		Sequence annSeq = genomes[genSrcIdx].getAnnotationSequence();
+		if (annSeq == null){
+			return null;
+		} else {
+			return annSeq.subList((int) left, (int)right).toString().toCharArray();
+		}
+		
 		
 	}
 	
