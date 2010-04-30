@@ -17,12 +17,15 @@ public class BrokenCDS {
 	 * this position
 	 */
 	private TreeMap<Integer,char[]> subs;
+	
+	private TreeMap<Integer,Integer> frmShfts;
 
 	
 	public BrokenCDS(LiteWeightFeature cds){
 		this.cds = cds;
 		prmtrStops = new TreeMap<Integer,Character>();
 		subs = new TreeMap<Integer, char[]>();
+		frmShfts = new TreeMap<Integer, Integer>();
 	}
 	
 	public void addSubstitution(int pos, char from, char to){
@@ -32,6 +35,14 @@ public class BrokenCDS {
 	
 	public void addPrmtrStop(int pos, char from){
 		prmtrStops.put(pos,from);
+	}
+	
+	public void addFrameShift(int pos, int length) throws IllegalArgumentException{
+		if (length !=1 && length !=2){
+			throw new IllegalArgumentException("Illegal length: " + length + " - Frameshifts can only be of length 1 or 2.");
+		} else {
+			frmShfts.put(pos, length);
+		}
 	}
 	
 	public String toString(){

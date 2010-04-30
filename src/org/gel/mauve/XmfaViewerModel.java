@@ -15,7 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.prefs.BackingStoreException;
 
+import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.Sequence;
+import org.biojava.bio.symbol.SymbolList;
 import org.gel.mauve.backbone.BackboneList;
 import org.gel.mauve.backbone.BackboneListBuilder;
 import org.gel.mauve.color.BackboneLcbColor;
@@ -270,7 +272,7 @@ public class XmfaViewerModel extends LcbViewerModel {
 		xmfa.setReference (getReference ());
 	}
 
-/**
+	/**
      * 
      * @return
      */
@@ -302,6 +304,46 @@ public class XmfaViewerModel extends LcbViewerModel {
 	public int getLCBIndex (Genome g, long position) {
 		return xmfa.getLCB (g, position);
 	}
+	
+	/**
+	 * Extracts columns from the sequence alignment containing the specified
+	 * range of the specified sequence. The returned alignment columns will
+	 * contain gaps and any whitespace in the XMFA source (e.g. newlines)
+	 * 
+	 * 
+	 * @param g
+	 * 			the genome whose sequence is of interest
+	 * @param lend
+	 *            The left end coordinate of the range to be extracted
+	 * @param rend
+	 *            The right end coordinate of the range to be extracted
+	 * @return A set of alignment columns stored as an array of byte arrays
+	 *         indexed as [sequence][column]
+	 *         
+	 */
+	public byte[][] getRange(Genome g, long left, long right){
+		return xmfa.getRange(g, left, right);
+	}
+	
+	/**
+	 * Extracts columns from the sequence alignment containing the specified
+	 * range of the specified sequence. The returned alignment columns will
+	 * contain gaps and any whitespace in the XMFA source (e.g. newlines)
+	 * 
+	 * 
+	 * @param genSrcIdx
+	 * 			the source index of the genome whose sequence is of interest
+	 * @param lend
+	 *            The left end coordinate of the range to be extracted
+	 * @param rend
+	 *            The right end coordinate of the range to be extracted
+	 * @return A set of alignment columns stored as an array of byte arrays
+	 *         indexed as [sequence][column]
+	 *         
+	 */
+	public byte[][] getRange(int genSrcIdx, long left, long right){
+		return this.getRange(genomes[genSrcIdx], left, right);
+	}
 
 	/**
 	 * The backbone list or null if none exists
@@ -326,46 +368,61 @@ public class XmfaViewerModel extends LcbViewerModel {
 		xmfa.getColumnCoordinates (this, lcb, column, seq_coords, gap);
 	}
 	
-	public char[] getSequence(long left, long right, int genSrcIdx){
-		/*
-		if (left > right){
-			return null;
-		}
-		int len = (int) right - (int) left + 1;
-		char[] ret = new char[len];
-		long[] ar = getLCBAndColumn(genomes[genSrcIdx], left);
-		int leftLCB = (int) ar[0];
-		long leftCol = ar[1];
-		ar = getLCBAndColumn(genomes[genSrcIdx], right);
-		int rightLCB = (int) ar[0];
-		long rightCol = ar[1];
-		if (rightLCB != leftLCB){
-			
-			
-		} else {
-			xmfa.readRawSequence(leftLCB, genSrcIdx, left_col, len);
-		}*/
-		
-		
+	/**
+	 * Returns the position in genome <code>genY</code> that is homologous
+	 * to position <code>pos</code> in genome <code>genX</code>.
+	 * 
+	 * 
+	 * @param genX input genome
+	 * @param pos input position
+	 * @param genY query genome
+	 * @return 0 if no positions in genome <code>genY</code> align to 
+	 * 		   <code>pos</code> in <code>genX</code>, else the homologous
+	 *         position in genome <code>genY</code>
+	 */
+	public long getHomologousCoordinate(int genX, long pos, int genY){
+		long[] lcb = getLCBAndColumn(genomes[genX], pos);
+		long[] seq_coords = new long[genomes.length];
+		boolean[] gap = new boolean[genomes.length];
+		getColumnCoordinates((int) lcb[0], lcb[1], seq_coords, gap);
+		if (!gap[genY])
+			return seq_coords[genY];
+		else
+			return 0;
+	}
+	
+	/**
+	 * Returns the sequence between <code>start</code> and <code>end</code>, inclusive,
+	 * in the specified genome.
+	 * <br>
+	 * If <code>start</code> > <code>end</code>, the reverse complement is returned. 
+	 * </br>
+	 * @param start start of the sequence to extract
+	 * @param end end of the sequence to extract
+	 * @param genSrcIdx the genome
+	 * @return a <code>char</code> array representation of the sequence
+	 * 
+	 * @author atritt
+	 */
+	public char[] getSequence(long start, long end, int genSrcIdx){
 		Sequence annSeq = genomes[genSrcIdx].getAnnotationSequence();
 		if (annSeq == null){
 			return null;
 		} else {
-			return annSeq.subList((int) left, (int)right).toString().toCharArray();
+			try {
+				if (start > end){
+					return DNATools.reverseComplement(annSeq.subList((int)end, (int)start)).seqString().toCharArray();
+				} else {
+					return annSeq.subList((int) start, (int)end).seqString().toCharArray();
+				}
+			} catch (Exception e){
+				System.err.println("Error getting sequence coordinates (" 
+						+start+", "+end+ ") for " + genomes[genSrcIdx].getDisplayName());
+				System.err.println("Sequence : " + annSeq.length());
+				e.printStackTrace();
+			}
 		}
-		
-		
-	}
-	
-	public long genPosToAlnCol(int genSrcIdx, long seqPos){
-		return getLCBAndColumn(genomes[genSrcIdx], seqPos)[1];
-	}
-	
-	public long alnColToGenPos(int genSrcIdx, int lcbIdx, long col){
-		long[] seq_offsets = new long[genomes.length];
-		boolean[] gap = new boolean[genomes.length];
-		getColumnCoordinates(lcbIdx, col, seq_offsets, gap);
-		return seq_offsets[genSrcIdx];
+		return null;
 	}
 
 	public void updateHighlight (Genome g, long coordinate) {

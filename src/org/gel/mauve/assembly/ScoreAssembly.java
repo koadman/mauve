@@ -24,6 +24,7 @@ import org.gel.mauve.contigs.ContigOrderer;
 import org.gel.mauve.gui.AlignFrame;
 import org.gel.mauve.gui.AlignWorker;
 import org.gel.mauve.gui.AnalysisDisplayWindow;
+import org.gel.mauve.gui.MauveFrame;
 
 public class ScoreAssembly  {
 	
@@ -38,7 +39,9 @@ public class ScoreAssembly  {
 	private static String CDS_CMD = "Broken CDS";
 	private static String CDS_DESC = "Broken CDS in assembly genome";
 	
-	private static HashMap<String,ScoreAssembly> modelMap;
+	private static HashMap<String,ScoreAssembly> modelMap = new HashMap<String, ScoreAssembly>();
+	
+	private static HashMap<String,ScoreAssembly> running = new HashMap<String, ScoreAssembly>();
 
 	private static final String temp = "Running...";
 	
@@ -66,10 +69,15 @@ public class ScoreAssembly  {
 	
 	private boolean getBrokenCDS;
 	
+	private boolean finished;
+	
+	private boolean cancel;
+	
 	public ScoreAssembly(XmfaViewerModel model, boolean getBrokenCDS){
 		//init(model);
 		this.model = model;
 		this.getBrokenCDS = getBrokenCDS;
+		this.finished = false;
 		initWithJTables(model);
 	}
 	/*
@@ -98,22 +106,38 @@ public class ScoreAssembly  {
 		sumTA = win.addContentPanel(SUM_CMD, SUM_DESC, true);
 		sumTA.append(temp);
 		this.win.showWindow();
+		running.put(this.model.getSrc().getAbsolutePath(), this);
 		new Thread( new Runnable (){ 
 			public void run(){
+				try {
 				assScore = new AssemblyScorer(ScoreAssembly.this.model,
 										ScoreAssembly.this.getBrokenCDS);
 				ScoreAssembly.this.finish();
+				} catch (Exception e){
+					ScoreAssembly.this.cancel();
+					System.err.println("\nError\n");
+					e.printStackTrace();
+				}
 			}
 		}).start();
 	}
 	
+	public void cancel(){
+		cancel = true;
+	}
+	
 	private synchronized void finish(){
-		sumTA.replaceRange("", 0, temp.length());
-		sumTA.setText(getSumText(assScore,true,false));
-		//addJTables();
-		addTables();
-		win.showWindow();
-		sumTA.setCaretPosition(0);
+		if (!cancel) {
+			running.remove(this.model.getSrc().getAbsolutePath());
+			modelMap.put(this.model.getSrc().getAbsolutePath(), this);
+			sumTA.replaceRange("", 0, temp.length());
+			sumTA.setText(getSumText(assScore,true,false));
+			//addJTables();
+			addTables();
+			finished = true;
+			win.showWindow();
+			sumTA.setCaretPosition(0);
+		}
 	}
 	
 	private void addTables(){
@@ -246,8 +270,8 @@ public class ScoreAssembly  {
 			char c_1 = snps[k].getChar(1);
 			
 			try {
-			if (c_0 != c_1)
-				subs[getBaseIdx(c_0)][getBaseIdx(c_1)]++;
+				if (c_0 != c_1)
+					subs[getBaseIdx(c_0)][getBaseIdx(c_1)]++;
 			} catch (IllegalArgumentException e){
 				//System.err.println("Skipping ambiguity: ref = " +c_0 +" assembly = " + c_1 );
 			}
@@ -269,27 +293,45 @@ public class ScoreAssembly  {
 		}
 	}
 	
-	public static void launchWindow(BaseViewerModel model){
-		if (modelMap == null) 
-			modelMap = new HashMap<String,ScoreAssembly>();
+	public static void launchWindow(MauveFrame frame){
+		BaseViewerModel model = frame.getModel();
 		String key = model.getSrc().getAbsolutePath();
 		if (modelMap.containsKey(key)){
 			modelMap.get(key).win.showWindow();
 		} else if (model instanceof XmfaViewerModel) {
-			
-			int ret_val = JOptionPane.showConfirmDialog(null, "Do you want me " +
-					"to locate broken CDS. This can take awhile");
-			if (ret_val == JOptionPane.YES_OPTION) {
-				modelMap.put(key, 
-						new ScoreAssembly((XmfaViewerModel)model,true));
-			} else if (ret_val == JOptionPane.NO_OPTION) {
-				modelMap.put(key, 
-						new ScoreAssembly((XmfaViewerModel)model,false));
-			}
-			
+			startNewSA(frame);			
 		} else {
-			System.err.println("Can't score assembly -- Please report this bug!");
+			System.err.println("Can't score assembly unless I have an" +
+							" XmfaViewerModel -- Please report this bug!");
 		}	
+	}
+	
+	private static void startNewSA(MauveFrame frame){
+		XmfaViewerModel model = (XmfaViewerModel) frame.getModel();
+		String key = model.getSrc().getAbsolutePath();
+		if (running.containsKey(key)) {
+			int ret_val = JOptionPane.showConfirmDialog(frame, "I'm currently"+
+					"running the scoring pipeline for this assembly. Do you " +
+					"want me to restart it?");
+			if (ret_val == JOptionPane.YES_OPTION){
+				running.get(key).cancel();
+				running.remove(key).win.closeWindow();
+				startNewSA(frame);
+			} else if (ret_val == JOptionPane.NO_OPTION){
+				running.get(key).win.showWindow();
+			}
+		} else {
+			int ret_val = JOptionPane.showConfirmDialog(frame, "Do you want me " +
+									"to locate broken CDS. This can take awhile");
+			if (ret_val == JOptionPane.YES_OPTION) {
+				running.put(key, 
+						new ScoreAssembly(model,true));
+			} else if (ret_val == JOptionPane.NO_OPTION) {
+				running.put(key, 
+						new ScoreAssembly(model,false));
+			}
+		}
+		
 	}
 
 	public static void main(String[] args){
@@ -364,7 +406,7 @@ public class ScoreAssembly  {
 					basename = basename.substring(0,basename.lastIndexOf("."));
 				}
 				alnmtFile = new File(outDir, basename+".xmfa");
-				as = new AssemblyScorer(alnmtFile, outDir, basename,getBrokenCDS);
+				as = new AssemblyScorer(alnmtFile, outDir, basename, getBrokenCDS);
 				String[] cmd = makeAlnCmd(refFile,assPath, alnmtFile);
 				System.out.println("Executing");
 				AlignFrame.printCommand(cmd, System.out);

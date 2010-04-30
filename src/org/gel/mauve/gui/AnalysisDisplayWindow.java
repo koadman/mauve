@@ -112,6 +112,10 @@ public class AnalysisDisplayWindow extends JFrame {
 		}
 		frame.setVisible(true);
 	}
+	
+	public void closeWindow(){
+		frame.setVisible(false);
+	}
 
 	/**
 	 * Adds a text pane to this display window.

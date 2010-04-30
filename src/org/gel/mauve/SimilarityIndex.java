@@ -94,7 +94,7 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 		long buffer_left = -1;
 		long buffer_right = -1;
 		long buffer_size = 100000;
-		Object [] cols = null;
+		byte[][] cols = null;
 		double [] chars = new double [5];
 		double [] entropies = null;
 
@@ -139,7 +139,7 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 				// calculate entropies for this set of alignment columns
 				// assume that newlines and gaps haven't been filtered
 				int [] col_index = new int [cols.length];
-				entropies = new double [((byte []) cols[g.getSourceIndex ()]).length];
+				entropies = new double [cols[g.getSourceIndex ()].length];
 				int ent_count = (int) (buffer_right - buffer_left);
 				for (int entI = 0; entI < ent_count; entI++) {
 					int i;
@@ -151,7 +151,7 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 					if (bb_list == null) {
 						// store nt frequencies as a, c, g, t, gap
 						for (i = 0; i < cols.length; i++) {
-							chars[char_map[(char) ((byte []) cols[i])[col_index[i]]]]++;
+							chars[char_map[(char) cols[i][col_index[i]]]]++;
 						}
 					} else {
 						// first check whether we're still in range of the
@@ -177,7 +177,7 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 						// if we're inside bb, add the seqs designated by the bb
 						int sI = g.getSourceIndex ();
 						if (bb == null) {
-							chars[char_map[(char) ((byte []) cols[sI])[col_index[sI]]]]++;
+							chars[char_map[(char) cols[sI][col_index[sI]]]]++;
 							chars[char_map['-']] += cols.length - 1; // add
 							// gap
 							// for
@@ -187,7 +187,7 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 							boolean seqs[] = bb.getSeqs ();
 							for (i = 0; i < cols.length; i++) {
 								if (seqs[i])
-									chars[char_map[(char) ((byte []) cols[i])[col_index[i]]]]++;
+									chars[char_map[(char) cols[i][col_index[i]]]]++;
 							}
 						}
 					}

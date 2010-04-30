@@ -8,7 +8,10 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.TreeSet;
+import java.util.Vector;
 
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.analysis.BrokenCDS;
@@ -18,6 +21,7 @@ import org.gel.mauve.analysis.PermutationExporter;
 import org.gel.mauve.analysis.SNP;
 import org.gel.mauve.analysis.SnpExporter;
 import org.gel.mauve.contigs.ContigOrderer;
+import org.gel.mauve.dcjx.Adjacency;
 import org.gel.mauve.dcjx.DCJ;
 import org.gel.mauve.gui.AlignmentProcessListener;
 
@@ -48,6 +52,12 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	private DCJ dcj;
 	
 	private boolean getBrokenCDS;
+	
+	/** extra adjacencies */
+	private Vector<Adjacency> typeI;
+	
+	/** missing adjacencies */
+	private Vector<Adjacency> typeII;
 	
 	public AssemblyScorer(XmfaViewerModel model, boolean getBrokenCDS){
 		this.model = model;
@@ -106,6 +116,50 @@ public class AssemblyScorer implements AlignmentProcessListener {
 			
 	}
 	
+	private void computeAdjacencyErrors(){
+		Adjacency[] ref = dcj.getAdjacencyGraph().getGenomeA();
+		Adjacency[] ass = dcj.getAdjacencyGraph().getGenomeB();
+		Comparator<Adjacency> comp = new Comparator<Adjacency>(){
+			public int compare(Adjacency o1, Adjacency o2) {
+				String s1 = new String(min(o1.getFirstBlockEnd(),o1.getSecondBlockEnd()));
+				s1 = s1 + max(o1.getFirstBlockEnd(),o1.getSecondBlockEnd());
+				String s2 = new String(min(o2.getFirstBlockEnd(),o2.getSecondBlockEnd()));
+				s2 = s2 + max(o2.getFirstBlockEnd(),o2.getSecondBlockEnd());
+				return s1.compareTo(s2);
+			}
+			private String min(String s1, String s2){
+				if (s1.compareTo(s2) > 0)
+					return s2;
+				else 
+					return s1;
+			}
+			private String max(String s1, String s2){
+				if (s1.compareTo(s2) > 0)
+					return s1;
+				else 
+					return s2;
+			}
+		};
+		// false positives : adjacencies in assembly that aren't in the reference
+		typeI = new Vector<Adjacency>();
+		// false negatives : adjacencies in reference that aren't in the assembly
+		typeII = new Vector<Adjacency>();
+		
+		TreeSet<Adjacency> refSet = new TreeSet<Adjacency>(comp);
+		for (Adjacency a: ref) refSet.add(a);
+		for (Adjacency a: ass){
+			if (!refSet.contains(a)) 
+				typeI.add(a);
+		}
+		
+		TreeSet<Adjacency> assSet = new TreeSet<Adjacency>(comp);
+		for (Adjacency a: ass) assSet.add(a);
+		for (Adjacency a: ref) {
+			if (!assSet.contains(a))
+				typeII.add(a);
+		}
+	}
+	
 	/**
 	 * computes info. sorts gaps and snps
 	 */
@@ -118,6 +172,10 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		
 		System.out.print("Performing DCJ rearrangement analysis...");
 		this.dcj = new DCJ(perms[0], perms[1]);
+		System.out.print("done!\n");
+		
+		System.out.print("Computing adjacency errors...");
+		computeAdjacencyErrors();
 		System.out.print("done!\n");
 		
 		System.out.print("Getting SNPs...");
@@ -138,29 +196,37 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		Arrays.sort(refGaps);
 		System.out.flush();
 		if (getBrokenCDS){
-			Iterator<Genome> it = model.getGenomes().iterator();
-			boolean haveAnnotations = true;
-			while(it.hasNext()){
-				haveAnnotations = haveAnnotations &&
-					(it.next().getAnnotationSequence() != null);
-			}
-			haveAnnotations = model.getGenomeBySourceIndex(0).getAnnotationSequence() != null;
-		//	haveAnnotations = false;
-			if (haveAnnotations){
-				System.out.print("Getting broken CDS...");
-				System.out.flush();
-				CDSErrorExporter cdsEE = new CDSErrorExporter(model, snps, assGaps);
-				try {
-					cds = cdsEE.getBrokenCDS();
-					System.out.print("done!\n");
-				} catch (Exception e){
-					System.err.print(" failed to compute broken CDS. Reason given below");
-					System.err.print(e.getMessage());
-					e.printStackTrace();
-					
-				} 
-			}
+			computeBrokenCDS();
 		}
+	}
+	
+	private void computeBrokenCDS(){
+		Iterator<Genome> it = model.getGenomes().iterator();
+		boolean haveAnnotations = true;
+		while(it.hasNext()){
+			haveAnnotations = haveAnnotations &&
+				(it.next().getAnnotationSequence() != null);
+		}
+		haveAnnotations = model.getGenomeBySourceIndex(0).getAnnotationSequence() != null;
+	//	haveAnnotations = false;
+		if (haveAnnotations){
+			System.out.print("Getting broken CDS...");
+			System.out.flush();
+			CDSErrorExporter cdsEE = new CDSErrorExporter(model, snps, assGaps);
+			try {
+				cds = cdsEE.getBrokenCDS();
+				System.out.print("done!\n");
+			} catch (Exception e){
+				System.err.print(" failed to compute broken CDS. Reason given below");
+				System.err.print(e.getMessage());
+				e.printStackTrace();
+				
+			} 
+		}
+	}
+	
+	public XmfaViewerModel getModel(){
+		return this.model;
 	}
 
 	public DCJ getDCJ(){

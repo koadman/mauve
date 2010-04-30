@@ -101,6 +101,16 @@ class LiteWeightFeature implements Comparable
 */
 public class OneToOneOrthologExporter {
 
+	/**
+	 * Takes an Iterator over features and trims it down to an 
+	 * array of LiteWeightFeatures that contains only those features
+	 * specified by <code>featureType</code>
+	 * 
+	 * @param genSrcIdx
+	 * @param i
+	 * @param featureType
+	 * @return
+	 */
 	public static LiteWeightFeature[] getFeaturesByType(int genSrcIdx, Iterator i, String featureType)
 	{
 		Vector cds = new Vector();
@@ -353,7 +363,7 @@ public class OneToOneOrthologExporter {
 				// extract the alignment of the region in question
 				Quad[] bbs;
 				bbs = getBackboneSegs(model, g_i, cdsi[cI]);
-				Object[] aln = model.getXmfa().getRange(g_i, (long)cdsi[cI].getLeft(), (long)cdsi[cI].getRight());
+				byte[][] aln = model.getXmfa().getRange(g_i, (long)cdsi[cI].getLeft(), (long)cdsi[cI].getRight());
 				// for each of the other genomes, find the CDS that overlap the backbone segs and assess orthology
 				for(int gJ = gI+1; gJ < model.getSequenceCount(); gJ++)
 				{
@@ -398,8 +408,8 @@ public class OneToOneOrthologExporter {
 						// now compute percent id
 						int cur = cdsi[cI].getLeft();
 						int col = 0;
-						byte[] aln_gI = (byte[])aln[gI];
-						byte[] aln_gJ = (byte[])aln[gJ];
+						byte[] aln_gI = aln[gI];
+						byte[] aln_gJ = aln[gJ];
 						while(cur < left_min)
 						{
 							if(col == aln_gI.length)

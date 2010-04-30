@@ -186,5 +186,23 @@ public class Gap implements Comparable<Gap>{
 			}
 		};
 	}
+	/**
+	 * Returns a negative number, zero, or a positive number 
+	 * if this Gap comes before, lies within, or comes after the
+	 * given feature, respectively.
+	 * 
+	 * @param feat the feature to compare this Gap to
+	 * 
+	 * @return a negative number, zero, or a positive number
+	 */
+	public int relativePos(LiteWeightFeature feat){
+		int pos = (int) Math.abs(this.position);
+		if (pos < feat.getLeft())
+			return -1;
+		else if (pos <= feat.getRight())
+			return 0;
+		else
+			return 1;
+	}
 	
 }

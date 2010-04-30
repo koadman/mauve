@@ -506,18 +506,20 @@ public class XMFAAlignment implements Serializable {
 	 * range of the specified sequence. The returned alignment columns will
 	 * contain gaps and any whitespace in the XMFA source (e.g. newlines)
 	 * 
-	 * @param seqI
-	 *            The index of the sequence of interest
+	 * 
+	 * @param g
+	 * 			the genome whose sequence is of interest
 	 * @param lend
 	 *            The left end coordinate of the range to be extracted
 	 * @param rend
 	 *            The right end coordinate of the range to be extracted
 	 * @return A set of alignment columns stored as an array of byte arrays
 	 *         indexed as [sequence][column]
+	 *         
 	 */
-	public Object [] getRange (Genome g, long lend, long rend) {
+	public byte[][] getRange (Genome g, long lend, long rend) {
 		long cur_offset = lend;
-		Object [] cols = new Object [seq_count];
+		byte[][] cols = new byte [seq_count][];
 		int seqJ = 0;
 		for (seqJ = 0; seqJ < seq_count; seqJ++)
 			cols[seqJ] = new byte [0];
@@ -550,7 +552,7 @@ public class XMFAAlignment implements Serializable {
 				long fk_right_col = gis_tree[ivI][g.getSourceIndex ()]
 						.seqPosToColumn (lcb_right_offset);
 
-				Object [] byte_bufs = new Object [seq_count];
+				byte[][] byte_bufs = new byte [seq_count][];
 				for (seqJ = 0; seqJ < seq_count; seqJ++) {
 					byte_bufs[seqJ] = readRawSequence (ivI, seqJ, fk_left_col,
 							fk_right_col - fk_left_col);
@@ -563,18 +565,14 @@ public class XMFAAlignment implements Serializable {
 				// reverse the columns if necessary
 				if (intervals[ivI].getReverse (g)) {
 					for (seqJ = 0; seqJ < seq_count; seqJ++) {
-						reverse ((byte []) byte_bufs[seqJ]);
+						reverse (byte_bufs[seqJ]);
 					}
 				}
 				// append the columns to cols
 				for (seqJ = 0; seqJ < seq_count; seqJ++) {
-					byte [] tmp_buf = new byte [((byte []) cols[seqJ]).length
-							+ ((byte []) byte_bufs[seqJ]).length];
-					System.arraycopy ((byte []) cols[seqJ], 0, tmp_buf, 0,
-							((byte []) cols[seqJ]).length);
-					System.arraycopy ((byte []) byte_bufs[seqJ], 0, tmp_buf,
-							((byte []) cols[seqJ]).length,
-							((byte []) byte_bufs[seqJ]).length);
+					byte [] tmp_buf = new byte [cols[seqJ].length + byte_bufs[seqJ].length];
+					System.arraycopy (cols[seqJ], 0, tmp_buf, 0, cols[seqJ].length);
+					System.arraycopy (byte_bufs[seqJ], 0, tmp_buf, cols[seqJ].length, byte_bufs[seqJ].length);
 					cols[seqJ] = tmp_buf;
 				}
 			}

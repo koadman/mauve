@@ -53,6 +53,14 @@ public class AdjacencyGraph {
 		
 	}
 	
+	public Adjacency[] getGenomeA(){
+		return adjA;
+	}
+	
+	public Adjacency[] getGenomeB(){
+		return adjB;
+	}
+	
 	/**
 	 * Returns the number of paths in the adjacency
 	 * graph with an odd length

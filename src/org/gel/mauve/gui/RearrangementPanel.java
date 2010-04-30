@@ -160,10 +160,11 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
      *            A toolbar which can be manipulated by this panel, or null to indicate no
      *            toolbar will be available
      */
-    public RearrangementPanel(JToolBar toolbar)
+    public RearrangementPanel(JToolBar toolbar, MauveFrame parent)
     {
         setLayout(new FillLayout());
         this.toolbar = toolbar;
+        mauveFrame = parent;
     }
 
     /**
@@ -612,7 +613,7 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         else if (e.getActionCommand().equals("ScoreAssembly"))
         {
         	if( model instanceof LcbViewerModel ){
-        		org.gel.mauve.assembly.ScoreAssembly.launchWindow(model);
+        		org.gel.mauve.assembly.ScoreAssembly.launchWindow(mauveFrame);
         	}
         }
         else if (e.getActionCommand().equals("GRIMM"))

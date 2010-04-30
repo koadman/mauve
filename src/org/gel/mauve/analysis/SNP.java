@@ -1,5 +1,7 @@
 package org.gel.mauve.analysis;
 
+import java.util.Comparator;
+
 import org.biojava.bio.seq.FeatureHolder;
 import org.gel.mauve.Chromosome;
 import org.gel.mauve.Genome;
@@ -186,6 +188,12 @@ public class SNP {
 		return pattern[idx] == '-';
 	}
 	
+	/**
+	 * Returns true of any of the bases in the alignment
+	 * column corresponding to this SNP are ambiguity codes.
+	 * 
+	 * @return
+	 */
 	public boolean hasAmbiguities(){
 		for (int i = 0; i < pattern.length; i++){
 			char c = pattern[i];
@@ -221,8 +229,57 @@ public class SNP {
 		return false;
 	}
 	
+	/**
+	 * Returns a negative number, zero, or a positive number 
+	 * if this SNP comes before, lies within, or comes after the
+	 * given feature, respectively.
+	 * 
+	 * @param feat the feature to compare this SNP to
+	 * 
+	 * @return a negative number, zero, or a positive number
+	 */
+	public int relativePos(LiteWeightFeature feat){
+		int pos = (int) Math.abs(this.pos[feat.getGenSrcIdx()]);
+		if ((feat.getStrand() >= 0) == 
+				(this.pos[feat.getGenSrcIdx()] >= 0)){
+			if (pos < feat.getLeft())
+				return -1;
+			else if (pos <= feat.getRight())
+				return 0;
+			else 
+				return 1;
+		} else {
+			if (feat.getStrand()>0)
+				return 1;
+			else
+				return -1;
+		}
+	}
+	
 	public boolean areEqual(Genome x, Genome y){
 		return pattern[x.getSourceIndex()] == pattern[y.getSourceIndex()];
+	}
+	
+	public boolean areEqual(int x, int y){
+		return pattern[x] == pattern[y];
+	}
+	
+	public static Comparator<SNP> getLoopingComparator(final int genSrcIdx){
+		return new Comparator<SNP>(){
+			private int idx = genSrcIdx;
+			public int compare(SNP o1, SNP o2) {
+				// if they have equal sign
+				if ((o1.pos[idx] >= 0) == (o2.pos[idx] >= 0)){
+					return (int)(o1.pos[idx] - o2.pos[idx]);
+				} else {
+					if (o1.pos[idx] < 0) 
+						return 1;
+					else
+						return -1;
+				}
+			}
+			
+		};
 	}
 	
 }

@@ -620,7 +620,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
             toolbar = new JToolBar();
             jMenuBar1.add(toolbar);
             
-            rrpanel = new RearrangementPanel(toolbar);
+            rrpanel = new RearrangementPanel(toolbar, this);
             Dimension max_size = new Dimension( 10000, 10000 );
             rrpanel.setMaximumSize(max_size);
 
