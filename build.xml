@@ -93,17 +93,13 @@
 		<!-- Build all java source files -->
 		<javac
 			classpath="
-				${ext}/biojava-1.5.jar;
+				${ext}/biojava.jar;
 				${ext}/bytecode.jar;
-				${ext}/commons-cli.jar;
-				${ext}/commons-collections-2.1.jar;
+				${ext}/commons-cli-1.2.jar;
 				${support}/junit.jar;
 				${ext}/zeus-jscl.jar;
-				${ext}/xercesImpl.jar;
-				${ext}/xml-apis.jar;
-				${ext}/jakarta-regexp.jar;
+				${ext}/goose.jar;
 				${ext}/dbus-2.6.jar;
-				${ext}/pal_v1.4.jar;
 				${ext}/unix-0.5.jar"
 			srcdir="${src}"
 			destdir="${build}"
