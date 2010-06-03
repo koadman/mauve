@@ -307,8 +307,7 @@ public class XmfaViewerModel extends LcbViewerModel {
 	
 	/**
 	 * Extracts columns from the sequence alignment containing the specified
-	 * range of the specified sequence. The returned alignment columns will
-	 * contain gaps and any whitespace in the XMFA source (e.g. newlines)
+	 * range of the specified sequence. 
 	 * 
 	 * 
 	 * @param g
@@ -321,14 +320,17 @@ public class XmfaViewerModel extends LcbViewerModel {
 	 *         indexed as [sequence][column]
 	 *         
 	 */
-	public byte[][] getRange(Genome g, long left, long right){
-		return xmfa.getRange(g, left, right);
+	public byte[][] getSequenceRange(Genome g, long left, long right){
+		byte[][] tmp = xmfa.getRange(g, left, right);
+		for (int i = 0; i < tmp.length; i++){
+			tmp[i] = XMFAAlignment.filterNewlines(tmp[i]);
+		}
+		return tmp;
 	}
 	
 	/**
 	 * Extracts columns from the sequence alignment containing the specified
-	 * range of the specified sequence. The returned alignment columns will
-	 * contain gaps and any whitespace in the XMFA source (e.g. newlines)
+	 * range of the specified sequence. 
 	 * 
 	 * 
 	 * @param genSrcIdx
@@ -339,10 +341,12 @@ public class XmfaViewerModel extends LcbViewerModel {
 	 *            The right end coordinate of the range to be extracted
 	 * @return A set of alignment columns stored as an array of byte arrays
 	 *         indexed as [sequence][column]
-	 *         
+	 * 
+	 *     
 	 */
-	public byte[][] getRange(int genSrcIdx, long left, long right){
-		return this.getRange(genomes[genSrcIdx], left, right);
+	/* FIXME */
+	public byte[][] getSequenceRange(int genSrcIdx, long left, long right){
+		return this.getSequenceRange(genomes[genSrcIdx], left, right);
 	}
 
 	/**

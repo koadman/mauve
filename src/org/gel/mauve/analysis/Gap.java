@@ -29,6 +29,10 @@ public class Gap implements Comparable<Gap>{
 	
 	private XmfaViewerModel model;
 	
+	private long[] pos;
+	
+	private Chromosome[] chromosomes;
+	
 	
 	/**
 	 * Creates a gap with the given arguments.
@@ -45,10 +49,20 @@ public class Gap implements Comparable<Gap>{
 		this.length = len;
 		this.lcbId = lcb;
 		this.model = model;
+		Genome[] genomes = model.getGenomes().toArray(new Genome[model.getGenomes().size()]);
 		Genome g = model.getGenomeBySourceIndex(genSrcIdx);
 		this.chrom = g.getChromosomeAt(position);
+		if (this.chrom == null) System.err.println("Null Chromosome");
 		this.posInCtg = (int) (position - this.chrom.getStart()+1);
 		this.lcbCol = (int) model.getLCBAndColumn(g, position)[1];
+		this.pos = new long[model.getGenomes().size()];
+		long[] ar = model.getLCBAndColumn(genomeSrcIdx, pos);
+		boolean[] gap = new boolean[model.getGenomes().size()];
+		model.getColumnCoordinates((int)ar[0], ar[1], this.pos, gap);
+		chromosomes = new Chromosome[genomes.length];
+		for (int i = 0; i < genomes.length; i++){
+			chromosomes[i] = genomes[i].getChromosomeAt(this.pos[i]);
+		}
 	}
 	
 	private Gap(Gap gap){
@@ -60,6 +74,10 @@ public class Gap implements Comparable<Gap>{
 		this.chrom = gap.chrom;
 		this.posInCtg = gap.posInCtg;
 		this.lcbCol = gap.lcbCol;
+		this.pos = new long[gap.pos.length];
+		System.arraycopy(gap.pos, 0, this.pos, 0, this.pos.length);
+		this.chromosomes = new Chromosome[gap.chromosomes.length];
+		System.arraycopy(gap.chromosomes, 0, this.chromosomes, 0, this.chromosomes.length);
 	}
 	
 	
@@ -69,14 +87,13 @@ public class Gap implements Comparable<Gap>{
 	 * @return a tab-delimited String with the information ordered as given above
 	 */
 	public String toString(){
-		return Integer.toString(genSrcIdx) +"\t"+ chrom.getName() + "\t"+
-				Integer.toString(posInCtg)+"\t"+ Long.toString(position) +"\t"+ Long.toString(length);
+		return this.toString("sequence_"+Integer.toString(genSrcIdx));
 	}
 	
 	
 	
 	/**
-	 * Genome  Contig   Position_in_Contig   GenomeWide_Position   Length
+	 * Genome  Contig   Position_in_Contig   GenomeWide_Position   Length  seqi_pos seqi_ctg seqi_posInCtg
 	 * 
 	 * Replaces genome id with the given name
 	 * 
@@ -85,8 +102,15 @@ public class Gap implements Comparable<Gap>{
 	 * @return a tab-delimited String with the information ordered as given above
 	 */
 	public String toString(String genomeName){
-		return genomeName +"\t"+ chrom.getName() + "\t"+
-		Integer.toString(posInCtg)+"\t"+ Long.toString(position) +"\t"+ Long.toString(length);
+		StringBuilder sb = new StringBuilder();
+		sb.append(genomeName +"\t"+ chrom.getName() + "\t"+
+				Integer.toString(posInCtg)+"\t" + 
+				Long.toString(position) +"\t"+ Long.toString(length));
+		for (int i = 0; i < pos.length; i++){
+			int ctg_pos = (int)(pos[i] - chromosomes[i].getStart()+1); 
+			sb.append("\t"+pos[i]+"\t"+chromosomes[i].getName()+"\t"+ctg_pos);
+		}
+		return sb.toString();
 	}
 	
 	public int getGenomeSrcIdx(){
@@ -187,16 +211,24 @@ public class Gap implements Comparable<Gap>{
 		};
 	}
 	/**
-	 * Returns a negative number, zero, or a positive number 
+	 * <br>Returns a negative number, zero, or a positive number 
 	 * if this Gap comes before, lies within, or comes after the
-	 * given feature, respectively.
-	 * 
+	 * given feature, respectively. </br>
+	 * <br>
+	 * If the feature passed in is not a feature in the genome that this
+	 * gap pertains to, the relative position of this gap to the feature
+	 * is determined based on the position in the genome, which the feature 
+	 * belongs to, that is homologous to the position that this gap starts at.
+	 * </br>
+	 * <br>
+	 * Strand is neglected here, as a gap affects both strands.
+	 * </br>
 	 * @param feat the feature to compare this Gap to
 	 * 
 	 * @return a negative number, zero, or a positive number
 	 */
 	public int relativePos(LiteWeightFeature feat){
-		int pos = (int) Math.abs(this.position);
+		int pos = (int) Math.abs(this.pos[feat.getGenSrcIdx()]);
 		if (pos < feat.getLeft())
 			return -1;
 		else if (pos <= feat.getRight())

@@ -26,6 +26,7 @@ public class ExportMenu extends JMenu implements ActionListener {
 	JMenuItem jMenuFileExportSpas = new JMenuItem();
 	JMenuItem jMenuFileExportOrthologs = new JMenuItem();
 	JMenuItem jMenuFileExportPermutation = new JMenuItem();
+	JMenuItem jMenuFileExportGaps = new JMenuItem();
 
 	BaseViewerModel model;
 	RearrangementPanel rrpanel;
@@ -66,18 +67,27 @@ public class ExportMenu extends JMenu implements ActionListener {
     	jMenuFileExportPermutation.setMnemonic('P');
     	jMenuFileExportPermutation.setActionCommand("ExportPermutation");
     	jMenuFileExportPermutation.addActionListener(this);
+    	
+    	jMenuFileExportGaps.setToolTipText("Export locations of gaps in alignment.");
+    	jMenuFileExportGaps.setVisible(true);
+    	jMenuFileExportGaps.setText("Export Gaps");
+    	jMenuFileExportGaps.setMnemonic('i');
+    	jMenuFileExportGaps.setActionCommand("ExportGaps");
+    	jMenuFileExportGaps.addActionListener(this);
 
         jMenuFileExportImage.setEnabled(false);
 		jMenuFileExportSnps.setEnabled(false);
 		jMenuFileExportSpas.setEnabled(false);
 		jMenuFileExportPermutation.setEnabled(false);
 		jMenuFileExportOrthologs.setEnabled(false);
+		jMenuFileExportGaps.setEnabled(false);
 		
         add(jMenuFileExportImage);
         add(jMenuFileExportSnps);
 //        add(jMenuFileExportSpas);
         add(jMenuFileExportPermutation);
         add(jMenuFileExportOrthologs);
+        add(jMenuFileExportGaps);
 
     }
     
@@ -92,6 +102,7 @@ public class ExportMenu extends JMenu implements ActionListener {
     			jMenuFileExportOrthologs.setEnabled(true);
     			jMenuFileExportSpas.setEnabled(true);
     			jMenuFileExportSnps.setEnabled(true);
+    			jMenuFileExportGaps.setEnabled(true);
     		}
        		jMenuFileExportPermutation.setEnabled(true);
     	}else{
@@ -133,6 +144,21 @@ public class ExportMenu extends JMenu implements ActionListener {
         {
         	XmfaViewerModel xvm = (XmfaViewerModel)model;
         	PermutationExporter.ExportFrame pef = new PermutationExporter.ExportFrame(xvm);
+        }
+        if (e.getActionCommand().equals("ExportGaps")){
+        	JFileChooser fc = new JFileChooser();
+        	fc.setDialogTitle("Export Gap file to...");
+        	if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION){
+        		try {
+        			BufferedWriter bw = new BufferedWriter(new FileWriter(fc.getSelectedFile()));
+        			XmfaViewerModel xvm = (XmfaViewerModel) model;
+        			SnpExporter.exportGaps(xvm, xvm.getXmfa(), bw);
+        			bw.flush();
+        			bw.close();
+        		} catch (IOException ioe) {
+        			ioe.printStackTrace();
+        		}
+        	}
         }
 		
 	}

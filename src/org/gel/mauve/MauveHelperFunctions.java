@@ -234,5 +234,70 @@ public class MauveHelperFunctions implements FlatFileFeatureConstants {
 		}
 		return all_contigs;
 	}
+	
+	/**
+	 * Splits the byte array into an array of arrays of length <code>k</code>
+	 * 
+	 * @param ar the array to split up
+	 * @param k the length of the mers to split <code>ar</code> into
+	 * @return an array of length <i>l</i>, where <i>l</i> = <code> r == 0 ? q : q+1 </code> </br>
+	 * 		   and <code>ar.length = q*k + r</code> 
+	 */
+	public static byte[][] splitIntoKmers(byte[] ar, int k){
+		// ar.length = q*k + r   good ol' Division Algorithm
+		int r = ar.length % k;
+		int q = ar.length/k;
+		byte[][] ret = null;
+		if (r == 0){
+			ret = new byte[q][];
+		} else {
+			ret = new byte[q+1][];
+		}
+		int curr = 0;
+		for (int merI = 0; merI < q; merI++){
+			ret[merI] = new byte[k];
+			System.arraycopy(ar, curr, ret[merI], 0, k);
+			curr = curr+k;
+		}
+		
+		if (r != 0) {
+			ret[ret.length-1] = new byte[r];
+			System.arraycopy(ar,curr,ret[ret.length-1],0,r);
+		}
+		
+		return ret;
+	}
 
+	/**
+	 * Splits the char array into an array of arrays of length <code>k</code>
+	 * 
+	 * @param ar the array to split up
+	 * @param k the length of the mers to split <code>ar</code> into
+	 * @return an array of length <i>l</i>, where <i>l</i> = <code> r == 0 ? q : q+1 </code> </br>
+	 * 		   and <code>ar.length = q*k + r</code> 
+	 */
+	public static char[][] splitIntoKmers(char[] ar, int k){
+		// ar.length = q*k + r   good ol' Division Algorithm
+		int r = ar.length % k;
+		int q = ar.length/k;
+		char[][] ret = null;
+		if (r == 0){
+			ret = new char[q][];
+		} else {
+			ret = new char[q+1][];
+		}
+		int curr = 0;
+		for (int merI = 0; merI < q; merI++){
+			ret[merI] = new char[k];
+			System.arraycopy(ar, curr, ret[merI], 0, k);
+			curr = curr+k;
+		}
+		
+		if (r != 0) {
+			ret[ret.length-1] = new char[r];
+			System.arraycopy(ar,curr,ret[ret.length-1],0,r);
+		}
+		
+		return ret;
+	}
 }

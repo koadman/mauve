@@ -49,6 +49,8 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	
 	private BrokenCDS[] cds;
 	
+	private CDSErrorExporter cdsEE;
+	
 	private DCJ dcj;
 	
 	private boolean getBrokenCDS;
@@ -146,18 +148,27 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		typeII = new Vector<Adjacency>();
 		
 		TreeSet<Adjacency> refSet = new TreeSet<Adjacency>(comp);
-		for (Adjacency a: ref) refSet.add(a);
+		for (Adjacency a: ref) { refSet.add(a);}
+		
+		System.err.println("\nnum assembly adjacencies: " + ass.length);
+		
 		for (Adjacency a: ass){
 			if (!refSet.contains(a)) 
 				typeI.add(a);
 		}
 		
+		System.err.println("num typeI errors: " + typeI.size());
+		
 		TreeSet<Adjacency> assSet = new TreeSet<Adjacency>(comp);
-		for (Adjacency a: ass) assSet.add(a);
+		for (Adjacency a: ass) { assSet.add(a);}
+		
+		System.err.println("num ref adjacencies: " + ref.length);
+		
 		for (Adjacency a: ref) {
 			if (!assSet.contains(a))
 				typeII.add(a);
 		}
+		System.err.println("num typeII errors: " + typeII.size());
 	}
 	
 	/**
@@ -208,19 +219,17 @@ public class AssemblyScorer implements AlignmentProcessListener {
 				(it.next().getAnnotationSequence() != null);
 		}
 		haveAnnotations = model.getGenomeBySourceIndex(0).getAnnotationSequence() != null;
-	//	haveAnnotations = false;
 		if (haveAnnotations){
 			System.out.print("Getting broken CDS...");
 			System.out.flush();
-			CDSErrorExporter cdsEE = new CDSErrorExporter(model, snps, assGaps);
+			this.cdsEE = new CDSErrorExporter(model, snps, assGaps, refGaps);
 			try {
 				cds = cdsEE.getBrokenCDS();
 				System.out.print("done!\n");
 			} catch (Exception e){
-				System.err.print(" failed to compute broken CDS. Reason given below");
-				System.err.print(e.getMessage());
+				System.err.println("\n\nfailed to compute broken CDS. Reason given below");
+				System.err.println(e.getMessage());
 				e.printStackTrace();
-				
 			} 
 		}
 	}
@@ -261,14 +270,34 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		return cds;
 	}
 	
-	public int getDCJDist(){
+	public int getSCJdist(){
+		return dcj.scjDistance();
+	}
+	
+	public int getDCJdist(){
 		return dcj.dcjDistance();
+	}
+	
+	public int getBPdist(){
+		return dcj.bpDistance();
 	}
 	
 	public int numBlocks(){
 		return dcj.numBlocks();
 	}
 
+	public double typeIadjErr(){
+		return ((double) typeI.size()) / 
+			((double) dcj.getAdjacencyGraph()
+						 .getGenomeB().length);
+	}
+	
+	public double typeIIadjErr(){
+		return ((double) typeII.size()) /
+			((double) dcj.getAdjacencyGraph()
+						 .getGenomeA().length);
+	}
+	
 	public int numLCBs(){
 		return (int) model.getLcbCount();
 	}
@@ -392,49 +421,4 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		}
 		
 	}
-	
-	private static void printSummary(AssemblyScorer sa, PrintStream out, boolean header, boolean singleLine){
-		NumberFormat nf = NumberFormat.getInstance();
-		nf.setMaximumFractionDigits(4);
-		StringBuilder sb = new StringBuilder();
-		if (out!=null){
-			if (singleLine){
-				if (header) {
-					sb.append("DCJ_Distance\tNum_Blocks\tNum_SNPs\tNumGaps_Ref\tNumGaps_Assembly\t" +
-							"TotalBasesMissed\tPercentBasesMissed\tExtraBases\tPercentExtraBases\n");
-				}
-				
-				sb.append(sa.dcj.dcjDistance()+"\t"+sa.dcj.numBlocks()+"\t"+sa.snps.length+"\t"+
-							sa.getReferenceGaps().length+"\t"+sa.getAssemblyGaps().length+"\t"+
-						 	sa.totalMissedBases()+"\t"+nf.format(sa.percentMissedBases()*100)+"\t"+
-						 	sa.totalExtraBases()+"\t"+nf.format(sa.percentExtraBases()*100)+"\n");
-				
-			} else {
-				if (header)
-					sb.append("DCJ Distance:\t"+sa.dcj.dcjDistance()+"\n"+
-						 "Number of Blocks:\t"+sa.dcj.numBlocks()+"\n"+
-						 "Number of SNPs:\t"+sa.snps.length+"\n"+
-						 "Number of Gaps in Reference:\t"+sa.refGaps.length+"\n"+
-						 "Number of Gaps in Assembly:\t"+sa.assGaps.length+"\n" +
-						 "Total bases missed:\t" + sa.totalMissedBases() +"\n"+
-						 "Percent bases missed:\t" + nf.format(sa.percentMissedBases()*100)+" %\n"+
-						 "Total bases extra:\t" + sa.totalExtraBases()+"\n" +
-						 "Percent bases extra:\t" + nf.format(sa.percentExtraBases()*100)+ " %\n");
-				else 
-					sb.append(sa.dcj.dcjDistance()+"\n"+
-							 sa.dcj.numBlocks()+"\n"+
-							 sa.snps.length+"\n"+
-							 sa.refGaps.length+"\n"+
-							 sa.assGaps.length+"\n" +
-							 sa.totalMissedBases() +"\n"+
-							 nf.format(sa.percentMissedBases()*100)+"\n"+
-							 sa.totalExtraBases()+"\n" +
-							 nf.format(sa.percentExtraBases()*100)+ "\n");
-				
-			}
-		}
-		out.print(sb.toString());
-		out.flush();
-	}
-	
 }

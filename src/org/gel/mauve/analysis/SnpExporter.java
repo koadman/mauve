@@ -1,6 +1,8 @@
 package org.gel.mauve.analysis;
 
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -114,8 +116,16 @@ public class SnpExporter {
 		SNP[] snps = getSNPs(model, xmfa);
 		for (int i = 0; i < snps.length; i++){
 			output.write(snps[i].toString()+"\n");
-			
 		}
+	}
+	
+	public static void exportGaps(XmfaViewerModel model, XMFAAlignment xmfa, BufferedWriter output) throws IOException {
+		// Genome  Contig   Position_in_Contig   GenomeWide_Position   Length
+		Gap[][] gaps = getGaps(model);
+		output.write("Genome\tContig\tPosition_in_Contig\tGenomeWide_Position\tLength\n");
+		for (Gap[] ar: gaps)
+			for (Gap g: ar)
+				output.write(g.toString()+"\n");
 	}
 	
 	public static SNP[] getSNPs(XmfaViewerModel model){
@@ -371,6 +381,24 @@ public class SnpExporter {
 	 	  case 'G': return 3;
 		  default: return -1;
 		}
+	}
+	
+	public static void main(String[] args) {
+		String alnmtFilePath = args[0];
+		String outputFilePath = args[1];
+		
+		try {
+			System.out.print("Loading alignment file...");
+			XmfaViewerModel model = new XmfaViewerModel(new File(alnmtFilePath), null);
+			System.out.println("done!");
+			model.setReference(model.getGenomeBySourceIndex(0));
+			BufferedWriter bw = new BufferedWriter(new FileWriter(outputFilePath));
+			export(model, model.getXmfa(), bw);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		
 	}
 
 }

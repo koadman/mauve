@@ -73,8 +73,11 @@ public class SNP {
 		StringBuilder sb = new StringBuilder();
 		sb.append(pattern);
 		for (int i = 0; i < pos.length; i++){
-			sb.append("\t"+chrom[i].getName()
+			if (chrom[i] != null)
+				sb.append("\t"+chrom[i].getName()
 					  +"\t"+posInCtg[i]+"\t"+pos[i]);
+			else 
+				sb.append("\tnull\t"+posInCtg[i]+"\t"+pos[i]);
 		}
 		return sb.toString();
 	}
@@ -98,9 +101,13 @@ public class SNP {
 		present[genSrcIdx] = true;
 		pattern[genSrcIdx] = base;
 		pos[genSrcIdx] = position;
-		chrom[genSrcIdx] =
-			model.getGenomeBySourceIndex(genSrcIdx).getChromosomeAt(position);
-		posInCtg[genSrcIdx] = (int) (position - chrom[genSrcIdx].getStart() + 1);
+		if (position == 0) {
+			posInCtg[genSrcIdx] = 0;
+		} else {
+			chrom[genSrcIdx] =
+				model.getGenomeBySourceIndex(genSrcIdx).getChromosomeAt(position);
+			posInCtg[genSrcIdx] = (int) (position - chrom[genSrcIdx].getStart() + 1);
+		}
 		
 	}
 	
@@ -239,27 +246,48 @@ public class SNP {
 	 * @return a negative number, zero, or a positive number
 	 */
 	public int relativePos(LiteWeightFeature feat){
-		int pos = (int) Math.abs(this.pos[feat.getGenSrcIdx()]);
-		if ((feat.getStrand() >= 0) == 
-				(this.pos[feat.getGenSrcIdx()] >= 0)){
-			if (pos < feat.getLeft())
-				return -1;
-			else if (pos <= feat.getRight())
-				return 0;
-			else 
-				return 1;
+		int snpPos = (int) Math.abs(this.pos[feat.getGenSrcIdx()]);
+		if (snpPos == 0)
+			return 1;
+		boolean snpFwd = this.pos[feat.getGenSrcIdx()] > 0;
+		boolean featFwd = feat.getStrand() > 0;
+		if (featFwd == snpFwd){ // if on same strand
+			if (featFwd) {
+				if (snpPos < feat.getLeft())
+					return -1;
+				else if (snpPos <= feat.getRight())
+					return 0;
+				else 
+					return 1;
+			} else {
+				if (snpPos > feat.getRight())
+					return -1;
+				else if (snpPos >= feat.getLeft())
+					return 0;
+				else
+					return 1;
+			}
 		} else {
-			if (feat.getStrand()>0)
-				return 1;
-			else
+			if (featFwd)
 				return -1;
+			else
+				return 1;
 		}
 	}
 	
+	/**
+	 * Returns true if genome x and genome y share the same
+	 * base in this SNP.
+	 */
 	public boolean areEqual(Genome x, Genome y){
 		return pattern[x.getSourceIndex()] == pattern[y.getSourceIndex()];
 	}
-	
+	/**
+	 * Returns true if genome x and genome y share the same
+	 * base in this SNP.
+	 * @param x genome source index
+	 * @param y genome source index
+	 */
 	public boolean areEqual(int x, int y){
 		return pattern[x] == pattern[y];
 	}
@@ -268,17 +296,35 @@ public class SNP {
 		return new Comparator<SNP>(){
 			private int idx = genSrcIdx;
 			public int compare(SNP o1, SNP o2) {
-				// if they have equal sign
-				if ((o1.pos[idx] >= 0) == (o2.pos[idx] >= 0)){
-					return (int)(o1.pos[idx] - o2.pos[idx]);
+				if (o1.pos[idx] == 0 && o2.pos[idx] == 0) {
+					return 0;
 				} else {
-					if (o1.pos[idx] < 0) 
-						return 1;
-					else
-						return -1;
+					if ((o1.pos[idx] >= 0) == (o2.pos[idx] >= 0)){ // on same strand
+						if (o1.pos[idx] > 0) { // on forward strand
+							if (o1.pos[idx] > o2.pos[idx]) {
+								return 1;
+							} else if (o1.pos[idx] < o2.pos[idx]){
+								return -1;
+							} else {
+								return 0;
+							}
+						} else { // on complement strand
+							if (o1.pos[idx] > o2.pos[idx]) {
+								return -1;
+							} else if (o1.pos[idx] < o2.pos[idx]) {
+								return 1;
+							} else {
+								return 0;
+							}
+						}
+					} else { // on diff. strands
+						if (o1.pos[idx] < 0) // put comp strand stuff last
+							return 1;
+						else
+							return -1;
+					}
 				}
 			}
-			
 		};
 	}
 	

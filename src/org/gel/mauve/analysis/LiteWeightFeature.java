@@ -2,7 +2,7 @@ package org.gel.mauve.analysis;
 
 import java.util.Comparator;
 
-public class LiteWeightFeature implements Comparable
+public class LiteWeightFeature implements Comparable<LiteWeightFeature>
 {
 	
 	private int genSrcIdx;
@@ -26,6 +26,10 @@ public class LiteWeightFeature implements Comparable
 		} else 
 			ID = locus;
 			
+	}
+	
+	public int getLength(){
+		return right - left + 1;
 	}
 	
 	public int hashCode(){
@@ -60,20 +64,23 @@ public class LiteWeightFeature implements Comparable
 		return genSrcIdx;
 	}
 	
-	public int compareTo(Object o)
+	public String getType(){
+		return type;
+	}
+	
+	public int compareTo(LiteWeightFeature o)
 	{
-		LiteWeightFeature c = (LiteWeightFeature)o;
-		if(left < c.left)
+		if(left < o.left)
 			return -1;
-		else if(left > c.left)
+		else if(left > o.left)
 			return 1;
-		if(right < c.right)
+		if(right < o.right)
 			return -1;
-		else if(right > c.right)
+		else if(right > o.right)
 			return 1;
-		if(strand < c.strand)
+		if(strand < o.strand)
 			return -1;
-		else if(strand > c.strand)
+		else if(strand > o.strand)
 			return 1;
 		return 0;
 	}

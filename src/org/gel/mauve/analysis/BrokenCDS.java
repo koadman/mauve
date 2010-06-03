@@ -22,6 +22,9 @@ public class BrokenCDS {
 
 	
 	public BrokenCDS(LiteWeightFeature cds){
+		if (cds.getLength() % 3 != 0) {
+			throw new IllegalArgumentException("CDS length must be divisible by 3.");
+		}
 		this.cds = cds;
 		prmtrStops = new TreeMap<Integer,Character>();
 		subs = new TreeMap<Integer, char[]>();
@@ -46,8 +49,9 @@ public class BrokenCDS {
 	}
 	
 	public String toString(){
+		/*FeatureID Peptide_Length PercIncPeptides Subst_Positions Subst_Patterns PrmtrStop_Positions PrmtrStop_OrigRes*/
 		StringBuilder sb = new StringBuilder();
-		sb.append(cds.getID());
+		sb.append(cds.getID()+"\t"+getPeptideLength()+"\t"+getPercIncPeptides());
 		Iterator<Integer> it = subs.keySet().iterator();
 		StringBuilder subPos = new StringBuilder();
 		StringBuilder subPat = new StringBuilder();
@@ -83,4 +87,15 @@ public class BrokenCDS {
 		}
 		return sb.toString();
 	}
+	
+	public int getPeptideLength(){
+		return (cds.getRight() - cds.getLeft() + 1) / 3;
+	}
+	
+	public double getPercIncPeptides(){
+		double len = getPeptideLength();
+		double inc = prmtrStops.size() + subs.size();
+		return inc/len;
+	}
+	
 }

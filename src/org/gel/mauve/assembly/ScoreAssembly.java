@@ -155,13 +155,25 @@ public class ScoreAssembly  {
 		
 		Gap[] refGaps = assScore.getReferenceGaps();
 		Gap[] assGaps = assScore.getAssemblyGaps();
-		Object[] gapHeader = {"Sequence","Contig","Position_in_Contig","GenomeWide_Position","Length"};
+		int nGen = model.numGenomes();
+		Object[] gapHeader = new Object[5+(nGen)*3];
+		gapHeader[0] = "Sequence";
+		gapHeader[1] = "Contig";
+		gapHeader[2] = "Position_in_Contig";
+		gapHeader[3] = "GenomeWide_Position";
+		gapHeader[4] = "Length";
+		int idx = 5;
+		for (int j = 0; j < nGen; j++){
+			gapHeader[idx++] = "sequence_"+j+"_pos"; 
+			gapHeader[idx++] = "sequence_"+j+"_ctg";
+			gapHeader[idx++] = "sequence_"+j+"_posInCtg";
+		}
 		DefaultTableModel gapData = win.addContentTable(GAP_CMD, GAP_DESC, false);
 		gapData.setColumnIdentifiers(gapHeader);
 		for (int gapI = 0; gapI < refGaps.length; gapI++)
-			gapData.addRow(refGaps[gapI].toString("reference").split("\t"));
+			gapData.addRow(refGaps[gapI].toString().split("\t"));
 		for (int gapI = 0; gapI < assGaps.length; gapI++)
-			gapData.addRow(assGaps[gapI].toString("assembly").split("\t"));
+			gapData.addRow(assGaps[gapI].toString().split("\t"));
 		if (getBrokenCDS && assScore.hasBrokenCDS()){
 			Object[] cdsHeader = {"CDS_ID","Substituted_Positions","Substitution","Stop_Codon_Positions","Original_Residue"};
 			DefaultTableModel cdsData = win.addContentTable(CDS_CMD, CDS_DESC, false);
@@ -185,7 +197,7 @@ public class ScoreAssembly  {
 			
 			sb.append(	assScore.numContigs()+"\t"+assScore.numReplicons()+"\t"+
 						assScore.numBasesAssembly()+"\t"+assScore.numBasesReference()+"\t"+assScore.numLCBs()+"\t"+
-						assScore.getDCJDist()+"\t"+assScore.numBlocks()+"\t"+assScore.getSNPs().length+"\t"+
+						assScore.getDCJdist()+"\t"+assScore.numBlocks()+"\t"+assScore.getSNPs().length+"\t"+
 						assScore.getReferenceGaps().length+"\t"+assScore.getAssemblyGaps().length+"\t"+
 					 	assScore.totalMissedBases()+"\t"+nf.format(assScore.percentMissedBases()*100)+"\t"+
 					 	assScore.totalExtraBases()+"\t"+nf.format(assScore.percentExtraBases()*100)+"\n");
@@ -198,8 +210,12 @@ public class ScoreAssembly  {
 					"Number of assembly bases:\t" + assScore.numBasesAssembly()+"\n\n"+
 					"Number of reference bases:\t" + assScore.numBasesReference()+"\n\n"+
 					"Number of LCBs:\t" + assScore.numLCBs()+"\n\n"+
-					"Number of DCJ Blocks:\t"+assScore.numBlocks()+"\n\n"+
-					"DCJ Distance:\t"+assScore.getDCJDist()+"\n\n"+
+					"Number of Blocks:\t"+assScore.numBlocks()+"\n\n"+
+					"Breakpoint Distance:\t"+assScore.getBPdist()+"\n\n"+
+					"DCJ Distance:\t"+assScore.getDCJdist()+"\n\n"+
+					"SCJ Distance:\t"+assScore.getSCJdist()+"\n\n"+
+					"Type-I Adjacency Error Rate:\t"+nf.format(assScore.typeIadjErr())+"\n\n"+
+					"Type-II Adjacency Error Rate:\t"+nf.format(assScore.typeIIadjErr())+"\n\n"+
 					"Number of SNPs:\t"+assScore.getSNPs().length+"\n\n"+
 					"Number of Gaps in Reference:\t"+assScore.getReferenceGaps().length+"\n\n"+
 					"Number of Gaps in Assembly:\t"+assScore.getAssemblyGaps().length+"\n\n" +
@@ -215,7 +231,7 @@ public class ScoreAssembly  {
 				sb.append(
 						assScore.numContigs()+"\n\n"+
 						assScore.numLCBs()+"\n\n"+
-						assScore.getDCJDist()+"\n"+
+						assScore.getDCJdist()+"\n"+
 						 assScore.numBlocks()+"\n"+
 						 assScore.getSNPs().length+"\n"+
 						 assScore.getReferenceGaps().length+"\n"+
@@ -251,15 +267,15 @@ public class ScoreAssembly  {
 	 * Returns a 4x4 matrix of counts of substitution types between 
 	 * genome <code>src_i</code> and <code>src_j</code>
 	 * 
-	 * <p>
+	 * <pre>
 	 * <code>
-	 *      A  C  T  G <br />
-	 *    A -          <br />
-	 *    C    -       <br />
-	 *    T       -    <br />
-	 *    G          - <br />
+	 *      A  C  T  G 
+	 *    A -          
+	 *    C    -       
+	 *    T       -    
+	 *    G          - 
 	 * </code>
-	 * </p>
+	 * </pre>
 	 * @param snps
 	 * @return a 4x4 matrix of substitution counts
 	 */
@@ -297,7 +313,8 @@ public class ScoreAssembly  {
 		BaseViewerModel model = frame.getModel();
 		String key = model.getSrc().getAbsolutePath();
 		if (modelMap.containsKey(key)){
-			modelMap.get(key).win.showWindow();
+		//	modelMap.get(key).win.showWindow();
+			startNewSA(frame);
 		} else if (model instanceof XmfaViewerModel) {
 			startNewSA(frame);			
 		} else {
@@ -307,6 +324,10 @@ public class ScoreAssembly  {
 	}
 	
 	private static void startNewSA(MauveFrame frame){
+		interactive(frame);
+	}
+
+	public static void interactive(MauveFrame frame){
 		XmfaViewerModel model = (XmfaViewerModel) frame.getModel();
 		String key = model.getSrc().getAbsolutePath();
 		if (running.containsKey(key)) {
@@ -331,9 +352,8 @@ public class ScoreAssembly  {
 						new ScoreAssembly(model,false));
 			}
 		}
-		
 	}
-
+	
 	public static void main(String[] args){
 		CommandLine line = OptionsBuilder.getCmdLine(getOptions(), args);
 		if (args.length == 0 || line == null || line.hasOption("help")){

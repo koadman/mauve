@@ -176,6 +176,10 @@ public class BaseViewerModel {
 			ret.add (genomes[i]);
 		return ret;
 	}
+	
+	public int numGenomes(){
+		return genomes.length;
+	}
 
 	/**
 	 * Set the genome at viewing position viewIndex to g. This will update the
