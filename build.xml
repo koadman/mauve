@@ -6,7 +6,7 @@
 	
 	<!-- set the release version, unless making a snapshot -->
 	<target name="release_properties" unless="env.MAUVE_SNAPSHOT">
-		<property name="release.version" value="2.3.1"/>
+		<property name="release.version" value="2.4.0_beta"/>
 	</target>
 
 	<!-- deployment locations for production ASAP integration -->
@@ -99,6 +99,7 @@
 				${support}/junit.jar;
 				${ext}/zeus-jscl.jar;
 				${ext}/goose.jar;
+				${ext}/ant-1.7.1.jar;
 				${ext}/dbus-2.6.jar;
 				${ext}/unix-0.5.jar"
 			srcdir="${src}"

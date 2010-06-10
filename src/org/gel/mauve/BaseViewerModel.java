@@ -924,6 +924,7 @@ public class BaseViewerModel {
 			attributes.put(g,l);
 		}
 		l.add(o);
+		fireAttributesEvent();
 	}
 	public List getGenomeAttributes(Genome g){
 		return attributes.get(g);
@@ -934,5 +935,20 @@ public class BaseViewerModel {
 	}
 	public void setDrawAttributes(boolean drawAttributes) {
 		this.drawAttributes = drawAttributes;
+		fireAttributesEvent();
 	}
+
+	/**
+	 * Invoke {@link ModelListener.attributesChanged(ModelEvent)} on this model's
+	 * collection of ModelListeners.
+	 */
+	protected void fireAttributesEvent () {
+		Object [] listeners = listenerList.getListenerList ();
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if (listeners[i] == ModelListener.class) {
+				((ModelListener) listeners[i + 1]).attributesChanged (modelEvent);
+			}
+		}
+	}
+
 }

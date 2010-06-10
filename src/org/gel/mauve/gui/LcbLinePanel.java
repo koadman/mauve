@@ -278,4 +278,6 @@ class LcbLinePanel extends JComponent implements ModelListener
     {
         // Ignored.
     }
+    public void attributesChanged(ModelEvent event) {}
+
 }

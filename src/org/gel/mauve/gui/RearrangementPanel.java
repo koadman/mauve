@@ -22,6 +22,7 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
+import java.io.File;
 import java.util.Vector;
 
 import javax.print.DocFlavor;
@@ -32,6 +33,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
@@ -66,6 +68,7 @@ import org.gel.mauve.color.NormalizedOffsetColorScheme;
 import org.gel.mauve.color.OffsetColorScheme;
 import org.gel.mauve.gui.sequence.RRSequencePanel;
 import org.gel.mauve.gui.sequence.SeqPanel;
+import org.gel.mauve.recombination.WeakArgModelBuilder;
 
 /**
  * The primary container class for the visualization interface. For every genome
@@ -278,6 +281,7 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         addKeyMapping("ctrl D", "DCJ", this);
         addKeyMapping("shift ctrl LEFT", "ShiftLeft", this);
         addKeyMapping("shift ctrl RIGHT", "ShiftRight", this);
+        addKeyMapping("ctrl R", "Recombination", this);
     }
     
     public void addKeyMapping(String stroke, String actionName, ActionListener listener)
@@ -610,6 +614,22 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         		org.gel.mauve.dcjx.DCJDistance.launchWindow(model);
         	}
         }
+        else if (e.getActionCommand().equals("Recombination"))
+        {
+        	if( model instanceof XmfaViewerModel )
+        	{
+        		try{
+        			JFileChooser fc = new JFileChooser();
+        			int ret = fc.showOpenDialog(this);
+                    if (ret == JFileChooser.APPROVE_OPTION)
+                    {
+            			WeakArgModelBuilder.buildModel(fc.getSelectedFile(), (XmfaViewerModel)model);
+                    }        			
+        		}catch(Exception ee){
+        			ee.printStackTrace();
+        		}
+        	}
+        }
         else if (e.getActionCommand().equals("ScoreAssembly"))
         {
         	if( model instanceof LcbViewerModel ){
@@ -914,6 +934,7 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
     {
         // Ignored.
     }
+    public void attributesChanged(ModelEvent event) {}
 
 }
 
