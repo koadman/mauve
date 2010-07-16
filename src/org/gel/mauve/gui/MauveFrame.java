@@ -132,6 +132,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
 
     public MauveFrame(Mauve mauve)
     {
+    	System.err.println(MauveFrame.class.getResource("/images/Dcj16.gif").getFile());
         this.mauve = mauve;
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         fc = new JFileChooser();

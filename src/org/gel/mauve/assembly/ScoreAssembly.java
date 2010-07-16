@@ -175,11 +175,16 @@ public class ScoreAssembly  {
 		for (int gapI = 0; gapI < assGaps.length; gapI++)
 			gapData.addRow(assGaps[gapI].toString().split("\t"));
 		if (getBrokenCDS && assScore.hasBrokenCDS()){
-			Object[] cdsHeader = {"CDS_ID","Substituted_Positions","Substitution","Stop_Codon_Positions","Original_Residue"};
+			Object[] cdsHeader = 
+				{"CDS_ID","Peptide_Length",
+					"Perc_IncorrectBases", "Broken_Frame_Segments",
+					"Gap_Segments","Substituted_Positions","Substitutions",
+					"Stop_Codon_Positions","Original_Residue"};
 			DefaultTableModel cdsData = win.addContentTable(CDS_CMD, CDS_DESC, false);
+			cdsData.setColumnIdentifiers(cdsHeader);
 			BrokenCDS[] cds = assScore.getBrokenCDS();
-			for (int cdsI = 0; cdsI < cds.length; cdsI++)
-				cdsData.addRow(cds.toString().split("\t"));
+			for (BrokenCDS bcds: cds)
+				cdsData.addRow(bcds.toString().split("\t"));
 		}
 		
 	}
@@ -216,6 +221,8 @@ public class ScoreAssembly  {
 					"SCJ Distance:\t"+assScore.getSCJdist()+"\n\n"+
 					"Type-I Adjacency Error Rate:\t"+nf.format(assScore.typeIadjErr())+"\n\n"+
 					"Type-II Adjacency Error Rate:\t"+nf.format(assScore.typeIIadjErr())+"\n\n"+
+					"Number of Complete Coding Sequences:\t"+assScore.numCompleteCDS()+"\n\n"+
+					"Number of Broken Coding Sequences:\t"+assScore.numBrokenCDS()+"\n\n"+
 					"Number of SNPs:\t"+assScore.getSNPs().length+"\n\n"+
 					"Number of Gaps in Reference:\t"+assScore.getReferenceGaps().length+"\n\n"+
 					"Number of Gaps in Assembly:\t"+assScore.getAssemblyGaps().length+"\n\n" +

@@ -47,7 +47,7 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	
 	private Gap[] assGaps; 
 	
-	private BrokenCDS[] cds;
+	private BrokenCDS[] brokenCDS;
 	
 	private CDSErrorExporter cdsEE;
 	
@@ -148,7 +148,9 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		typeII = new Vector<Adjacency>();
 		
 		TreeSet<Adjacency> refSet = new TreeSet<Adjacency>(comp);
-		for (Adjacency a: ref) { refSet.add(a);}
+		for (Adjacency a: ref) {
+			refSet.add(a);
+		}
 		
 		System.err.println("\nnum assembly adjacencies: " + ass.length);
 		
@@ -156,7 +158,7 @@ public class AssemblyScorer implements AlignmentProcessListener {
 			if (!refSet.contains(a)) 
 				typeI.add(a);
 		}
-		
+
 		System.err.println("num typeI errors: " + typeI.size());
 		
 		TreeSet<Adjacency> assSet = new TreeSet<Adjacency>(comp);
@@ -180,6 +182,10 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		System.out.print("Computing signed permutations....");
 		String[] perms = PermutationExporter.getPermStrings(model, true); 
 		System.out.print("done!\n");
+		
+		System.out.println("Permutations: ");
+		System.out.println(perms[0]);
+		System.out.println(perms[1]);
 		
 		System.out.print("Performing DCJ rearrangement analysis...");
 		this.dcj = new DCJ(perms[0], perms[1]);
@@ -224,7 +230,7 @@ public class AssemblyScorer implements AlignmentProcessListener {
 			System.out.flush();
 			this.cdsEE = new CDSErrorExporter(model, snps, assGaps, refGaps);
 			try {
-				cds = cdsEE.getBrokenCDS();
+				brokenCDS = cdsEE.getBrokenCDS();
 				System.out.print("done!\n");
 			} catch (Exception e){
 				System.err.println("\n\nfailed to compute broken CDS. Reason given below");
@@ -259,15 +265,23 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	}
 	
 	public boolean hasBrokenCDS(){
-		if (cds == null) 
+		if (brokenCDS == null) 
 			return false;
 		else {
-			return cds.length > 0;
+			return brokenCDS.length > 0;
 		}
 	}
 	
 	public BrokenCDS[] getBrokenCDS(){
-		return cds;
+		return brokenCDS;
+	}
+	
+	public int numBrokenCDS(){
+		return cdsEE.numBrokenCDS();
+	}
+	
+	public int numCompleteCDS(){
+		return cdsEE.numCompleteCDS();
 	}
 	
 	public int getSCJdist(){
@@ -318,7 +332,6 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	public long numBasesReference(){
 		return model.getGenomeBySourceIndex(0).getLength();
 	}
-	
 	
 	public double percentMissedBases(){
 		double totalBases = model.getGenomeBySourceIndex(0).getLength();
