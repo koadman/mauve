@@ -210,34 +210,34 @@ public class ScoreAssembly  {
 		} else {
 			if (header) {
 				sb.append(
-					"Number of Contigs:\t"+assScore.numContigs()+"\n\n"+
-					"Number reference replicons:\t" + assScore.numReplicons()+"\n\n"+
-					"Number of assembly bases:\t" + assScore.numBasesAssembly()+"\n\n"+
-					"Number of reference bases:\t" + assScore.numBasesReference()+"\n\n"+
-					"Number of LCBs:\t" + assScore.numLCBs()+"\n\n"+
-					"Number of Blocks:\t"+assScore.numBlocks()+"\n\n"+
-					"Breakpoint Distance:\t"+assScore.getBPdist()+"\n\n"+
-					"DCJ Distance:\t"+assScore.getDCJdist()+"\n\n"+
-					"SCJ Distance:\t"+assScore.getSCJdist()+"\n\n"+
-					"Type-I Adjacency Error Rate:\t"+nf.format(assScore.typeIadjErr())+"\n\n"+
-					"Type-II Adjacency Error Rate:\t"+nf.format(assScore.typeIIadjErr())+"\n\n"+
-					"Number of Complete Coding Sequences:\t"+assScore.numCompleteCDS()+"\n\n"+
-					"Number of Broken Coding Sequences:\t"+assScore.numBrokenCDS()+"\n\n"+
-					"Number of SNPs:\t"+assScore.getSNPs().length+"\n\n"+
-					"Number of Gaps in Reference:\t"+assScore.getReferenceGaps().length+"\n\n"+
-					"Number of Gaps in Assembly:\t"+assScore.getAssemblyGaps().length+"\n\n" +
-					"Total bases missed in reference:\t" + assScore.totalMissedBases() +"\n\n"+
-					"Percent bases missed:\t" + nf.format(assScore.percentMissedBases()*100)+" %\n\n"+
-					"Total bases extra in assembly:\t" + assScore.totalExtraBases()+"\n\n" +
-					"Percent bases extra:\t" + nf.format(assScore.percentExtraBases()*100)+ " %\n\n"+
+					"Number of Contigs:\t"+assScore.numContigs()+"\n"+
+					"Number reference replicons:\t" + assScore.numReplicons()+"\n"+
+					"Number of assembly bases:\t" + assScore.numBasesAssembly()+"\n"+
+					"Number of reference bases:\t" + assScore.numBasesReference()+"\n"+
+					"Number of LCBs:\t" + assScore.numLCBs()+"\n"+
+					"Number of Blocks:\t"+assScore.numBlocks()+"\n"+
+					"Breakpoint Distance:\t"+assScore.getBPdist()+"\n"+
+					"DCJ Distance:\t"+assScore.getDCJdist()+"\n"+
+					"SCJ Distance:\t"+assScore.getSCJdist()+"\n"+
+					"Type-I Adjacency Error Rate:\t"+nf.format(assScore.typeIadjErr())+"\n"+
+					"Type-II Adjacency Error Rate:\t"+nf.format(assScore.typeIIadjErr())+"\n"+
+					"Number of Complete Coding Sequences:\t"+assScore.numCompleteCDS()+"\n"+
+					"Number of Broken Coding Sequences:\t"+assScore.numBrokenCDS()+"\n"+
+					"Number of SNPs:\t"+assScore.getSNPs().length+"\n"+
+					"Number of Gaps in Reference:\t"+assScore.getReferenceGaps().length+"\n"+
+					"Number of Gaps in Assembly:\t"+assScore.getAssemblyGaps().length+"\n" +
+					"Total bases missed in reference:\t" + assScore.totalMissedBases() +"\n"+
+					"Percent bases missed:\t" + nf.format(assScore.percentMissedBases()*100)+" %\n"+
+					"Total bases extra in assembly:\t" + assScore.totalExtraBases()+"\n" +
+					"Percent bases extra:\t" + nf.format(assScore.percentExtraBases()*100)+ " %\n"+
 					"Substitutions (Ref on Y, Assembly on X):\n"+subsToString(assScore)
 				);
 				
 				
 			} else { 
 				sb.append(
-						assScore.numContigs()+"\n\n"+
-						assScore.numLCBs()+"\n\n"+
+						assScore.numContigs()+"\n"+
+						assScore.numLCBs()+"\n"+
 						assScore.getDCJdist()+"\n"+
 						 assScore.numBlocks()+"\n"+
 						 assScore.getSNPs().length+"\n"+
