@@ -4,6 +4,8 @@ import java.awt.Dimension;
 import java.io.File;
 import java.text.NumberFormat;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -15,6 +17,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.gel.mauve.BaseViewerModel;
+import org.gel.mauve.Chromosome;
 import org.gel.mauve.OptionsBuilder;
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.analysis.BrokenCDS;
@@ -38,6 +41,10 @@ public class ScoreAssembly  {
 	private static String GAP_DESC = "Gaps in reference and assembly";
 	private static String CDS_CMD = "Broken CDS";
 	private static String CDS_DESC = "Broken CDS in assembly genome";
+	private static String INV_CMD = "Inverted Contigs";
+	private static String INV_DESC = "Incorrectly inverted contigs";
+	private static String MIS_CMD = "Mis-assembled Contigs";
+	private static String MIS_DESC = "Mis-assembled contigs with the total number of mis-assemblies in each";
 	
 	private static HashMap<String,ScoreAssembly> modelMap = new HashMap<String, ScoreAssembly>();
 	
@@ -131,7 +138,7 @@ public class ScoreAssembly  {
 			running.remove(this.model.getSrc().getAbsolutePath());
 			modelMap.put(this.model.getSrc().getAbsolutePath(), this);
 			sumTA.replaceRange("", 0, temp.length());
-			sumTA.setText(getSumText(assScore,true,false));
+			sumTA.setText(getSumText(assScore,true,false,getBrokenCDS));
 			//addJTables();
 			addTables();
 			finished = true;
@@ -187,9 +194,26 @@ public class ScoreAssembly  {
 				cdsData.addRow(bcds.toString().split("\t"));
 		}
 		
+		Chromosome[] chr = assScore.getInverted();
+		JTextArea invTA = win.addContentPanel(INV_CMD, INV_DESC, false);
+		for (Chromosome c: chr){
+			invTA.append(c.getName()+"\n");
+		}
+		
+		Map<Chromosome,Integer> misAsm = assScore.getMisAssemblies();
+		DefaultTableModel misAsmDat = win.addContentTable(MIS_CMD, MIS_DESC, false);
+		String[] misAsmHdr = {"Contig","No_Mis-Assemblies"};
+		misAsmDat.setColumnIdentifiers(misAsmHdr);
+		Iterator<Chromosome> it = misAsm.keySet().iterator();
+		while (it.hasNext()){
+			Chromosome key = it.next();
+			Integer count = misAsm.get(key);
+			String[] dat = {key.getName(),count.toString()};
+			misAsmDat.addRow(dat);
+		}
 	}
 	
-	public static String getSumText(AssemblyScorer assScore, boolean header, boolean singleLine){
+	public static String getSumText(AssemblyScorer assScore, boolean header, boolean singleLine, boolean brokenCDS){
 		NumberFormat nf = NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(4);
 		StringBuilder sb = new StringBuilder();
@@ -221,8 +245,10 @@ public class ScoreAssembly  {
 					"SCJ Distance:\t"+assScore.getSCJdist()+"\n"+
 					"Type-I Adjacency Error Rate:\t"+nf.format(assScore.typeIadjErr())+"\n"+
 					"Type-II Adjacency Error Rate:\t"+nf.format(assScore.typeIIadjErr())+"\n"+
-					"Number of Complete Coding Sequences:\t"+assScore.numCompleteCDS()+"\n"+
-					"Number of Broken Coding Sequences:\t"+assScore.numBrokenCDS()+"\n"+
+					
+					(brokenCDS ? ("Number of Complete Coding Sequences:\t"+assScore.numCompleteCDS()+"\n"+
+					"Number of Broken Coding Sequences:\t"+assScore.numBrokenCDS()+"\n"): "")+
+					
 					"Number of SNPs:\t"+assScore.getSNPs().length+"\n"+
 					"Number of Gaps in Reference:\t"+assScore.getReferenceGaps().length+"\n"+
 					"Number of Gaps in Assembly:\t"+assScore.getAssemblyGaps().length+"\n" +

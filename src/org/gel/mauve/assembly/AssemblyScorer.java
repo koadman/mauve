@@ -1,6 +1,9 @@
 package org.gel.mauve.assembly;
 
 import java.io.File;
+
+
+import org.gel.mauve.Chromosome;
 import org.gel.mauve.Genome;
 
 
@@ -10,8 +13,11 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.List;
 
 import org.gel.mauve.XmfaViewerModel;
 import org.gel.mauve.analysis.BrokenCDS;
@@ -22,8 +28,10 @@ import org.gel.mauve.analysis.SNP;
 import org.gel.mauve.analysis.SnpExporter;
 import org.gel.mauve.contigs.ContigOrderer;
 import org.gel.mauve.dcjx.Adjacency;
+import org.gel.mauve.dcjx.Block;
 import org.gel.mauve.dcjx.DCJ;
 import org.gel.mauve.gui.AlignmentProcessListener;
+
 
 public class AssemblyScorer implements AlignmentProcessListener {
 
@@ -60,6 +68,12 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	
 	/** missing adjacencies */
 	private Vector<Adjacency> typeII;
+	
+	private Vector<Chromosome> invCtgs;
+	
+	private Map<Chromosome,Integer> misAsm;
+	
+	private int numMisAssemblies;
 	
 	public AssemblyScorer(XmfaViewerModel model, boolean getBrokenCDS){
 		this.model = model;
@@ -195,6 +209,10 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		computeAdjacencyErrors();
 		System.out.print("done!\n");
 		
+		System.out.print("Computing inversions and mis-assemblies...");
+		computeInverted(perms[1]);
+		System.out.print("done\n");
+		
 		System.out.print("Getting SNPs...");
 		this.snps = SnpExporter.getSNPs(model);
 		System.out.print("done!\n");
@@ -215,6 +233,43 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		if (getBrokenCDS){
 			computeBrokenCDS();
 		}
+	}
+	
+	private void computeInverted(String asm){
+		invCtgs = new Vector<Chromosome>();
+		Comparator<Chromosome> comp = new Comparator<Chromosome>(){
+			public int compare(Chromosome c1, Chromosome c2){
+				return c1.getName().compareTo(c2.getName());
+			}
+		};
+		misAsm = new TreeMap<Chromosome,Integer>(comp);
+		String[] ctg = asm.split("[ ]*[$][ ]*");
+		List<Chromosome> tmp = model.getGenomeBySourceIndex(1).getChromosomes();
+		Chromosome[] ctgs = tmp.toArray(new Chromosome[tmp.size()]);
+		for (int i = 0; i < ctg.length;i++){
+			String[] blocks = ctg[i].split("[ ]*[,][ ]*");
+			boolean allInv =  blocks[0].startsWith("-");
+			boolean first = true;
+			for (int j = 1; j < blocks.length; j++){
+				boolean prev = blocks[j-1].startsWith("-");
+				boolean curr = blocks[j].startsWith("-");
+				if (prev != curr) {
+					numMisAssemblies++;
+					if (first) {
+						misAsm.put(ctgs[i], new Integer(1));
+						first = false;
+					} else {
+						int x = misAsm.get(ctgs[i]).intValue()+1;
+						misAsm.put(ctgs[i], x);
+					}
+				}
+			}
+			if (allInv){
+				invCtgs.add(ctgs[i]);
+			}
+		}
+		
+		
 	}
 	
 	private void computeBrokenCDS(){
@@ -312,6 +367,14 @@ public class AssemblyScorer implements AlignmentProcessListener {
 						 .getGenomeA().length);
 	}
 	
+	public Map<Chromosome, Integer> getMisAssemblies(){
+		return misAsm;
+	}
+	
+	public Chromosome[] getInverted(){
+		return invCtgs.toArray(new Chromosome[invCtgs.size()]);
+	}
+	
 	public int numLCBs(){
 		return (int) model.getLcbCount();
 	}
@@ -392,9 +455,9 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		}
 		printInfo(sa,snpOut,gapOut);
 		if (batch){
-		    sumOut.print(ScoreAssembly.getSumText(sa, false, true));	
+		    sumOut.print(ScoreAssembly.getSumText(sa, false, true, sa.getBrokenCDS));	
 		}else {
-		    sumOut.print(ScoreAssembly.getSumText(sa, true, true));
+		    sumOut.print(ScoreAssembly.getSumText(sa, true, true, sa.getBrokenCDS));
 		}
 		
 		gapOut.close();
