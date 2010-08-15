@@ -24,7 +24,7 @@ public class Genome {
 
 	private Sequence annotationSequence;
 
-	private List chromosomes = new ArrayList ();
+	private List<Chromosome> chromosomes = new ArrayList<Chromosome> ();
 
 	private String displayName;
 
@@ -111,7 +111,7 @@ public class Genome {
 	 * 
 	 * @return an unmodifiable sorted list of chromosomes.
 	 */
-	public List getChromosomes () {
+	public List<Chromosome> getChromosomes () {
 		return Collections.unmodifiableList (chromosomes);
 	}
 
