@@ -1097,8 +1097,12 @@ public class OneToOneOrthologExporter {
 	        	errorMessage = "Min. pairwise alignment coverage must be less than max.";
 	        if(oep.min_nucleotide_id < 0 || oep.max_nucleotide_id > 1.0)
 	        	errorMessage = "Pairwise nucleotide identity must be in the range of 0 to 100.";
-	        if(oep.min_conserved_length < 0.51 || oep.max_conserved_length > 1.0)
-	        	errorMessage = "Pairwise alignment coverage must be in the range of 51 to 100.";
+	        if(oep.min_conserved_length <= 0 || oep.max_conserved_length > 1.0)
+	        	errorMessage = "Pairwise alignment coverage must be in the range of 1 to 100.";
+	        if(oep.min_conserved_length <= 0.5 || oep.max_conserved_length > 1.0)
+	        {
+	        	JOptionPane.showMessageDialog(this, "<html>Setting the minimum conserved length below 51% can yield undesirable<br/> long chains of homolog groups when annotated features overlap.<br/><b>Proceed with caution!", "Warning!",JOptionPane.WARNING_MESSAGE);
+	        }
 	        if(errorMessage != null)
 	        {
 	        	JOptionPane.showMessageDialog(this, errorMessage, "Error",JOptionPane.ERROR_MESSAGE);
