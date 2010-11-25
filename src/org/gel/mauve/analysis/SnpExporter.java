@@ -15,9 +15,12 @@ import org.gel.mauve.XMFAAlignment;
 import org.gel.mauve.XmfaViewerModel;
 
 public class SnpExporter {
-	static char[] revtab = initRevTab();
+	public static char[] revtab = initRevTab();
 	static public char[] initRevTab(){
 			revtab = new char[255];
+			for(byte i=0; i<127; i++){
+					revtab[i]=(char)i;
+			}
 	        revtab['a'] = 't';
 	        revtab['A'] = 'T';
 	        revtab['t'] = 'a';
