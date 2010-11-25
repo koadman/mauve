@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.Properties;
 import java.util.Vector;
 
+import org.gel.mauve.analysis.SnpExporter;
 import org.gel.mauve.tree.FileKey;
 import org.gel.mauve.tree.GISTree;
 import org.gel.mauve.tree.GapKey;
@@ -586,9 +587,12 @@ public class XMFAAlignment implements Serializable {
 	 */
 	void reverse (byte [] byte_buf) {
 		for (int byteI = 0; byteI < byte_buf.length / 2; byteI++) {
-			byte tmp = byte_buf[byteI];
-			byte_buf[byteI] = byte_buf[byte_buf.length - byteI - 1];
-			byte_buf[byte_buf.length - byteI - 1] = tmp;
+			byte tmp = (byte) SnpExporter.revtab[byte_buf[byteI]];
+			byte_buf[byteI] = (byte) SnpExporter.revtab[ byte_buf[byte_buf.length - byteI - 1] ];
+			byte_buf[byte_buf.length - byteI - 1] = tmp;			
+		}
+		if(byte_buf.length%2==1){
+			byte_buf[byte_buf.length/2] = (byte) SnpExporter.revtab[ byte_buf[byte_buf.length/2] ];
 		}
 	}
 
