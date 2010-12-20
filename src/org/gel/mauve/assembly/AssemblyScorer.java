@@ -167,10 +167,12 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		}
 		
 		System.err.println("\nnum assembly adjacencies: " + ass.length);
-		
+		Vector<Adjacency> intersection = new Vector<Adjacency>(); 
 		for (Adjacency a: ass){
 			if (!refSet.contains(a)) 
 				typeI.add(a);
+			else
+				intersection.add(a);
 		}
 
 		System.err.println("num typeI errors: " + typeI.size());
@@ -185,6 +187,11 @@ public class AssemblyScorer implements AlignmentProcessListener {
 				typeII.add(a);
 		}
 		System.err.println("num typeII errors: " + typeII.size());
+		
+		Iterator<Adjacency> it = intersection.iterator();
+		while(it.hasNext()){
+			System.err.println(it.next().toString());
+		}
 	}
 	
 	/**
