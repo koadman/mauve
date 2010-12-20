@@ -23,7 +23,7 @@ public class IOUtils {
 	 * @throws IOException 
 	 */
 	public static void copyFile (File sourceFile, File destFile) throws IOException {
-		System.out.println("AJT0403: Copying...\n\t" + sourceFile.getAbsolutePath() +"\nto\n\t" + destFile.getAbsolutePath());
+		System.out.println("Copying...\n\t" + sourceFile.getAbsolutePath() +"\nto\n\t" + destFile.getAbsolutePath());
 		if(!destFile.exists()) {
 			 destFile.createNewFile();
 		}
