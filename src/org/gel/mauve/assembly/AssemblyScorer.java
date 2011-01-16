@@ -36,52 +36,35 @@ import org.gel.mauve.gui.AlignmentProcessListener;
 public class AssemblyScorer implements AlignmentProcessListener {
 
 	private ContigOrderer co;
-	
 	private File alnmtFile;
-	
 	private File outputDir;
-	
 	private boolean batch;
-	
 	private String basename;
-	
 	private XmfaViewerModel model; 
-	
 	private int[][] subs;
-	
 	private SNP[] snps;
-	
 	private Gap[] refGaps;
-	
 	private Gap[] assGaps; 
-	
 	private BrokenCDS[] brokenCDS;
-	
 	private CDSErrorExporter cdsEE;
-	
 	private DCJ dcj;
-	
-	private boolean getBrokenCDS;
+	private boolean getBrokenCDS = true;
 	
 	/** extra adjacencies */
 	private Vector<Adjacency> typeI;
 	
 	/** missing adjacencies */
 	private Vector<Adjacency> typeII;
-	
 	private Vector<Chromosome> invCtgs;
-	
 	private Map<Chromosome,Integer> misAsm;
-	
 	private int numMisAssemblies;
 	
-	public AssemblyScorer(XmfaViewerModel model, boolean getBrokenCDS){
+	public AssemblyScorer(XmfaViewerModel model){
 		this.model = model;
-		this.getBrokenCDS = getBrokenCDS;
 		loadInfo();
 	}
 	
-	public AssemblyScorer(File alnmtFile, File outDir, boolean getBrokenCDS) {
+	public AssemblyScorer(File alnmtFile, File outDir) {
 		this.alnmtFile = alnmtFile;
 		this.outputDir = outDir;
 		basename = alnmtFile.getName();
@@ -89,30 +72,31 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		batch = false;
 	}
 	
-	public AssemblyScorer(File alnmtFile, File outDir, String basename, boolean getBrokenCDS) {
-		this(alnmtFile,outDir,getBrokenCDS);
+	public AssemblyScorer(File alnmtFile, File outDir, String basename) {
+		this(alnmtFile,outDir);
 		this.basename = basename;
 	}
 	
-	public AssemblyScorer(ContigOrderer co, File outDir, boolean getBrokenCDS) {
+	public AssemblyScorer(ContigOrderer co, File outDir) {
 		this.co = co;
 		this.outputDir = outDir;
 		batch = false;
 	}
 	
-	public AssemblyScorer(ContigOrderer co, File outDir, String basename, boolean getBrokenCDS) {
-		this(co,outDir,getBrokenCDS);
+	public AssemblyScorer(ContigOrderer co, File outDir, String basename) {
+		this(co,outDir);
 		this.basename = basename;
 	}
 	
 	public void completeAlignment(int retcode){
 		if (retcode == 0) {
 			if (co != null){
-				alnmtFile = co.getAlignmentFile();
+//				alnmtFile = co.getAlignmentFile();
 				if (basename == null) {
 					basename = alnmtFile.getName();
 					basename = basename.substring(0,basename.lastIndexOf("."));
 				}
+				throw new RuntimeException("Re-implement ordering in assembly scorer!");
 			}
 			try {
 				this.model = new XmfaViewerModel(alnmtFile,null);
@@ -462,9 +446,9 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		}
 		printInfo(sa,snpOut,gapOut);
 		if (batch){
-		    sumOut.print(ScoreAssembly.getSumText(sa, false, true, sa.getBrokenCDS));	
+		    sumOut.print(ScoreAssembly.getSumText(sa, false, true));	
 		}else {
-		    sumOut.print(ScoreAssembly.getSumText(sa, true, true, sa.getBrokenCDS));
+		    sumOut.print(ScoreAssembly.getSumText(sa, true, true));
 		}
 		
 		gapOut.close();

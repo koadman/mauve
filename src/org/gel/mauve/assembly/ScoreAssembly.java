@@ -73,17 +73,14 @@ public class ScoreAssembly  {
 	private AssemblyScorer assScore;
 	
 	private AnalysisDisplayWindow win;
-	
-	private boolean getBrokenCDS;
-	
+		
 	private boolean finished;
 	
 	private boolean cancel;
 	
-	public ScoreAssembly(XmfaViewerModel model, boolean getBrokenCDS){
+	public ScoreAssembly(XmfaViewerModel model){
 		//init(model);
 		this.model = model;
-		this.getBrokenCDS = getBrokenCDS;
 		this.finished = false;
 		initWithJTables(model);
 	}
@@ -117,8 +114,7 @@ public class ScoreAssembly  {
 		new Thread( new Runnable (){ 
 			public void run(){
 				try {
-				assScore = new AssemblyScorer(ScoreAssembly.this.model,
-										ScoreAssembly.this.getBrokenCDS);
+				assScore = new AssemblyScorer(ScoreAssembly.this.model);
 				ScoreAssembly.this.finish();
 				} catch (Exception e){
 					ScoreAssembly.this.cancel();
@@ -138,7 +134,7 @@ public class ScoreAssembly  {
 			running.remove(this.model.getSrc().getAbsolutePath());
 			modelMap.put(this.model.getSrc().getAbsolutePath(), this);
 			sumTA.replaceRange("", 0, temp.length());
-			sumTA.setText(getSumText(assScore,true,false,getBrokenCDS));
+			sumTA.setText(getSumText(assScore,true,false));
 			//addJTables();
 			addTables();
 			finished = true;
@@ -181,7 +177,7 @@ public class ScoreAssembly  {
 			gapData.addRow(refGaps[gapI].toString().split("\t"));
 		for (int gapI = 0; gapI < assGaps.length; gapI++)
 			gapData.addRow(assGaps[gapI].toString().split("\t"));
-		if (getBrokenCDS && assScore.hasBrokenCDS()){
+		if (assScore.hasBrokenCDS()){
 			Object[] cdsHeader = 
 				{"CDS_ID","Peptide_Length",
 					"Perc_IncorrectBases", "Broken_Frame_Segments",
@@ -213,7 +209,7 @@ public class ScoreAssembly  {
 		}
 	}
 	
-	public static String getSumText(AssemblyScorer assScore, boolean header, boolean singleLine, boolean brokenCDS){
+	public static String getSumText(AssemblyScorer assScore, boolean header, boolean singleLine){
 		NumberFormat nf = NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(4);
 		StringBuilder sb = new StringBuilder();
@@ -244,11 +240,9 @@ public class ScoreAssembly  {
 					"DCJ Distance:\t"+assScore.getDCJdist()+"\n"+
 					"SCJ Distance:\t"+assScore.getSCJdist()+"\n"+
 					"Type-I Adjacency Error Rate:\t"+nf.format(assScore.typeIadjErr())+"\n"+
-					"Type-II Adjacency Error Rate:\t"+nf.format(assScore.typeIIadjErr())+"\n"+
-					
-					(brokenCDS ? ("Number of Complete Coding Sequences:\t"+assScore.numCompleteCDS()+"\n"+
-					"Number of Broken Coding Sequences:\t"+assScore.numBrokenCDS()+"\n"): "")+
-					
+					"Type-II Adjacency Error Rate:\t"+nf.format(assScore.typeIIadjErr())+"\n"+					
+					"Number of Complete Coding Sequences:\t"+assScore.numCompleteCDS()+"\n"+
+					"Number of Broken Coding Sequences:\t"+assScore.numBrokenCDS()+"\n"+					
 					"Number of SNPs:\t"+assScore.getSNPs().length+"\n"+
 					"Number of Gaps in Reference:\t"+assScore.getReferenceGaps().length+"\n"+
 					"Number of Gaps in Assembly:\t"+assScore.getAssemblyGaps().length+"\n" +
@@ -375,15 +369,8 @@ public class ScoreAssembly  {
 				running.get(key).win.showWindow();
 			}
 		} else {
-			int ret_val = JOptionPane.showConfirmDialog(frame, "Do you want me " +
-									"to locate broken CDS. This can take awhile");
-			if (ret_val == JOptionPane.YES_OPTION) {
 				running.put(key, 
-						new ScoreAssembly(model,true));
-			} else if (ret_val == JOptionPane.NO_OPTION) {
-				running.put(key, 
-						new ScoreAssembly(model,false));
-			}
+						new ScoreAssembly(model));
 		}
 	}
 	
@@ -409,11 +396,6 @@ public class ScoreAssembly  {
 		String basename = null;
 		if (line.hasOption("basename"))
 			basename = line.getOptionValue("basename");
-		boolean getBrokenCDS = false;
-		if (line.hasOption("brokenCDS")){
-			getBrokenCDS = true;
-		}
-		
 		
 		File alnmtFile = null;
 		AssemblyScorer as = null;
@@ -427,9 +409,9 @@ public class ScoreAssembly  {
 			alnmtFile = new File (line.getOptionValue("alignment"));
 			if (basename == null) {
 				basename = alnmtFile.getName();
-				basename = basename.substring(0,basename.lastIndexOf("."));
+				// AED: can't truncate to last . because the file may not have a dot in the name
 			}
-			as = getAS(alnmtFile,getBrokenCDS);
+			as = getAS(alnmtFile);
 			AssemblyScorer.printInfo(as,outDir,basename,batch);
 		} else { // we need to do some sort of alignment
 			
@@ -446,20 +428,22 @@ public class ScoreAssembly  {
 			
 			if (line.hasOption("reorder")){ // we need to reorder first
 				String reorderDir = line.getOptionValue("reorder");
-				ContigOrderer co = new ContigOrderer(refFile, assPath,
-												new File(reorderDir));
+				ContigOrderer co = null;
+				//new ContigOrderer(refFile, assPath,
+				//								new File(reorderDir));
 				if (basename != null)
-					as = new AssemblyScorer(co, outDir, basename,getBrokenCDS);
+					as = new AssemblyScorer(co, outDir, basename);
 				else 
-					as = new AssemblyScorer(co, outDir,getBrokenCDS);
-				co.addAlnmtListener(as);
+					as = new AssemblyScorer(co, outDir);
+				throw new RuntimeException("Fix contig orderer and scorer integration!");
+//				co.addAlnmtListener(as);
 			} else {
 				if (basename == null) {
 					basename = assPath.getName();
 					basename = basename.substring(0,basename.lastIndexOf("."));
 				}
 				alnmtFile = new File(outDir, basename+".xmfa");
-				as = new AssemblyScorer(alnmtFile, outDir, basename, getBrokenCDS);
+				as = new AssemblyScorer(alnmtFile, outDir, basename);
 				String[] cmd = makeAlnCmd(refFile,assPath, alnmtFile);
 				System.out.println("Executing");
 				AlignFrame.printCommand(cmd, System.out);
@@ -470,11 +454,11 @@ public class ScoreAssembly  {
 		}
 	}
 
-	private static AssemblyScorer getAS(File alnmtFile, boolean getBrokenCDS){
+	private static AssemblyScorer getAS(File alnmtFile){
 		try {
 			//sa = new ScoreAssembly(args,true);
 			XmfaViewerModel model = new XmfaViewerModel(alnmtFile,null);
-			return new AssemblyScorer(model, getBrokenCDS);
+			return new AssemblyScorer(model);
 		} catch (Exception e){
 			e.printStackTrace();
 			System.exit(-1);
@@ -507,13 +491,12 @@ public class ScoreAssembly  {
 		ob.addArgument("directory", "reorder contigs before scoring " +
 						"assembly and store output in <directory>", "reorder",false);
 		ob.addArgument("directory", "save output in <directory>. Default " +
-									"is current directory.", "outputDir",false);
+									"is current directory.", "outputDir",true);
 		ob.addArgument("file", "file containing alignment of assembly to " +
 											"reference genome", "alignment",false);
 		ob.addArgument("file", "file containing reference genome", "reference",false);
 		ob.addArgument("file", "file containing assembly/draft genome to score",
 																	"assembly",false);
-		ob.addBoolean("brokenCDS", "compute broken CDS in assembly. This can take awhile.");
 		return ob.getOptions();
 	}
 }
