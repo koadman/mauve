@@ -109,7 +109,7 @@ public class ContigGrouper implements MauveConstants {
 		}
 	}
 	
-	/**
+	/*
 	 * assumes lcb partially overlaps one side of the chromosome.  Since left refers to whether
 	 * end is the left or right side, the lcb would overlap the right side of chrom if left is
 	 * true, otherwise, the opposite is true.

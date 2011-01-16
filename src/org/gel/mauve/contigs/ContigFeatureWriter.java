@@ -25,12 +25,6 @@ public class ContigFeatureWriter extends AbstractTabbedDataWriter
 	protected Hashtable use;
 	protected HashSet inverted;
 	
-	/**
-	 * Writes out the *_contigs.tab files
-	 * 
-	 * @param file
-	 * @param args
-	 */
 	public ContigFeatureWriter (String file, Hashtable args) {
 		super(file, args);
 	}
@@ -63,7 +57,7 @@ public class ContigFeatureWriter extends AbstractTabbedDataWriter
 	}
 
 	protected void printContigs (Collection conts, String descriptor) {
-		System.out.println ("printing " + file_name);
+		System.out.println ("printing");
 		if (conts.size() > 0) {
 			contigs = conts.iterator ();
 			out.println (descriptor);

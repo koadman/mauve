@@ -6,13 +6,8 @@ import java.util.Iterator;
 import org.biojava.bio.seq.Feature;
 import org.gel.mauve.Chromosome;
 import org.gel.mauve.MauveHelperFunctions;
-/**
- * This is vestigial. I don't think it ever gets used!
- * 
- * @author andrew
- * @deprecated
- */
-public class ContigRenamer  extends ContigReorderer {
+
+public class ContigRenamer extends ContigReorderer {
 	
 	public Hashtable names;
 	

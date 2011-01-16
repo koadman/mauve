@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -33,70 +32,63 @@ import org.gel.mauve.backbone.BackboneList;
 import org.gel.mauve.contigs.ContigGrouper.ContigGroup;
 import org.gel.mauve.gui.Mauve;
 import org.gel.mauve.gui.MauveFrame;
-/*
- * TODO Fix ContigReorderer so it doesn't extend Mauve 
- * 
- */
-public class ContigReorderer/* extends Mauve */implements MauveConstants {
+
+public class ContigReorderer extends Mauve implements MauveConstants {
 
 	public static final int REF_IND = 1;
 	public static final int REORDER_IND = 2;
 	public static final int FILE_IND = 3;
 	public static final int MAX_IGNORABLE_DIST = 50;
 	public static final double MIN_LENGTH_RATIO = .01;
-	protected int ref_ind = 0;
-	protected int reorder_ind = 1;
+	protected int ref_ind;
+	protected int reorder_ind;
 	protected LcbViewerModel model;
 	public LcbIdComparator id_compare;
 	protected LCB dummy;
-	protected Hashtable<Long,Chromosome> inverters;
-	protected LinkedList<Chromosome> ordered;
-	protected Hashtable<Long,Chromosome> conflicts;
-	
-	// this looks vestigial
+	protected Hashtable inverters;
+	protected LinkedList ordered;
+	protected Hashtable conflicts;
 	protected Hashtable nexts;
 	protected LCBLeftComparator left_compare;
-	/**
-	 * What does this guy do?
-	 */
 	protected String input_file;
-//	protected String slast_ordered;  // unused
+	protected String slast_ordered;
 	protected String feature_file;
 	public static final String CONTIG_EXT = "_contigs.tab";
 	public static final String FEATURE_EXT = "_features.tab";
 	protected MauveFrame frame;
 	protected Hashtable args;
-	protected String basename;
+	protected String file;
 	protected File directory;
 	protected LCB[] lcbs;
 	protected LCB [] fix_lcbs;
 	protected Genome ref;
 	protected Genome fix;
-	protected Hashtable<Genome,LCB[]> lcb_table;
-	protected Hashtable<Genome,LCBLeftComparator> comparator_table;
+	protected Hashtable lcb_table;
+	protected Hashtable comparator_table;
 	protected Genome [] ordered_genomes;
 	protected ContigGrouper grouper;
 	protected ContigOrderer orderer;
-	private boolean active;
-	protected HashSet<String> inverted_from_start;
+	protected boolean active;
+	protected HashSet inverted_from_start;
 	protected HashSet inverted_from_read;
 	
-	
-	public ContigReorderer (ContigOrderer order /*, Vector parent*/) {
-		active = true;	
+	public ContigReorderer (ContigOrderer order, Vector parent) {
+		active = true;
+		check_updates = false;
+		if (parent != null) {
+			frames = parent;
+		}
 		orderer = order;
 	}
 	
 	public ContigReorderer () {
-		this (null);
+		this (null, null);
 	}
 	
 	/**
 	 * Initializes Mauve environment.
 	 * 
-	 * @param args			Index 0 should be the name of the alignment file,
-	 * 						  1 the reference genome's index, 2 the index of the
-	 * 						  genome to reorder.
+	 * @param args		See description of args in main (String [] args).
 	 */
 	public void init (String [] args) {
 		ref_ind = Integer.parseInt (args [REF_IND]);
@@ -108,29 +100,39 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 				System.out.println ("ff: " + feature_file);
 			}
 		}
+		super.init (args [0]);
+	}
+	
+	public void init () {
+		if (frames == null)
+			super.init();
 	}
 	
 	/**
 	 * Makes a new Mauve frame that calls fixContigs once the alignment has
 	 * been set up.
 	 */
- 
+	protected MauveFrame makeNewFrame () {
+		if (active) {
+			frame = new ReordererMauveFrame (this);
+			frames.add (frame);
+			return frame;
+		}
+		else
+			return super.makeNewFrame ();
+	} 
 	
-	private void initMauveData () {
+	protected void initMauveData () {
 		if (inverted_from_start == null)
 			inverted_from_start = new HashSet ();
-		args = new Hashtable<String, Serializable> ();
-		inverters = new Hashtable<Long, Chromosome> ();
-		conflicts = new Hashtable<Long, Chromosome> ();
-		nexts = new Hashtable<Object, Object> ();
-		lcb_table = new Hashtable<Genome, LCB[]> ();
-		comparator_table = new Hashtable<Genome, LCBLeftComparator> ();
+		args = new Hashtable ();
+		inverters = new Hashtable ();
+		conflicts = new Hashtable ();
+		nexts = new Hashtable ();
+		lcb_table = new Hashtable ();
+		comparator_table = new Hashtable ();
 		orderGenomes ();
 		if (input_file != null && input_file.indexOf (FEATURE_EXT) > 0) {
-			/*
-			 * I don't think this condition ever gets satisfied
-			 *  -atritt
-			 */
 			feature_file = input_file;
 			input_file = null;
 		}
@@ -140,32 +142,25 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 		args.put (ContigFeatureWriter.REVERSES, inverters);
 		args.put (ContigFeatureWriter.CONFLICTED_CONTIGS, conflicts);
 		args.put(ContigFeatureWriter.COMPLEMENT, inverted_from_start);
-		
-		// trim String file to get a display name. 
-		basename = fix.getDisplayName ();
-		int period = basename.toLowerCase ().lastIndexOf (".fas");
+		file = fix.getDisplayName ();
+		int period = file.toLowerCase ().indexOf (".fas");
 		if (period > -1)
-			basename = basename.substring (0, period);
-		if (basename.endsWith("."))
-				basename = basename.substring (0, basename.length() - 1);
-		//directory = MauveHelperFunctions.getRootDirectory (model);
-		directory = model.getSrc().getParentFile ();
-		File feats = new File (directory, basename + ContigReorderer.FEATURE_EXT);
+			file = file.substring (0, period);
+		if (file.endsWith("."))
+				file = file.substring (0, file.length() - 1);
+		directory = MauveHelperFunctions.getRootDirectory (model);
+		File feats = new File (directory, file + ContigReorderer.FEATURE_EXT);
 		if (feats.exists ())
 			feature_file = feats.getAbsolutePath ();
-		if (feature_file != null && frame != null){
-			/* TODO: Figure out a way to import a new annotation file into
-			 * a genome without having to use a MauveFrame */ 
-			//System.err.println("AJT0403: Importing features from " + feature_file + " to genome " + fix.getDisplayName());
+		if (feature_file != null && frame != null)
 			frame.getFeatureImporter ().importAnnotationFile (new File (
-					feature_file), fix); 
-		}
+					feature_file), fix);
 		if (ordered == null) {
 			ordered = new LinkedList (fix.getChromosomes());
 			args.put (ContigFeatureWriter.ORDERED_CONTIGS, ordered);
 			output (false);
 		}
-		directory = new File (directory + File.separator + 
+		directory = new File (directory + File.separator +
 				CONTIG_OUTPUT);
 		ordered = new LinkedList ();
 		args.put (ContigFeatureWriter.ORDERED_CONTIGS, ordered);
@@ -174,33 +169,14 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 
 	}
 	
-	/**
-	 * Third function in iterative loop
-	 */
 	protected void initModelData () {
 		initMauveData ();
-		lcbs = model.getFullLcbList ();
-	/*	if (orderer == null || (active && orderer.shouldReorder ())) {
-			if (orderer == null){
-				System.err.println("AJT0403: ContigOrderer orderer == null.");
-			}
+		lcbs = ContigReorderer.this.model.getFullLcbList ();
+		if (orderer == null || (active && orderer.shouldReorder ())) {
 			fixContigs ();
 			if (orderer != null)
-				orderer.checkReorderDone ();
-		}*/
-	}
-	
-	public void setInactive(){
-		active = false;
-	}
-	
-	public boolean isActive(){
-		return active;
-	}
-	
-	public void setModel(LcbViewerModel model){
-		this.model = model;
-		lcbs = model.getFullLcbList();
+				orderer.reorderDone ();
+		}
 	}
 	
 	protected void orderGenomes () {
@@ -213,10 +189,6 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 	}
 	
 	protected void fixContigs () {
-		/*
-		 * Calls ContigInverter constructer, which does all the work
-		 * of reordering contigs.... I think (04/18/10 atritt)
-		 */
 		process ();
 		output (true);
 	}
@@ -227,34 +199,21 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 		fix_lcbs = new LCB [ids.length];
 		System.arraycopy (ids, 0, fix_lcbs, 0, ids.length);
 		Arrays.sort (fix_lcbs, id_compare);
-		if (input_file == null) {
-			//System.err.println("AJT0403: input_file at ContigReorderer.process() == null");
+		if (input_file == null)
 			new ContigInverter (model, this);
-		}else{
-			/*
-			 * I don't think this condition is ever satisfied 
-			 *  - atritt
-			 */
-			System.err.println("AJT0403: input_file at ContigReorderer.process() != null");
+		else
 			new ContigInverter (model, this, input_file);
-		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void output (boolean fasta) {
-		if (fasta){
-		//	new FastAContigChangeWriter (this);
-			new FastAContigChangeWriter(this.fix, this.inverters, 
-					this.ordered, this.conflicts, this.nexts, this.directory);
-		}
-		// prints a bunch of stuff to directory/file+CONTIG_EXT
+		if (fasta)
+			new FastAContigChangeWriter (this);
 		new ContigFeatureWriter (new File (
-				directory, basename + CONTIG_EXT).getAbsolutePath (), args);
+				directory, file + CONTIG_EXT).getAbsolutePath (), args);
 		Iterator feats = MauveHelperFunctions.getFeatures (model, reorder_ind);
 		if (feats.hasNext ()) {
-		//	System.out.println("AJTO403: invoking ChangedFeatureWriter(File,Hashtable,Iterator,Genome)");
 			new ChangedFeatureWriter (new File (
-					directory, basename + FEATURE_EXT).getAbsolutePath (), args, feats, fix);
+					directory, file + FEATURE_EXT).getAbsolutePath (), args, feats, fix);
 		}
 	}
 	
@@ -263,15 +222,6 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 		lcbs = (LCB []) lcb_table.get(ref);
 		left_compare = (LCBLeftComparator) comparator_table.get(ref);
 	}
-	
-	public LinkedList<Chromosome> getOrderedCtgs(){
-		return ordered;
-	}
-	
-	public Genome getFix(){
-		return fix;
-	}
-	
 	
 	protected void removeBadLCBs () {
 		left_compare = new LCBLeftComparator (fix);
@@ -320,11 +270,6 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 		System.out.println ("new lcbs: " + lcbs.length);
 	}
 	
-	/**
-	 * This doesn't look like it gets called.
-	 *  
-	 * @param last_ordered
-	 */
 	protected void trimLCBs (String last_ordered) {
 		if (last_ordered != null) {
 			Iterator itty = ref.getChromosomes ().iterator ();
@@ -427,7 +372,7 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 	
 	//from tab or comma separated file with contig names in first row; cuts off name before
 	//first underscore - specialized for projector output
-	private void readOrdered (String file) {
+	public void readOrdered (String file) {
 		try {
 			System.out.println ("getting ordered");
 			Hashtable <String, Chromosome> chroms = new Hashtable <String, Chromosome> 
@@ -493,16 +438,13 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 		}
 	}
 	
-	// keep this 
 	public boolean containsEndOfLCB (ContigGrouper.ContigGroup group, boolean left) {
 		LCB lcb = left ? group.first : group.last;
 		long loc = left ? lcb.getLeftEnd (ref) : lcb.getRightEnd (ref) - 10;
 		Segment segment = grouper.bb.getNextBackbone (ref, loc);
 		return segment.left [reorder_ind] == 0 ? false : true;
 	}
-	/*
-	 * never called in original implementation atritt 04/18/10
-	 */
+	
 	public LCB getLCBAt (LCB start, long pos) {
 		while (start.getRightEnd(fix) < pos)
 			start = getAdjacentLCB (false, start);
@@ -529,7 +471,6 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 			if (MauveHelperFunctions.getChromByStart(inverters, contig) == null) {
 				MauveHelperFunctions.addChromByStart (inverters, 
 						contig);
-				//inverters.put(contig.getStart(), contig); 
 				switchOverallOrientation (contig);
 			}
 		}
@@ -555,11 +496,8 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 	}
 	
 	
-/* TODO: part of original implementation. 
-	@Override 
-	
-	Moved to ContigReordererGUI atritt 04/18/10
-	
+
+	@Override
 	public void loadFile(File rr_file) {
 		if (orderer.gui)
 			super.loadFile(rr_file);
@@ -576,7 +514,7 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 	protected synchronized MauveFrame getNewFrame() {
 		return super.getNewFrame();
 	}
-*/	
+	
 	/**
 	 * always starts with gui.  Files can be input from command line,
 	 * or entered via gui.
@@ -584,30 +522,17 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 	 * @param args			Index 0 should be the name of the alignment file,
 	 * 						  1 the reference genome's index, 2 the index of the
 	 * 						  genome to reorder.
-	 * 
-	 * NOTE I don't think this ever gets called or is even necessary
 	 */
-	public static void main (String [] args) {		
-	/*	if (args.length > 0)
+	public static void main (String [] args) {
+		if (args.length > 0)
 			new ContigReorderer ().init (args);
 		else
-			new ContigOrderer (null);*/ 
+			new ContigOrderer (null, null);
 	}
-	
-	
 
-
-	
-	
-	
-	
-	
-	
-/*
 	 public class ReordererMauveFrame extends MauveFrame {
 		 
-
-		 public ReordererMauveFrame (ContigReorderer ord) {
+		 	public ReordererMauveFrame (ContigReorderer ord) {
 		 		super (ord);
 		 		if (orderer != null)
 					orderer.parent = this;
@@ -641,5 +566,5 @@ public class ContigReorderer/* extends Mauve */implements MauveConstants {
 					 super.actionPerformed(ae);
 			 }
 	 }
-*/
+
 }

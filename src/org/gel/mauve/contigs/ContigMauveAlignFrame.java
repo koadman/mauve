@@ -14,9 +14,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollBar;
 
-import org.gel.mauve.MyConsole;
-import org.gel.mauve.gui.AlignFrame;
-import org.gel.mauve.gui.AlignWorker;
 import org.gel.mauve.gui.Mauve;
 import org.gel.mauve.gui.ProgressiveMauveAlignFrame;
 
@@ -109,19 +106,17 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 			cancelButton.setText(text);
 		}
 		super.setVisible(show);
-	//	System.out.println ("shown");
+		System.out.println ("shown");
 	}
 	
-	public void setFileInput () {
+	public void displayFileInput () {
 		try {
 			current_dir = orderer.getAlignDir ();
-			//System.err.println("AJT0403: current_dir was " + current_dir.getAbsolutePath());
 			//current_dir.mkdirs ();
 			setOutput(current_dir.getParentFile ().getAbsolutePath ());
 			if (!first)
 				sequenceListModel.clear ();
 			current_dir = new File (current_dir, orderer.DIR_STUB + orderer.count);
-			//System.err.println("AJT0403: now current_dir is " + current_dir.getAbsolutePath());
 			JScrollBar scroller = listScrollPane.getHorizontalScrollBar ();
 			scroller.setValue (scroller.getMaximum ());
 		} catch (Exception e) {
@@ -134,14 +129,9 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 		model.addElement(file);
 	}
 	
-	@SuppressWarnings("static-access")
 	public void alignButtonActionPerformed (ActionEvent e) {
-		JScrollBar scroller = listScrollPane.getHorizontalScrollBar ();
-		scroller.setValue (scroller.getMaximum ());
-		
-		
 		DefaultListModel model = (DefaultListModel) sequenceList.getModel ();
-		if (first) { // if first get it from from the dnd screen 
+		if (first) {
 			sequenceList.setDropActive (false);
 			if (sequenceList.getModel ().getSize() != 2) {
 				JOptionPane.showMessageDialog(this,	"Alignment should be two sequences;" +
@@ -149,29 +139,20 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 						"Wrong Number of Sequences", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
-			orderer.setReference(new File ((String) model.getElementAt (0)));
-			orderer.setUnordered(new File ((String) model.getElementAt (1)));
-			orderer.initializeAlnDir(true);
+			orderer.reference = new File ((String) model.getElementAt (0));
+			orderer.unordered = new File ((String) model.getElementAt (1));
+			orderer.copyInputFiles ();
 			sequencesPanel.remove (addButton);
 			sequencesPanel.remove (removeButton);
 			first = false;
+			orderer.directory = new File (getOutput ());
 		}
 		model.clear();
-		model.addElement (orderer.getReference().getAbsolutePath ());
-		model.addElement (orderer.getUnordered().getAbsolutePath ());
-		
-		current_dir = orderer.getCurrAlnDir();
-		setOutput (orderer.getAlignmentFile().getAbsolutePath());
-		String[] mauve_cmd = super.makeAlignerCommand();
-		super.worker = new AlignWorker(this, mauve_cmd, false);
-		//super.alignButtonActionPerformed(e);
-		//setOutput (current_dir.getParentFile().getParentFile().getAbsolutePath());
-        System.out.println("Running alignment.\nExecuting ");
-        AlignFrame.printCommand(mauve_cmd, System.out);
-        alignButton.setEnabled(false);
-        worker.start();
-        cancelButton.setEnabled(true);
-        MyConsole.showConsole();
+		model.addElement (orderer.reference.getAbsolutePath ());
+		model.addElement (orderer.unordered.getAbsolutePath ());
+		setOutput (current_dir.getAbsolutePath());
+		super.alignButtonActionPerformed(e);
+		setOutput (current_dir.getParentFile().getParentFile().getAbsolutePath());
 	}
 	
 	public void addButtonActionPerformed (ActionEvent e) {

@@ -10,11 +10,6 @@ import org.biojava.bio.seq.Feature;
 import org.gel.mauve.Chromosome;
 import org.gel.mauve.MauveHelperFunctions;
 
-/**
- * I don't think this ever gets called.
- * @author andrew
- * @deprecated
- */
 public class FeatureFixer extends ContigReorderer {
 	
 	public void readOrdered (String file) {

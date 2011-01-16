@@ -40,37 +40,23 @@ public class FastAContigChangeWriter implements MauveConstants {
 	protected StreamWriter writer;
 	protected StreamWriter writer2;
 	
-	public FastAContigChangeWriter (Genome fix, Hashtable<Long,Chromosome> inverters, LinkedList<Chromosome> ordered,
-									Hashtable<Long,Chromosome> conflicts, Hashtable<Object,Object> nexts, File dir){
-//	public FastAContigChangeWriter (ContigReorderer central) {
-		this.genome = fix;
-		this.inverters = inverters;
-		this.ordered = ordered;
-		this.conflicts = conflicts;
-		this.nexts = nexts;
-		/*
+	public FastAContigChangeWriter (ContigReorderer central) {
 		genome = central.fix;
 		inverters = central.inverters;
 		ordered = central.ordered;
 		conflicts = central.conflicts;
 		nexts = central.nexts;
-		File dir = central.directory; */
-		
-		/*  
-		 * It doesn't look like ContigRenamer constructor ever gets called
-		 
+		File dir = central.directory;
 		if (central instanceof ContigRenamer) {
 			format = new ChangedFastaFormat (((ContigRenamer) central).names);
 		}
-		else*/
+		else
 			format = new FastaFormat ();
 		boolean print_extra = false;
 		try {
 			String file = MauveHelperFunctions.genomeNameToFasta (genome);
-			File outFile = new File (dir, file);
-	//		System.err.println("AJT0403: Writing\n\t" + genome.getDisplayName()
-	//									+ "\nto\n\t" + outFile.getAbsolutePath());
-			out = new PrintStream (new FileOutputStream (outFile.getAbsolutePath ()));
+			out = new PrintStream (new FileOutputStream (new File (
+					dir, file).getAbsolutePath ()));
 			if (print_extra) {
 				file = "extra_" +file;
 				out2 = new PrintStream (new FileOutputStream (new File (
@@ -106,8 +92,6 @@ public class FastAContigChangeWriter implements MauveConstants {
 			out2.close ();
 		}
 	}
-	
-	
 	
 	public void writeContigs (Iterator itty, boolean key) {
 		writeContigs (itty, key, false);
