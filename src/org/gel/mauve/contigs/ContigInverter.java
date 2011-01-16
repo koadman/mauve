@@ -22,6 +22,7 @@ public class ContigInverter implements MauveConstants {
 	protected HashSet groups;
 	protected Hashtable befores;
 	protected Hashtable afters;
+	//protected int looping;
 	
 	public ContigInverter (LcbViewerModel mod, ContigReorderer reorder) {
 		init (mod, reorder);
@@ -145,23 +146,34 @@ public class ContigInverter implements MauveConstants {
 			central.setReference(central.ordered_genomes [gen]);
 			for (int i = 0; i < central.lcbs.length - 1; i++) {
 				group1 = grouper.getContigGroup (central.lcbs [i]);
-				//System.out.println ("match: " + group1.toString ());
+				/*if (print (group1))
+					System.out.println ("match: " + group1.toString ());
+				else if (looping > 0)
+					System.out.println ("matching diff after loop started: " + group1);*/
 				do {
 					first = true;
 					reversed1 = central.isReversed (last ? group1.last : group1.first);
-					//System.out.println ("last: " + last + " rev1: " + reversed1);
+					/*if (print (group1))
+						System.out.println ("last: " + last + " rev1: " + reversed1);*/
 					if (last != reversed1 && !(last ? r_matched.contains (group1.last) :
 						l_matched.contains (group1.first)) && group1.matchedToEdge (reversed1)
 						&& central.containsEndOfLCB (group1, reversed1)) {
 						do {
 							group2 = grouper.getContigGroup (central.lcbs [i + 1]);
-							//System.out.println ("i: " + group2);
+							/*if (print (group1))
+								System.out.println ("i: " + group2);
+							else if (print (group2)) {
+								System.out.println ("group is second, here is first: ");
+								System.out.println (group1);
+							}*/
 							reversed2 = central.isReversed (first ? group2.first : group2.last);
-							//System.out.println ("first: " + first + " rev2: " + reversed2);
+							/*if (print (group1))
+								System.out.println ("first: " + first + " rev2: " + reversed2);*/
 							if ((first == reversed2) || (first ? l_matched.contains (group2.first)
 									: r_matched.contains (group2.last)))
 								group2 = group1;
-							if (group2.start != group1.start && group2.matchedToEdge(!reversed2) &&
+							//first condition is new 5.10.10
+							if (noCircle (group1, group2) && group2.start != group1.start && group2.matchedToEdge(!reversed2) &&
 									central.containsEndOfLCB (group2, !reversed2) &&
 									central.lcbs [i] == (reversed1 ?  group1.first : group1.last) &&
 									central.lcbs [i + 1] == (reversed2 ?  group2.last : group2.first) &&
@@ -233,8 +245,9 @@ public class ContigInverter implements MauveConstants {
 										putNextTo (group1, group2, after);
 										if (!after)
 											group2 = group1;
+										int loopy = 0;
 										while (move != null) {
-											System.out.println ("new code: " + move);
+											System.out.println ("oldish new code (" + loopy + "): " + move);
 											putNextTo (after ? group2 : move, after ? move : group2,
 													after);
 											group2 = move;
@@ -252,6 +265,46 @@ public class ContigInverter implements MauveConstants {
 				} while (!last);
 			}
 		}
+	}
+	
+	//new method 5.10.10
+	protected boolean noCircle (ContigGrouper.ContigGroup group1, ContigGrouper.ContigGroup group2) {
+		Hashtable matched = befores;
+		/*if (looping > 0 && group1.start.getName().indexOf("97418") == -1 &&
+				group1.start.getName().indexOf("97420") == -1)
+			System.out.println ("not that one: " + group1.start.getName ());
+		else if (group1.start.getName().indexOf("97418") > -1) {
+			System.out.println ("in new method");
+			looping++;
+		}*/
+		do {
+			int count = 0;
+			ContigGrouper.ContigGroup cur = (ContigGrouper.ContigGroup) matched.get(group1.toString());
+			while (cur != null) {
+				/*if (print (group1)) {
+					System.out.println ("linked to: " + cur);
+					System.out.println ("group2: " + group2);
+				}*/
+				if (group2.toString().equals(cur.toString())) {
+					System.out.println ("rejecting b/c of loop");
+					return false;
+				}
+				cur = (ContigGrouper.ContigGroup) matched.get(cur.toString ());
+			}
+			if (matched == befores)
+				matched = afters;
+			else
+				matched = null;
+		} while (matched != null);
+		return true;
+	}
+	
+	protected boolean print (ContigGrouper.ContigGroup group) {
+		/*if (group.start.getName().indexOf("97418") > -1 ||
+				group.start.getName().indexOf("97420") > -1)
+			return true;
+		else*/
+			return false;
 	}
 	
 	/*

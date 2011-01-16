@@ -194,6 +194,7 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 	}
 	
 	public void process () {
+		System.out.println ("in process. . .");
 		adjustLCBs ();
 		LCB [] ids = (LCB []) lcb_table.get(fix);
 		fix_lcbs = new LCB [ids.length];
@@ -499,7 +500,7 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 
 	@Override
 	public void loadFile(File rr_file) {
-		if (orderer.gui)
+		if (orderer == null || orderer.gui)
 			super.loadFile(rr_file);
 		else {
 			try {
@@ -536,6 +537,7 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 		 		super (ord);
 		 		if (orderer != null)
 					orderer.parent = this;
+		 		System.out.println ("made reorder frame");
 		 	}
 		 	
 			public void setModel (BaseViewerModel mod) {
@@ -543,7 +545,9 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 				ContigReorderer.this.model = (LcbViewerModel) mod;
 				new Thread (new Runnable () {
 					public void run () {
+						System.out.println ("initing data");
 						initModelData ();
+						System.out.println ("inited data");
 					}
 				}).start ();				
 			}
