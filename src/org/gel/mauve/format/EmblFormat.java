@@ -19,7 +19,7 @@ class EmblFormat extends GenbankEmblFormat {
 			// exist.
 			throw new RuntimeException (e);
 		}
-		return RichSequence.IOTools.readEMBLDNA(reader, null);
+		return SeqIOTools.readEmbl (reader);
 	}
 
     public boolean isRich(){ return false; }

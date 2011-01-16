@@ -14,7 +14,7 @@ import org.gel.mauve.FilterCacheSpec;
 public class FastaFormat extends BaseFormat {
 	public SequenceIterator readFile (File file) {
 		BufferedReader reader = openFile (file);
-		return RichSequence.IOTools.readFastaDNA(reader, null);
+		return SeqIOTools.readFastaDNA (reader);
 	}
 
 	protected BufferedReader openFile (File file) {

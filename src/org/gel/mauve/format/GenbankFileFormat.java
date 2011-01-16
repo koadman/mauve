@@ -20,7 +20,8 @@ class GenbankFileFormat extends GenbankEmblFormat {
 			throw new RuntimeException (e);
 		}
 		
-		return RichSequence.IOTools.readGenbankDNA(reader, null);
+		return SeqIOTools.readGenbank (reader);
+//		return RichSequence.IOTools.readGenbankDNA(reader, null);
 	}
 
 	public boolean isRich(){ return false; }
