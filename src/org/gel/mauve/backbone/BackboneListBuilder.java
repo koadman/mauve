@@ -108,7 +108,7 @@ public class BackboneListBuilder {
 			}
 			// now sort on LCB id
 			Genome g = model.getGenomeBySourceIndex (gI);
-			BbLeftEndComparator comp = new BbLeftEndComparator (g);
+			BackboneList.BbLeftEndComparator comp = new BackboneList.BbLeftEndComparator (g);
 			Arrays.sort (seq_bb, comp);
 			seq_bb_vect.addElement (seq_bb);
 		}

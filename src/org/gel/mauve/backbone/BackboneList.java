@@ -7,65 +7,65 @@ import java.util.Vector;
 import org.gel.mauve.Genome;
 import org.gel.mauve.XMFAAlignment;
 
-/**
- * Compares LCB ids and left-columns of backbone segments
- */
-class BbComparator implements Comparator {
-	protected int seq;
-
-	BbComparator (int seq) {
-		this.seq = seq;
-	}
-
-	public int compare (Object o_a, Object o_b) {
-		Backbone a = (Backbone) o_a;
-		Backbone b = (Backbone) o_b;
-		boolean a_def = a.getSeqs ()[seq];
-		boolean b_def = b.getSeqs ()[seq];
-		if (!a_def && !b_def)
-			return 0;
-		if (!a_def)
-			return -1;
-		if (!b_def)
-			return 1;
-		int a_lcb_id = a.getLcbIndex ();
-		int b_lcb_id = b.getLcbIndex ();
-		if (a_lcb_id != b_lcb_id)
-			return a_lcb_id - b_lcb_id;
-		return (int) (a.getLeftColumn () - b.getLeftColumn ());
-	}
-}
-
-/**
- * Compares LCB ids and left-columns of backbone segments
- */
-class BbLeftEndComparator implements Comparator {
-	protected Genome g;
-
-	BbLeftEndComparator (Genome g) {
-		this.g = g;
-	}
-
-	public int compare (Object o_a, Object o_b) {
-		Backbone a = (Backbone) o_a;
-		Backbone b = (Backbone) o_b;
-		boolean a_def = a.getSeqs ()[g.getSourceIndex ()];
-		boolean b_def = b.getSeqs ()[g.getSourceIndex ()];
-		if (!a_def && !b_def)
-			return 0;
-		if (!a_def)
-			return -1;
-		if (!b_def)
-			return 1;
-		long a_lend = a.getLeftEnd (g);
-		long b_lend = b.getLeftEnd (g);
-		if (a_lend == b_lend)
-			return (int) (a.getRightEnd (g) - b.getRightEnd (g));
-		return (int) (a_lend - b_lend);
-	}
-}
-
 public class BackboneList {
+	/**
+	 * Compares LCB ids and left-columns of backbone segments
+	 */
+	static class BbLeftEndComparator implements Comparator {
+		protected Genome g;
+	
+		BbLeftEndComparator (Genome g) {
+			this.g = g;
+		}
+	
+		public int compare (Object o_a, Object o_b) {
+			Backbone a = (Backbone) o_a;
+			Backbone b = (Backbone) o_b;
+			boolean a_def = a.getSeqs ()[g.getSourceIndex ()];
+			boolean b_def = b.getSeqs ()[g.getSourceIndex ()];
+			if (!a_def && !b_def)
+				return 0;
+			if (!a_def)
+				return -1;
+			if (!b_def)
+				return 1;
+			long a_lend = a.getLeftEnd (g);
+			long b_lend = b.getLeftEnd (g);
+			if (a_lend == b_lend)
+				return (int) (a.getRightEnd (g) - b.getRightEnd (g));
+			return (int) (a_lend - b_lend);
+		}
+	}
+
+	/**
+	 * Compares LCB ids and left-columns of backbone segments
+	 */
+	static class BbComparator implements Comparator {
+		protected int seq;
+	
+		BbComparator (int seq) {
+			this.seq = seq;
+		}
+	
+		public int compare (Object o_a, Object o_b) {
+			Backbone a = (Backbone) o_a;
+			Backbone b = (Backbone) o_b;
+			boolean a_def = a.getSeqs ()[seq];
+			boolean b_def = b.getSeqs ()[seq];
+			if (!a_def && !b_def)
+				return 0;
+			if (!a_def)
+				return -1;
+			if (!b_def)
+				return 1;
+			int a_lcb_id = a.getLcbIndex ();
+			int b_lcb_id = b.getLcbIndex ();
+			if (a_lcb_id != b_lcb_id)
+				return a_lcb_id - b_lcb_id;
+			return (int) (a.getLeftColumn () - b.getLeftColumn ());
+		}
+	}
+
 	protected Vector seq_bb;
 
 	protected Backbone [] bb_array;
