@@ -3,18 +3,22 @@ package org.gel.mauve.contigs;
 import java.io.File;
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Vector;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.event.EventListenerList;
 
 import org.gel.air.util.IOUtils;
 import org.gel.mauve.MauveConstants;
 import org.gel.mauve.MauveHelperFunctions;
+import org.gel.mauve.ModelListener;
 import org.gel.mauve.MyConsole;
 import org.gel.mauve.XMFAAlignment;
 import org.gel.mauve.XmfaViewerModel;
+import org.gel.mauve.gui.AlignmentProcessListener;
 import org.gel.mauve.gui.MauveFrame;
 
 public class ContigOrderer implements MauveConstants {
@@ -39,7 +43,8 @@ public class ContigOrderer implements MauveConstants {
 	protected static final String OUTPUT_DIR = "-output";
 	protected static final String REF_FILE = "-ref";
 	protected static final String DRAFT_FILE = "-draft";
-
+	private EventListenerList alnListeners;
+	private File alnmtFile;
 	
 	public ContigOrderer (String [] args, Vector frames, boolean gui) {
 		init (args, frames, gui);
@@ -104,6 +109,7 @@ public class ContigOrderer implements MauveConstants {
 	
 	public void init (String [] args, Vector frames, boolean gui) {
 		this.gui = gui;
+		alnListeners = new EventListenerList();
 		past_orders = new Vector ();
 		iterations = 25;//DEFAULT_ITERATIONS;
 		if (args != null && args.length > 0) {
@@ -233,6 +239,10 @@ public class ContigOrderer implements MauveConstants {
 			else {
 				temp = new File (align_dir, CONTIG_OUTPUT);
 			}
+			// ugh, this is really ugly hardcoding.
+			String alnmtFilename = directory + "alignment" + count;
+			alnmtFilename += File.pathSeparator + "alignment" + count;
+			alnmtFile = new File( alnmtFilename );
 			if (orderRepeated ()) {
 				iterations = 0;
 				IOUtils.deleteDir (temp);
@@ -243,7 +253,9 @@ public class ContigOrderer implements MauveConstants {
 							"Reorder Done", JOptionPane.INFORMATION_MESSAGE);
 					reorderer.inverted_from_start.clear ();
 				}
-				else {
+				else if (alnListeners != null){
+					fireAlignmentEvent();
+				}else {
 					System.exit(0);
 				}
 			}
@@ -273,7 +285,23 @@ public class ContigOrderer implements MauveConstants {
 		}
 		return false;
 	}
-	
+
+	public void addAlignmentProcessListener(AlignmentProcessListener listener){
+		alnListeners.add(AlignmentProcessListener.class, listener);
+	}
+
+	private void fireAlignmentEvent(){
+		Object [] listeners = alnListeners.getListenerList ();
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if (listeners[i] == AlignmentProcessListener.class) {
+				((AlignmentProcessListener) listeners[i + 1]).completeAlignment (0);
+			}
+		}
+	}
+
+	public File getAlignmentFile(){
+		return alnmtFile;
+	}		
 	public void copyInputFiles () {
 		try {
 			File dir = makeAlignDir ();

@@ -428,15 +428,19 @@ public class ScoreAssembly  {
 			
 			if (line.hasOption("reorder")){ // we need to reorder first
 				String reorderDir = line.getOptionValue("reorder");
-				ContigOrderer co = null;
-				//new ContigOrderer(refFile, assPath,
-				//								new File(reorderDir));
+				String[] reorderParams = new String[6];
+				reorderParams[0] = "-output";
+				reorderParams[1] = outDir.getAbsolutePath();
+				reorderParams[2] = "-ref";
+				reorderParams[3] = refFile.getAbsolutePath();
+				reorderParams[4] = "-draft";
+				reorderParams[5] = assPath.getAbsolutePath();
+				ContigOrderer co = new ContigOrderer(reorderParams, null, false);
 				if (basename != null)
 					as = new AssemblyScorer(co, outDir, basename);
 				else 
 					as = new AssemblyScorer(co, outDir);
-				throw new RuntimeException("Fix contig orderer and scorer integration!");
-//				co.addAlnmtListener(as);
+				co.addAlignmentProcessListener(as);
 			} else {
 				if (basename == null) {
 					basename = assPath.getName();

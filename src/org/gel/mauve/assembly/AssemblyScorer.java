@@ -91,12 +91,11 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	public void completeAlignment(int retcode){
 		if (retcode == 0) {
 			if (co != null){
-//				alnmtFile = co.getAlignmentFile();
+				alnmtFile = co.getAlignmentFile();
 				if (basename == null) {
 					basename = alnmtFile.getName();
 					basename = basename.substring(0,basename.lastIndexOf("."));
 				}
-				throw new RuntimeException("Re-implement ordering in assembly scorer!");
 			}
 			try {
 				this.model = new XmfaViewerModel(alnmtFile,null);
