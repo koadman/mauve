@@ -59,6 +59,9 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	private Map<Chromosome,Integer> misAsm;
 	private int numMisAssemblies;
 	
+	private int miscalled;
+	private int uncalled;
+	
 	public AssemblyScorer(XmfaViewerModel model){
 		this.model = model;
 		loadInfo();
@@ -68,7 +71,6 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		this.alnmtFile = alnmtFile;
 		this.outputDir = outDir;
 		basename = alnmtFile.getName();
-		basename = basename.substring(0,basename.lastIndexOf("."));
 		batch = false;
 	}
 	
@@ -94,7 +96,6 @@ public class AssemblyScorer implements AlignmentProcessListener {
 				alnmtFile = co.getAlignmentFile();
 				if (basename == null) {
 					basename = alnmtFile.getName();
-					basename = basename.substring(0,basename.lastIndexOf("."));
 				}
 			}
 			try {
@@ -209,6 +210,7 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		
 		System.out.print("Counting base substitutions...");
 		this.subs = ScoreAssembly.countSubstitutions(snps);
+		summarizeBaseCalls();
 		System.out.print("done!\n");
 		
 		System.out.print("Counting gaps...");
@@ -262,6 +264,16 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		
 	}
 	
+	public void summarizeBaseCalls(){
+		int subsum = 0;
+		for(int i=0; i<subs.length;i++){
+			for(int j=0; j<subs.length;j++)
+				subsum += subs[i][j];
+		}
+		this.miscalled = subsum;
+		this.uncalled = snps.length - subsum;
+	}
+
 	private void computeBrokenCDS(){
 		Iterator<Genome> it = model.getGenomes().iterator();
 		boolean haveAnnotations = true;
@@ -285,6 +297,22 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		}
 	}
 	
+	public int getMiscalled() {
+		return miscalled;
+	}
+
+	public void setMiscalled(int miscalled) {
+		this.miscalled = miscalled;
+	}
+
+	public int getUncalled() {
+		return uncalled;
+	}
+
+	public void setUncalled(int uncalled) {
+		this.uncalled = uncalled;
+	}
+
 	public XmfaViewerModel getModel(){
 		return this.model;
 	}
@@ -426,15 +454,19 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	
 	public static void printInfo(AssemblyScorer sa, File outDir, String baseName, boolean batch){
 		PrintStream gapOut = null;
-		PrintStream snpOut = null;
+		PrintStream miscallOut = null;
+		PrintStream uncallOut = null;
 		PrintStream sumOut = null;
 		try {
 			File gapFile = new File(outDir, baseName+"__gaps.txt");
 			gapFile.createNewFile();
 			gapOut = new PrintStream(gapFile);
-			File snpFile = new File(outDir, baseName+"__snps.txt");
-			snpFile.createNewFile();
-			snpOut = new PrintStream(snpFile);
+			File miscallFile = new File(outDir, baseName+"__miscalls.txt");
+			miscallFile.createNewFile();
+			miscallOut = new PrintStream(miscallFile);
+			File uncallFile = new File(outDir, baseName+"__uncalls.txt");
+			uncallFile.createNewFile();
+			uncallOut = new PrintStream(uncallFile);
 			File sumFile = new File(outDir, baseName+"__sum.txt");
 			sumFile.createNewFile();
 			sumOut = new PrintStream(sumFile);
@@ -443,7 +475,7 @@ public class AssemblyScorer implements AlignmentProcessListener {
 			e.printStackTrace();
 			System.exit(-1);    
 		}
-		printInfo(sa,snpOut,gapOut);
+		printInfo(sa,miscallOut,uncallOut,gapOut);
 		if (batch){
 		    sumOut.print(ScoreAssembly.getSumText(sa, false, true));	
 		}else {
@@ -451,7 +483,8 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		}
 		
 		gapOut.close();
-		snpOut.close();
+		miscallOut.close();
+		uncallOut.close();
 		sumOut.close();
 	}
 	
@@ -466,22 +499,31 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	 * @param snpOut stream to print SNP info to
 	 * @param gapOut stream to print gap info to
 	 */
-	public static void printInfo(AssemblyScorer sa,  PrintStream snpOut, PrintStream gapOut){
-		if (snpOut!=null){
+	public static void printInfo(AssemblyScorer sa,  PrintStream miscallOut, PrintStream uncallOut, PrintStream gapOut){
+		if (miscallOut!=null){
 			StringBuilder sb = new StringBuilder();
 			sb.append("SNP_Pattern\tRef_Contig\tRef_PosInContig\tRef_PosGenomeWide\tAssembly_Contig\tAssembly_PosInContig\tAssembly_PosGenomeWide\n");
+			StringBuilder sb2 = new StringBuilder();
+			sb2.append("SNP_Pattern\tRef_Contig\tRef_PosInContig\tRef_PosGenomeWide\tAssembly_Contig\tAssembly_PosInContig\tAssembly_PosGenomeWide\n");
 			for (int i = 0; i < sa.snps.length; i++)
-				sb.append(sa.snps[i].toString()+"\n");
-			snpOut.print(sb.toString());
-			snpOut.flush();
+			{
+				if(sa.snps[i].hasAmbiguities())
+					sb.append(sa.snps[i].toString()+"\n");
+				else
+					sb2.append(sa.snps[i].toString()+"\n");
+			}
+			uncallOut.print(sb.toString());
+			uncallOut.flush();
+			miscallOut.print(sb2.toString());
+			miscallOut.flush();
 		}
 		if (gapOut!=null){
 			StringBuilder sb = new StringBuilder();
-			sb.append("Sequence\tContig\tPosition_in_Contig\tGenomeWide_Position\tLength\n");
+			sb.append("Sequence\tContig\tPosition_in_Contig\tGenomeWide_Position\tLength\tGenome0_GlobalPos\tGenome0_contig\tGenome0_LocalPos\tGenome1_GlobalPos\tGenome1_contig\tGenome1_LocalPos\n");
 			for (int i = 0; i < sa.refGaps.length; i++)
 				sb.append(sa.refGaps[i].toString("reference")+"\n");
 			for (int i = 0; i < sa.assGaps.length; i++)
-				sb.append(sa.assGaps[i].toString("assembly")+"\n");
+				sb.append(sa.assGaps[i].toString("assembly")+"\n");			
 			gapOut.print(sb.toString());
 			gapOut.flush();
 		}
