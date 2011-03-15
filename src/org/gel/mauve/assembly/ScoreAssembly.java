@@ -216,17 +216,27 @@ public class ScoreAssembly  {
 		if (singleLine){
 			if (header) {
 				sb.append("NumContigs\tNumRefReplicons\tNumAssemblyBases\tNumReferenceBases\tNumLCBs\t" +
-						"DCJ_Distance\tNumDCJBlocks\tNumSNPs\tNumGapsRef\tNumGapsAssembly\t" +
-						"TotalBasesMissed\tPercBasesMissed\tExtraBases\tPercExtraBases\n");
+						"DCJ_Distance\tNumDCJBlocks\tNumSNPs\tNumMisCalled\tNumUnCalled\tNumGapsRef\tNumGapsAssembly\t" +
+						"TotalBasesMissed\tPercBasesMissed\tExtraBases\tPercExtraBases" + 
+						"\tAA\tAC\tAG\tAT\tCA\tCC\tCG\tCT\tGA\tGC\tGG\tGT\tTA\tTC\tTG\tTT\n");
 			}
-			
-			sb.append(	assScore.numContigs()+"\t"+assScore.numReplicons()+"\t"+
+			sb.append(	assScore.getModel().getGenomeBySourceIndex(1).getDisplayName() + "\t" +
+						assScore.numContigs()+"\t"+assScore.numReplicons()+"\t"+
 						assScore.numBasesAssembly()+"\t"+assScore.numBasesReference()+"\t"+assScore.numLCBs()+"\t"+
 						assScore.getDCJdist()+"\t"+assScore.numBlocks()+"\t"+assScore.getSNPs().length+"\t"+
+						assScore.getMiscalled()+'\t'+assScore.getUncalled()+'\t'+
 						assScore.getReferenceGaps().length+"\t"+assScore.getAssemblyGaps().length+"\t"+
 					 	assScore.totalMissedBases()+"\t"+nf.format(assScore.percentMissedBases()*100)+"\t"+
-					 	assScore.totalExtraBases()+"\t"+nf.format(assScore.percentExtraBases()*100)+"\n");
-			
+					 	assScore.totalExtraBases()+"\t"+nf.format(assScore.percentExtraBases()*100));
+			int[][] subs = assScore.getSubs();
+			for(int i=0; i<subs.length; i++)
+			{
+				for(int j=0; j<subs[i].length; j++)
+				{
+					sb.append('\t');
+					sb.append(subs[i][j]);
+				}
+			}
 		} else {
 			if (header) {
 				sb.append(
@@ -444,7 +454,6 @@ public class ScoreAssembly  {
 			} else {
 				if (basename == null) {
 					basename = assPath.getName();
-					basename = basename.substring(0,basename.lastIndexOf("."));
 				}
 				alnmtFile = new File(outDir, basename+".xmfa");
 				as = new AssemblyScorer(alnmtFile, outDir, basename);
