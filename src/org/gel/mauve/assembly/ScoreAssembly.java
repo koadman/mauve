@@ -1,11 +1,14 @@
 package org.gel.mauve.assembly;
 
 import java.awt.Dimension;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -16,6 +19,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.biojava.bio.symbol.SymbolList;
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.Chromosome;
 import org.gel.mauve.OptionsBuilder;
@@ -237,6 +241,7 @@ public class ScoreAssembly  {
 					sb.append(subs[i][j]);
 				}
 			}
+			sb.append("\n");
 		} else {
 			if (header) {
 				sb.append(
@@ -280,10 +285,78 @@ public class ScoreAssembly  {
 						 subsToString(assScore));
 			}
 		}
-		
 		return sb.toString();
 	}
-	
+
+	/* 
+	 * calculate GC content of missing bases
+	 * in stretches up to 100nt.
+	 * Useful for determining if we're suffering GC bias
+	 */
+	public static void calculateMissingGC(AssemblyScorer assScore, File outDir, String basename){
+		try{
+			System.out.println("Printing GC contents of gaps < 100nt!");
+			Gap[] gaps = assScore.getAssemblyGaps();
+			java.io.BufferedWriter bw = new BufferedWriter(new java.io.FileWriter(new File( outDir, basename + "_missing_gc.txt" )));
+			java.io.BufferedWriter bw3 = new BufferedWriter(new java.io.FileWriter(new File( outDir, basename + "_background_gc_distribution.txt")));
+			Random randy = new Random();
+			for(int i=0; i<gaps.length; i++){
+				if(gaps[i].getLength()>100)
+					continue;
+				long glen = gaps[i].getLength();
+				glen = glen < 20 ? 20 : glen;
+				long[] left = assScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), gaps[i].getPosition()-glen/2);
+				long[] right = assScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), gaps[i].getPosition()+glen/2);
+				if(left[0]!=right[0]){
+					// gap spans LCB.  too hard for this hack.
+					continue;
+				}
+				long ll = left[1] < right[1] ? left[1] : right[1];
+				byte[] rawseq = assScore.getModel().getXmfa().readRawSequence((int)left[0], 0, ll, Math.abs(right[1]-left[1])+1);
+				double gc = countGC(rawseq);
+				if(!Double.isNaN(gc))
+				{
+					bw.write((new Double(gc)).toString());
+					bw.write("\n");
+				}
+				int rpos = randy.nextInt((int)assScore.getModel().getGenomeBySourceIndex(gaps[i].getGenomeSrcIdx()).getLength() - (int)glen);
+
+				// evil code copy!!
+				left = assScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), rpos-glen/2);
+				right = assScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), rpos+glen/2);
+				if(left[0]!=right[0]){
+					// gap spans LCB.  too hard for this hack.
+					continue;
+				}
+				ll = left[1] < right[1] ? left[1] : right[1];
+				rawseq = assScore.getModel().getXmfa().readRawSequence((int)left[0], 0, ll, Math.abs(right[1]-left[1])+1);
+				gc = countGC(rawseq);
+				if(!Double.isNaN(gc))
+				{
+					bw3.write((new Double(gc)).toString());
+					bw3.write("\n");
+				}
+			}
+			bw.flush();
+			bw.close();
+			bw3.flush();
+			bw3.close();
+		}catch(IOException ioe){ioe.printStackTrace();};
+	}
+
+	private static double countGC(byte[] rawseq){
+		double gc = 0;
+		double counts = 0;
+		for(int j=0; j<rawseq.length; j++){
+			if(rawseq[j]== 'G' || rawseq[j]== 'C' || 
+					rawseq[j]== 'g' || rawseq[j]== 'c')
+				gc++;
+			else if(rawseq[j]=='-' || rawseq[j]=='\n')
+				continue;
+			counts++;
+		}
+		return gc /= counts;
+	}
 	private static String subsToString(AssemblyScorer assScore){
 		// A C T G
 		StringBuilder sb = new StringBuilder();

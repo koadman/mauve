@@ -481,6 +481,7 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		}else {
 		    sumOut.print(ScoreAssembly.getSumText(sa, true, true));
 		}
+		ScoreAssembly.calculateMissingGC(sa, outDir, baseName);
 		
 		gapOut.close();
 		miscallOut.close();
