@@ -1,0 +1,14 @@
+TranslatedSequencePanel is the top-level element that needs to be added
+to the mauve GUI.  The sequence panel has, most importantly, a sequence
+to be rendered, and a renderer to renderer it.  It also has some doodads
+to control the part of the sequence being rendered.
+
+Using MultiLineRenderer as the rendered for a TranslatedSequencePanel
+allows for the rendering of multiple views of the same sequence.
+
+The blocks for the features are created using the FeatureBlockSequenceRenderer.
+The FeatureBlockSequenceRenderer delegated the rendering of features to FeatureRenderers,
+which actually go about doing the drawing (using a Graphics2D object, the feature, etc).
+These FeatureBlockSequenceRenderers are then wrapped up in a FeatureFilter, that only causes
+select features to be rendered by each particular FeatureRenderer.
+
