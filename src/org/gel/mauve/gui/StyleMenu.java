@@ -7,8 +7,10 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 
 import org.gel.mauve.BaseViewerModel;
+import org.gel.mauve.LCB;
 import org.gel.mauve.LcbViewerModel;
 import org.gel.mauve.XmfaViewerModel;
+import org.gel.mauve.analysis.PermutationExporter;
 
 public class StyleMenu extends JMenu implements ActionListener {
 
@@ -21,6 +23,7 @@ public class StyleMenu extends JMenu implements ActionListener {
     JCheckBoxMenuItem jMenuViewStyleChromosomeBoundaries = new JCheckBoxMenuItem();
     JCheckBoxMenuItem jMenuViewStyleMouseHighlighting = new JCheckBoxMenuItem();
     JCheckBoxMenuItem jMenuViewStyleDrawAttributes = new JCheckBoxMenuItem();
+    JCheckBoxMenuItem jMenuViewStyleSplitLcbsByCtgBnds = new JCheckBoxMenuItem();
     
     BaseViewerModel model;
     RearrangementPanel rrpanel;
@@ -90,6 +93,13 @@ public class StyleMenu extends JMenu implements ActionListener {
         jMenuViewStyleDrawAttributes.setActionCommand("ToggleDrawAttributes");
         jMenuViewStyleDrawAttributes.addActionListener(this);
 
+        jMenuViewStyleSplitLcbsByCtgBnds.setToolTipText("Split LCBs by chromosome or contig boundaries");
+        jMenuViewStyleSplitLcbsByCtgBnds.setVisible(true);
+        jMenuViewStyleSplitLcbsByCtgBnds.setText("Split LCBs");
+        jMenuViewStyleSplitLcbsByCtgBnds.setMnemonic('s');
+        jMenuViewStyleSplitLcbsByCtgBnds.setActionCommand("ToggleSplitLCBs");
+        jMenuViewStyleSplitLcbsByCtgBnds.addActionListener(this);
+        
         add(jMenuViewStyleLcbOutlines);
         add(jMenuViewStyleSimilarityPlot);
         add(jMenuViewStyleSimilarityRanges);
@@ -99,6 +109,7 @@ public class StyleMenu extends JMenu implements ActionListener {
         add(jMenuViewStyleChromosomeBoundaries);
         add(jMenuViewStyleMouseHighlighting);
         add(jMenuViewStyleDrawAttributes);
+        add(jMenuViewStyleSplitLcbsByCtgBnds);
     }
     
     /**
@@ -129,6 +140,7 @@ public class StyleMenu extends JMenu implements ActionListener {
             jMenuViewStyleSolidBlocks.setSelected(false);
             jMenuViewStyleChromosomeBoundaries.setSelected(true);
             jMenuViewStyleMouseHighlighting.setSelected(true);
+            jMenuViewStyleSplitLcbsByCtgBnds.setSelected(false);
     	}else
     		setEnabled(false);
         rrpanel.addKeyMapping("typed h", "ToggleDrawAttributes", this);
@@ -216,6 +228,15 @@ public class StyleMenu extends JMenu implements ActionListener {
                 jMenuViewStyleDrawAttributes.setSelected(model.getDrawAttributes());
             }
         }
-    	
+        else if (e.getActionCommand().equals("ToggleSplitLCBs"))
+        {
+        	if (model instanceof XmfaViewerModel)
+            {
+                XmfaViewerModel xvm = (XmfaViewerModel) model;
+                xvm.setSplitLcbByCtg(!xvm.getSplitLcbByCtg());
+                jMenuViewStyleSplitLcbsByCtgBnds.setSelected(xvm.getSplitLcbByCtg());
+                //rrpanel.lcbLinePanel.
+            } 
+        }
     }
 }

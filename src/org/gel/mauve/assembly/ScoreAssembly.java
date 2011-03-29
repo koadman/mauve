@@ -219,9 +219,10 @@ public class ScoreAssembly  {
 		StringBuilder sb = new StringBuilder();
 		if (singleLine){
 			if (header) {
-				sb.append("NumContigs\tNumRefReplicons\tNumAssemblyBases\tNumReferenceBases\tNumLCBs\t" +
+				sb.append("Name\tNumContigs\tNumRefReplicons\tNumAssemblyBases\tNumReferenceBases\tNumLCBs\t" +
 						"DCJ_Distance\tNumDCJBlocks\tNumSNPs\tNumMisCalled\tNumUnCalled\tNumGapsRef\tNumGapsAssembly\t" +
 						"TotalBasesMissed\tPercBasesMissed\tExtraBases\tPercExtraBases" + 
+						"\tMissingChromosomes\tExtraContigs"+
 						"\tAA\tAC\tAG\tAT\tCA\tCC\tCG\tCT\tGA\tGC\tGG\tGT\tTA\tTC\tTG\tTT\n");
 			}
 			sb.append(	assScore.getModel().getGenomeBySourceIndex(1).getDisplayName() + "\t" +
@@ -231,7 +232,8 @@ public class ScoreAssembly  {
 						assScore.getMiscalled()+'\t'+assScore.getUncalled()+'\t'+
 						assScore.getReferenceGaps().length+"\t"+assScore.getAssemblyGaps().length+"\t"+
 					 	assScore.totalMissedBases()+"\t"+nf.format(assScore.percentMissedBases()*100)+"\t"+
-					 	assScore.totalExtraBases()+"\t"+nf.format(assScore.percentExtraBases()*100));
+					 	assScore.totalExtraBases()+"\t"+nf.format(assScore.percentExtraBases()*100) +"\t"+
+					 	assScore.getMissingChromosomes().length+"\t"+assScore.getExtraContigs().length	);
 			int[][] subs = assScore.getSubs();
 			for(int i=0; i<subs.length; i++)
 			{
@@ -265,6 +267,8 @@ public class ScoreAssembly  {
 					"Percent bases missed:\t" + nf.format(assScore.percentMissedBases()*100)+" %\n"+
 					"Total bases extra in assembly:\t" + assScore.totalExtraBases()+"\n" +
 					"Percent bases extra:\t" + nf.format(assScore.percentExtraBases()*100)+ " %\n"+
+					"Number of missing chromosomes:\t" + assScore.getMissingChromosomes().length +"\n"+
+					"Number of extra contigs:\t"+assScore.getExtraContigs().length+"\n"+
 					"Substitutions (Ref on Y, Assembly on X):\n"+subsToString(assScore)
 				);
 				
@@ -282,6 +286,8 @@ public class ScoreAssembly  {
 						 nf.format(assScore.percentMissedBases()*100)+"\n"+
 						 assScore.totalExtraBases()+"\n" +
 						 nf.format(assScore.percentExtraBases()*100)+ "\n"+
+						 assScore.getMissingChromosomes() +"\n"+
+						assScore.getExtraContigs()+"\n"+
 						 subsToString(assScore));
 			}
 		}
@@ -292,6 +298,8 @@ public class ScoreAssembly  {
 	 * calculate GC content of missing bases
 	 * in stretches up to 100nt.
 	 * Useful for determining if we're suffering GC bias
+	 * 
+	 * AJT0403: Shouldn't this be in AssemblyScorer.java
 	 */
 	public static void calculateMissingGC(AssemblyScorer assScore, File outDir, String basename){
 		try{

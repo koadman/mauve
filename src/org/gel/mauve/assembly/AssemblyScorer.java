@@ -45,6 +45,8 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	private SNP[] snps;
 	private Gap[] refGaps;
 	private Gap[] assGaps; 
+	private Chromosome[] extraCtgs;
+	private Chromosome[] missingChroms;
 	private BrokenCDS[] brokenCDS;
 	private CDSErrorExporter cdsEE;
 	private DCJ dcj;
@@ -217,10 +219,16 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		Gap[][] tmp = SnpExporter.getGaps(model);
 		System.out.print("done!\n");
 		
+		System.out.print("Counting extra contigs...");
+		Chromosome[][] unique = SnpExporter.getUniqueChromosomes(model);
+		System.out.print("done!\n");
+		
 		refGaps = tmp[0];
 		assGaps = tmp[1];
 		Arrays.sort(assGaps);
 		Arrays.sort(refGaps);
+		missingChroms = unique[0];
+		extraCtgs = unique[1];
 		System.out.flush();
 		if (getBrokenCDS){
 			computeBrokenCDS();
@@ -327,6 +335,14 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	
 	public Gap[] getAssemblyGaps(){
 		return assGaps;
+	}
+	
+	public Chromosome[] getExtraContigs(){
+		return extraCtgs;
+	}
+	
+	public Chromosome[] getMissingChromosomes(){
+		return missingChroms;
 	}
 	
 	public SNP[] getSNPs(){
@@ -481,7 +497,7 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		}else {
 		    sumOut.print(ScoreAssembly.getSumText(sa, true, true));
 		}
-		ScoreAssembly.calculateMissingGC(sa, outDir, baseName);
+		// ScoreAssembly.calculateMissingGC(sa, outDir, baseName);
 		
 		gapOut.close();
 		miscallOut.close();

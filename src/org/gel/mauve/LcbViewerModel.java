@@ -23,6 +23,9 @@ public class LcbViewerModel extends BaseViewerModel {
 
 	// The sequence coordinates of the complete set of LCB boundaries
 	private LCB [] fullLcbList = new LCB [0];
+	
+	// The sequence coordinate of contig-split LCB boundaries
+	private LCB [] splitLcbList = new LCB[0];
 
 	// The list of deleted LCBs that should not be shown
 	private LCB [] delLcbList = new LCB [0];
@@ -40,6 +43,8 @@ public class LcbViewerModel extends BaseViewerModel {
 	private boolean drawLCBbounds = true;
 
 	private boolean fillLCBboxes = false;
+	
+	private boolean displaySplitLCBs = false;
 
 	private long highlightCoordinateRight = -1;
 
@@ -64,7 +69,7 @@ public class LcbViewerModel extends BaseViewerModel {
 	 * @param lcbList
 	 *            sequence coordinates of currently viewed LCB boundaries.
 	 */
-	void setVisibleLcbList (LCB [] lcbList) {
+	public void setVisibleLcbList (LCB [] lcbList) {
 		this.visibleLcbList = lcbList;
 	}
 
@@ -517,6 +522,29 @@ public class LcbViewerModel extends BaseViewerModel {
 		return fillLCBboxes;
 	}
 
+	public void setSplitLcbByCtg (boolean value) {
+		if (value){
+			visibleLcbList = splitLcbList;
+		} else {
+			visibleLcbList = fullLcbList;
+		}
+		displaySplitLCBs = value;
+		updateLCBweight((int) minimumLCBWeight, true);
+		fireDrawingSettingsEvent();
+	}
+	
+	public boolean getSplitLcbByCtg () {
+		return displaySplitLCBs;
+	}
+	
+	public void setSplitLcbList(LCB[] list){
+		splitLcbList = list;
+	}
+	
+	public LCB[] getSplitLcbList(){
+		return splitLcbList;
+	}
+	
 	public void initModelLCBs () {
 		nway_lcb_list = LCBlist.isNwayLcbList (getFullLcbList (), this);
 		LCBlist.computeLCBAdjacencies (getFullLcbList (), this);

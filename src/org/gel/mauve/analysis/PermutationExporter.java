@@ -57,6 +57,21 @@ import org.gel.mauve.gui.RearrangementPanel;
 	
 public class PermutationExporter {
 	
+	public static LCB[] getSplitLCBs(XmfaViewerModel model){
+		System.err.println(model.getVisibleLcbList().length + " LCBs before splitting with getSplitLCBs(XmfaViewerModel).");
+		Genome[] genomes = model.getGenomes().toArray(new Genome[model.getGenomes().size()]);
+		LCB[] lcbList = projectLcbList(model, model.getVisibleLcbList(),genomes);
+		lcbList = splitLcbList(model, lcbList, genomes);
+		if (lcbList != null){
+			System.err.println(lcbList.length + " LCBs after splitting with getSplitLCBs(XmfaViewerModel).");
+		}
+		return lcbList;
+	}
+	
+/*	public static String[] getSplitPermStrings(XmfaViewerModel model){
+		return null;
+	} */
+	
 	/**
 	 * Computes a refined set of LCBs, returning an array containing only those
 	 * LCBs present in all of <code>genomes</code>. The return set of LCBs may contain
@@ -68,7 +83,8 @@ public class PermutationExporter {
 	 * @param genomes the genomes to work with
 	 * @return an array of <code>LCB</code>s 
 	 */
-	public static LCB[] projectLcbList(XmfaViewerModel model, LCB[] lcbList, Genome[] genomes, boolean splitOnCtgBnds)
+	@SuppressWarnings("unchecked")
+	public static LCB[] projectLcbList(XmfaViewerModel model, LCB[] lcbList, Genome[] genomes)
 	{
 		// make a list of undesired genomes
 		Genome[] others = new Genome[model.getSequenceCount()-genomes.length];
@@ -111,25 +127,72 @@ public class PermutationExporter {
 			projlcbs.add(newlcb);
 		}
 		
-		int start = projlcbs.size();
-	
 		// split each LCB based on the each genome's contig boundaries
-		if (splitOnCtgBnds){
-			for (int g = 0; g < genomes.length; g++){
-				for (int i = 0; i < projlcbs.size(); i++){
-				// split each LCB based on each genome
-					LCB tmp = (LCB) projlcbs.elementAt(i);
-					Vector newlcbs = splitLCBbyGenome(model, tmp, genomes, g);
-					// replace the old LCB with the resulting split
-					projlcbs.remove(i);
-					projlcbs.addAll(i, newlcbs);
-					// move our "pointer" to the last element we inserted into the Vector
-					i = i + newlcbs.size() - 1; 
+/*		if (splitOnCtgBnds){
+			
+		}	
+*/		LCB[] plist = new LCB[projlcbs.size()];
+		projlcbs.toArray(plist);
+		// now that we've got all the LCBs we need, compute adjacencies
+		LCBlist.computeLCBAdjacencies(plist, model);
+		/*
+		for (int i = 0; i < genomes.length; i++){
+			Iterator<Chromosome> it = genomes[i].getChromosomes().iterator();
+			while (it.hasNext()){
+				Chromosome chr = it.next();
+				long chrS = chr.getStart();
+				long chrE = chr.getEnd();
+				boolean flanked = false;
+				for (LCB l: plist){
+					long lcbL = l.getLeftEnd(genomes[i]);
+					long lcbR = l.getRightEnd(genomes[i]);
+					if (lcbL > lcbR){
+						if (chrS < lcbL && chrS > lcbR) {
+							flanked = true;
+							break;
+						} else if (chrE < lcbL && chrE > lcbR){
+							flanked = true;
+							break;
+						}
+					} else {
+						if (chrS > lcbL && chrS < lcbR) {
+							flanked = true;
+							break;
+						} else if (chrE > lcbL && chrE < lcbR){
+							flanked = true;
+							break;
+						}
+					}
 				}
+				if (flanked){
+					System.out.print("");
+				}
+				
 			}
 		}
+		*/
+		return plist;
+	}
+	
+	public static LCB[] splitLcbList(XmfaViewerModel model, LCB[] lcbList, Genome[] genomes){
+		Vector<LCB> projlcbs = new Vector<LCB>();
+		for (LCB l: lcbList) projlcbs.add(l);
+		System.err.println("starting with " + projlcbs.size()+" LCBs");
+		for (int g = 0; g < genomes.length; g++){
+			for (int i = 0; i < projlcbs.size(); i++){
+			// split each LCB based on each genome
+				LCB tmp = (LCB) projlcbs.elementAt(i);
+				Vector newlcbs = splitLCBbyGenome(model, tmp, genomes, g);
+				// replace the old LCB with the resulting split
+				projlcbs.remove(i);
+				projlcbs.addAll(i, newlcbs);
+				// move our "pointer" to the last element we inserted into the Vector
+				i = i + newlcbs.size() - 1; 
+			}
+			System.err.println("genome"+g+"\t"+projlcbs.size());
+		}
 		LCB[] plist = new LCB[projlcbs.size()];
-		plist = (LCB[])projlcbs.toArray(plist);
+		projlcbs.toArray(plist);
 		// now that we've got all the LCBs we need, compute adjacencies
 		LCBlist.computeLCBAdjacencies(plist, model);
 		return plist;
@@ -144,6 +207,7 @@ public class PermutationExporter {
 	 * @param g the index in genomes of the genome to split on
 	 * @return a list of new <code>LCB</code>s resulting from splitting <code>lcb</code>
 	 */
+	@SuppressWarnings("unchecked")
 	public static Vector splitLCBbyGenome(XmfaViewerModel model, LCB lcb, Genome[] genomes, int g){
 		Vector subLCBs = new Vector();
 		List chrom = genomes[g].getChromosomes();
@@ -155,10 +219,10 @@ public class PermutationExporter {
 			Chromosome chr = (Chromosome) it.next();
 			long chrL = Long.MIN_VALUE;
 			long chrR = Long.MAX_VALUE;
-			if (chrIdx > 0)
+		//	if (chrIdx > 0)
 				chrL = chr.getStart();  // concatenated genome coordinate
 			
-			if (chrIdx < chrom.size()-1)
+		//	if (chrIdx < chrom.size()-1)
 				chrR = chr.getEnd();   // concatenated genome coordinate
 			long lcbL = lcbCopy.getLeftEnd(genomes[g]);  // concatenated genome coordinate
 			long lcbR = lcbCopy.getRightEnd(genomes[g]); // concatenated genome coordinate
@@ -170,8 +234,6 @@ public class PermutationExporter {
 			} 
 			lcbL = lcbCopy.getLeftEnd(genomes[g]);  // concatenated genome coordinate
 			lcbR = lcbCopy.getRightEnd(genomes[g]); // concatenated genome coordinate
-			
-			
 			
 			if (chrR < lcbR && chrR > lcbL) {
 				long splitBnd = model.getLCBAndColumn(genomes[g], chrR)[1];
@@ -223,42 +285,6 @@ public class PermutationExporter {
 			return lcb;
 		}
 		
-/* FIXME - When LCBs are split, some get split based on contig boundaries 
- *         lying at the end of the LCB, resulting in boundaries erroneous 
- *         boundaries (i.e. leftBound > rightBound)
- *         
- *         I don't believe this results in erroneous results in the 
- *         permutation. 
- *    
-		boolean doPrint = false;
-		for (int i = 0; i < genomes.length; i++){
-			Genome g = genomes[i];
-			if (g.getLength() < start_coords[g.getSourceIndex()]){
-				long bad = start_coords[g.getSourceIndex()];
-				start_coords[g.getSourceIndex()] = g.getLength();
-				
-				doPrint = true;
-				System.err.print("Bad Mauve! (at start_coords) genome " + g.getSourceIndex() 
-						+" Length = " + g.getLength()+ " coord = " + bad+ " ");
-			
-			}
-			if (g.getLength() < end_coords[g.getSourceIndex()]){
-				long bad = end_coords[g.getSourceIndex()];
-				
-				end_coords[g.getSourceIndex()] = g.getLength();
-				
-				System.err.println("Bad Mauve! (at end_coords) genome " + g.getSourceIndex() 
-						+" Length = " + g.getLength()+ " coord = " + bad+ " ");
-			
-				
-			} else if (doPrint)
-				System.err.println();
-			
-			doPrint = false;
-		}
-		
-*/
-		
 		for (int j = 0; j < genomes.length; j++){ 
 			int srcIdx = genomes[j].getSourceIndex();
 			Genome g = genomes[j];
@@ -299,12 +325,28 @@ public class PermutationExporter {
 	 * @return an array of <code>Vector</code>s of <code>Vector</code>s of <code>String</code>s
 	 */
 	//@SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked")
 	public static Vector[] computeSignedPermutation(XmfaViewerModel model, Genome[] genomes, boolean splitOnCtgBnds)
 	{
 		int seq_count = genomes.length;
+/*		
 		LCB[] lcbList = model.getVisibleLcbList();
+		System.err.println(lcbList.length+" LCBs before splitting in computeSignedPermutation(XmfaViewerModel,Genome[],boolean).");
 		lcbList = projectLcbList(model, lcbList, genomes,splitOnCtgBnds);
-		
+		System.err.println(lcbList.length+" LCBs after splitting in computeSignedPermutation(XmfaViewerModel,Genome[],boolean).");
+		LCB[] lcbList2 = getSplitLCBs(model);
+*/
+		LCB[] lcbList = null;
+		if (splitOnCtgBnds){
+			lcbList = model.getSplitLcbList();
+		} else {
+			lcbList = model.getVisibleLcbList();
+		}
+		// Filter out LCBs that don't pertain to our set of genomes.
+		// LCB splitting by contig boundaries has already been done for us, 
+		// so no need to split again. 
+		// TODO: Split projectLcbList() into two functions: 1) filter unwanted LCBs 2) split LCB list by contig boundaries.
+		lcbList = projectLcbList(model, lcbList, genomes);
 		Vector[] signed_perms = new Vector[seq_count];
 		
 
@@ -391,6 +433,7 @@ public class PermutationExporter {
 	 * @param genomes the genomes of interest.
 	 * @return an array of permutations, one for each element in <code>genomes</code>
 	 */
+	@SuppressWarnings("unchecked")
 	public static String[] getPermStrings(XmfaViewerModel model, Genome[] genomes, boolean splitOnCtgBnds) 
 	{
 		// perms = an array of vectors of vectors. one array element per genome.
@@ -431,6 +474,11 @@ public class PermutationExporter {
 		return getPermStrings(model, v.toArray(new Genome[v.size()]), splitOnCtgBnds);
 	}
 
+/*	public static String[] getPermStrings(XmfaViewerModel model, boolean splitOnCtgBnds){
+		Vector<Genome> v = model.getGenomes();
+		return getPermStrings(model, v.toArray(new Genome[v.size()]), splitOnCtgBnds);
+	}*/
+	
 	public static class ExportFrame extends JFrame
 	{	    
 	    private JTextField outputFile = new JTextField();
