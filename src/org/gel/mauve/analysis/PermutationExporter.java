@@ -1,61 +1,55 @@
 package org.gel.mauve.analysis;
-
-import java.awt.Graphics2D;
-
-
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.util.Enumeration;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Vector;
 
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriter;
-import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
-import javax.imageio.stream.ImageOutputStream;
-import javax.swing.AbstractButton;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-import javax.swing.event.UndoableEditEvent;
-import javax.swing.event.UndoableEditListener;
 
 import org.gel.mauve.Chromosome;
 import org.gel.mauve.Genome;
 import org.gel.mauve.LCB;
 import org.gel.mauve.LCBlist;
 import org.gel.mauve.MauveConstants;
-import org.gel.mauve.MyConsole;
-import org.gel.mauve.XMFAAlignment;
 import org.gel.mauve.XmfaViewerModel;
-import org.gel.mauve.gui.ExportFrame;
-import org.gel.mauve.gui.MauveRenderingHints;
-import org.gel.mauve.gui.RearrangementPanel;
 	
 public class PermutationExporter {
+
+	public static final char LCB_BND = 'l';
+	public static final char CTG_BND = 'c';
+	
+	private static Map<String,Integer> sharedBoundaryCounts = new HashMap<String, Integer>();
+	
+	public static LCB[] getSplitLCBs(XmfaViewerModel model){
+		System.err.println(model.getVisibleLcbList().length + " LCBs before splitting with getSplitLCBs(XmfaViewerModel).");
+		Genome[] genomes = model.getGenomes().toArray(new Genome[model.getGenomes().size()]);
+		LCB[] lcbList = projectLcbList(model, model.getVisibleLcbList(),genomes);
+		lcbList = splitLcbList(model, lcbList, genomes);
+		if (lcbList != null){
+			System.err.println(lcbList.length + " LCBs after splitting with getSplitLCBs(XmfaViewerModel).");
+		}
+		return lcbList;
+	}
 	
 	/**
 	 * Computes a refined set of LCBs, returning an array containing only those
@@ -68,8 +62,12 @@ public class PermutationExporter {
 	 * @param genomes the genomes to work with
 	 * @return an array of <code>LCB</code>s 
 	 */
-	public static LCB[] projectLcbList(XmfaViewerModel model, LCB[] lcbList, Genome[] genomes, boolean splitOnCtgBnds)
+	@SuppressWarnings("unchecked")
+	public static LCB[] projectLcbList(XmfaViewerModel model, LCB[] lcbList, Genome[] genomes)
 	{
+		if (!sharedBoundaryCounts.containsKey(model.getSrc().getAbsolutePath()))
+			sharedBoundaryCounts.put(model.getSrc().getAbsolutePath(), 0);
+		//System.err.println(model.getSrc().getAbsolutePath());
 		// make a list of undesired genomes
 		Genome[] others = new Genome[model.getSequenceCount()-genomes.length];
 		int k=0;
@@ -111,25 +109,36 @@ public class PermutationExporter {
 			projlcbs.add(newlcb);
 		}
 		
-		int start = projlcbs.size();
-	
 		// split each LCB based on the each genome's contig boundaries
-		if (splitOnCtgBnds){
-			for (int g = 0; g < genomes.length; g++){
-				for (int i = 0; i < projlcbs.size(); i++){
-				// split each LCB based on each genome
-					LCB tmp = (LCB) projlcbs.elementAt(i);
-					Vector newlcbs = splitLCBbyGenome(model, tmp, genomes, g);
-					// replace the old LCB with the resulting split
-					projlcbs.remove(i);
-					projlcbs.addAll(i, newlcbs);
-					// move our "pointer" to the last element we inserted into the Vector
-					i = i + newlcbs.size() - 1; 
-				}
+/*		if (splitOnCtgBnds){
+			
+		}	
+*/		LCB[] plist = new LCB[projlcbs.size()];
+		projlcbs.toArray(plist);
+		// now that we've got all the LCBs we need, compute adjacencies
+		LCBlist.computeLCBAdjacencies(plist, model);
+		return plist;
+	}
+	
+	public static LCB[] splitLcbList(XmfaViewerModel model, LCB[] lcbList, Genome[] genomes){
+		Vector<LCB> projlcbs = new Vector<LCB>();
+		for (LCB l: lcbList) projlcbs.add(l);
+		System.err.println("starting with " + projlcbs.size()+" LCBs");
+		for (int g = 0; g < genomes.length; g++){
+			for (int i = 0; i < projlcbs.size(); i++){
+			// split each LCB based on each genome
+				LCB tmp = (LCB) projlcbs.elementAt(i);
+				Vector newlcbs = splitLCBbyGenome(model, tmp, genomes, g);
+				// replace the old LCB with the resulting split
+				projlcbs.remove(i);
+				projlcbs.addAll(i, newlcbs);
+				// move our "pointer" to the last element we inserted into the Vector
+				i = i + newlcbs.size() - 1; 
 			}
+			System.err.println("genome"+g+"\t"+projlcbs.size());
 		}
 		LCB[] plist = new LCB[projlcbs.size()];
-		plist = (LCB[])projlcbs.toArray(plist);
+		projlcbs.toArray(plist);
 		// now that we've got all the LCBs we need, compute adjacencies
 		LCBlist.computeLCBAdjacencies(plist, model);
 		return plist;
@@ -144,6 +153,7 @@ public class PermutationExporter {
 	 * @param g the index in genomes of the genome to split on
 	 * @return a list of new <code>LCB</code>s resulting from splitting <code>lcb</code>
 	 */
+	@SuppressWarnings("unchecked")
 	public static Vector splitLCBbyGenome(XmfaViewerModel model, LCB lcb, Genome[] genomes, int g){
 		Vector subLCBs = new Vector();
 		List chrom = genomes[g].getChromosomes();
@@ -151,36 +161,130 @@ public class PermutationExporter {
 		
 		LCB lcbCopy = new LCB(lcb);
 		int chrIdx = 1;
+		int shrdBnds = -1;
 		while(it.hasNext()){
 			Chromosome chr = (Chromosome) it.next();
 			long chrL = Long.MIN_VALUE;
 			long chrR = Long.MAX_VALUE;
-			if (chrIdx > 0)
+			shrdBnds = countSharedBoundaries(chr,lcb,genomes[g]);
+			if (shrdBnds > 0){
+				Integer newVal = sharedBoundaryCounts.get(model.getSrc().getAbsolutePath());
+				newVal += shrdBnds;
+				sharedBoundaryCounts.put(model.getSrc().getAbsolutePath(),newVal);
+			}
+		//	if (chrIdx > 0)
 				chrL = chr.getStart();  // concatenated genome coordinate
 			
-			if (chrIdx < chrom.size()-1)
+		//	if (chrIdx < chrom.size()-1)
 				chrR = chr.getEnd();   // concatenated genome coordinate
 			long lcbL = lcbCopy.getLeftEnd(genomes[g]);  // concatenated genome coordinate
 			long lcbR = lcbCopy.getRightEnd(genomes[g]); // concatenated genome coordinate
-			
+			boolean rev = lcbCopy.getReverse(genomes[g]);
 			
 			if (chrL < lcbR && chrL > lcbL){
 				long splitBnd = model.getLCBAndColumn(genomes[g], chrL-1)[1];
-				subLCBs.add(trimLCB(model, genomes, lcbCopy, splitBnd));	
+				LCB lcbCrop = cropLeft(model, genomes, lcbCopy, splitBnd);
+				if (rev) {
+					subLCBs.add(lcbCopy);
+					lcbCopy = lcbCrop;
+				} else {
+					subLCBs.add(lcbCrop);
+				}
 			} 
 			lcbL = lcbCopy.getLeftEnd(genomes[g]);  // concatenated genome coordinate
 			lcbR = lcbCopy.getRightEnd(genomes[g]); // concatenated genome coordinate
 			
-			
-			
 			if (chrR < lcbR && chrR > lcbL) {
 				long splitBnd = model.getLCBAndColumn(genomes[g], chrR)[1];
-				subLCBs.add(trimLCB(model, genomes, lcbCopy, splitBnd));
+				LCB lcbCrop = cropLeft(model, genomes, lcbCopy, splitBnd);
+				if (rev) {
+					subLCBs.add(lcbCopy);
+					lcbCopy = lcbCrop;
+				} else {
+					subLCBs.add(lcbCrop);
+				}
 			}
 			chrIdx++;
 		}
 		subLCBs.add(lcbCopy);
 		return subLCBs;
+	} 
+	
+	private static int countSharedBoundaries(Chromosome chr, LCB lcb, Genome g){
+		int ret = 0;
+		if (lcb.getReverse(g)){
+			if (chr.getStart() == lcb.getRightEnd(g)) ret++;
+			if (chr.getEnd() == lcb.getLeftEnd(g)) ret++;
+		} else {
+			if (chr.getStart() == lcb.getLeftEnd(g)) ret++;
+			if (chr.getEnd() == lcb.getRightEnd(g)) ret++;
+		}
+		return ret;
+	}
+	/**
+	 * Returns the number of shared boundaries between contigs/chromosomes and LCB 
+	 * @param model XmfaViewerModel to get this info for
+	 * @return the number of shared boundaries between contigs/chromosomes and LCBs if 
+	 * 			this number has been calculated already, -1 otherwise
+	 */
+	public static int getSharedBoundaryCount(XmfaViewerModel model){
+		int ret = 0;
+		Genome[] genomes = new Genome[model.getGenomes().size()];
+		model.getGenomes().toArray(genomes);
+		LCB[] lcbs = model.getFullLcbList();
+		return getSharedBoundaryCount(model, lcbs, genomes);
+		
+		//return sharedBoundaryCounts.get(model.getSrc().getAbsolutePath());
+	}
+	
+	public static int getSharedBoundaryCount(XmfaViewerModel model, LCB[] lcbs, Genome[] genomes){
+		int ret = 0;
+		for (Genome g: genomes){
+			Vector<Long> bndryPtList = new Vector<Long>();
+			loadChromosomeBoundaries(bndryPtList, g);
+			loadLcbBoundaries(bndryPtList, g, lcbs);
+			ret += sortAndCount(bndryPtList);
+		}
+		return ret;
+	}
+	
+	private static void loadChromosomeBoundaries(Vector<Long> bndryPts, Genome g){
+		Chromosome chr = null;
+		Iterator<Chromosome> it = g.getChromosomes().iterator();
+		while(it.hasNext()){
+			chr = it.next();
+			bndryPts.add(chr.getStart());
+			bndryPts.add(chr.getEnd());
+		}
+	}
+	
+	private static void loadLcbBoundaries(Vector<Long> bndryPts, Genome g, LCB[] lcbs){
+		for (LCB lcb: lcbs){
+			bndryPts.add(lcb.getLeftEnd(g));
+			bndryPts.add(lcb.getRightEnd(g));
+		}
+	}
+	
+	private static int sortAndCount(Vector<Long> list){
+		Long[] ar = new Long[list.size()];
+		list.toArray(ar);
+		Arrays.sort(ar);
+		int ret = 0;
+//		int[] dif = new int[ar.length-1];
+		for (int i = 1; i < ar.length; i++){
+			if (ar[i] == ar[i-1])
+				ret++;
+//			dif[i-1] = (int) (ar[i] - ar[i-1]);
+		}
+/*		try {
+			File difFile = new File("/Users/andrew/MauveDev/BadDCJ/alignment4/AssemblyScore/boundary_diffs.txt");
+			if (!difFile.exists()) difFile.createNewFile();
+			PrintStream out = new PrintStream(difFile);
+			for (int d: dif)
+				out.println(d);
+			out.close();
+		} catch(Exception e) { e.printStackTrace(); }*/
+		return ret;
 	}
 	
 	/** 
@@ -197,7 +301,7 @@ public class PermutationExporter {
 	 */
 	/* FIXME - off by one error - read FIXME statement below. 
 	 * Turn on error messages below and run Permutation Exporter or DCJ Analysis for example */
-	public static LCB trimLCB (XmfaViewerModel model, Genome[] genomes, LCB lcb, long col){	
+	public static LCB cropLeft (XmfaViewerModel model, Genome[] genomes, LCB lcb, long col){	
 
 		long lcbLen = model.getXmfa().getLcbLength(lcb.id);
 		if (col > lcbLen)
@@ -223,61 +327,18 @@ public class PermutationExporter {
 			return lcb;
 		}
 		
-/* FIXME - When LCBs are split, some get split based on contig boundaries 
- *         lying at the end of the LCB, resulting in boundaries erroneous 
- *         boundaries (i.e. leftBound > rightBound)
- *         
- *         I don't believe this results in erroneous results in the 
- *         permutation. 
- *    
-		boolean doPrint = false;
-		for (int i = 0; i < genomes.length; i++){
-			Genome g = genomes[i];
-			if (g.getLength() < start_coords[g.getSourceIndex()]){
-				long bad = start_coords[g.getSourceIndex()];
-				start_coords[g.getSourceIndex()] = g.getLength();
-				
-				doPrint = true;
-				System.err.print("Bad Mauve! (at start_coords) genome " + g.getSourceIndex() 
-						+" Length = " + g.getLength()+ " coord = " + bad+ " ");
-			
-			}
-			if (g.getLength() < end_coords[g.getSourceIndex()]){
-				long bad = end_coords[g.getSourceIndex()];
-				
-				end_coords[g.getSourceIndex()] = g.getLength();
-				
-				System.err.println("Bad Mauve! (at end_coords) genome " + g.getSourceIndex() 
-						+" Length = " + g.getLength()+ " coord = " + bad+ " ");
-			
-				
-			} else if (doPrint)
-				System.err.println();
-			
-			doPrint = false;
-		}
-		
-*/
-		
 		for (int j = 0; j < genomes.length; j++){ 
 			int srcIdx = genomes[j].getSourceIndex();
 			Genome g = genomes[j];
 			
 			if (lcb.getReverse(genomes[j])){
-				/*if (start_coords[srcIdx] < end_coords[srcIdx]){
-					System.err.println("REVERSE! "+ genomes[j].getSourceIndex()+ ":  start_coords[srcIdx] = " + 
-							start_coords[srcIdx] + "  end_coords[srcIdx] = " + end_coords[srcIdx]);
-				}*/
 			
 			//	if (!gapEnd[srcIdx])
 					newLCB.setLeftEnd(genomes[j], end_coords[srcIdx]);
 			//	if (!gapStart[srcIdx])
 					lcb.setRightEnd(genomes[j], start_coords[srcIdx]);
 			} else {
-				/*if (start_coords[srcIdx] > end_coords[srcIdx]){
-					System.err.println("FORWARD!  lcb "+ lcb.id +", seq "+ srcIdx + ",  start_coords[srcIdx] = " + 
-							start_coords[srcIdx] + "  end_coords[srcIdx] = " + end_coords[srcIdx]);
-				}*/
+				
 			//	if (!gapEnd[srcIdx])
 					newLCB.setRightEnd(genomes[j], end_coords[srcIdx]);
 			//	if (!gapStart[srcIdx])
@@ -299,12 +360,27 @@ public class PermutationExporter {
 	 * @return an array of <code>Vector</code>s of <code>Vector</code>s of <code>String</code>s
 	 */
 	//@SuppressWarnings("unchecked")
+	//@SuppressWarnings("unchecked")
 	public static Vector[] computeSignedPermutation(XmfaViewerModel model, Genome[] genomes, boolean splitOnCtgBnds)
 	{
 		int seq_count = genomes.length;
+/*		
 		LCB[] lcbList = model.getVisibleLcbList();
+		System.err.println(lcbList.length+" LCBs before splitting in computeSignedPermutation(XmfaViewerModel,Genome[],boolean).");
 		lcbList = projectLcbList(model, lcbList, genomes,splitOnCtgBnds);
-		
+		System.err.println(lcbList.length+" LCBs after splitting in computeSignedPermutation(XmfaViewerModel,Genome[],boolean).");
+		LCB[] lcbList2 = getSplitLCBs(model);
+*/
+		LCB[] lcbList = null;
+		if (splitOnCtgBnds){
+			lcbList = model.getSplitLcbList();
+		} else {
+			lcbList = model.getVisibleLcbList();
+		}
+		// Filter out LCBs that don't pertain to our set of genomes.
+		// LCB splitting by contig boundaries has already been done for us, 
+		// so no need to split again. 
+		lcbList = projectLcbList(model, lcbList, genomes);
 		Vector[] signed_perms = new Vector[seq_count];
 		
 
@@ -389,8 +465,10 @@ public class PermutationExporter {
 	 * 
 	 * @param model XmfaViewerModel holding alignment
 	 * @param genomes the genomes of interest.
+	 * @param splitOnCtgBnds split blocks up by contig/chromosome boundaries if true
 	 * @return an array of permutations, one for each element in <code>genomes</code>
 	 */
+	@SuppressWarnings("unchecked")
 	public static String[] getPermStrings(XmfaViewerModel model, Genome[] genomes, boolean splitOnCtgBnds) 
 	{
 		// perms = an array of vectors of vectors. one array element per genome.
@@ -431,6 +509,102 @@ public class PermutationExporter {
 		return getPermStrings(model, v.toArray(new Genome[v.size()]), splitOnCtgBnds);
 	}
 
+/*	public static String[] getPermStrings(XmfaViewerModel model, boolean splitOnCtgBnds){
+		Vector<Genome> v = model.getGenomes();
+		return getPermStrings(model, v.toArray(new Genome[v.size()]), splitOnCtgBnds);
+	}*/
+	
+	public static interface Boundary extends Comparable<Boundary> {
+		public long getPos();
+		
+		public static class Sequence implements Boundary {
+			final long pos;
+			final int g;
+			public Sequence (long pos){ this.pos = pos; g = -1; }
+			public Sequence (long pos, int g){ this.pos = pos; this.g = g; }
+			public int compareTo(Boundary o) {
+				if (this.pos < o.getPos()){
+					return -1;
+				} else if (this.pos > o.getPos()){
+					return 1;
+				} else return 0;
+			}
+			public long getPos() {return pos;}
+		}
+		
+		public static class Block implements Boundary {
+			final long pos;
+			final int lcb;
+			public Block (long pos, int lcb){ this.pos = pos; this.lcb = lcb;}
+			public int compareTo(Boundary o) {
+				if (this.pos < o.getPos()){
+					return -1;
+				} else if (this.pos > o.getPos()){
+					return 1;
+				} else return 0;
+			}
+			public long getPos() {return pos;}
+			public int getId() {return lcb;}
+		}
+	}
+	
+	public static int countInterBlockBounds(XmfaViewerModel model, Genome g){
+		int ret = 0;
+		Vector<Boundary> bnds = new Vector<Boundary>(); 
+		Iterator<Chromosome> it = g.getChromosomes().iterator();
+		it.next();
+		while(it.hasNext()) {
+			Chromosome tmp = it.next();
+			bnds.add(new Boundary.Sequence(tmp.getStart()));
+			//bnds.add(new Boundary.Sequence(tmp.getEnd()));
+		}
+		LCB[] lcbs = model.getFullLcbList();
+		for (LCB lcb: lcbs){
+			bnds.add(new Boundary.Block(lcb.getLeftEnd(g),lcb.id));
+			bnds.add(new Boundary.Block(lcb.getRightEnd(g),lcb.id));
+		}
+		Boundary[] ar = new Boundary[bnds.size()];
+		bnds.toArray(ar);
+		Arrays.sort(ar);
+	//	if (ar[0] instanceof Boundary.Sequence) ret++;
+		for (int i = 1; i < ar.length-1; i++){
+			Boundary l = ar[i-1];
+			Boundary m = ar[i];
+			Boundary r = ar[i+1];
+			if (l instanceof Boundary.Block && 
+				m instanceof Boundary.Sequence && 
+				r instanceof Boundary.Block) {
+				Boundary.Block bl = (Boundary.Block) l;
+				Boundary.Block br = (Boundary.Block) r;
+				if (bl.lcb != br.lcb) ret++;
+			}/* else if (l instanceof Boundary.Sequence && m instanceof Boundary.Sequence && r instanceof Boundary.Block){
+				System.out.print("");
+			} else if (r instanceof Boundary.Sequence && m instanceof Boundary.Sequence && l instanceof Boundary.Block){
+				System.out.print("");
+			}*/
+		}
+	//	if (ar[ar.length-1] instanceof Boundary.Sequence) ret++;
+		return ret;
+	}
+	
+	public static int countInterBlockBounds(XmfaViewerModel model){
+		int ret = 0;
+		Iterator<Genome> it = model.getGenomes().iterator();
+		while(it.hasNext()){
+			ret += countInterBlockBounds(model, it.next());
+		}
+		return ret;
+	}
+	
+	public static int countSharedContigBounds(XmfaViewerModel model, Genome[] genomes){
+		for (int gI = 0; gI < genomes.length; gI++){
+			for (int gJ = gI+1; gJ < genomes.length; gJ++){
+				
+			}
+		}
+		return 0;
+	}
+	
 	public static class ExportFrame extends JFrame
 	{	    
 	    private JTextField outputFile = new JTextField();
@@ -590,5 +764,10 @@ public class PermutationExporter {
 	        }
 	        setVisible(false);
 	    }
+	}
+
+	public int compareTo(Boundary arg0) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

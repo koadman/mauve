@@ -5,6 +5,7 @@ import java.io.File;
 
 import org.gel.mauve.Chromosome;
 import org.gel.mauve.Genome;
+import org.gel.mauve.LCB;
 
 
 import java.io.IOException;
@@ -45,10 +46,16 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	private SNP[] snps;
 	private Gap[] refGaps;
 	private Gap[] assGaps; 
+	private Chromosome[] extraCtgs;
+	private Chromosome[] missingChroms;
 	private BrokenCDS[] brokenCDS;
 	private CDSErrorExporter cdsEE;
 	private DCJ dcj;
 	private boolean getBrokenCDS = true;
+	
+	private int numSharedBnds;
+	
+	private int numInterLcbBnds;
 	
 	/** extra adjacencies */
 	private Vector<Adjacency> typeI;
@@ -150,7 +157,7 @@ public class AssemblyScorer implements AlignmentProcessListener {
 			refSet.add(a);
 		}
 		
-		System.err.println("\nnum assembly adjacencies: " + ass.length);
+	//	System.err.println("\nnum assembly adjacencies: " + ass.length);
 		Vector<Adjacency> intersection = new Vector<Adjacency>(); 
 		for (Adjacency a: ass){
 			if (!refSet.contains(a)) 
@@ -159,23 +166,23 @@ public class AssemblyScorer implements AlignmentProcessListener {
 				intersection.add(a);
 		}
 
-		System.err.println("num typeI errors: " + typeI.size());
+	//	System.err.println("num typeI errors: " + typeI.size());
 		
 		TreeSet<Adjacency> assSet = new TreeSet<Adjacency>(comp);
 		for (Adjacency a: ass) { assSet.add(a);}
 		
-		System.err.println("num ref adjacencies: " + ref.length);
+	//	System.err.println("num ref adjacencies: " + ref.length);
 		
 		for (Adjacency a: ref) {
 			if (!assSet.contains(a))
 				typeII.add(a);
 		}
-		System.err.println("num typeII errors: " + typeII.size());
+	//	System.err.println("num typeII errors: " + typeII.size());
 		
-		Iterator<Adjacency> it = intersection.iterator();
+	/*	Iterator<Adjacency> it = intersection.iterator();
 		while(it.hasNext()){
 			System.err.println(it.next().toString());
-		}
+		}*/
 	}
 	
 	/**
@@ -184,13 +191,21 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	private synchronized void loadInfo(){
 		model.setReference(model.getGenomeBySourceIndex(0));
 		
-		System.out.print("Computing signed permutations....");
+		System.out.print("Counting shared bounds between contigs/chromosomes and LCBs...");
+		numSharedBnds = PermutationExporter.getSharedBoundaryCount(model);
+		System.out.print("done!\n");
+		
+		System.out.print("Counting interLCB contig/chromosome boundaries...");
+		numInterLcbBnds = PermutationExporter.countInterBlockBounds(model);
+		System.out.print("done!\n");
+		
+		System.out.print("Computing signed permutations...");
 		String[] perms = PermutationExporter.getPermStrings(model, true); 
 		System.out.print("done!\n");
 		
-		System.out.println("Permutations: ");
-		System.out.println(perms[0]);
-		System.out.println(perms[1]);
+		//System.out.println("Permutations: ");
+		//System.out.println(perms[0]);
+		//System.out.println(perms[1]);
 		
 		System.out.print("Performing DCJ rearrangement analysis...");
 		this.dcj = new DCJ(perms[0], perms[1]);
@@ -217,10 +232,16 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		Gap[][] tmp = SnpExporter.getGaps(model);
 		System.out.print("done!\n");
 		
+		System.out.print("Counting extra contigs...");
+		Chromosome[][] unique = SnpExporter.getUniqueChromosomes(model);
+		System.out.print("done!\n");
+		
 		refGaps = tmp[0];
 		assGaps = tmp[1];
 		Arrays.sort(assGaps);
 		Arrays.sort(refGaps);
+		missingChroms = unique[0];
+		extraCtgs = unique[1];
 		System.out.flush();
 		if (getBrokenCDS){
 			computeBrokenCDS();
@@ -327,6 +348,14 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	
 	public Gap[] getAssemblyGaps(){
 		return assGaps;
+	}
+	
+	public Chromosome[] getExtraContigs(){
+		return extraCtgs;
+	}
+	
+	public Chromosome[] getMissingChromosomes(){
+		return missingChroms;
 	}
 	
 	public SNP[] getSNPs(){
@@ -452,11 +481,20 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		return extraBases;
 	}
 	
+	public int getSharedBoundaryCount(){
+		return numSharedBnds;
+	}
+	
+	public int getInterLcbBoundaryCount(){
+		return numInterLcbBnds;
+	}
+	
 	public static void printInfo(AssemblyScorer sa, File outDir, String baseName, boolean batch){
 		PrintStream gapOut = null;
 		PrintStream miscallOut = null;
 		PrintStream uncallOut = null;
 		PrintStream sumOut = null;
+		PrintStream blockOut = null;
 		try {
 			File gapFile = new File(outDir, baseName+"__gaps.txt");
 			gapFile.createNewFile();
@@ -470,12 +508,15 @@ public class AssemblyScorer implements AlignmentProcessListener {
 			File sumFile = new File(outDir, baseName+"__sum.txt");
 			sumFile.createNewFile();
 			sumOut = new PrintStream(sumFile);
-			
+			File blockFile = new File(outDir,baseName+"__blocks.txt");
+			blockFile.createNewFile();
+			blockOut = new PrintStream(blockFile);
 		} catch (IOException e){
 			e.printStackTrace();
 			System.exit(-1);    
 		}
 		printInfo(sa,miscallOut,uncallOut,gapOut);
+		printBlockInfo(blockOut,sa.model);
 		if (batch){
 		    sumOut.print(ScoreAssembly.getSumText(sa, false, true));	
 		}else {
@@ -483,10 +524,38 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		}
 		ScoreAssembly.calculateMissingGC(sa, outDir, baseName);
 		
+		blockOut.close();
 		gapOut.close();
 		miscallOut.close();
 		uncallOut.close();
 		sumOut.close();
+	}
+	
+	private static void printBlockInfo(PrintStream out, XmfaViewerModel model){
+		out.println("BlockId\tBlockLength\tRefLeft\tRefRight\tAsmLeft\tAsmRight");
+		LCB[] lcbList = model.getSplitLcbList();
+		int l = -1;
+		int r = -1;
+		Genome ref = model.getGenomeBySourceIndex(0);
+		Genome asm = model.getGenomeBySourceIndex(1);
+		for (LCB lcb: lcbList){
+			out.print(lcb.id+"\t"+lcb.getAvgSegmentLength());
+			if (lcb.getReverse(ref)){
+				out.print("\t"+-1*lcb.getLeftEnd(ref));
+				out.print("\t"+-1*lcb.getRightEnd(ref));
+			} else {
+				out.print("\t"+lcb.getLeftEnd(ref));
+				out.print("\t"+lcb.getRightEnd(ref));
+			}
+			if (lcb.getReverse(asm)){
+				out.print("\t"+-1*lcb.getLeftEnd(asm));
+				out.print("\t"+-1*lcb.getRightEnd(asm));
+			} else {
+				out.print("\t"+lcb.getLeftEnd(asm));
+				out.print("\t"+lcb.getRightEnd(asm));
+			}
+			out.println();
+		}
 	}
 	
 	/**

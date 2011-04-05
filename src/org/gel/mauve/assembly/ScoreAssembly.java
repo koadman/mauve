@@ -74,7 +74,7 @@ public class ScoreAssembly  {
 
 	private int fHEIGHT = 510;
 	
-	private AssemblyScorer assScore;
+	private AssemblyScorer asmScore;
 	
 	private AnalysisDisplayWindow win;
 		
@@ -118,7 +118,7 @@ public class ScoreAssembly  {
 		new Thread( new Runnable (){ 
 			public void run(){
 				try {
-				assScore = new AssemblyScorer(ScoreAssembly.this.model);
+				asmScore = new AssemblyScorer(ScoreAssembly.this.model);
 				ScoreAssembly.this.finish();
 				} catch (Exception e){
 					ScoreAssembly.this.cancel();
@@ -138,7 +138,7 @@ public class ScoreAssembly  {
 			running.remove(this.model.getSrc().getAbsolutePath());
 			modelMap.put(this.model.getSrc().getAbsolutePath(), this);
 			sumTA.replaceRange("", 0, temp.length());
-			sumTA.setText(getSumText(assScore,true,false));
+			sumTA.setText(getSumText(asmScore,true,false));
 			//addJTables();
 			addTables();
 			finished = true;
@@ -148,7 +148,7 @@ public class ScoreAssembly  {
 	}
 	
 	private void addTables(){
-		SNP[] snps = assScore.getSNPs();
+		SNP[] snps = asmScore.getSNPs();
 		Object[] snpHeader = {"SNP_Pattern","Ref_Contig","Ref_PosInContig",
 							"Ref_PosGenomeWide","Assembly_Contig",
 							"Assembly_PosInContig","Assembly_PosGenomeWide"};
@@ -160,8 +160,8 @@ public class ScoreAssembly  {
 			snpData.addRow(snps[snpI].toString().split("\t"));
 		}
 		
-		Gap[] refGaps = assScore.getReferenceGaps();
-		Gap[] assGaps = assScore.getAssemblyGaps();
+		Gap[] refGaps = asmScore.getReferenceGaps();
+		Gap[] assGaps = asmScore.getAssemblyGaps();
 		int nGen = model.numGenomes();
 		Object[] gapHeader = new Object[5+(nGen)*3];
 		gapHeader[0] = "Sequence";
@@ -181,7 +181,7 @@ public class ScoreAssembly  {
 			gapData.addRow(refGaps[gapI].toString().split("\t"));
 		for (int gapI = 0; gapI < assGaps.length; gapI++)
 			gapData.addRow(assGaps[gapI].toString().split("\t"));
-		if (assScore.hasBrokenCDS()){
+		if (asmScore.hasBrokenCDS()){
 			Object[] cdsHeader = 
 				{"CDS_ID","Peptide_Length",
 					"Perc_IncorrectBases", "Broken_Frame_Segments",
@@ -189,18 +189,18 @@ public class ScoreAssembly  {
 					"Stop_Codon_Positions","Original_Residue"};
 			DefaultTableModel cdsData = win.addContentTable(CDS_CMD, CDS_DESC, false);
 			cdsData.setColumnIdentifiers(cdsHeader);
-			BrokenCDS[] cds = assScore.getBrokenCDS();
+			BrokenCDS[] cds = asmScore.getBrokenCDS();
 			for (BrokenCDS bcds: cds)
 				cdsData.addRow(bcds.toString().split("\t"));
 		}
 		
-		Chromosome[] chr = assScore.getInverted();
+		Chromosome[] chr = asmScore.getInverted();
 		JTextArea invTA = win.addContentPanel(INV_CMD, INV_DESC, false);
 		for (Chromosome c: chr){
 			invTA.append(c.getName()+"\n");
 		}
 		
-		Map<Chromosome,Integer> misAsm = assScore.getMisAssemblies();
+		Map<Chromosome,Integer> misAsm = asmScore.getMisAssemblies();
 		DefaultTableModel misAsmDat = win.addContentTable(MIS_CMD, MIS_DESC, false);
 		String[] misAsmHdr = {"Contig","No_Mis-Assemblies"};
 		misAsmDat.setColumnIdentifiers(misAsmHdr);
@@ -219,9 +219,10 @@ public class ScoreAssembly  {
 		StringBuilder sb = new StringBuilder();
 		if (singleLine){
 			if (header) {
-				sb.append("NumContigs\tNumRefReplicons\tNumAssemblyBases\tNumReferenceBases\tNumLCBs\t" +
+				sb.append("Name\tNumContigs\tNumRefReplicons\tNumAssemblyBases\tNumReferenceBases\tNumLCBs\t" +
 						"DCJ_Distance\tNumDCJBlocks\tNumSNPs\tNumMisCalled\tNumUnCalled\tNumGapsRef\tNumGapsAssembly\t" +
 						"TotalBasesMissed\tPercBasesMissed\tExtraBases\tPercExtraBases" + 
+						"\tMissingChromosomes\tExtraContigs\tNumSharedBoundaries\tNumInterLcbBoundaries"+
 						"\tAA\tAC\tAG\tAT\tCA\tCC\tCG\tCT\tGA\tGC\tGG\tGT\tTA\tTC\tTG\tTT\n");
 			}
 			sb.append(	assScore.getModel().getGenomeBySourceIndex(1).getDisplayName() + "\t" +
@@ -231,7 +232,9 @@ public class ScoreAssembly  {
 						assScore.getMiscalled()+'\t'+assScore.getUncalled()+'\t'+
 						assScore.getReferenceGaps().length+"\t"+assScore.getAssemblyGaps().length+"\t"+
 					 	assScore.totalMissedBases()+"\t"+nf.format(assScore.percentMissedBases()*100)+"\t"+
-					 	assScore.totalExtraBases()+"\t"+nf.format(assScore.percentExtraBases()*100));
+					 	assScore.totalExtraBases()+"\t"+nf.format(assScore.percentExtraBases()*100) +"\t"+
+					 	assScore.getMissingChromosomes().length+"\t"+assScore.getExtraContigs().length +"\t"+ 
+					 	assScore.getSharedBoundaryCount()+"\t"+assScore.getInterLcbBoundaryCount());
 			int[][] subs = assScore.getSubs();
 			for(int i=0; i<subs.length; i++)
 			{
@@ -265,6 +268,10 @@ public class ScoreAssembly  {
 					"Percent bases missed:\t" + nf.format(assScore.percentMissedBases()*100)+" %\n"+
 					"Total bases extra in assembly:\t" + assScore.totalExtraBases()+"\n" +
 					"Percent bases extra:\t" + nf.format(assScore.percentExtraBases()*100)+ " %\n"+
+					"Number of missing chromosomes:\t" + assScore.getMissingChromosomes() +"\n"+
+					"Number of extra contigs:\t"+assScore.getExtraContigs()+"\n"+
+					"Number of Shared Boundaries:\t"+assScore.getSharedBoundaryCount()+"\n"+
+					"Number of Inter-LCB Boundaries:\t"+assScore.getInterLcbBoundaryCount()+"\n"+
 					"Substitutions (Ref on Y, Assembly on X):\n"+subsToString(assScore)
 				);
 				
@@ -282,6 +289,10 @@ public class ScoreAssembly  {
 						 nf.format(assScore.percentMissedBases()*100)+"\n"+
 						 assScore.totalExtraBases()+"\n" +
 						 nf.format(assScore.percentExtraBases()*100)+ "\n"+
+						 assScore.getMissingChromosomes() +"\n"+
+						assScore.getExtraContigs()+"\n"+
+						"Number of Shared Boundaries:\t"+assScore.getSharedBoundaryCount()+"\n"+
+						"Number of Inter-LCB Boundaries:\t"+assScore.getInterLcbBoundaryCount()+"\n"+
 						 subsToString(assScore));
 			}
 		}
@@ -293,10 +304,10 @@ public class ScoreAssembly  {
 	 * in stretches up to 100nt.
 	 * Useful for determining if we're suffering GC bias
 	 */
-	public static void calculateMissingGC(AssemblyScorer assScore, File outDir, String basename){
+	public static void calculateMissingGC(AssemblyScorer asmScore, File outDir, String basename){
 		try{
 			System.out.println("Printing GC contents of gaps < 100nt!");
-			Gap[] gaps = assScore.getAssemblyGaps();
+			Gap[] gaps = asmScore.getAssemblyGaps();
 			java.io.BufferedWriter bw = new BufferedWriter(new java.io.FileWriter(new File( outDir, basename + "_missing_gc.txt" )));
 			java.io.BufferedWriter bw3 = new BufferedWriter(new java.io.FileWriter(new File( outDir, basename + "_background_gc_distribution.txt")));
 			Random randy = new Random();
@@ -305,31 +316,31 @@ public class ScoreAssembly  {
 					continue;
 				long glen = gaps[i].getLength();
 				glen = glen < 20 ? 20 : glen;
-				long[] left = assScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), gaps[i].getPosition()-glen/2);
-				long[] right = assScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), gaps[i].getPosition()+glen/2);
+				long[] left = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), gaps[i].getPosition()-glen/2);
+				long[] right = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), gaps[i].getPosition()+glen/2);
 				if(left[0]!=right[0]){
 					// gap spans LCB.  too hard for this hack.
 					continue;
 				}
 				long ll = left[1] < right[1] ? left[1] : right[1];
-				byte[] rawseq = assScore.getModel().getXmfa().readRawSequence((int)left[0], 0, ll, Math.abs(right[1]-left[1])+1);
+				byte[] rawseq = asmScore.getModel().getXmfa().readRawSequence((int)left[0], 0, ll, Math.abs(right[1]-left[1])+1);
 				double gc = countGC(rawseq);
 				if(!Double.isNaN(gc))
 				{
 					bw.write((new Double(gc)).toString());
 					bw.write("\n");
 				}
-				int rpos = randy.nextInt((int)assScore.getModel().getGenomeBySourceIndex(gaps[i].getGenomeSrcIdx()).getLength() - (int)glen);
+				int rpos = randy.nextInt((int)asmScore.getModel().getGenomeBySourceIndex(gaps[i].getGenomeSrcIdx()).getLength() - (int)glen);
 
 				// evil code copy!!
-				left = assScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), rpos-glen/2);
-				right = assScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), rpos+glen/2);
+				left = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), rpos-glen/2);
+				right = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), rpos+glen/2);
 				if(left[0]!=right[0]){
 					// gap spans LCB.  too hard for this hack.
 					continue;
 				}
 				ll = left[1] < right[1] ? left[1] : right[1];
-				rawseq = assScore.getModel().getXmfa().readRawSequence((int)left[0], 0, ll, Math.abs(right[1]-left[1])+1);
+				rawseq = asmScore.getModel().getXmfa().readRawSequence((int)left[0], 0, ll, Math.abs(right[1]-left[1])+1);
 				gc = countGC(rawseq);
 				if(!Double.isNaN(gc))
 				{

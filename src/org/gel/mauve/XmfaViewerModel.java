@@ -18,6 +18,7 @@ import java.util.prefs.BackingStoreException;
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.Sequence;
 import org.biojava.bio.symbol.SymbolList;
+import org.gel.mauve.analysis.PermutationExporter;
 import org.gel.mauve.backbone.BackboneList;
 import org.gel.mauve.backbone.BackboneListBuilder;
 import org.gel.mauve.color.BackboneLcbColor;
@@ -239,6 +240,11 @@ public class XmfaViewerModel extends LcbViewerModel {
 	        HistogramBuilder.build(raf, this);
         }
         
+        // Now that we've initialized everything, we can make split LCBs
+        LCB[] splitLCBs = PermutationExporter.getSplitLCBs(this); 
+        setSplitLcbList(splitLCBs);
+      //  LCB[] testSplitLCBs = PermutationExporter.splitLcbList(this, splitLCBs, genomes);
+      //  System.err.println("");
         // try publishing this viewer model via DBus
     }
 

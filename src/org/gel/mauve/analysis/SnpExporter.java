@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -15,6 +18,7 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
+import org.gel.mauve.Chromosome;
 import org.gel.mauve.Genome;
 import org.gel.mauve.LCB;
 import org.gel.mauve.XMFAAlignment;
@@ -228,6 +232,61 @@ public class SnpExporter {
 		while(seq[len] == '-')
 			len++;
 		return len-gapStart;
+	}
+	
+	public static Chromosome[][] getUniqueChromosomes(XmfaViewerModel model){
+		Chromosome[][] ret = new Chromosome[model.getGenomes().size()][];
+		for (int i = 0; i < ret.length; i++){
+			ret[i] = getUniqueChromosomes(model,model.getGenomeBySourceIndex(i));
+		}
+		return ret;
+	}
+	
+	public static Chromosome[] getUniqueChromosomes(XmfaViewerModel model, Genome g){
+		return getUniqueChromosomes(model, model.getXmfa(), model.getGenomes().toArray(new Genome[model.getGenomes().size()]),g);
+	}
+	
+	public static Chromosome[] getUniqueChromosomes(XmfaViewerModel model, XMFAAlignment xmfa, Genome[] set, Genome g){
+		if (g.getSourceIndex()==1) {
+			System.out.println(g.getDisplayName());
+		}
+		Pattern p = Pattern.compile("Scaffold5.12[56][0-9]");
+		List<Chromosome> chroms = g.getChromosomes();
+		Iterator<Chromosome> it = chroms.iterator();
+		Vector<Chromosome> ret = new Vector<Chromosome>();
+		while(it.hasNext()){
+			Chromosome curr = it.next();
+		//	if (p.matcher(curr.getName()).matches()){
+		//		System.out.println(curr.getName());
+		//	} 
+			boolean unique = true;
+			long i = curr.getStart();
+			long[] coords = new long[model.getGenomes().size()];
+			boolean[] gap = new boolean[model.getGenomes().size()];
+			for (; i <= curr.getEnd() && unique; i++){
+				long[] loc = model.getLCBAndColumn(g, i);
+				int lcbId = (int)loc[0];
+				model.getColumnCoordinates(lcbId, loc[1], coords, gap);
+				unique = unique && isUnique(gap,set,g.getSourceIndex());
+			}
+			if (gap[1])
+				System.out.print("");
+			if (unique) 
+				ret.add(curr);
+		}
+		return ret.toArray(new Chromosome[ret.size()]);
+	}
+	
+	private static boolean isUnique(boolean[] gap, Genome[] set, int g){
+		if (gap[g]) 
+			return false;
+		boolean allGap = true;
+		for (int i = 0; i < set.length && allGap; i++){
+			if (set[i].getSourceIndex() == g) 
+				continue;
+			allGap = allGap && gap[set[i].getSourceIndex()];
+		}
+		return allGap;
 	}
 	
 	@SuppressWarnings("unchecked")
