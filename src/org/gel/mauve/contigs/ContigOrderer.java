@@ -33,8 +33,8 @@ public class ContigOrderer implements MauveConstants {
 	protected ContigReorderer reorderer;
 	protected MauveFrame parent;
 	protected ContigMauveAlignFrame align;
-	protected int iterations;
-	public static final int DEFAULT_ITERATIONS = 2;
+	public static final int DEFAULT_ITERATIONS = 15;
+	protected int iterations = DEFAULT_ITERATIONS;
 	public static final String ALIGN_START = "Start from alignment file.";
 	public static final String SEQ_START = "Start from sequence files.";
 	protected boolean align_start;
@@ -111,7 +111,7 @@ public class ContigOrderer implements MauveConstants {
 		this.gui = gui;
 		alnListeners = new EventListenerList();
 		past_orders = new Vector ();
-		iterations = 25;//DEFAULT_ITERATIONS;
+		iterations = DEFAULT_ITERATIONS;
 		if (args != null && args.length > 0) {
 			try {
 				iterations = Integer.parseInt (args [0]);
@@ -240,8 +240,8 @@ public class ContigOrderer implements MauveConstants {
 				temp = new File (align_dir, CONTIG_OUTPUT);
 			}
 			// ugh, this is really ugly hardcoding.
-			String alnmtFilename = directory + "alignment" + count;
-			alnmtFilename += File.pathSeparator + "alignment" + count;
+			String alnmtFilename = directory + "/alignment" + count;
+			alnmtFilename += "/alignment" + count;
 			alnmtFile = new File( alnmtFilename );
 			if (orderRepeated ()) {
 				iterations = 0;
