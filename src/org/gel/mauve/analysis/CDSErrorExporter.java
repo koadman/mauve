@@ -182,10 +182,10 @@ public class CDSErrorExporter {
 				model.getColumnCoordinates((int)leftLCB[0], leftLCB[1], left_pos, gap);
 				model.getColumnCoordinates((int)rightLCB[0], rightLCB[1], right_pos, gap);
 				if (left_pos[1] == 0 || right_pos[1] == 0) {
-					System.err.println("BAD_SNP_ERROR : feature " + feat.getID());
+//					System.err.println("BAD_SNP_ERROR : feature " + feat.getID());
 					continue;
 				} else if (left_pos[0] != right_pos[0]) {
-					System.err.println("Different LCBs");
+//					System.err.println("Different LCBs");
 				} else {
 					char[] assSeq = model.getSequence(left_pos[1], right_pos[1], 1);
 					computeSubstitutions(feat,refSeq,assSeq);
@@ -200,13 +200,21 @@ public class CDSErrorExporter {
 		BrokenCDS bcds = null;
 		while (it.hasNext()) {
 			LiteWeightFeature feat = it.next();
-			refineBrokenCDS(feat);
+			try{
+				refineBrokenCDS(feat);
+			}catch(Exception e){
+				System.err.println("Warning, unable to process reference gene " + feat.getID());
+			}
 		}
 		
 		it = snpErrors.keySet().iterator();
 		while(it.hasNext()) {
 			LiteWeightFeature feat = it.next();
-			refineBrokenCDS(feat);
+			try{
+				refineBrokenCDS(feat);
+			}catch(Exception e){
+				System.err.println("Warning, unable to process reference gene " + feat.getID());
+			}
 		}
 		
 	}
@@ -229,7 +237,7 @@ public class CDSErrorExporter {
 		}
 		byte[][] alnmt = model.getSequenceRange(0, feat.getLeft(), feat.getRight());
 		if (alnmt[0].length != alnmt[1].length) {
-			System.err.println("Different sequence lengths");
+//			System.err.println("Different sequence lengths");
 		}
 		
 		byte[][][] codons = splitOnRefCodons(alnmt);
