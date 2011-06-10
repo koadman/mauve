@@ -495,6 +495,7 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		PrintStream uncallOut = null;
 		PrintStream sumOut = null;
 		PrintStream blockOut = null;
+		PrintStream chromOut = null;
 		try {
 			File gapFile = new File(outDir, baseName+"__gaps.txt");
 			gapFile.createNewFile();
@@ -511,6 +512,9 @@ public class AssemblyScorer implements AlignmentProcessListener {
 			File blockFile = new File(outDir,baseName+"__blocks.txt");
 			blockFile.createNewFile();
 			blockOut = new PrintStream(blockFile);
+			File chromFile = new File(outDir,"chromosomes.txt");
+			chromFile.createNewFile();
+			chromOut = new PrintStream(chromFile);
 		} catch (IOException e){
 			e.printStackTrace();
 			System.exit(-1);    
@@ -523,12 +527,27 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		    sumOut.print(ScoreAssembly.getSumText(sa, true, true));
 		}
 		ScoreAssembly.calculateMissingGC(sa, outDir, baseName);
+		chromOut.print(getReferenceChromosomes(sa));
 		
 		blockOut.close();
 		gapOut.close();
 		miscallOut.close();
 		uncallOut.close();
 		sumOut.close();
+		chromOut.close();
+	}
+
+	private static String getReferenceChromosomes(AssemblyScorer sa) {
+		Genome refGenome = sa.getModel().getGenomeBySourceIndex(0);
+		StringBuilder sb = new StringBuilder();
+		for(int cI=0; cI<refGenome.getChromosomes().size(); cI++){
+			Chromosome c = refGenome.getChromosomes().get(cI);
+			sb.append(c.getName());
+			sb.append("\t");
+			sb.append(c.getStart() + 1);
+			sb.append("\n");
+		}
+		return sb.toString();
 	}
 	
 	private static void printBlockInfo(PrintStream out, XmfaViewerModel model){

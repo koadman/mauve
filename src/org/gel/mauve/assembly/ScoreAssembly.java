@@ -474,7 +474,7 @@ public class ScoreAssembly  {
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp(80,
 					"java -cp Mauve.jar org.gel.mauve.assembly.ScoreAssembly [options]",
-					"[options]", getOptions(), "report bugs to me");
+					"[options]", getOptions(), "report bugs to Aaron Darling <aarondarling@ucdavis.edu>");
 			System.exit(-1);
 		}
 	
@@ -482,7 +482,7 @@ public class ScoreAssembly  {
 		if (line.hasOption("outputDir"))
 			outDir = new File(line.getOptionValue("outputDir"));
 		else 
-			new File(System.getProperty("user.dir"));
+			outDir = new File(System.getProperty("user.dir"));
 		
 		boolean batch = false;
 		if (line.hasOption("batch"))
@@ -521,7 +521,6 @@ public class ScoreAssembly  {
 			File assPath = new File(line.getOptionValue("assembly"));
 			
 			if (line.hasOption("reorder")){ // we need to reorder first
-				String reorderDir = line.getOptionValue("reorder");
 				String[] reorderParams = new String[6];
 				reorderParams[0] = "-output";
 				reorderParams[1] = outDir.getAbsolutePath();
@@ -584,9 +583,8 @@ public class ScoreAssembly  {
 		ob.addBoolean("help", "print this message");
 		ob.addBoolean("batch", "run in batch mode i.e. print summary output " +
 											"on one line to standard output");
+		ob.addBoolean("reorder", "reorder contigs before scoring the assembly");
 		ob.addArgument("string", "basename for output files", "basename",false);
-		ob.addArgument("directory", "reorder contigs before scoring " +
-						"assembly and store output in <directory>", "reorder",false);
 		ob.addArgument("directory", "save output in <directory>. Default " +
 									"is current directory.", "outputDir",true);
 		ob.addArgument("file", "file containing alignment of assembly to " +

@@ -243,7 +243,8 @@ public class ContigOrderer implements MauveConstants {
 			String alnmtFilename = directory + "/alignment" + count;
 			alnmtFilename += "/alignment" + count;
 			alnmtFile = new File( alnmtFilename );
-			if (orderRepeated ()) {
+			count++;
+			if (orderRepeated () || count > iterations) {
 				iterations = 0;
 				IOUtils.deleteDir (temp);
 				reorderer.active = false;
@@ -261,7 +262,6 @@ public class ContigOrderer implements MauveConstants {
 			}
 			else {
 				past_orders.add(reorderer.ordered);
-				count++;
 				File to = makeAlignDir ();
 				temp.renameTo (to);
 				temp = new File (to, reference.getName ());
