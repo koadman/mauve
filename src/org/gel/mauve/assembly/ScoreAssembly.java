@@ -70,7 +70,7 @@ public class ScoreAssembly  {
 	
 	private XmfaViewerModel model;
 	
-	private int fWIDTH = 400;
+	private int fWIDTH = 800;
 
 	private int fHEIGHT = 510;
 	
@@ -88,27 +88,7 @@ public class ScoreAssembly  {
 		this.finished = false;
 		initWithJTables(model);
 	}
-	/*
-	private void init(XmfaViewerModel model){
-		win = new AnalysisDisplayWindow("Score Assembly - "+model.getSrc().getName(), fWIDTH, fHEIGHT);
-		sumTA = win.addContentPanel(SUM_CMD, SUM_DESC, true);
-		JTextArea snpTA = win.addContentPanel(SNP_CMD, SNP_DESC, false);
-		JTextArea gapTA = win.addContentPanel(GAP_CMD, GAP_DESC, false);
-		sumTA.append(temp);
-		snpTA.append(temp);
-		gapTA.append(temp);
-		win.showWindow();
-		//assScore = new AssemblyScorer(model);
-		sumTA.replaceRange("", 0, temp.length());
-		sumTA.setText(getSumText(assScore,true,false));
-		snpTA.replaceRange("", 0, temp.length());
-		gapTA.replaceRange("", 0, temp.length());
-		setInfoText();
-		sumTA.setCaretPosition(0);
-		snpTA.setCaretPosition(0);
-		gapTA.setCaretPosition(0);
-	}
-	*/
+
 	private void initWithJTables(XmfaViewerModel model){
 		win = new AnalysisDisplayWindow("Score Assembly - "+model.getSrc().getName(), fWIDTH, fHEIGHT);
 		sumTA = win.addContentPanel(SUM_CMD, SUM_DESC, true);
@@ -193,24 +173,6 @@ public class ScoreAssembly  {
 			for (BrokenCDS bcds: cds)
 				cdsData.addRow(bcds.toString().split("\t"));
 		}
-		
-		Chromosome[] chr = asmScore.getInverted();
-		JTextArea invTA = win.addContentPanel(INV_CMD, INV_DESC, false);
-		for (Chromosome c: chr){
-			invTA.append(c.getName()+"\n");
-		}
-		
-		Map<Chromosome,Integer> misAsm = asmScore.getMisAssemblies();
-		DefaultTableModel misAsmDat = win.addContentTable(MIS_CMD, MIS_DESC, false);
-		String[] misAsmHdr = {"Contig","No_Mis-Assemblies"};
-		misAsmDat.setColumnIdentifiers(misAsmHdr);
-		Iterator<Chromosome> it = misAsm.keySet().iterator();
-		while (it.hasNext()){
-			Chromosome key = it.next();
-			Integer count = misAsm.get(key);
-			String[] dat = {key.getName(),count.toString()};
-			misAsmDat.addRow(dat);
-		}
 	}
 	
 	public static String getSumText(AssemblyScorer assScore, boolean header, boolean singleLine){
@@ -223,6 +185,7 @@ public class ScoreAssembly  {
 						"DCJ_Distance\tNumDCJBlocks\tNumSNPs\tNumMisCalled\tNumUnCalled\tNumGapsRef\tNumGapsAssembly\t" +
 						"TotalBasesMissed\tPercBasesMissed\tExtraBases\tPercExtraBases" + 
 						"\tMissingChromosomes\tExtraContigs\tNumSharedBoundaries\tNumInterLcbBoundaries"+
+						"\tBrokenCDS\tIntactCDS"+
 						"\tAA\tAC\tAG\tAT\tCA\tCC\tCG\tCT\tGA\tGC\tGG\tGT\tTA\tTC\tTG\tTT\n");
 			}
 			sb.append(	assScore.getModel().getGenomeBySourceIndex(1).getDisplayName() + "\t" +
@@ -235,6 +198,7 @@ public class ScoreAssembly  {
 					 	assScore.totalExtraBases()+"\t"+nf.format(assScore.percentExtraBases()*100) +"\t"+
 					 	assScore.getMissingChromosomes().length+"\t"+assScore.getExtraContigs().length +"\t"+ 
 					 	assScore.getSharedBoundaryCount()+"\t"+assScore.getInterLcbBoundaryCount());
+			sb.append( "\t" + assScore.numBrokenCDS()+"\t"+assScore.numCompleteCDS());
 			int[][] subs = assScore.getSubs();
 			for(int i=0; i<subs.length; i++)
 			{
@@ -257,8 +221,6 @@ public class ScoreAssembly  {
 					"Breakpoint Distance:\t"+assScore.getBPdist()+"\n"+
 					"DCJ Distance:\t"+assScore.getDCJdist()+"\n"+
 					"SCJ Distance:\t"+assScore.getSCJdist()+"\n"+
-					"Type-I Adjacency Error Rate:\t"+nf.format(assScore.typeIadjErr())+"\n"+
-					"Type-II Adjacency Error Rate:\t"+nf.format(assScore.typeIIadjErr())+"\n"+					
 					"Number of Complete Coding Sequences:\t"+assScore.numCompleteCDS()+"\n"+
 					"Number of Broken Coding Sequences:\t"+assScore.numBrokenCDS()+"\n"+					
 					"Number of SNPs:\t"+assScore.getSNPs().length+"\n"+
@@ -268,8 +230,8 @@ public class ScoreAssembly  {
 					"Percent bases missed:\t" + nf.format(assScore.percentMissedBases()*100)+" %\n"+
 					"Total bases extra in assembly:\t" + assScore.totalExtraBases()+"\n" +
 					"Percent bases extra:\t" + nf.format(assScore.percentExtraBases()*100)+ " %\n"+
-					"Number of missing chromosomes:\t" + assScore.getMissingChromosomes() +"\n"+
-					"Number of extra contigs:\t"+assScore.getExtraContigs()+"\n"+
+					"Number of missing chromosomes:\t" + assScore.getMissingChromosomes().length +"\n"+
+					"Number of extra contigs:\t"+assScore.getExtraContigs().length +"\n"+
 					"Number of Shared Boundaries:\t"+assScore.getSharedBoundaryCount()+"\n"+
 					"Number of Inter-LCB Boundaries:\t"+assScore.getInterLcbBoundaryCount()+"\n"+
 					"Substitutions (Ref on Y, Assembly on X):\n"+subsToString(assScore)
