@@ -1,14 +1,11 @@
 package org.gel.mauve.assembly;
 
 import java.awt.Dimension;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Random;
 
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -57,14 +54,6 @@ public class ScoreAssembly  {
 	private static final String temp = "Running...";
 	
 	private static final String error = "Error computing DCJ distances! Please report bug to atritt@ucdavis.edu";
-	
-	private static int A = 0;
-	
-	private static int C = 1;
-	
-	private static int T = 2;
-	
-	private static int G = 3;
 	
 	private JTextArea sumTA;
 	
@@ -185,7 +174,7 @@ public class ScoreAssembly  {
 						"DCJ_Distance\tNumDCJBlocks\tNumSNPs\tNumMisCalled\tNumUnCalled\tNumGapsRef\tNumGapsAssembly\t" +
 						"TotalBasesMissed\tPercBasesMissed\tExtraBases\tPercExtraBases" + 
 						"\tMissingChromosomes\tExtraContigs\tNumSharedBoundaries\tNumInterLcbBoundaries"+
-						"\tBrokenCDS\tIntactCDS"+
+						"\tBrokenCDS\tIntactCDS\tContigN50\tContigN90\tMinContigLength\tMaxContigLength"+
 						"\tAA\tAC\tAG\tAT\tCA\tCC\tCG\tCT\tGA\tGC\tGG\tGT\tTA\tTC\tTG\tTT\n");
 			}
 			sb.append(	assScore.getModel().getGenomeBySourceIndex(1).getDisplayName() + "\t" +
@@ -199,6 +188,7 @@ public class ScoreAssembly  {
 					 	assScore.getMissingChromosomes().length+"\t"+assScore.getExtraContigs().length +"\t"+ 
 					 	assScore.getSharedBoundaryCount()+"\t"+assScore.getInterLcbBoundaryCount());
 			sb.append( "\t" + assScore.numBrokenCDS()+"\t"+assScore.numCompleteCDS());
+			sb.append( "\t" + assScore.getContigN50() + "\t" + assScore.getContigN90() + "\t" + assScore.getMinContigLength() + "\t" + assScore.getMaxContigLength());
 			int[][] subs = assScore.getSubs();
 			for(int i=0; i<subs.length; i++)
 			{
@@ -234,7 +224,11 @@ public class ScoreAssembly  {
 					"Number of extra contigs:\t"+assScore.getExtraContigs().length +"\n"+
 					"Number of Shared Boundaries:\t"+assScore.getSharedBoundaryCount()+"\n"+
 					"Number of Inter-LCB Boundaries:\t"+assScore.getInterLcbBoundaryCount()+"\n"+
-					"Substitutions (Ref on Y, Assembly on X):\n"+subsToString(assScore)
+					"Contig N50:\t"+assScore.getContigN50()+"\n"+
+					"Contig N90:\t"+assScore.getContigN90()+"\n"+
+					"Min contig length:\t"+assScore.getMinContigLength()+"\n"+
+					"Max contig length:\t"+assScore.getMaxContigLength()+"\n"+
+					"Substitutions (Ref on Y, Assembly on X):\n"+AssemblyScorer.subsToString(assScore)
 				);
 				
 				
@@ -255,143 +249,12 @@ public class ScoreAssembly  {
 						assScore.getExtraContigs()+"\n"+
 						"Number of Shared Boundaries:\t"+assScore.getSharedBoundaryCount()+"\n"+
 						"Number of Inter-LCB Boundaries:\t"+assScore.getInterLcbBoundaryCount()+"\n"+
-						 subsToString(assScore));
+						 AssemblyScorer.subsToString(assScore));
 			}
 		}
 		return sb.toString();
 	}
 
-	/* 
-	 * calculate GC content of missing bases
-	 * in stretches up to 100nt.
-	 * Useful for determining if we're suffering GC bias
-	 */
-	public static void calculateMissingGC(AssemblyScorer asmScore, File outDir, String basename){
-		try{
-			System.out.println("Printing GC contents of gaps < 100nt!");
-			Gap[] gaps = asmScore.getAssemblyGaps();
-			java.io.BufferedWriter bw = new BufferedWriter(new java.io.FileWriter(new File( outDir, basename + "_missing_gc.txt" )));
-			java.io.BufferedWriter bw3 = new BufferedWriter(new java.io.FileWriter(new File( outDir, basename + "_background_gc_distribution.txt")));
-			Random randy = new Random();
-			for(int i=0; i<gaps.length; i++){
-				if(gaps[i].getLength()>100)
-					continue;
-				long glen = gaps[i].getLength();
-				glen = glen < 20 ? 20 : glen;
-				long[] left = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), gaps[i].getPosition()-glen/2);
-				long[] right = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), gaps[i].getPosition()+glen/2);
-				if(left[0]!=right[0]){
-					// gap spans LCB.  too hard for this hack.
-					continue;
-				}
-				long ll = left[1] < right[1] ? left[1] : right[1];
-				byte[] rawseq = asmScore.getModel().getXmfa().readRawSequence((int)left[0], 0, ll, Math.abs(right[1]-left[1])+1);
-				double gc = countGC(rawseq);
-				if(!Double.isNaN(gc))
-				{
-					bw.write((new Double(gc)).toString());
-					bw.write("\n");
-				}
-				int rpos = randy.nextInt((int)asmScore.getModel().getGenomeBySourceIndex(gaps[i].getGenomeSrcIdx()).getLength() - (int)glen);
-
-				// evil code copy!!
-				left = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), rpos-glen/2);
-				right = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), rpos+glen/2);
-				if(left[0]!=right[0]){
-					// gap spans LCB.  too hard for this hack.
-					continue;
-				}
-				ll = left[1] < right[1] ? left[1] : right[1];
-				rawseq = asmScore.getModel().getXmfa().readRawSequence((int)left[0], 0, ll, Math.abs(right[1]-left[1])+1);
-				gc = countGC(rawseq);
-				if(!Double.isNaN(gc))
-				{
-					bw3.write((new Double(gc)).toString());
-					bw3.write("\n");
-				}
-			}
-			bw.flush();
-			bw.close();
-			bw3.flush();
-			bw3.close();
-		}catch(IOException ioe){ioe.printStackTrace();};
-	}
-
-	private static double countGC(byte[] rawseq){
-		double gc = 0;
-		double counts = 0;
-		for(int j=0; j<rawseq.length; j++){
-			if(rawseq[j]== 'G' || rawseq[j]== 'C' || 
-					rawseq[j]== 'g' || rawseq[j]== 'c')
-				gc++;
-			else if(rawseq[j]=='-' || rawseq[j]=='\n')
-				continue;
-			counts++;
-		}
-		return gc /= counts;
-	}
-	private static String subsToString(AssemblyScorer assScore){
-		// A C T G
-		StringBuilder sb = new StringBuilder();
-		sb.append("\tA\tC\tT\tG\n");
-		char[] ar = {'A','C','T','G'};
-		int[][] subs = assScore.getSubs();
-		for (int i = 0; i < subs.length; i++){
-			sb.append(ar[i]);
-			for (int j = 0; j < subs.length; j++){
-				sb.append("\t"+(i==j?"-":subs[i][j]));
-			}
-			sb.append("\n");
-		}
-		return sb.toString();
-	}
-	
-	/**
-	 * Returns a 4x4 matrix of counts of substitution types between 
-	 * genome <code>src_i</code> and <code>src_j</code>
-	 * 
-	 * <pre>
-	 * <code>
-	 *      A  C  T  G 
-	 *    A -          
-	 *    C    -       
-	 *    T       -    
-	 *    G          - 
-	 * </code>
-	 * </pre>
-	 * @param snps
-	 * @return a 4x4 matrix of substitution counts
-	 */
-	public static int[][] countSubstitutions(SNP[] snps){
-		int[][] subs = new int[4][4];
-		for (int k = 0; k < snps.length; k++){ 
-			char c_0 = snps[k].getChar(0);
-			char c_1 = snps[k].getChar(1);
-			
-			try {
-				if (c_0 != c_1)
-					subs[getBaseIdx(c_0)][getBaseIdx(c_1)]++;
-			} catch (IllegalArgumentException e){
-				//System.err.println("Skipping ambiguity: ref = " +c_0 +" assembly = " + c_1 );
-			}
-		}
-		return subs;
-	}
-	
-	private static int getBaseIdx(char c) throws IllegalArgumentException {
-		switch(c){
-		  case 'a': return A; 
-		  case 'A': return A;
-		  case 'c': return C;
-		  case 'C': return C;
-		  case 't': return T;
-		  case 'T': return T;
-		  case 'g': return G;
-	 	  case 'G': return G;
-		  default:{ throw new IllegalArgumentException("char " + c);}
-		}
-	}
-	
 	public static void launchWindow(MauveFrame frame){
 		BaseViewerModel model = frame.getModel();
 		String key = model.getSrc().getAbsolutePath();

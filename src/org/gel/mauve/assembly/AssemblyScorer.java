@@ -8,6 +8,8 @@ import org.gel.mauve.Genome;
 import org.gel.mauve.LCB;
 
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.NumberFormat;
@@ -15,6 +17,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -68,7 +71,19 @@ public class AssemblyScorer implements AlignmentProcessListener {
 	
 	private int miscalled;
 	private int uncalled;
+
+	/** contig stats */
+	private long maxContigLength = -1;
+	private long contigN50 = -1;
+	private long contigN90 = -1;
+	private long minContigLength = -1;
+
+	private static int A = 0;
+	private static int C = 1;
+	private static int T = 2;
+	private static int G = 3;
 	
+
 	public AssemblyScorer(XmfaViewerModel model){
 		this.model = model;
 		loadInfo();
@@ -215,16 +230,12 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		computeAdjacencyErrors();
 		System.out.print("done!\n");
 		
-		System.out.print("Computing inversions and mis-assemblies...");
-		computeInverted(perms[1]);
-		System.out.print("done\n");
-		
 		System.out.print("Getting SNPs...");
 		this.snps = SnpExporter.getSNPs(model);
 		System.out.print("done!\n");
 		
 		System.out.print("Counting base substitutions...");
-		this.subs = ScoreAssembly.countSubstitutions(snps);
+		this.subs = AssemblyScorer.countSubstitutions(snps);
 		summarizeBaseCalls();
 		System.out.print("done!\n");
 		
@@ -235,6 +246,8 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		System.out.print("Counting extra contigs...");
 		Chromosome[][] unique = SnpExporter.getUniqueChromosomes(model);
 		System.out.print("done!\n");
+		
+		computeContigSizeStats();
 		
 		refGaps = tmp[0];
 		assGaps = tmp[1];
@@ -248,42 +261,30 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		}
 	}
 	
-	private void computeInverted(String asm){
-		invCtgs = new Vector<Chromosome>();
-		Comparator<Chromosome> comp = new Comparator<Chromosome>(){
-			public int compare(Chromosome c1, Chromosome c2){
-				return c1.getName().compareTo(c2.getName());
-			}
-		};
-		misAsm = new TreeMap<Chromosome,Integer>(comp);
-		String[] ctg = asm.split("[ ]*[$][ ]*");
-		List<Chromosome> tmp = model.getGenomeBySourceIndex(1).getChromosomes();
-		Chromosome[] ctgs = tmp.toArray(new Chromosome[tmp.size()]);
-		for (int i = 0; i < ctg.length;i++){
-			String[] blocks = ctg[i].split("[ ]*[,][ ]*");
-			boolean allInv =  blocks[0].startsWith("-");
-			boolean first = true;
-			for (int j = 1; j < blocks.length; j++){
-				boolean prev = blocks[j-1].startsWith("-");
-				boolean curr = blocks[j].startsWith("-");
-				if (prev != curr) {
-					numMisAssemblies++;
-					if (first) {
-						misAsm.put(ctgs[i], new Integer(1));
-						first = false;
-					} else {
-						int x = misAsm.get(ctgs[i]).intValue()+1;
-						misAsm.put(ctgs[i], x);
-					}
-				}
-			}
-			if (allInv){
-				invCtgs.add(ctgs[i]);
-			}
+	private void computeContigSizeStats(){
+		List<Chromosome> chromos = model.getGenomeBySourceIndex(1).getChromosomes();
+		long[] sizer = new long[chromos.size()];
+		int i=0;
+		long sum = 0;
+		for(Chromosome c : chromos){
+			sizer[i++] = c.getLength();
+			sum += c.getLength();
 		}
 		
-		
+		Arrays.sort(sizer);
+		minContigLength = sizer[0];
+		maxContigLength = sizer[sizer.length-1];
+		long cur = 0;
+		for(i=sizer.length-1; i>=0 && cur*2 < sum; i--){
+			cur += sizer[i];
+		}
+		contigN50 = sizer[i];
+		for(; i>0 && cur < sum*0.9d;){
+			cur += sizer[--i];
+		}
+		contigN90 = sizer[i];
 	}
+	
 	
 	public void summarizeBaseCalls(){
 		int subsum = 0;
@@ -460,6 +461,22 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		return missedBases;
 	}
 	
+	public long getMaxContigLength() {
+		return maxContigLength;
+	}
+
+	public long getContigN50() {
+		return contigN50;
+	}
+
+	public long getContigN90() {
+		return contigN90;
+	}
+
+	public long getMinContigLength() {
+		return minContigLength;
+	}
+
 	/**
 	 * 
 	 * @return numExtraBases/totalNumBases
@@ -489,6 +506,161 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		return numInterLcbBnds;
 	}
 	
+	/* 
+	 * calculate GC content of missing bases
+	 * in stretches up to 100nt.
+	 * Useful for determining if we're suffering GC bias
+	 */
+	public static void calculateMissingGC(AssemblyScorer asmScore, File outDir, String basename){
+		try{
+			System.out.println("Printing GC contents of gaps < 100nt!");
+			Gap[] gaps = asmScore.getAssemblyGaps();
+			java.io.BufferedWriter bw = new BufferedWriter(new java.io.FileWriter(new File( outDir, basename + "_missing_gc.txt" )));
+			java.io.BufferedWriter bw3 = new BufferedWriter(new java.io.FileWriter(new File( outDir, basename + "_background_gc_distribution.txt")));
+			Random randy = new Random();
+			for(int i=0; i<gaps.length; i++){
+				if(gaps[i].getLength()>100)
+					continue;
+				long glen = gaps[i].getLength();
+				glen = glen < 20 ? 20 : glen;
+				long[] left = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), gaps[i].getPosition()-glen/2);
+				long[] right = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), gaps[i].getPosition()+glen/2);
+				if(left[0]!=right[0]){
+					// gap spans LCB.  too hard for this hack.
+					continue;
+				}
+				long ll = left[1] < right[1] ? left[1] : right[1];
+				byte[] rawseq = asmScore.getModel().getXmfa().readRawSequence((int)left[0], 0, ll, Math.abs(right[1]-left[1])+1);
+				double gc = countGC(rawseq);
+				if(!Double.isNaN(gc))
+				{
+					bw.write((new Double(gc)).toString());
+					bw.write("\n");
+				}
+				int rpos = randy.nextInt((int)asmScore.getModel().getGenomeBySourceIndex(gaps[i].getGenomeSrcIdx()).getLength() - (int)glen);
+	
+				// evil code copy!!
+				left = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), rpos-glen/2);
+				right = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), rpos+glen/2);
+				if(left[0]!=right[0]){
+					// gap spans LCB.  too hard for this hack.
+					continue;
+				}
+				ll = left[1] < right[1] ? left[1] : right[1];
+				rawseq = asmScore.getModel().getXmfa().readRawSequence((int)left[0], 0, ll, Math.abs(right[1]-left[1])+1);
+				gc = countGC(rawseq);
+				if(!Double.isNaN(gc))
+				{
+					bw3.write((new Double(gc)).toString());
+					bw3.write("\n");
+				}
+			}
+			bw.flush();
+			bw.close();
+			bw3.flush();
+			bw3.close();
+		}catch(IOException ioe){ioe.printStackTrace();};
+	}
+
+	static double countGC(byte[] rawseq){
+		double gc = 0;
+		double counts = 0;
+		for(int j=0; j<rawseq.length; j++){
+			if(rawseq[j]== 'G' || rawseq[j]== 'C' || 
+					rawseq[j]== 'g' || rawseq[j]== 'c')
+				gc++;
+			else if(rawseq[j]=='-' || rawseq[j]=='\n')
+				continue;
+			counts++;
+		}
+		return gc /= counts;
+	}
+
+	static String subsToString(AssemblyScorer assScore){
+		// A C T G
+		StringBuilder sb = new StringBuilder();
+		sb.append("\tA\tC\tT\tG\n");
+		char[] ar = {'A','C','T','G'};
+		int[][] subs = assScore.getSubs();
+		for (int i = 0; i < subs.length; i++){
+			sb.append(ar[i]);
+			for (int j = 0; j < subs.length; j++){
+				sb.append("\t"+(i==j?"-":subs[i][j]));
+			}
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Returns a 4x4 matrix of counts of substitution types between 
+	 * genome <code>src_i</code> and <code>src_j</code>
+	 * 
+	 * <pre>
+	 * <code>
+	 *      A  C  T  G 
+	 *    A -          
+	 *    C    -       
+	 *    T       -    
+	 *    G          - 
+	 * </code>
+	 * </pre>
+	 * @param snps
+	 * @return a 4x4 matrix of substitution counts
+	 */
+	public static int[][] countSubstitutions(SNP[] snps){
+		int[][] subs = new int[4][4];
+		for (int k = 0; k < snps.length; k++){ 
+			char c_0 = snps[k].getChar(0);
+			char c_1 = snps[k].getChar(1);
+			
+			try {
+				if (c_0 != c_1)
+					subs[getBaseIdx(c_0)][getBaseIdx(c_1)]++;
+			} catch (IllegalArgumentException e){
+				//System.err.println("Skipping ambiguity: ref = " +c_0 +" assembly = " + c_1 );
+			}
+		}
+		return subs;
+	}
+
+	static int getBaseIdx(char c) throws IllegalArgumentException {
+		switch(c){
+		  case 'a': return AssemblyScorer.A; 
+		  case 'A': return AssemblyScorer.A;
+		  case 'c': return AssemblyScorer.C;
+		  case 'C': return AssemblyScorer.C;
+		  case 't': return AssemblyScorer.T;
+		  case 'T': return AssemblyScorer.T;
+		  case 'g': return AssemblyScorer.G;
+	 	  case 'G': return AssemblyScorer.G;
+		  default:{ throw new IllegalArgumentException("char " + c);}
+		}
+	}
+
+	public static final int MINIMUM_REPORTABLE_MISSING_LENGTH = 20;
+	public static void printMissingRegions(AssemblyScorer asmScore, File outDir, String basename)
+	{
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(new File( outDir, basename + "_missing_regions.txt" )));
+			Gap[] gaps = asmScore.getReferenceGaps();
+			for(int gI=0; gI < gaps.length; gI++){
+				if(gaps[gI].getLength() < MINIMUM_REPORTABLE_MISSING_LENGTH)
+					continue;
+				byte[][] aln = asmScore.getModel().getSequenceRange(gaps[gI].getGenomeSrcIdx(), gaps[gI].getPosition(), gaps[gI].getPosition()+gaps[gI].getLength());
+				StringBuilder sb = new StringBuilder();
+				for(int i=0; i<aln[0].length; i++){
+					if(aln[0][i]!='-' && aln[0][i]!='\n' && aln[0][i]!='\r')
+						sb.append((char)aln[0][i]);
+				}
+				sb.append("\n");
+				bw.write(">at_contig_" + gaps[gI].getContig() + "_pos_" + gaps[gI].getPositionInContig() + "_assembly_has_" + gaps[gI].getLength() + "_extra_bases\n");
+				bw.write(sb.toString());
+			}
+			bw.flush();
+		}catch(IOException ioe){ioe.printStackTrace();};
+	}
+
 	public static void printInfo(AssemblyScorer sa, File outDir, String baseName, boolean batch){
 		PrintStream gapOut = null;
 		PrintStream miscallOut = null;
@@ -526,7 +698,8 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		}else {
 		    sumOut.print(ScoreAssembly.getSumText(sa, true, true));
 		}
-		ScoreAssembly.calculateMissingGC(sa, outDir, baseName);
+		AssemblyScorer.calculateMissingGC(sa, outDir, baseName);
+		AssemblyScorer.printMissingRegions(sa, outDir, baseName);
 		chromOut.print(getReferenceChromosomes(sa));
 		
 		blockOut.close();
