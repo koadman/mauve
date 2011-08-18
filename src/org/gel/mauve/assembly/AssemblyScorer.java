@@ -522,7 +522,7 @@ public class AssemblyScorer implements AlignmentProcessListener {
 				if(gaps[i].getLength()>100)
 					continue;
 				long glen = gaps[i].getLength();
-				glen = glen < 20 ? 20 : glen;
+				glen = glen < 50 ? 50 : glen;
 				long[] left = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), gaps[i].getPosition()-glen/2);
 				long[] right = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), gaps[i].getPosition()+glen/2);
 				if(left[0]!=right[0]){
