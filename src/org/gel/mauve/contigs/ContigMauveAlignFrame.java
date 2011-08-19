@@ -58,10 +58,6 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 			seedFamiliesCheckBox.setSelected(true);
 			args.remove("--seed-family");
 		}
-		if (args.containsKey("--seed-weight")) {
-			seedLengthSlider.setValue(Integer.parseInt(args.get("--seed-weight")));
-			args.remove("--seed-weight");
-		}
 		args.remove("--output");
 		args.remove("--mums");
 		args.remove("--apply-backbone");

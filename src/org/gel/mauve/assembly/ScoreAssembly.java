@@ -346,13 +346,18 @@ public class ScoreAssembly  {
 			File assPath = new File(line.getOptionValue("assembly"));
 			
 			if (line.hasOption("reorder")){ // we need to reorder first
-				String[] reorderParams = new String[6];
+				String[] reorderParams = new String[8];
 				reorderParams[0] = "-output";
 				reorderParams[1] = outDir.getAbsolutePath();
 				reorderParams[2] = "-ref";
 				reorderParams[3] = refFile.getAbsolutePath();
 				reorderParams[4] = "-draft";
 				reorderParams[5] = assPath.getAbsolutePath();
+				// Add the following two options when doing a reorder for alignment scoring
+				// These tune the aligner toward high sequence identity, which we
+				// expect when scoring an assembly against a reference
+				reorderParams[6] = "--seed-weight=25";
+				reorderParams[7] = "--solid-seeds";
 				ContigOrderer co = new ContigOrderer(reorderParams, null, false);
 				if (basename != null)
 					as = new AssemblyScorer(co, outDir, basename);
