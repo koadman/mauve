@@ -537,7 +537,7 @@ public class AssemblyScorer implements AlignmentProcessListener {
 					bw.write((new Double(gc)).toString());
 					bw.write("\n");
 				}
-				int rpos = randy.nextInt((int)asmScore.getModel().getGenomeBySourceIndex(gaps[i].getGenomeSrcIdx()).getLength() - (int)glen);
+				int rpos = randy.nextInt((int)asmScore.getModel().getGenomeBySourceIndex(gaps[i].getGenomeSrcIdx()).getLength() - (int)glen - 100);
 	
 				// evil code copy!!
 				left = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), rpos-glen/2);
