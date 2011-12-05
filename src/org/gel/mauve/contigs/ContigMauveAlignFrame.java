@@ -32,7 +32,8 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 	
 	public void initComponents () {
 		super.initComponents();
-		setTitle("Align and Reorder Contigs");
+		if (frame != null)
+			frame.setTitle("Align and Reorder Contigs");
 		first = true;
 		minLcbWeightText.setText("200");
 		refineCheckBox.setSelected(false);

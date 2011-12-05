@@ -34,9 +34,15 @@ import org.gel.mauve.gui.dnd.DnDList;
  * A dialog box implementing a graphical interface to the command-line
  * mauveAligner tool. Allows the user to manipulate various alignment options.
  * Originally created with Metrowerks java gui designer.
+ * 
+ * Changed so is panel rather than frame, and contains frame for display if gui should be showed.
  */
-public class AlignFrame extends java.awt.Frame
+public class AlignFrame extends JPanel
 {
+	
+	//to separate data from gui
+    protected java.awt.Frame frame;
+    
     // Use for post-alignment file loading
     protected String read_filename;
 
@@ -74,16 +80,24 @@ public class AlignFrame extends java.awt.Frame
 
     Mauve mauve;
     AlignWorker worker;
+
     
     public AlignFrame(Mauve mauve)
     {
-        setResizable(false);
+        this (mauve, true);
+    }
+    
+    public AlignFrame(Mauve mauve, boolean gui_visible)
+    {
+    	if (gui_visible) {
+    		frame  = new java.awt.Frame ();
+    		frame.setResizable(false);
+    	}
         this.mauve = mauve;
     }
 
     public void initComponents()
     {
-        setIconImage(MauveFrame.mauve_icon.getImage());
         // the following code sets the frame's initial state
         parameterPanel.setSize(new java.awt.Dimension(350, 150));
         parameterPanel.setLocation(new java.awt.Point(0, 210));
@@ -189,7 +203,7 @@ public class AlignFrame extends java.awt.Frame
         sequencesLabel.setText("Sequences to align:");
         setLocation(new java.awt.Point(0, 0));
         setLayout(null);
-        setTitle("Align sequences...");
+
         
         // if we're not on Mac or Windows then use the current dir as default
         String osname = System.getProperty("os.name");
@@ -231,8 +245,19 @@ public class AlignFrame extends java.awt.Frame
         parentPanel.add(cancelButton);
 
         add(parentPanel);
-
+        
         setSize(new java.awt.Dimension(343, 383));
+
+    	if (frame != null) {
+    		frame.setIconImage(MauveFrame.mauve_icon.getImage());
+            frame.setTitle("Align sequences...");
+            frame.setLocation(new java.awt.Point(0, 0));
+            frame.setLayout(null);
+            frame.add(this);
+            frame.setSize(new java.awt.Dimension(400, 383));
+    	}
+    	
+
 
         // event handling
 
@@ -283,18 +308,20 @@ public class AlignFrame extends java.awt.Frame
                 outputButtonActionPerformed(e);
             }
         });
-
-        addWindowListener(new java.awt.event.WindowAdapter()
-        {
-            public void windowClosing(java.awt.event.WindowEvent e)
-            {
-                thisWindowClosing(e);
-            }
-            public void windowClosed(java.awt.event.WindowEvent e)
-            {
-                thisWindowClosed(e);
-            }
+        
+        if (frame != null) {
+        	frame.addWindowListener(new java.awt.event.WindowAdapter()
+        	{
+        		public void windowClosing(java.awt.event.WindowEvent e)
+        		{
+        			thisWindowClosing(e);
+        		}
+        		public void windowClosed(java.awt.event.WindowEvent e)
+        		{
+        			thisWindowClosed(e);
+        		}
         });
+        }
 
         // delete the file in case the user chooses a different file name
         alignButton.addActionListener(new java.awt.event.ActionListener()
@@ -417,14 +444,17 @@ public class AlignFrame extends java.awt.Frame
             File readFile = new File(read_filename);
             if(!readFile.exists() || readFile.length() == 0)
             {
-                JOptionPane.showMessageDialog(null, "The aligner failed to produce an alignment.  The sequences may not contain any homologous regions.", "An error occurred", JOptionPane.ERROR_MESSAGE);
+            	if (frame != null)
+            		JOptionPane.showMessageDialog(null, "The aligner failed to produce an alignment.  The sequences may not contain any homologous regions.", "An error occurred", JOptionPane.ERROR_MESSAGE);
             }
             mauve.loadFile(new File(read_filename));
-            setVisible(false);
+            if (frame != null)
+            	frame.setVisible(false);
         }
         else if(!worker.getKilled())
         {
-            JOptionPane.showMessageDialog(null, "mauveAligner exited with an error code.  Check the log window for details", "An error occurred", JOptionPane.ERROR_MESSAGE);
+        	if (frame != null)
+        		JOptionPane.showMessageDialog(null, "mauveAligner exited with an error code.  Check the log window for details", "An error occurred", JOptionPane.ERROR_MESSAGE);
         }
         worker = null;
     }
@@ -475,6 +505,7 @@ public class AlignFrame extends java.awt.Frame
     }
 
     // Close the window when the close box is clicked
+    //air - will only get called if frame is null
     void thisWindowClosing(java.awt.event.WindowEvent e)
     {
     	if(cancelButton.isEnabled())
@@ -484,8 +515,8 @@ public class AlignFrame extends java.awt.Frame
     		if(choice == JOptionPane.NO_OPTION)
     			return;
     	}
-        setVisible(false);
-        dispose();
+        frame.setVisible(false);
+        frame.dispose();
     }
     void thisWindowClosed(java.awt.event.WindowEvent e)
     {
@@ -635,6 +666,12 @@ public class AlignFrame extends java.awt.Frame
         for (int seqI = 0; seqI < seqs.length; seqI++)
             seqs[seqI] = (String) (sequenceListModel.get(seqI));
         return seqs;
+    }
+    
+    public void setVisible (boolean show) {
+    	super.setVisible (show);
+    	if (show)
+    		frame.setVisible(true);
     }
 
 }
