@@ -523,6 +523,11 @@ public class AssemblyScorer implements AlignmentProcessListener {
 					continue;
 				long glen = gaps[i].getLength();
 				glen = glen < 50 ? 50 : glen;
+				if(gaps[i].getPosition()+glen/2 >=
+					(int)asmScore.getModel().getGenomeBySourceIndex(gaps[i].getGenomeSrcIdx()).getLength())
+				{
+					glen = ((int)asmScore.getModel().getGenomeBySourceIndex(gaps[i].getGenomeSrcIdx()).getLength() - gaps[i].getPosition() - 3) / 2;
+				}
 				long[] left = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), gaps[i].getPosition()-glen/2);
 				long[] right = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), gaps[i].getPosition()+glen/2);
 				if(left[0]!=right[0]){
@@ -537,7 +542,9 @@ public class AssemblyScorer implements AlignmentProcessListener {
 					bw.write((new Double(gc)).toString());
 					bw.write("\n");
 				}
-				int rpos = randy.nextInt((int)asmScore.getModel().getGenomeBySourceIndex(gaps[i].getGenomeSrcIdx()).getLength() - (int)glen - 100);
+				int upperbound = (int)asmScore.getModel().getGenomeBySourceIndex(gaps[i].getGenomeSrcIdx()).getLength() - (int)glen - 10000;
+				upperbound = upperbound < 0 ? 0 : upperbound;
+				int rpos = randy.nextInt(upperbound);
 	
 				// evil code copy!!
 				left = asmScore.getModel().getLCBAndColumn(gaps[i].getGenomeSrcIdx(), rpos-glen/2);
@@ -668,6 +675,9 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		PrintStream sumOut = null;
 		PrintStream blockOut = null;
 		PrintStream chromOut = null;
+		if(!outDir.exists()){
+			outDir.mkdir();
+		}
 		try {
 			File gapFile = new File(outDir, baseName+"__gaps.txt");
 			gapFile.createNewFile();
