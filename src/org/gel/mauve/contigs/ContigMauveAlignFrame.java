@@ -25,7 +25,7 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 	protected Hashtable <String, String> more_args;
 
 	public ContigMauveAlignFrame(Mauve mauve, ContigOrderer orderer) {
-		super(mauve);
+		super(mauve, false);
 		this.orderer = orderer;
 		initComponents ();
 	}
@@ -133,7 +133,7 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 	public void alignButtonActionPerformed (ActionEvent e) {
 		DefaultListModel model = (DefaultListModel) sequenceList.getModel ();
 		if (first) {
-			sequenceList.setDropActive (false);
+//			sequenceList.setDropActive (false);
 			if (sequenceList.getModel ().getSize() != 2) {
 				JOptionPane.showMessageDialog(this,	"Alignment should be two sequences;" +
 						"reference\nfirst followed by sequence to reorder.",

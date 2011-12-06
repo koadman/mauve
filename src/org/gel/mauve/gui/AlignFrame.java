@@ -26,6 +26,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.JList;
 
 import org.gel.mauve.MyConsole;
 import org.gel.mauve.gui.dnd.DnDList;
@@ -65,7 +66,7 @@ public class AlignFrame extends JPanel
     protected JButton removeButton = new JButton();
     protected JTextField outputFileText = new JTextField();
     protected JButton outputButton = new JButton();
-    protected DnDList sequenceList = new DnDList();
+    protected JList sequenceList = new JList();
     protected JLabel outputLabel = new JLabel();
     JLabel sequencesLabel = new JLabel();
 

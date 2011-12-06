@@ -84,7 +84,8 @@ public class ContigOrderer implements MauveConstants {
 			error = e.getMessage();
 		}
 		if (error != null) {
-			JOptionPane.showMessageDialog(null, error);
+			System.err.println(error);
+//			JOptionPane.showMessageDialog(null, error);
 			System.exit(0);
 		}
 		else {

@@ -63,6 +63,11 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
     	super(mauve);
     }
 
+    public ProgressiveMauveAlignFrame(Mauve mauve, boolean gui)
+    {
+    	super(mauve, gui);
+    }
+
     public void initComponents()
     {
     	super.initComponents();
