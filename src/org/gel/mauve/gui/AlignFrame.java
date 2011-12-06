@@ -27,6 +27,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.JList;
 
 import org.gel.mauve.MyConsole;
 import org.gel.mauve.contigs.ContigOrderer;
@@ -37,10 +38,13 @@ import org.gel.mauve.gui.dnd.DnDList;
  * mauveAligner tool. Allows the user to manipulate various alignment options.
  * Originally created with Metrowerks java gui designer.
  */
-public class AlignFrame extends java.awt.Frame implements AlignmentProcessListener
+public class AlignFrame extends java.awt.Panel implements AlignmentProcessListener
 {
     // Use for post-alignment file loading
     protected String read_filename;
+    
+    // used when in GUI mode
+    protected java.awt.Frame frame;
 
     // member declarations
     JPanel parameterPanel = new JPanel();
@@ -61,7 +65,7 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
     protected JButton removeButton = new JButton();
     protected JTextField outputFileText = new JTextField();
     protected JButton outputButton = new JButton();
-    protected DnDList sequenceList = new DnDList();
+    protected JList sequenceList = null;
     protected JLabel outputLabel = new JLabel();
     JLabel sequencesLabel = new JLabel();
 
@@ -79,13 +83,18 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
     
     public AlignFrame(Mauve mauve)
     {
-        setResizable(false);
+    	this(mauve, true);
+    }
+    public AlignFrame(Mauve mauve, boolean gui)
+    {
+    	if(gui){
+    		frame  = new java.awt.Frame ();
+    		frame.setResizable(false);
+    	}
         this.mauve = mauve;
     }
-
     public void initComponents()
     {
-        setIconImage(MauveFrame.mauve_icon.getImage());
         // the following code sets the frame's initial state
         parameterPanel.setSize(new java.awt.Dimension(350, 150));
         parameterPanel.setLocation(new java.awt.Point(0, 210));
@@ -174,6 +183,11 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
         outputButton.setText("...");
         outputButton.setLocation(new java.awt.Point(310, 180));
         outputButton.setToolTipText("Set the output file location");
+        if(frame!=null){
+        	sequenceList = new DnDList();
+        }else{
+        	sequenceList = new JList();
+        }
         sequenceList.setModel(sequenceListModel);
         sequenceList.setVisible(true);
         sequenceList.setSize(new java.awt.Dimension(320, 110));
@@ -191,7 +205,6 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
         sequencesLabel.setText("Sequences to align:");
         setLocation(new java.awt.Point(0, 0));
         setLayout(null);
-        setTitle("Align sequences...");
         
         // if we're not on Mac or Windows then use the current dir as default
         String osname = System.getProperty("os.name");
@@ -236,6 +249,14 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
 
         setSize(new java.awt.Dimension(343, 383));
 
+        if(frame != null){
+			frame.setIconImage(MauveFrame.mauve_icon.getImage());
+			frame.setTitle("Align sequences...");
+			frame.setLocation(new java.awt.Point(0, 0));
+			frame.setLayout(null);
+			frame.add(this);
+			frame.setSize(new java.awt.Dimension(400, 383));
+        }
         // event handling
 
         defaultSeedCheckBox.addActionListener(new java.awt.event.ActionListener()
@@ -286,17 +307,19 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
             }
         });
 
-        addWindowListener(new java.awt.event.WindowAdapter()
-        {
-            public void windowClosing(java.awt.event.WindowEvent e)
-            {
-                thisWindowClosing(e);
-            }
-            public void windowClosed(java.awt.event.WindowEvent e)
-            {
-                thisWindowClosed(e);
-            }
-        });
+        if (frame != null) {
+        	frame.addWindowListener(new java.awt.event.WindowAdapter()
+	        {
+	            public void windowClosing(java.awt.event.WindowEvent e)
+	            {
+	                thisWindowClosing(e);
+	            }
+	            public void windowClosed(java.awt.event.WindowEvent e)
+	            {
+	                thisWindowClosed(e);
+	            }
+	        });
+        }
 
         // delete the file in case the user chooses a different file name
         alignButton.addActionListener(new java.awt.event.ActionListener()
@@ -442,7 +465,11 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
             File readFile = new File(read_filename);
             if(!readFile.exists() || readFile.length() == 0)
             {
-                JOptionPane.showMessageDialog(null, "The aligner failed to produce an alignment.  The sequences may not contain any homologous regions.", "An error occurred", JOptionPane.ERROR_MESSAGE);
+            	if(frame!=null){
+            		JOptionPane.showMessageDialog(null, "The aligner failed to produce an alignment.  The sequences may not contain any homologous regions.", "An error occurred", JOptionPane.ERROR_MESSAGE);
+            	}else{
+            		System.err.println("The aligner failed to produce an alignment.  The sequences may not contain any homologous regions.");
+            	}
             }
             System.out.println("Alignment complete!");
             mauve.loadFile(new File(read_filename));
@@ -511,8 +538,8 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
     		if(choice == JOptionPane.NO_OPTION)
     			return;
     	}
-        setVisible(false);
-        dispose();
+        frame.setVisible(false);
+        frame.dispose();
     }
     void thisWindowClosed(java.awt.event.WindowEvent e)
     {
@@ -666,5 +693,9 @@ public class AlignFrame extends java.awt.Frame implements AlignmentProcessListen
             seqs[seqI] = (String) (sequenceListModel.get(seqI));
         return seqs;
     }
-
+	public void setVisible (boolean show) {
+		super.setVisible (show);
+		if (show && frame != null)
+			frame.setVisible(true);
+	}
 }

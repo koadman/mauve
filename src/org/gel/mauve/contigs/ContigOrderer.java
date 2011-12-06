@@ -89,7 +89,11 @@ public class ContigOrderer implements MauveConstants {
 			error = e.getMessage();
 		}
 		if (error != null) {
-			JOptionPane.showMessageDialog(null, error);
+			if(gui){
+				JOptionPane.showMessageDialog(null, error);
+			}else{
+				System.err.println(error);
+			}
 			System.exit(0);
 		}
 		else {
@@ -124,7 +128,7 @@ public class ContigOrderer implements MauveConstants {
 		reorderer.ref_ind = 0;
 		reorderer.reorder_ind = 1;
 		align = new ContigMauveAlignFrame (
-				reorderer, this);
+				reorderer, this, gui);
 	}
 	
 	protected void startAlignment (boolean show_message) {

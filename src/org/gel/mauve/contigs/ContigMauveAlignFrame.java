@@ -16,6 +16,7 @@ import javax.swing.JScrollBar;
 
 import org.gel.mauve.gui.Mauve;
 import org.gel.mauve.gui.ProgressiveMauveAlignFrame;
+import org.gel.mauve.gui.dnd.DnDList;
 
 public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 	
@@ -24,15 +25,17 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 	protected File current_dir;
 	protected Hashtable <String, String> more_args;
 
-	public ContigMauveAlignFrame(Mauve mauve, ContigOrderer orderer) {
-		super(mauve);
+	public ContigMauveAlignFrame(Mauve mauve, ContigOrderer orderer, boolean gui) {
+		super(mauve,gui);
 		this.orderer = orderer;
 		initComponents ();
 	}
 	
 	public void initComponents () {
 		super.initComponents();
-		setTitle("Align and Reorder Contigs");
+		if(frame != null){
+			frame.setTitle("Align and Reorder Contigs");
+		}
 		first = true;
 		minLcbWeightText.setText("200");
 		refineCheckBox.setSelected(false);
@@ -128,7 +131,8 @@ public class ContigMauveAlignFrame extends ProgressiveMauveAlignFrame {
 	public void alignButtonActionPerformed (ActionEvent e) {
 		DefaultListModel model = (DefaultListModel) sequenceList.getModel ();
 		if (first) {
-			sequenceList.setDropActive (false);
+			if(sequenceList instanceof DnDList)
+				((DnDList)sequenceList).setDropActive (false);
 			if (sequenceList.getModel ().getSize() != 2) {
 				JOptionPane.showMessageDialog(this,	"Alignment should be two sequences;" +
 						"reference\nfirst followed by sequence to reorder.",
