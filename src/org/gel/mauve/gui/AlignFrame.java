@@ -27,6 +27,8 @@ import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JList;
+import javax.swing.filechooser.FileSystemView;
+import javax.swing.plaf.ComponentUI;
 
 import org.gel.mauve.MyConsole;
 import org.gel.mauve.gui.dnd.DnDList;
@@ -74,7 +76,12 @@ public class AlignFrame extends JPanel
     JTabbedPane alignmentOptionPane = new JTabbedPane();
     /** < contains the various parameter panels */
 
-    protected final JFileChooser fc = new JFileChooser();
+    protected final JFileChooser fc = new JFileChooser() {
+    	public void updateUI () {
+    		if (frame != null)
+    			super.updateUI();
+    	}
+    };
     protected JScrollPane listScrollPane = new JScrollPane();
     protected DefaultListModel sequenceListModel = new DefaultListModel();
     Dimension d;
