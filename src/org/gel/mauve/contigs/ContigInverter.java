@@ -161,7 +161,8 @@ public class ContigInverter implements MauveConstants {
 							if ((first == reversed2) || (first ? l_matched.contains (group2.first)
 									: r_matched.contains (group2.last)))
 								group2 = group1;
-							if (group2.start != group1.start && group2.matchedToEdge(!reversed2) &&
+							//first condition is new 5.10.10
+							if (noCircle (group1, group2) && group2.start != group1.start && group2.matchedToEdge(!reversed2) &&
 									central.containsEndOfLCB (group2, !reversed2) &&
 									central.lcbs [i] == (reversed1 ?  group1.first : group1.last) &&
 									central.lcbs [i + 1] == (reversed2 ?  group2.last : group2.first) &&
@@ -234,7 +235,7 @@ public class ContigInverter implements MauveConstants {
 										if (!after)
 											group2 = group1;
 										while (move != null) {
-											System.out.println ("new code: " + move);
+											System.out.println ("old new code: " + move);
 											putNextTo (after ? group2 : move, after ? move : group2,
 													after);
 											group2 = move;
@@ -252,6 +253,26 @@ public class ContigInverter implements MauveConstants {
 				} while (!last);
 			}
 		}
+	}
+	
+	//new method 5.10.10
+	protected boolean noCircle (ContigGrouper.ContigGroup group1, ContigGrouper.ContigGroup group2) {
+		Hashtable matched = befores;
+		do {
+			ContigGrouper.ContigGroup cur = (ContigGrouper.ContigGroup) matched.get(group1);
+			while (cur != null) {
+				if (group2 == cur) {
+					System.out.println ("rejecting b/c of loop");
+					return false;
+				}
+				cur = (ContigGrouper.ContigGroup) matched.get(cur);
+			}
+			if (matched == befores)
+				matched = afters;
+			else
+				matched = null;
+		} while (matched != null);
+		return true;
 	}
 	
 	/*

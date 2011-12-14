@@ -499,7 +499,7 @@ public class ContigReorderer extends Mauve implements MauveConstants {
 
 	@Override
 	public void loadFile(File rr_file) {
-		if (orderer.gui)
+		if (orderer == null || orderer.gui)
 			super.loadFile(rr_file);
 		else {
 			try {
