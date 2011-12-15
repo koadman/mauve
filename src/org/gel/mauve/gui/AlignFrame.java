@@ -73,12 +73,7 @@ public class AlignFrame extends java.awt.Panel implements AlignmentProcessListen
     JTabbedPane alignmentOptionPane = new JTabbedPane();
     /** < contains the various parameter panels */
 
-    protected final JFileChooser fc = new JFileChooser() {
-    	public void updateUI () {
-    		if (frame != null)
-    			super.updateUI();
-    	}
-    };
+    protected JFileChooser fc;
     protected JScrollPane listScrollPane = new JScrollPane();
     protected DefaultListModel sequenceListModel = new DefaultListModel();
     Dimension d;
@@ -96,10 +91,17 @@ public class AlignFrame extends java.awt.Panel implements AlignmentProcessListen
     		frame  = new java.awt.Frame ();
     		frame.setResizable(false);
     	}
+   	 fc = new JFileChooser() {
+	    	public void updateUI () {
+	    		if (frame != null)
+	    			super.updateUI();
+	    	}
+	    };
         this.mauve = mauve;
     }
     public void initComponents()
     {
+
         // the following code sets the frame's initial state
         parameterPanel.setSize(new java.awt.Dimension(350, 150));
         parameterPanel.setLocation(new java.awt.Point(0, 210));
