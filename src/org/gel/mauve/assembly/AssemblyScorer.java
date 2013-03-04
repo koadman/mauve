@@ -278,7 +278,7 @@ public class AssemblyScorer implements AlignmentProcessListener {
 		for(i=sizer.length-1; i>=0 && cur*2 < sum; i--){
 			cur += sizer[i];
 		}
-		contigN50 = sizer[i];
+		contigN50 = sizer[i+1];
 		for(; i>0 && cur < sum*0.9d;){
 			cur += sizer[--i];
 		}
