@@ -192,7 +192,7 @@
 		<copy todir="C:\htdocs" file="./jws/mauve.jnlp" />
 	</target>
 		
-	<target name="dist" depends="jar,getChangeLog,getDoco" description="generate the distribution" >
+	<target name="dist" depends="jar,getChangeLog" description="generate the distribution" >
 		<!-- Create the distribution directory -->
 		<mkdir dir="${dist}" />
 		
@@ -212,7 +212,6 @@
 				<include name="COPYING" />
 				<include name="README" />
 				<include name="ChangeLog.html" />
-				<include name="mauve_user_guide.pdf" />
 			</tarfileset>
 			<tarfileset dir="linux-x86" prefix="/mauve_${release.version}" mode="755">
 				<include name="Mauve" />
@@ -228,7 +227,7 @@
 	</target>
 
 	<!-- Create an OS X application and disk image -->
-	<target name="macdist" depends="jar,getChangeLog,getDoco" description="Generate a Mac OS X disk image" >
+	<target name="macdist" depends="jar,getChangeLog" description="Generate a Mac OS X disk image" >
 		<!-- Create the distribution directory -->
 		<mkdir dir="${dist}" />
 		<delete dir="${dist}/Mauve.app"/>
@@ -269,7 +268,6 @@
 				<include name="Mauve.app/**/*"/>
 			</fileset>
 			<fileset dir="${basedir}">
-				<include name="mauve_user_guide.pdf"/>
 				<include name="ChangeLog.html"/>
 			</fileset>
 		</copy>
@@ -314,21 +312,11 @@
 	</target>
 
 	<target name="getChangeLog" >
-		<post to="http://gel.ahabs.wisc.edu/index2.php" logfile="ChangeLog.html" failonerror="true" append="false">
-			<prop name="option" value="com_content"/>
-			<prop name="task" value="view"/>
-			<prop name="id" value="22"/>
-			<prop name="page" value="0"/>
-			<prop name="Itemid" value="60"/>
-		</post>
+		<get src="http://darlinglab.org/mauve/user-guide/versions.html" dest="ChangeLog.html" usetimestamp="true"/>
 		<copy file="ChangeLog.html" tofile="ChangeLog"/>
 	</target>
-	<target name="getDoco" >
-		<!-- Get the latest documentation PDF from the docserver -->	 
-                 <get src="http://gel.ahabs.wisc.edu/mauve/downloads/UserGuide_latest.pdf" dest="mauve_user_guide.pdf" usetimestamp="true"/>
-	</target>
 
-	<target name="nsicompile" depends="jar,getChangeLog,getDoco" description="make windows installer" >
+	<target name="nsicompile" depends="jar,getChangeLog" description="make windows installer" >
 
 		<!-- create output directory -->
 		<mkdir dir="${dist}" />
