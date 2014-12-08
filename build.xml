@@ -47,10 +47,6 @@
 	<!-- get any environment variables -->	
 	<property environment="env" />
 
-	<!-- jarbundler builds Mac OS X apps from jar files -->
-	<taskdef name="jarbundler"
-		classpath="${support}/jarbundler-1.4.jar"
-		classname="com.loomcom.ant.tasks.jarbundler.JarBundler" />
 	<!-- osxant.jar creates Mac OS X disk images -->
 	<taskdef name="dmg" classname="com.amberarcher.ant.osx.DmgTask">
 		<classpath>
@@ -226,19 +222,38 @@
 		</tar>
 	</target>
 
+	<taskdef name="bundleapp"
+		classname="com.oracle.appbundler.AppBundlerTask"   
+		classpath="build_support/appbundler-1.0.jar" />
+
 	<!-- Create an OS X application and disk image -->
 	<target name="macdist" depends="jar,getChangeLog" description="Generate a Mac OS X disk image" >
 		<!-- Create the distribution directory -->
 		<mkdir dir="${dist}" />
 		<delete dir="${dist}/Mauve.app"/>
+
+		<bundleapp outputdirectory="${dist}"
+			name="Mauve"
+			displayname="Mauve ${release.version}"
+			identifier="components.Mauve"
+			icon="osx/mauve.icns"
+			shortversion="${release.version}"
+			copyright="(c) 2003-2015  http://darlinglab.org/mauve"
+			mainclassname="org.gel.mauve.gui.Mauve">
+			<classpath file="dist/Mauve.jar" />
+			<classpath file="ext/*.jar" />
+			<librarypath file="osx/progressiveMauve" />
+			<option value="-Xmx500m -Dapple.laf.useScreenMenuBar=false"/>
+		</bundleapp>
 		
 			<!-- Use jarbundler to create an OS X app bundle -->
+<!--
 		<jarbundler dir="${dist}"
 			verbose="true"
 			name="Mauve"
 			mainclass="org.gel.mauve.gui.Mauve"
 			version="${release.version}"
-			infostring="Mauve ${release.version}, (c) 2003-2009  http://gel.ahabs.wisc.edu/mauve"
+			infostring="Mauve ${release.version}, (c) 2003-2015  http://darlinglab.org/mauve"
 			stubfile="osx/JavaApplicationStub"
 			aboutmenuname="Mauve"
 			icon="osx/mauve.icns"
@@ -260,7 +275,7 @@
 				<include name="progressiveMauve" />
 			</execfileset>
 		</jarbundler>
-		
+-->		
 		<!-- Create a staging directory for the Disk Image filesystem -->
 		<mkdir dir="staging"/>
 		<copy todir="staging">
@@ -283,7 +298,6 @@
 		<chmod file="staging/Mauve.app/Contents/MacOS/JavaApplicationStub" perm="755"/>
 		<chmod file="staging/Mauve.app/Contents/MacOS/mauveAligner" perm="755"/>
 		<chmod file="staging/Mauve.app/Contents/MacOS/progressiveMauve" perm="755"/>
-		<chmod file="staging/Mauve.app/Contents/MacOS/muscle_aed" perm="755"/>
 		<dmg destfile="${dist}/Mauve-${release.version}.dmg" name="Mauve ${release.version}" srcdir="staging" compressed="true"/>
 	</target>
 
