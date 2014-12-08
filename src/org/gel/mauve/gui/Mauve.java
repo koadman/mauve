@@ -142,7 +142,7 @@ public class Mauve {
 			ioe.printStackTrace (MyConsole.err ());
 		}
 
-        about_message = "<html><center>Mauve version " + release_version + " build " + build_number + " (c) 2003-2010 <br>Aaron Darling, Paul Infield-Harm, Anna Rissman, and Andrew Tritt<br>" + "<a href=\"http://gel.ahabs.wisc.edu\">http://gel.ahabs.wisc.edu/mauve</a><br>" + "<p>Mauve is free, open-source software.  See COPYING for details.</center></p><p>CITATION:<br>Mauve: Multiple Alignment of Conserved Genomic Sequence With Rearrangements.<br>Aaron C. E. Darling, Bob Mau, Frederick R. Blattner, Nicole T. Perna.<br><i>Genome Research</i> <b>14</b>(7):1394-1403</p>";
+        about_message = "<html><center>Mauve version " + release_version + " build " + build_number + " (c) 2003-2015 <br>Aaron Darling, Paul Infield-Harm, Anna Rissman, and Andrew Tritt<br>" + "<a href=\"http://darlinglab.org/mauve\">http://darlinglab.org/mauve</a><br>" + "<p>Mauve is free, open-source software.  See COPYING for details.</center></p><p>CITATION:<br>Mauve: Multiple Alignment of Conserved Genomic Sequence With Rearrangements.<br>Aaron C. E. Darling, Bob Mau, Frederick R. Blattner, Nicole T. Perna.<br><i>Genome Research</i> <b>14</b>(7):1394-1403</p>";
 
         // check for updates in a separate thread so as not to
         // stall the GUI if the network is down
@@ -183,7 +183,7 @@ public class Mauve {
 			else if (os_type.startsWith ("Mac"))
 				os_suffix = "mac";
 			URL hurl = new URL (
-					"http://gel.ahabs.wisc.edu/mauve/downloads/latest."
+					"http://darlinglab.org/mauve/downloads/latest."
 							+ os_suffix);
 			BufferedReader latest_in = new BufferedReader (
 					new InputStreamReader (hurl.openStream ()));
@@ -195,7 +195,7 @@ public class Mauve {
 					JOptionPane
 							.showMessageDialog (
 									null,
-									"<html>An updated version of Mauve is available.<br>See the Mauve web site at <a href=\"http://gel.ahabs.wisc.edu/mauve\">http://gel.ahabs.wisc.edu/mauve</a> for more details...",
+									"<html>An updated version of Mauve is available.<br>See the Mauve web site at <a href=\"http://darlinglab.org/mauve\">http://darlinglab.org/mauve</a> for more details...",
 									"Updated Mauve available",
 									JOptionPane.INFORMATION_MESSAGE);
 					return;
@@ -208,7 +208,7 @@ public class Mauve {
                     // download the installer to a temp file
                     //
                     MyConsole.out().println("Downloading installer...\n");
-                    String dl_location = "http://gel.ahabs.wisc.edu/mauve/downloads/mauve_installer_";
+                    String dl_location = "http://darlinglab.org/mauve/downloads/mauve_installer_";
                     dl_location += Long.toString(latest_version) + ".exe";
                     URL dlurl = new URL(dl_location);
                     InputStream is = dlurl.openStream();
