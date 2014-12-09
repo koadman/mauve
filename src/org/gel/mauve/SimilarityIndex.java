@@ -101,8 +101,9 @@ public class SimilarityIndex extends ZoomHistogram implements Serializable {
 		calculateLog2Table ();
 		calculateFracTable ();
 		initCharMap ();
+			
 
-		for (int indexI = 0; indexI < level_sizes[0]; indexI++) {
+		for (int indexI = 0; level_sizes.length > 0 && indexI < level_sizes[0]; indexI++) {
 			// calculate the left and right ends of the current sliding window
 			long lend = cur_offset + 1;
 			lend = lend < 1 ? 1 : lend;
