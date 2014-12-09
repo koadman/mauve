@@ -226,8 +226,17 @@
 		classname="com.oracle.appbundler.AppBundlerTask"   
 		classpath="build_support/appbundler-1.0.jar" />
 
+    <target name="signosx" description="Sign the app for OS X">
+        <exec executable="/usr/bin/codesign" os="Mac OS X" failonerror="true">
+            <arg value="-s"/>
+            <arg value="Developer ID Application: Aaron Darling"/>
+            <arg value="--deep"/>
+            <arg value="${dist}/Mauve.app"/>
+        </exec>
+    </target>
+
 	<!-- Create an OS X application and disk image -->
-	<target name="macdist" depends="jar,getChangeLog" description="Generate a Mac OS X disk image" >
+	<target name="macdist" depends="jar,getChangeLog,signosx" description="Generate a Mac OS X disk image" >
 		<!-- Create the distribution directory -->
 		<mkdir dir="${dist}" />
 		<delete dir="${dist}/Mauve.app"/>
@@ -240,10 +249,11 @@
 			shortversion="${release.version}"
 			copyright="(c) 2003-2015  http://darlinglab.org/mauve"
 			mainclassname="org.gel.mauve.gui.Mauve">
-			<classpath file="dist/Mauve.jar" />
+			<classpath file="Mauve.jar" />
 			<classpath file="ext/*.jar" />
 			<librarypath file="osx/progressiveMauve" />
-			<option value="-Xmx500m -Dapple.laf.useScreenMenuBar=false"/>
+            <option value="-Dapple.laf.useScreenMenuBar=false"/>
+            <option value="-Xmx500m"/>
 		</bundleapp>
 		
 			<!-- Use jarbundler to create an OS X app bundle -->
