@@ -951,4 +951,21 @@ public class BaseViewerModel {
 		}
 	}
 
+	protected int drawAnnotationThreshold = 1000000;
+	/**
+	 * Width of the view in bp below which any annotation features should be drawn
+	 * @param threshold
+	 */
+	public void setDrawAnnotationThreshold(int threshold) {
+		if(threshold!=drawAnnotationThreshold)
+		{
+			drawAnnotationThreshold = threshold;
+			fireDrawingSettingsEvent();
+		}
+		drawAnnotationThreshold = threshold;
+	}
+	public int getDrawAnnotationThreshold() {
+		return drawAnnotationThreshold;
+	}
+
 }
