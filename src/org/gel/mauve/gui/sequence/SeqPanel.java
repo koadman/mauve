@@ -59,7 +59,6 @@ public class SeqPanel extends AbstractSequencePanel implements MouseListener
     private JLabel label;
     
         
-    private RearrangementPanel rrPanel;
     private static final DataFlavor REARRANGEMENT_FLAVOR = new DataFlavor(Integer.class, TransferableObject.MIME_TYPE);
 
     private Dimension min_size;
@@ -71,8 +70,6 @@ public class SeqPanel extends AbstractSequencePanel implements MouseListener
     public SeqPanel(BaseViewerModel model, Genome genome, RearrangementPanel rearrangementPanel)
     {
         super(model, genome);
-        
-        this.rrPanel = rearrangementPanel;
         
         // set the minimum dimensions
         min_size = this.getSize();
