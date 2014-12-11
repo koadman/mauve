@@ -431,8 +431,10 @@ public class SnpExporter {
 		for (int k = 0; k < snps.length; k++){ 
 			char c_i = snps[k].getChar(src_i);
 			char c_j = snps[k].getChar(src_j);
-			if (c_i != c_j)
-				subs[getBaseIdx(c_i)][getBaseIdx(c_j)]++;
+			int b_i = getBaseIdx(c_i);
+			int b_j = getBaseIdx(c_j);
+			if (b_i != b_j && b_i > 0 && b_j > 0)
+				subs[b_i][b_j]++;
 		}
 		return subs;
 	}
