@@ -9,12 +9,16 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -109,34 +113,6 @@ public class PermutationExporter {
 			projlcbs.add(newlcb);
 		}
 		
-		// split each LCB based on the each genome's contig boundaries
-/*		if (splitOnCtgBnds){
-			
-		}	
-*/		LCB[] plist = new LCB[projlcbs.size()];
-		projlcbs.toArray(plist);
-		// now that we've got all the LCBs we need, compute adjacencies
-		LCBlist.computeLCBAdjacencies(plist, model);
-		return plist;
-	}
-	
-	public static LCB[] splitLcbList(XmfaViewerModel model, LCB[] lcbList, Genome[] genomes){
-		Vector<LCB> projlcbs = new Vector<LCB>();
-		for (LCB l: lcbList) projlcbs.add(l);
-		System.err.println("starting with " + projlcbs.size()+" LCBs");
-		for (int g = 0; g < genomes.length; g++){
-			for (int i = 0; i < projlcbs.size(); i++){
-			// split each LCB based on each genome
-				LCB tmp = (LCB) projlcbs.elementAt(i);
-				Vector newlcbs = splitLCBbyGenome(model, tmp, genomes, g);
-				// replace the old LCB with the resulting split
-				projlcbs.remove(i);
-				projlcbs.addAll(i, newlcbs);
-				// move our "pointer" to the last element we inserted into the Vector
-				i = i + newlcbs.size() - 1; 
-			}
-			System.err.println("genome"+g+"\t"+projlcbs.size());
-		}
 		LCB[] plist = new LCB[projlcbs.size()];
 		projlcbs.toArray(plist);
 		// now that we've got all the LCBs we need, compute adjacencies
@@ -144,83 +120,50 @@ public class PermutationExporter {
 		return plist;
 	}
 	
-	/**
-	 * Splits an LCB based on the contig boundaries of a given genome.
-	 * 
-	 * @param model
-	 * @param lcb the lcb to split
-	 * @param genomes the genomes to maintain
-	 * @param g the index in genomes of the genome to split on
-	 * @return a list of new <code>LCB</code>s resulting from splitting <code>lcb</code>
-	 */
-	@SuppressWarnings("unchecked")
-	public static Vector splitLCBbyGenome(XmfaViewerModel model, LCB lcb, Genome[] genomes, int g){
-		Vector subLCBs = new Vector();
-		List chrom = genomes[g].getChromosomes();
-		Iterator it = chrom.iterator();
+	public static LCB[] splitLcbList(XmfaViewerModel model, LCB[] lcbList, Genome[] genomes){
+		HashMap<Integer, Set<Long>> break_map = new HashMap<Integer, Set<Long>>();
+		// for each LCB, accumulate the breakpoint column coordinates across all genomes for the LCB
+		for (int g = 0; g < genomes.length; g++){
+			List chrom = genomes[g].getChromosomes();
+			Iterator it = chrom.iterator();				
+			while(it.hasNext()){
+				Chromosome chr = (Chromosome) it.next();
+				long[] chrbnds = new long[2];
+				chrbnds[0] = chr.getStart()-1;
+				chrbnds[1] = chr.getEnd();
+				for(long chrb:chrbnds){
+					long[] splitBnd = model.getLCBAndColumn(genomes[g], chrb);
+					Integer inty = new Integer((int)(splitBnd[0]));
+					if(break_map.get(inty) == null){
+						break_map.put(inty, new TreeSet<Long>());
+					}
+					break_map.get(inty).add(splitBnd[1]);
+				}
+			}
+		}
 		
-		LCB lcbCopy = new LCB(lcb);
-		int chrIdx = 1;
-		int shrdBnds = -1;
-		while(it.hasNext()){
-			Chromosome chr = (Chromosome) it.next();
-			long chrL = Long.MIN_VALUE;
-			long chrR = Long.MAX_VALUE;
-			shrdBnds = countSharedBoundaries(chr,lcb,genomes[g]);
-			if (shrdBnds > 0){
-				Integer newVal = sharedBoundaryCounts.get(model.getSrc().getAbsolutePath());
-				newVal += shrdBnds;
-				sharedBoundaryCounts.put(model.getSrc().getAbsolutePath(),newVal);
+		// now break up each LCB on the identified columns
+		Vector<LCB> projlcbs = new Vector<LCB>();
+		for(LCB lcb: lcbList){
+			Set<Long> breakset = break_map.get(new Integer(lcb.id));
+			if(breakset == null) continue;
+			LCB lcbCopy = new LCB(lcb);
+			long prev = 0;
+			for(Long bp: breakset){
+				LCB lcbCrop = cropLeft(model, genomes, lcbCopy, bp.longValue() - prev);
+				projlcbs.add(lcbCrop);
+				prev = bp.longValue();
 			}
-		//	if (chrIdx > 0)
-				chrL = chr.getStart();  // concatenated genome coordinate
-			
-		//	if (chrIdx < chrom.size()-1)
-				chrR = chr.getEnd();   // concatenated genome coordinate
-			long lcbL = lcbCopy.getLeftEnd(genomes[g]);  // concatenated genome coordinate
-			long lcbR = lcbCopy.getRightEnd(genomes[g]); // concatenated genome coordinate
-			boolean rev = lcbCopy.getReverse(genomes[g]);
-			
-			if (chrL < lcbR && chrL > lcbL){
-				long splitBnd = model.getLCBAndColumn(genomes[g], chrL-1)[1];
-				LCB lcbCrop = cropLeft(model, genomes, lcbCopy, splitBnd);
-				if (rev) {
-					subLCBs.add(lcbCopy);
-					lcbCopy = lcbCrop;
-				} else {
-					subLCBs.add(lcbCrop);
-				}
-			} 
-			lcbL = lcbCopy.getLeftEnd(genomes[g]);  // concatenated genome coordinate
-			lcbR = lcbCopy.getRightEnd(genomes[g]); // concatenated genome coordinate
-			
-			if (chrR < lcbR && chrR > lcbL) {
-				long splitBnd = model.getLCBAndColumn(genomes[g], chrR)[1];
-				LCB lcbCrop = cropLeft(model, genomes, lcbCopy, splitBnd);
-				if (rev) {
-					subLCBs.add(lcbCopy);
-					lcbCopy = lcbCrop;
-				} else {
-					subLCBs.add(lcbCrop);
-				}
-			}
-			chrIdx++;
+			projlcbs.add(lcbCopy);
 		}
-		subLCBs.add(lcbCopy);
-		return subLCBs;
-	} 
-	
-	private static int countSharedBoundaries(Chromosome chr, LCB lcb, Genome g){
-		int ret = 0;
-		if (lcb.getReverse(g)){
-			if (chr.getStart() == lcb.getRightEnd(g)) ret++;
-			if (chr.getEnd() == lcb.getLeftEnd(g)) ret++;
-		} else {
-			if (chr.getStart() == lcb.getLeftEnd(g)) ret++;
-			if (chr.getEnd() == lcb.getRightEnd(g)) ret++;
-		}
-		return ret;
+		
+		LCB[] plist = new LCB[projlcbs.size()];
+		projlcbs.toArray(plist);
+		// now that we've got all the LCBs we need, compute adjacencies
+		LCBlist.computeLCBAdjacencies(plist, model);
+		return plist;		
 	}
+		
 	/**
 	 * Returns the number of shared boundaries between contigs/chromosomes and LCB 
 	 * @param model XmfaViewerModel to get this info for
@@ -228,13 +171,10 @@ public class PermutationExporter {
 	 * 			this number has been calculated already, -1 otherwise
 	 */
 	public static int getSharedBoundaryCount(XmfaViewerModel model){
-		int ret = 0;
 		Genome[] genomes = new Genome[model.getGenomes().size()];
 		model.getGenomes().toArray(genomes);
 		LCB[] lcbs = model.getFullLcbList();
-		return getSharedBoundaryCount(model, lcbs, genomes);
-		
-		//return sharedBoundaryCounts.get(model.getSrc().getAbsolutePath());
+		return getSharedBoundaryCount(model, lcbs, genomes);		
 	}
 	
 	public static int getSharedBoundaryCount(XmfaViewerModel model, LCB[] lcbs, Genome[] genomes){
@@ -276,14 +216,6 @@ public class PermutationExporter {
 				ret++;
 //			dif[i-1] = (int) (ar[i] - ar[i-1]);
 		}
-/*		try {
-			File difFile = new File("/Users/andrew/MauveDev/BadDCJ/alignment4/AssemblyScore/boundary_diffs.txt");
-			if (!difFile.exists()) difFile.createNewFile();
-			PrintStream out = new PrintStream(difFile);
-			for (int d: dif)
-				out.println(d);
-			out.close();
-		} catch(Exception e) { e.printStackTrace(); }*/
 		return ret;
 	}
 	
