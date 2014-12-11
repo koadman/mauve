@@ -3,12 +3,15 @@ package org.gel.mauve.gui;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
+import javax.swing.JRadioButtonMenuItem;
 
 import org.gel.mauve.BaseViewerModel;
 import org.gel.mauve.LcbViewerModel;
 import org.gel.mauve.XmfaViewerModel;
+import org.gel.mauve.gui.sequence.FeaturePanel;
 
 public class StyleMenu extends JMenu implements ActionListener {
 
@@ -22,11 +25,50 @@ public class StyleMenu extends JMenu implements ActionListener {
     JCheckBoxMenuItem jMenuViewStyleMouseHighlighting = new JCheckBoxMenuItem();
     JCheckBoxMenuItem jMenuViewStyleDrawAttributes = new JCheckBoxMenuItem();
     
+    JMenu annotationMenu = new JMenu();
+    JRadioButtonMenuItem annotationMenuShowAnnotation = new JRadioButtonMenuItem();
+    JRadioButtonMenuItem annotationMenuShowAnnotationBelow = new JRadioButtonMenuItem();
+    JRadioButtonMenuItem annotationMenuHideAnnotation = new JRadioButtonMenuItem();
+    
     BaseViewerModel model;
     RearrangementPanel rrpanel;
 
     public StyleMenu()
     {
+    	annotationMenuShowAnnotation.setToolTipText("Always show annotated features if available");
+    	annotationMenuShowAnnotation.setVisible(true);
+    	annotationMenuShowAnnotation.setText("Always show");
+    	annotationMenuShowAnnotation.setMnemonic('a');
+    	annotationMenuShowAnnotation.setActionCommand("ShowAnnotation");
+    	annotationMenuShowAnnotation.addActionListener(this);
+
+    	annotationMenuShowAnnotationBelow.setSelected(true);
+    	annotationMenuShowAnnotationBelow.setToolTipText("Only show annotated features when the view spans less than 1Mbp");
+    	annotationMenuShowAnnotationBelow.setVisible(true);
+    	annotationMenuShowAnnotationBelow.setText("Only show less than 500Kbp");
+    	annotationMenuShowAnnotationBelow.setMnemonic('a');
+    	annotationMenuShowAnnotationBelow.setActionCommand("ShowAnnotationBelow");
+    	annotationMenuShowAnnotationBelow.addActionListener(this);
+
+    	annotationMenuHideAnnotation.setToolTipText("Never show annotated features");
+    	annotationMenuHideAnnotation.setVisible(true);
+    	annotationMenuHideAnnotation.setText("Never show");
+    	annotationMenuHideAnnotation.setMnemonic('h');
+    	annotationMenuHideAnnotation.setActionCommand("HideAnnotation");
+    	annotationMenuHideAnnotation.addActionListener(this);
+    	
+    	ButtonGroup group = new ButtonGroup();
+    	group.add(annotationMenuShowAnnotation);
+    	group.add(annotationMenuShowAnnotationBelow);
+    	group.add(annotationMenuHideAnnotation);
+
+    	annotationMenu.add(annotationMenuShowAnnotation);
+    	annotationMenu.add(annotationMenuShowAnnotationBelow);
+    	annotationMenu.add(annotationMenuHideAnnotation);
+    	annotationMenu.setText("Annotated features");
+    	annotationMenu.setMnemonic('A');
+    	annotationMenu.setToolTipText("Controls for when annotated features are displayed");
+    	
     	jMenuViewStyleSimilarityRanges.setToolTipText("Draw sequence similarity values as a range with mean value darkened");
     	jMenuViewStyleSimilarityRanges.setVisible(true);
     	jMenuViewStyleSimilarityRanges.setText("Similarity ranges");
@@ -99,6 +141,7 @@ public class StyleMenu extends JMenu implements ActionListener {
         add(jMenuViewStyleChromosomeBoundaries);
         add(jMenuViewStyleMouseHighlighting);
         add(jMenuViewStyleDrawAttributes);
+        add(annotationMenu);
     }
     
     /**
@@ -214,6 +257,27 @@ public class StyleMenu extends JMenu implements ActionListener {
             {
                 model.setDrawAttributes(!model.getDrawAttributes());
                 jMenuViewStyleDrawAttributes.setSelected(model.getDrawAttributes());
+            }
+        }
+        else if (e.getActionCommand().equals("ShowAnnotation"))
+        {
+            if (model != null)
+            {
+                model.setDrawAnnotationThreshold(Integer.MAX_VALUE);
+            }
+        }
+        else if (e.getActionCommand().equals("ShowAnnotationBelow"))
+        {
+            if (model != null)
+            {
+                model.setDrawAnnotationThreshold(FeaturePanel.DEFAULT_MAX_FEATURE_DISPLAY_RANGE);
+            }
+        }
+        else if (e.getActionCommand().equals("HideAnnotation"))
+        {
+            if (model != null)
+            {
+                model.setDrawAnnotationThreshold(0);
             }
         }
     	

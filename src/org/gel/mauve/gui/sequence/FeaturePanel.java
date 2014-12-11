@@ -62,7 +62,7 @@ public class FeaturePanel extends AbstractSequencePanel
 {
 	public static final int DEFAULT_WIDTH = 10000;
 	public static final int DEFAULT_HEIGHT = 40;
-    public static final int MAX_FEATURE_DISPLAY_RANGE = 500000;
+    public static final int DEFAULT_MAX_FEATURE_DISPLAY_RANGE = 500000;
     private TranslatedSequencePanel trans;
     private Sequence seq;
     private final GenbankMenuItemBuilder gmib = new GenbankMenuItemBuilder();
@@ -221,7 +221,7 @@ public class FeaturePanel extends AbstractSequencePanel
             double scale = (double) width / (double) getGenome().getViewLength();
 
             if (getGenome().getViewStart() >= seq.length() ||
-                    getGenome().getViewLength() >= MAX_FEATURE_DISPLAY_RANGE)
+                    getGenome().getViewLength() >= model.getDrawAnnotationThreshold())
             {
                 // TranslatedSequencePanel can't handle being translated out of
                 // visibility, and we want to limit the viewable range for 
@@ -476,8 +476,19 @@ public class FeaturePanel extends AbstractSequencePanel
         }
     }
     
-    public void genomesReordered(ModelEvent event)
+    public void drawingSettingsChanged(ModelEvent event) 
     {
-        // Ignored
+        if (getSize().width != 0)
+        {
+	        if (getGenome().getViewStart() >= seq.length() ||
+	                getGenome().getViewLength() >= model.getDrawAnnotationThreshold())
+	        {
+	            trans.setVisible(false);
+	        }
+	        else
+	        {
+	            trans.setVisible(true);
+	        }
+        }
     }
 }
