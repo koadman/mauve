@@ -128,10 +128,14 @@ public class XmfaViewerModel extends LcbViewerModel {
         }
         // it didn't get read from the cache
         if(cache_instream == null)
-            xmfa = new XMFAAlignment(inputFile);
-
+        {
+        	// try to read the alignment file itself
+        	try{
+        		xmfa = new XMFAAlignment(inputFile);
+        	}catch(Exception e){}
+        }
         // If no sequences are found, this is certainly an invalid file.
-        if (xmfa.seq_count == 0)
+        if (xmfa==null || xmfa.seq_count == 0)
         {
             throw new IOException("Not an XMFA file.  Please check that the" +
             		" input file is a properly formatted alignment.");
