@@ -14,6 +14,7 @@ import gr.zeus.ui.JConsole;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -194,7 +195,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFileOpen.setToolTipText("Open an existing alignment...");
         jMenuFileOpen.setVisible(true);
         jMenuFileOpen.setText("Open alignment...");
-        jMenuFileOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
+        jMenuFileOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         jMenuFileOpen.setMnemonic('O');
         
         jMenuFileAlign.setToolTipText("Align sequences with the mauveAligner algorithm...");
@@ -211,7 +212,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFilePrint.setVisible(true);
         jMenuFilePrint.setEnabled(false);
         jMenuFilePrint.setText("Print");
-        jMenuFilePrint.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK));
+        jMenuFilePrint.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         jMenuFilePrint.setMnemonic('P');
         
         jMenuFilePageSetup.setToolTipText("Choose printer settings...");
@@ -223,21 +224,21 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFilePrintPreview.setVisible(true);
         jMenuFilePrintPreview.setEnabled(false);
         jMenuFilePrintPreview.setText("Print Preview");
-        jMenuFilePrintPreview.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.SHIFT_MASK + ActionEvent.CTRL_MASK));
+        jMenuFilePrintPreview.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.SHIFT_MASK + Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         
 
         /*jMenuFileImport.setToolTipText("Import annotation file...");
         jMenuFileImport.setVisible(true);
         jMenuFileImport.setEnabled(false);
         jMenuFileImport.setText("Import Annotations");
-        jMenuFileImport.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+        jMenuFileImport.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         jMenuFileImport.setMnemonic('s');*/
         
         jMenuFileClose.setToolTipText("Close this alignment...");
         jMenuFileClose.setVisible(true);
         jMenuFileClose.setEnabled(false);
         jMenuFileClose.setText("Close");
-        jMenuFileClose.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, ActionEvent.CTRL_MASK));
+        jMenuFileClose.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         jMenuFileClose.setMnemonic('C');
 
         JSeparator jMenuFileSeparator1 = new JSeparator();
@@ -246,7 +247,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuFileQuit.setToolTipText("Quit this application");
         jMenuFileQuit.setVisible(true);
         jMenuFileQuit.setText("Quit");
-        jMenuFileQuit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
+        jMenuFileQuit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         jMenuFileQuit.setMnemonic('Q');
 
         jMenuHelp.setToolTipText("Get help using this program");
@@ -312,7 +313,7 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuGoToSearchFeatures.setText("Find Features. . .");
         jMenuGoToSearchFeatures.setMnemonic('i');
         jMenuGoToSearchFeatures.setAccelerator(KeyStroke.getKeyStroke(
-        		KeyEvent.VK_I, ActionEvent.CTRL_MASK));
+        		KeyEvent.VK_I, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         
         jMenuTools.setToolTipText("Additional Mauve Tools");
         jMenuTools.setVisible(true);
@@ -387,12 +388,13 @@ public class MauveFrame extends JFrame implements ActionListener, ModelProgressL
         jMenuToolsOrderContigs.addActionListener(this);
         
         // set up key bindings
-        jMenuFilePrint.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl P"), "Print");
-        jMenuFileOpen.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl O"), "Open");
-        jMenuFileClose.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl W"), "Close");
-        jMenuFileQuit.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl Q"), "Quit");
+    	String cmd_key = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() == Event.CTRL_MASK ? "ctrl" : "meta";
+        jMenuFilePrint.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(cmd_key + " P"), "Print");
+        jMenuFileOpen.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(cmd_key + " O"), "Open");
+        jMenuFileClose.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(cmd_key + " W"), "Close");
+        jMenuFileQuit.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(cmd_key + " Q"), "Quit");
         jMenuGoToSearchFeatures.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-        		KeyStroke.getKeyStroke("ctrl I"), jMenuGoToSearchFeatures.getText ());
+        		KeyStroke.getKeyStroke(cmd_key + " I"), jMenuGoToSearchFeatures.getText ());
         jMenuFilePrint.getActionMap().put("Print", new GenericAction(this, "Print"));
         jMenuFilePageSetup.getActionMap().put("PageSetup", new GenericAction(this, "PageSetup"));
         jMenuFilePrintPreview.getActionMap().put("PrintPreview", new GenericAction(this, "PrintPreview"));
