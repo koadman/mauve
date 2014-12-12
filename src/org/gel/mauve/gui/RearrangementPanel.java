@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.ComponentOrientation;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -14,6 +15,7 @@ import java.awt.Insets;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -274,14 +276,15 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
      */
     private void initKeyBindings()
     {
-        addKeyMapping("ctrl UP", "ZoomIn", this);
-        addKeyMapping("ctrl DOWN", "ZoomOut", this);
-        addKeyMapping("ctrl LEFT", "ScrollLeft", this);
-        addKeyMapping("ctrl RIGHT", "ScrollRight", this);
-        addKeyMapping("ctrl D", "DCJ", this);
-        addKeyMapping("shift ctrl LEFT", "ShiftLeft", this);
-        addKeyMapping("shift ctrl RIGHT", "ShiftRight", this);
-        addKeyMapping("ctrl R", "Recombination", this);
+    	String cmd_key = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() == Event.CTRL_MASK ? "ctrl" : "meta";
+        addKeyMapping(cmd_key + " UP", "ZoomIn", this);
+        addKeyMapping(cmd_key + " DOWN", "ZoomOut", this);
+        addKeyMapping(cmd_key + " LEFT", "ScrollLeft", this);
+        addKeyMapping(cmd_key + " RIGHT", "ScrollRight", this);
+        addKeyMapping(cmd_key + " D", "DCJ", this);
+        addKeyMapping(cmd_key + " shift LEFT", "ShiftLeft", this);
+        addKeyMapping(cmd_key + " shift RIGHT", "ShiftRight", this);
+        addKeyMapping(cmd_key + " R", "Recombination", this);
     }
     
     public void addKeyMapping(String stroke, String actionName, ActionListener listener)
@@ -619,11 +622,21 @@ public class RearrangementPanel extends JLayeredPane implements ActionListener, 
         	if( model instanceof XmfaViewerModel )
         	{
         		try{
-        			JFileChooser fc = new JFileChooser();
+        			final JFileChooser fc = new JFileChooser();
         			int ret = fc.showOpenDialog(this);
                     if (ret == JFileChooser.APPROVE_OPTION)
                     {
-            			WeakArgModelBuilder.buildModel(fc.getSelectedFile(), (XmfaViewerModel)model);
+                    	SwingWorker sw = new SwingWorker() {
+							public Object construct() {
+								try{
+									return WeakArgModelBuilder.buildModel(fc.getSelectedFile(), (XmfaViewerModel)model);
+								}catch(Exception e){
+									e.printStackTrace();
+									throw new RuntimeException("Failed to load Weak ARG xml data");
+								}
+							}
+						};
+						sw.start();
                     }        			
         		}catch(Exception ee){
         			ee.printStackTrace();
