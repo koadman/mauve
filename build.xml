@@ -18,14 +18,11 @@
 	<property name="asap.codebase" value="http://asap.ahabs.wisc.edu/asap-devel/mauve/" />
 	-->
 	<!-- deployment locations for standalone releases -->
-<!--
-	<property name="deploy.dir" value="\\192.168.26.120\darling\productionmauve\" />
-	-->
-	<property name="deploy.address" value="koadman@gel.ahabs.wisc.edu" />
-	<property name="deploy.bareaddress" value="gel.ahabs.wisc.edu" />
-	<property name="deploy.username" value="koadman" />
+	<property name="deploy.address" value="darlini8@darlinglab.org" />
+	<property name="deploy.bareaddress" value="darlinglab.org" />
+	<property name="deploy.username" value="darlini8" />
 	<property name="deploy.win32.keyfile" value="C:\Documents and Settings\Administrator\My Documents\plonk.ppk" />
-	<property name="deploy.serverdir" value="/srv/www/vhosts/gel/mauve/downloads/" />
+	<property name="deploy.serverdir" value="/home3/darlini8/www/mauve/downloads" />
 	<property name="key.alias" value="mauve" />
 	<property name="key.keystore" value="C:\Documents and Settings\koadman\My Documents\mauve-keystore" />
 	
@@ -256,36 +253,6 @@
             <option value="-Xmx500m"/>
 		</bundleapp>
 		
-			<!-- Use jarbundler to create an OS X app bundle -->
-<!--
-		<jarbundler dir="${dist}"
-			verbose="true"
-			name="Mauve"
-			mainclass="org.gel.mauve.gui.Mauve"
-			version="${release.version}"
-			infostring="Mauve ${release.version}, (c) 2003-2015  http://darlinglab.org/mauve"
-			stubfile="osx/JavaApplicationStub"
-			aboutmenuname="Mauve"
-			icon="osx/mauve.icns"
-			jvmversion="1.4+"
-			bundleid="org.gel.mauve.MauveBundle"
-			vmoptions="-Xmx500m"
-			smalltabs="true"
-			antialiasedgraphics="true"
-			antialiasedtext="true"
-			liveresize="true"
-			growboxintrudes="false"
-			screenmenu="false">
-			<jarfileset dir="./">
-				<include name="Mauve.jar" />
-				<include name="ext/*.jar" />
-			</jarfileset>
-			<execfileset dir="${basedir}/osx">
-				<include name="mauveAligner" />
-				<include name="progressiveMauve" />
-			</execfileset>
-		</jarbundler>
--->		
 		<!-- Create a staging directory for the Disk Image filesystem -->
 		<mkdir dir="staging"/>
 		<copy todir="staging">
@@ -305,7 +272,7 @@
 			</fileset>
 			<mapper type="glob" from="*" to="*.txt"/>
 		</copy>
-		<chmod file="staging/Mauve.app/Contents/MacOS/JavaApplicationStub" perm="755"/>
+		<chmod file="staging/Mauve.app/Contents/MacOS/JavaAppLauncher" perm="755"/>
 		<chmod file="staging/Mauve.app/Contents/MacOS/mauveAligner" perm="755"/>
 		<chmod file="staging/Mauve.app/Contents/MacOS/progressiveMauve" perm="755"/>
 		<dmg destfile="${dist}/Mauve-${release.version}.dmg" name="Mauve ${release.version}" srcdir="staging" compressed="true"/>
@@ -327,7 +294,6 @@
 				<include name=".project" />
 				<include name=".classpath" />
 				<include name="mauve.icns" />
-				<include name="JavaApplicationStub" />
 				<include name="Mauve Online Documentation.url" />
 				<include name="Mauve.lnk" />
 			</tarfileset>
