@@ -77,6 +77,7 @@ public class AlignFrame extends java.awt.Panel implements AlignmentProcessListen
     protected JScrollPane listScrollPane = new JScrollPane();
     protected DefaultListModel sequenceListModel = new DefaultListModel();
     Dimension d;
+    int top_inset = 30;
 
     protected Mauve mauve;
     protected AlignWorker worker;
@@ -97,6 +98,9 @@ public class AlignFrame extends java.awt.Panel implements AlignmentProcessListen
 	    		if (frame != null)
 	    			super.updateUI();
 	    	}
+	    	public boolean isTraversable(File f) {
+	    		return true;
+	    	}
 	    };
         this.mauve = mauve;
     }
@@ -109,7 +113,7 @@ public class AlignFrame extends java.awt.Panel implements AlignmentProcessListen
         parameterPanel.setVisible(true);
         parameterPanel.setLayout(null);
         defaultSeedCheckBox.setVisible(true);
-        defaultSeedCheckBox.setSize(new java.awt.Dimension(160, 20));
+        defaultSeedCheckBox.setSize(new java.awt.Dimension(180, 20));
         defaultSeedCheckBox.setText("Default seed weight");
         defaultSeedCheckBox.setSelected(true);
         defaultSeedCheckBox.setLocation(new java.awt.Point(10, 10));
@@ -133,19 +137,19 @@ public class AlignFrame extends java.awt.Panel implements AlignmentProcessListen
         seedLengthSlider.setValue(15);
         seedLengthSlider.setEnabled(false);
         seedLengthSlider.setToolTipText("This sets the minimum size of multi-MUMs found during the first pass of match detection");
-        seedLengthLabel.setSize(new java.awt.Dimension(120, 20));
+        seedLengthLabel.setSize(new java.awt.Dimension(160, 20));
         seedLengthLabel.setLocation(new java.awt.Point(210, 10));
         seedLengthLabel.setVisible(true);
         seedLengthLabel.setText("Match Seed Weight:");
         seedLengthLabel.setEnabled(false);
         recursiveCheckBox.setVisible(true);
-        recursiveCheckBox.setSize(new java.awt.Dimension(120, 20));
+        recursiveCheckBox.setSize(new java.awt.Dimension(140, 20));
         recursiveCheckBox.setText("Full Alignment");
         recursiveCheckBox.setSelected(true);
         recursiveCheckBox.setLocation(new java.awt.Point(10, 145));
         recursiveCheckBox.setToolTipText("This enables recursive anchor search and gapped alignment using MUSCLE");
         collinearCheckBox.setVisible(true);
-        collinearCheckBox.setSize(new java.awt.Dimension(195, 20));
+        collinearCheckBox.setSize(new java.awt.Dimension(220, 20));
         collinearCheckBox.setText("Assume collinear genomes");
         collinearCheckBox.setSelected(false);
         collinearCheckBox.setLocation(new java.awt.Point(10, 110));
@@ -162,26 +166,26 @@ public class AlignFrame extends java.awt.Panel implements AlignmentProcessListen
         minLcbWeightText.setText("default");
         minLcbWeightText.setToolTipText("LCBs below this weight will be removed from the alignment");
         alignButton.setVisible(true);
-        alignButton.setSize(new java.awt.Dimension(80, 30));
+        alignButton.setSize(new java.awt.Dimension(100, 30));
         alignButton.setText("Align...");
-        alignButton.setLocation(new java.awt.Point(250, 320));
+        alignButton.setLocation(new java.awt.Point(230, 320+top_inset));
         cancelButton.setVisible(true);
         cancelButton.setEnabled(false);
-        cancelButton.setSize(new java.awt.Dimension(145, 30));
+        cancelButton.setSize(new java.awt.Dimension(165, 30));
         cancelButton.setText("Cancel alignment");
-        cancelButton.setLocation(new java.awt.Point(100, 320));
+        cancelButton.setLocation(new java.awt.Point(60, 320+top_inset));
         sequencesPanel.setSize(new java.awt.Dimension(350, 210));
         sequencesPanel.setLocation(new java.awt.Point(0, 0));
         sequencesPanel.setVisible(true);
         sequencesPanel.setLayout(null);
         addButton.setVisible(true);
-        addButton.setSize(new java.awt.Dimension(145, 20));
+        addButton.setSize(new java.awt.Dimension(150, 20));
         addButton.setText("Add Sequence...");
-        addButton.setLocation(new java.awt.Point(30, 150));
+        addButton.setLocation(new java.awt.Point(10, 150));
         removeButton.setVisible(true);
-        removeButton.setSize(new java.awt.Dimension(145, 20));
+        removeButton.setSize(new java.awt.Dimension(175, 20));
         removeButton.setText("Remove Sequence");
-        removeButton.setLocation(new java.awt.Point(185, 150));
+        removeButton.setLocation(new java.awt.Point(165, 150));
         outputFileText.setVisible(true);
         outputFileText.setSize(new java.awt.Dimension(220, 20));
         outputFileText.setLocation(new java.awt.Point(85, 180));
@@ -206,8 +210,8 @@ public class AlignFrame extends java.awt.Panel implements AlignmentProcessListen
         outputLabel.setSize(new java.awt.Dimension(75, 20));
         outputLabel.setLocation(new java.awt.Point(10, 180));
         outputLabel.setVisible(true);
-        outputLabel.setText("Output File:");
-        sequencesLabel.setSize(new java.awt.Dimension(130, 20));
+        outputLabel.setText("Output:");
+        sequencesLabel.setSize(new java.awt.Dimension(180, 20));
         sequencesLabel.setLocation(new java.awt.Point(10, 10));
         sequencesLabel.setVisible(true);
         sequencesLabel.setText("Sequences to align:");
@@ -237,16 +241,13 @@ public class AlignFrame extends java.awt.Panel implements AlignmentProcessListen
         //		add(parameterPanel);
         //		add(sequencesPanel);
 
-        parentPanel.setSize(new java.awt.Dimension(350, 360));
         parentPanel.setLocation(new java.awt.Point(0, 0));
         parentPanel.setVisible(true);
         parentPanel.setLayout(null);
 
         alignmentOptionPane.addTab("Files", sequencesPanel);
         alignmentOptionPane.addTab("Parameters", parameterPanel);
-        //		alignmentOptionPane.setSelectedIndex( 0 );
-        alignmentOptionPane.setSize(new java.awt.Dimension(350, 310));
-        alignmentOptionPane.setLocation(new java.awt.Point(0, 0));
+        //		alignmentOptionPane.setSelectedIndex( 0 );        
         alignmentOptionPane.setVisible(true);
 
         parentPanel.add(alignmentOptionPane);
@@ -255,7 +256,8 @@ public class AlignFrame extends java.awt.Panel implements AlignmentProcessListen
 
         add(parentPanel);
 
-        setSize(new java.awt.Dimension(343, 383));
+        int frame_width = 400;
+        int frame_height = 383;
 
         if(frame != null){
 			frame.setIconImage(MauveFrame.mauve_icon.getImage());
@@ -263,8 +265,13 @@ public class AlignFrame extends java.awt.Panel implements AlignmentProcessListen
 			frame.setLocation(new java.awt.Point(0, 0));
 			frame.setLayout(null);
 			frame.add(this);
-			frame.setSize(new java.awt.Dimension(400, 383));
+			frame.setSize(new java.awt.Dimension(frame_width, frame_height));
         }
+        setSize(new java.awt.Dimension(frame_width, frame_height));
+        parentPanel.setSize(new java.awt.Dimension(frame_width, frame_height));
+        alignmentOptionPane.setSize(new java.awt.Dimension(frame_width, 310));
+        alignmentOptionPane.setLocation(new java.awt.Point(0, top_inset));
+
         // event handling
 
         defaultSeedCheckBox.addActionListener(new java.awt.event.ActionListener()

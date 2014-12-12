@@ -89,7 +89,7 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         d = minLcbWeightLabel.getPreferredSize();
         minLcbWeightLabel.setLocation(new java.awt.Point(265 - d.width, 90));
         minLcbWeightText.setLocation(new java.awt.Point(270, 90));
-        alignButton.setLocation(new java.awt.Point(250, 320));
+//        alignButton.setLocation(new java.awt.Point(220, 320));
 
         //
         // add a panel to define MUSCLE behavior
@@ -101,12 +101,12 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
 
         d = matrixChoice.getPreferredSize();
         matrixChoice.setSize(d);
-        matrixChoice.setLocation(new java.awt.Point(110, 10));
+        matrixChoice.setLocation(new java.awt.Point(130, 10));
         matrixChoice.setVisible(true);
     	scorePanel.add(matrixChoice);
         matrixChoiceLabel.getPreferredSize();
         matrixChoiceLabel.setText("Scoring matrix:");
-        matrixChoiceLabel.setSize(new Dimension(100, 15));
+        matrixChoiceLabel.setSize(new Dimension(120, 15));
         matrixChoiceLabel.setLocation(10, 15);
         matrixChoiceLabel.setVisible(true);
     	scorePanel.add(matrixChoiceLabel);
@@ -170,7 +170,7 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
 
         gapOpenText.setVisible(true);
         gapOpenText.setSize(new java.awt.Dimension(50, 20));
-        gapOpenText.setLocation(new java.awt.Point(130, 160));
+        gapOpenText.setLocation(new java.awt.Point(150, 160));
         gapOpenText.setText(hoxd_go);
         gapOpenText.setHorizontalAlignment(JTextField.RIGHT);
     	scorePanel.add(gapOpenText);
@@ -182,7 +182,7 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
 
         gapExtendText.setVisible(true);
         gapExtendText.setSize(new java.awt.Dimension(50, 20));
-        gapExtendText.setLocation(new java.awt.Point(130, 185));
+        gapExtendText.setLocation(new java.awt.Point(150, 185));
         gapExtendText.setText(hoxd_ge);
         gapExtendText.setHorizontalAlignment(JTextField.RIGHT);
     	scorePanel.add(gapExtendText);
@@ -197,27 +197,27 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
 
         // initialize progressiveMauve-specific configuration options
         seedFamiliesCheckBox.setVisible(true);
-        seedFamiliesCheckBox.setSize(new java.awt.Dimension(160, 20));
+        seedFamiliesCheckBox.setSize(new java.awt.Dimension(180, 20));
         seedFamiliesCheckBox.setText("Use seed families");
         seedFamiliesCheckBox.setSelected(false);
         seedFamiliesCheckBox.setLocation(new java.awt.Point(10, 30));
         seedFamiliesCheckBox.setToolTipText("<html>Uses multiple spaced seed patterns to identify potential homology.<br>Can substantially improve sensitivity and accuracy on divergent genomes.</html>");
 
         refineCheckBox.setVisible(true);
-        refineCheckBox.setSize(new java.awt.Dimension(160, 20));
+        refineCheckBox.setSize(new java.awt.Dimension(180, 20));
         refineCheckBox.setText("Iterative refinement");
         refineCheckBox.setSelected(true);
         refineCheckBox.setLocation(new java.awt.Point(10, 110));
         refineCheckBox.setToolTipText("Iteratively refines the alignment, significantly improving accuracy");
 
         sumOfPairsCheckBox.setVisible(true);
-        sumOfPairsCheckBox.setSize(new java.awt.Dimension(200, 20));
+        sumOfPairsCheckBox.setSize(new java.awt.Dimension(220, 20));
         sumOfPairsCheckBox.setText("Sum-of-pairs LCB scoring");
         sumOfPairsCheckBox.setSelected(true);
         sumOfPairsCheckBox.setLocation(new java.awt.Point(10, 135));
         sumOfPairsCheckBox.setToolTipText("Set to use sum-of-pairs scoring instead of scoring LCBs against an inferred ancestral order");
 
-        breakpointWeightScaleLabel.setSize(new java.awt.Dimension(195, 20));
+        breakpointWeightScaleLabel.setSize(new java.awt.Dimension(215, 20));
         breakpointWeightScaleLabel.setVisible(true);
         breakpointWeightScaleLabel.setText("Breakpoint dist. weight scaling:");
         breakpointWeightScaleLabel.setLocation(new java.awt.Point(10, 155));
@@ -249,7 +249,7 @@ public class ProgressiveMauveAlignFrame extends AlignFrame implements ChangeList
         breakpointWeightScaleText.setLocation(new java.awt.Point(200, 175));
         
 
-        conservationWeightScaleLabel.setSize(new java.awt.Dimension(195, 20));
+        conservationWeightScaleLabel.setSize(new java.awt.Dimension(215, 20));
         conservationWeightScaleLabel.setVisible(true);
         conservationWeightScaleLabel.setText("Conservation dist. weight scaling:");
         conservationWeightScaleLabel.setLocation(new java.awt.Point(10, 210));

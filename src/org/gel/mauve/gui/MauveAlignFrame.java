@@ -69,16 +69,16 @@ public class MauveAlignFrame extends AlignFrame {
 		alignerChoiceLabel.setLocation (alignerChoice.getLocation ().x
 				- d.width - 10, 145);
 		alignerChoiceLabel.setVisible (true);
-		islandSizeLabel.setSize (new java.awt.Dimension (135, 20));
-		islandSizeLabel.setLocation (new java.awt.Point (135, 190));
+		islandSizeLabel.setSize (new java.awt.Dimension (155, 20));
+		islandSizeLabel.setLocation (new java.awt.Point (105, 190));
 		islandSizeLabel.setVisible (true);
 		islandSizeLabel.setText ("Minimum Island Size:");
 		islandSizeText.setVisible (true);
 		islandSizeText.setSize (new java.awt.Dimension (60, 20));
 		islandSizeText.setLocation (new java.awt.Point (270, 190));
 		islandSizeText.setText ("50");
-		backboneGapSizeLabel.setSize (new java.awt.Dimension (185, 20));
-		backboneGapSizeLabel.setLocation (new java.awt.Point (85, 220));
+		backboneGapSizeLabel.setSize (new java.awt.Dimension (215, 20));
+		backboneGapSizeLabel.setLocation (new java.awt.Point (55, 220));
 		backboneGapSizeLabel.setVisible (true);
 		backboneGapSizeLabel.setText ("Maximum Backbone Gap Size:");
 		backboneGapSizeText.setVisible (true);
@@ -87,8 +87,8 @@ public class MauveAlignFrame extends AlignFrame {
 		backboneGapSizeText.setText ("50");
 		backboneGapSizeText
 				.setToolTipText ("Segments of backbone may not contain gaps larger than the given size");
-		backboneSizeLabel.setSize (new java.awt.Dimension (155, 20));
-		backboneSizeLabel.setLocation (new java.awt.Point (115, 250));
+		backboneSizeLabel.setSize (new java.awt.Dimension (175, 20));
+		backboneSizeLabel.setLocation (new java.awt.Point (85, 250));
 		backboneSizeLabel.setVisible (true);
 		backboneSizeLabel.setText ("Minimum Backbone Size:");
 		backboneSizeText.setVisible (true);
@@ -97,7 +97,7 @@ public class MauveAlignFrame extends AlignFrame {
 		backboneSizeText.setText ("50");
 		backboneSizeText
 				.setToolTipText ("Segments of backbone must contain at least this many nucleotides without a gap larger than the minimum backbone gap size");
-		alignButton.setLocation (new java.awt.Point (250, 320));
+//		alignButton.setLocation (new java.awt.Point (250, 320));
 
 		parameterPanel.add (extendLcbsCheckBox);
 		parameterPanel.add (alignerChoice);
