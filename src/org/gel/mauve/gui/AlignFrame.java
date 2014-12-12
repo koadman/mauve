@@ -383,8 +383,9 @@ public class AlignFrame extends java.awt.Panel implements AlignmentProcessListen
         }
         else if (os_type.startsWith("Mac"))
         {
-            String mauve_path = System.getProperty("user.dir");
-            mauve_path += "/Mauve.app/Contents/MacOS/" + name;
+//            String mauve_path = System.getProperty("user.dir");
+//            mauve_path += "/Mauve.app/Contents/MacOS/" + name;
+            String mauve_path = System.getProperty("java.library.path") + "/" + name;
         	File f = new File(mauve_path);
         	if( f.exists()){
         		return mauve_path;
