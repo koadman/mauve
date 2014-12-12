@@ -45,13 +45,9 @@ public class PermutationExporter {
 	private static Map<String,Integer> sharedBoundaryCounts = new HashMap<String, Integer>();
 	
 	public static LCB[] getSplitLCBs(XmfaViewerModel model){
-		System.err.println(model.getVisibleLcbList().length + " LCBs before splitting with getSplitLCBs(XmfaViewerModel).");
 		Genome[] genomes = model.getGenomes().toArray(new Genome[model.getGenomes().size()]);
 		LCB[] lcbList = projectLcbList(model, model.getVisibleLcbList(),genomes);
 		lcbList = splitLcbList(model, lcbList, genomes);
-		if (lcbList != null){
-			System.err.println(lcbList.length + " LCBs after splitting with getSplitLCBs(XmfaViewerModel).");
-		}
 		return lcbList;
 	}
 	
@@ -129,7 +125,7 @@ public class PermutationExporter {
 			while(it.hasNext()){
 				Chromosome chr = (Chromosome) it.next();
 				long[] chrbnds = new long[2];
-				chrbnds[0] = chr.getStart()-1;
+				chrbnds[0] = chr.getStart();
 				chrbnds[1] = chr.getEnd();
 				for(long chrb:chrbnds){
 					long[] splitBnd = model.getLCBAndColumn(genomes[g], chrb);
@@ -296,13 +292,6 @@ public class PermutationExporter {
 	public static Vector[] computeSignedPermutation(XmfaViewerModel model, Genome[] genomes, boolean splitOnCtgBnds)
 	{
 		int seq_count = genomes.length;
-/*		
-		LCB[] lcbList = model.getVisibleLcbList();
-		System.err.println(lcbList.length+" LCBs before splitting in computeSignedPermutation(XmfaViewerModel,Genome[],boolean).");
-		lcbList = projectLcbList(model, lcbList, genomes,splitOnCtgBnds);
-		System.err.println(lcbList.length+" LCBs after splitting in computeSignedPermutation(XmfaViewerModel,Genome[],boolean).");
-		LCB[] lcbList2 = getSplitLCBs(model);
-*/
 		LCB[] lcbList = null;
 		if (splitOnCtgBnds){
 			lcbList = model.getSplitLcbList();
@@ -421,9 +410,11 @@ public class PermutationExporter {
 						sb.append(",");
 					sb.append(cur.elementAt(k).toString());
 				}
-				if (genomes[i].isCircular(j))
-					sb.append(MauveConstants.CIRCULAR_CHAR);
-				sb.append("$ ");
+				if(cur.size()>0){
+					if (genomes[i].isCircular(j))
+						sb.append(MauveConstants.CIRCULAR_CHAR);
+					sb.append("$ ");
+				}
 			}
 			sb.append("\n");
 		}
