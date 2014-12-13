@@ -86,19 +86,21 @@
 		<!-- Build all java source files -->
 		<javac
 			classpath="
-				${ext}/biojava.jar;
-				${ext}/bytecode.jar;
+				${ext}/core-1.9.1.jar;
+				${ext}/bytecode-1.9.1.jar;
+				${ext}/gui-1.9.1.jar;
 				${ext}/commons-cli-1.2.jar;
 				${support}/junit.jar;
 				${ext}/zeus-jscl.jar;
 				${ext}/goose.jar;
 				${ext}/ant-1.7.1.jar;
 				${ext}/dbus-2.6.jar;
+				${ext}/jebl-0.4.jar;
 				${ext}/unix-0.5.jar"
 			srcdir="${src}"
 			destdir="${build}"
-			target="1.5"
-			source="1.5"
+			target="1.6"
+			source="1.6"
 		/>
 		<mkdir dir="${build}/images"/>
 		<copy todir="${build}/images">
@@ -206,11 +208,6 @@
 				<include name="README" />
 				<include name="ChangeLog.html" />
 			</tarfileset>
-			<tarfileset dir="linux-x86" prefix="/mauve_${release.version}" mode="755">
-				<include name="Mauve" />
-				<include name="mauveAligner" />
-				<include name="progressiveMauve" />
-			</tarfileset>
 			<tarfileset dir="linux-x64" prefix="/mauve_${release.version}/linux-x64" mode="755">
 				<include name="mauveAligner" />
 				<include name="progressiveMauve" />
@@ -249,6 +246,7 @@
 			<classpath file="Mauve.jar" />
 			<classpath file="ext/*.jar" />
 			<librarypath file="osx/progressiveMauve" />
+			<librarypath file="osx/mauveAligner" />
             <option value="-Dapple.laf.useScreenMenuBar=false"/>
             <option value="-Xmx500m"/>
 		</bundleapp>
