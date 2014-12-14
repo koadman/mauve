@@ -402,9 +402,8 @@ public class AlignFrame extends java.awt.Panel implements AlignmentProcessListen
         	String mauvedir = System.getProperty("mauveDir");
         	if(mauvedir == null)	mauvedir = "./";
         	String pname = mauvedir + name;
+       		pname = mauvedir + "linux-x64/" + name;
         	System.out.println("trying path " + pname);
-        	if(os_arch.indexOf("64") >= 0)
-        		pname = mauvedir + "linux-x64/" + name;
         	File f = new File(pname);
         	if( f.exists())
         		return pname;
