@@ -190,7 +190,6 @@ CreateDirectory "$SMPROGRAMS\Mauve $%release_version%"
 Delete "$SMPROGRAMS\Mauve $%release_version%\Mauve.lnk"
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve.lnk" "$1\bin\javaw" "-jar -Xmx1000m Mauve.jar" "$INSTDIR\mauve.ico"
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve ChangeLog.lnk" "$INSTDIR\ChangeLog.html"
-CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve User Guide.lnk" "$INSTDIR\mauve_user_guide.pdf"
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve License.lnk" "notepad.exe" "COPYING" "$INSTDIR\COPYING" 0
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Mauve Online Documentation.lnk" "$INSTDIR\Mauve Online Documentation.url" "" "$INSTDIR\Mauve Online Documentation.url" 0
 CreateShortCut "$SMPROGRAMS\Mauve $%release_version%\Uninstall Mauve.lnk" "$INSTDIR\Uninstall.exe"
@@ -232,7 +231,6 @@ pop $0
 
   ; Top level directory files
   File "ChangeLog.html"
-  File "mauve_user_guide.pdf"
   File "COPYING"
   File "README"
   File "win32\mauveAligner.exe"
@@ -318,7 +316,6 @@ Section "Uninstall"
 	Delete /REBOOTOK "$INSTDIR\win64\progressiveMauve.exe"
 	Delete /REBOOTOK "$INSTDIR\Mauve.jar"
 	Delete /REBOOTOK "$INSTDIR\mauve.ico"
-	Delete /REBOOTOK "$INSTDIR\mauve_user_guide.pdf"
 	Delete /REBOOTOK "$INSTDIR\Mauve Online Documentation.url"
 	
 	; External dependency files
