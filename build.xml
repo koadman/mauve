@@ -140,10 +140,10 @@
 				<section name="common">
 					<attribute name="Specification-Title" value="Mauve"/>
 					<attribute name="Specification-Version" value="${version}"/>
-					<attribute name="Specification-Vendor" value="Genome Evolution Laboratory"/>
+					<attribute name="Specification-Vendor" value="Aaron E. Darling"/>
 					<attribute name="Implementation-Title" value="Mauve"/>
 					<attribute name="Implementation-Version" value="${version} ${TODAY}"/> 
-					<attribute name="Implementation-Vendor" value="Genome Evolution Laboratory"/>
+					<attribute name="Implementation-Vendor" value="Aaron E. Darling"/>
 				</section>
 			</manifest>
 		 </jar>
@@ -223,17 +223,82 @@
 		classname="com.oracle.appbundler.AppBundlerTask"   
 		classpath="build_support/appbundler-1.0.jar" />
 
-    <target name="signosx" description="Sign the app for OS X">
-        <exec executable="/usr/bin/codesign" os="Mac OS X" failonerror="true">
-            <arg value="-s"/>
-            <arg value="Developer ID Application: Aaron Darling"/>
-            <arg value="--deep"/>
-            <arg value="${dist}/Mauve.app"/>
-        </exec>
-    </target>
+<!-- Create a DMG - This only works on MacOSX (requires hdiutil) -->
+<target name="dmg" depends="macdist" description="Create a DMG package for MacOSX (only works on MacOSX)">
+    
+    <!-- Set this property value to your application name -->
+    <property name="app.name" value="Mauve ${release.version}"/>
+    
+    <!-- Set this property value to a directory where you can
+     mount temporarily your images, for example /tmp -->
+    <property name="mountdir"  value="/tmp"/>
+    
+    <!-- Delete previously created DMG -->
+    <delete file="${app.name}.dmg" quiet="yes" failonerror="false"/>
+    
+    <!-- Create a temporary Disk Image -->
+    <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
+        <arg value="create"/>
+        <arg value="-srcfolder"/>
+        <arg value="staging"/>
+        <arg value="-volname"/>
+        <arg value="${app.name}"/>
+        <arg value="-ov"/>
+        <arg value="${app.name}-tmp.dmg"/>
+        <arg value="-format"/>
+        <arg value="UDRW"/>
+    </exec>
+    
+    <!-- Attach the temporary image -->
+    <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
+        <arg value="attach"/>
+        <arg value="${app.name}-tmp.dmg"/>
+        <arg value="-mountroot"/>
+        <arg value="${mountdir}/"/>
+    </exec>
+    
+    <!-- Copy the background, the volume icon and DS_Store files -->
+    <mkdir dir="${mountdir}/${app.name}/.background"/>
+    <copy file="osx/background.png" tofile="${mountdir}/${app.name}/.background/background.png" overwrite="true"/>
+    <copy file="osx/mauve.icns" tofile="${mountdir}/${app.name}/.VolumeIcon.icns" overwrite="true"/>
+    <copy file="osx/DS_Store" tofile="${mountdir}/${app.name}/.DS_Store" overwrite="true"/>
+
+
+    <!-- Indicate that we want a custom icon -->
+    <exec executable="SetFile" os="Mac OS X">
+        <arg value="-a"/>
+        <arg value="C"/>
+        <arg value="${mountdir}/${app.name}"/>
+    </exec>
+    
+    <!-- Add a symbolic link to the Applications directory -->
+    <symlink link="${mountdir}/${app.name}" resource="/Applications"/>
+
+
+
+    <!-- Detach the temporary image -->
+    <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
+        <arg value="detach"/>
+        <arg value="${mountdir}/${app.name}"/>
+    </exec>
+    
+    <!-- Compress it to a new image -->
+    <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
+        <arg value="convert"/>
+        <arg value="${app.name}-tmp.dmg"/>
+        <arg value="-format"/>
+        <arg value="UDZO"/>
+        <arg value="-o"/>
+        <arg value="${app.name}.dmg"/>
+    </exec>
+    
+    <!-- Delete the temporary image -->
+    <delete file="${app.name}-tmp.dmg" quiet="yes" failonerror="false"/>
+</target>
+
 
 	<!-- Create an OS X application and disk image -->
-	<target name="macdist" depends="jar,getChangeLog,signosx" description="Generate a Mac OS X disk image" >
+	<target name="macdist" depends="jar,getChangeLog" description="Generate a Mac OS X disk image" >
 		<!-- Create the distribution directory -->
 		<mkdir dir="${dist}" />
 		<delete dir="${dist}/Mauve.app"/>
@@ -276,7 +341,17 @@
 		<chmod file="staging/Mauve.app/Contents/MacOS/JavaAppLauncher" perm="755"/>
 		<chmod file="staging/Mauve.app/Contents/MacOS/mauveAligner" perm="755"/>
 		<chmod file="staging/Mauve.app/Contents/MacOS/progressiveMauve" perm="755"/>
-		<dmg destfile="${dist}/Mauve-${release.version}.dmg" name="Mauve ${release.version}" srcdir="staging" compressed="true"/>
+
+<!-- sign the app -->
+<exec executable="/usr/bin/codesign" os="Mac OS X" failonerror="true">
+    <arg value="-s"/>
+    <arg value="Developer ID Application: Aaron Darling"/>
+    <arg value="--deep"/>
+    <arg value="staging/Mauve.app"/>
+</exec>
+<!---->
+
+<!--        <dmg destfile="${dist}/Mauve-${release.version}.dmg" name="Mauve ${release.version}" srcdir="staging" compressed="true"/> -->
 	</target>
 
 	<target name="srcdist" depends="init" description="package a source distribution">
