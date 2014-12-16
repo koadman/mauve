@@ -86,9 +86,9 @@
 		<!-- Build all java source files -->
 		<javac
 			classpath="
-				${ext}/core-1.9.1.jar;
-				${ext}/bytecode-1.9.1.jar;
-				${ext}/gui-1.9.1.jar;
+				${ext}/core-1.9.2-SNAPSHOT.jar;
+				${ext}/bytecode-1.9.2-SNAPSHOT.jar;
+				${ext}/gui-1.9.2-SNAPSHOT.jar;
 				${ext}/commons-cli-1.2.jar;
 				${support}/junit.jar;
 				${ext}/zeus-jscl.jar;
