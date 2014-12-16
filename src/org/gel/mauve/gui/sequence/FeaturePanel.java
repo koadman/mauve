@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.EventListener;
 import java.util.Iterator;
@@ -18,6 +19,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
+import javax.swing.Timer;
 import javax.swing.ToolTipManager;
 import javax.swing.event.EventListenerList;
 
@@ -409,8 +411,9 @@ public class FeaturePanel extends AbstractSequencePanel
         }
     }
 
-    private final class ToolTipMotionListener implements SequenceViewerMotionListener
+    private final class ToolTipMotionListener implements SequenceViewerMotionListener, ActionListener
     {
+    	Timer tooltipDelayResetTimer = new Timer(2000, this);
         public void mouseDragged(SequenceViewerEvent sve)
         {
             //This space intentionally left blank.
@@ -422,6 +425,8 @@ public class FeaturePanel extends AbstractSequencePanel
 
             if (t != null && t instanceof FeatureHolder && 
             		((FeatureHolder) t).countFeatures() > 0) {
+            	ToolTipManager.sharedInstance().setInitialDelay(1);
+            	ToolTipManager.sharedInstance().setDismissDelay(100000);
                 FeatureHolder fh = (FeatureHolder) t;
                 ToolTipManager.sharedInstance().registerComponent (trans);
                 StringBuffer msg = new StringBuffer("<HTML>");
@@ -459,12 +464,18 @@ public class FeaturePanel extends AbstractSequencePanel
                     }
                 }
                 trans.setToolTipText(msg.toString());
+                tooltipDelayResetTimer.start();
             }
             else
             {
                 trans.setToolTipText(null);
                 ToolTipManager.sharedInstance().unregisterComponent (trans);
             }
+        }
+        
+        public void actionPerformed(ActionEvent ae){
+        	ToolTipManager.sharedInstance().setInitialDelay(2000);
+        	ToolTipManager.sharedInstance().setDismissDelay(10000);
         }
     }
 
