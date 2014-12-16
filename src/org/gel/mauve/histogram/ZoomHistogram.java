@@ -270,9 +270,6 @@ public class ZoomHistogram implements Serializable {
 			level_tmp /= index_factor;
 			levels++;
 		}
-		// nothing to allocate if there are no levels
-		if (levels == 0)
-			return;
 
 		resolutions = new long [levels];
 		level_sizes = new long [levels];
@@ -294,6 +291,10 @@ public class ZoomHistogram implements Serializable {
 		}
 
 		sim_index = new byte [(int) size_sum];
+
+		// nothing more to allocate if there are no levels
+		if (levels == 0)
+			return;
 		
 		min_vals = new byte[(int)(size_sum - level_sizes[0])];
 		max_vals = new byte[(int)(size_sum - level_sizes[0])];
