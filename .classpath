@@ -3,16 +3,18 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="var" path="JUNIT_HOME/junit.jar" sourcepath="ECLIPSE_HOME/plugins/org.eclipse.jdt.source_3.0.0/src/org.junit_3.8.1/junitsrc.zip"/>
-	<classpathentry kind="lib" path="ext/bytecode.jar"/>
 	<classpathentry kind="lib" path="ext/commons-cli-1.2.jar"/>
 	<classpathentry kind="lib" path="ext/ant-1.7.1.jar"/>
+	<classpathentry kind="lib" path="ext/jebl-0.4.jar" sourcepath="/jebl/src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="lib" path="ext/zeus-jscl.jar"/>
-	<classpathentry kind="lib" path="ext/biojava.jar"/>
 	<classpathentry kind="lib" path="ext/dbus-2.6.jar"/>
 	<classpathentry kind="lib" path="ext/unix-0.5.jar"/>
 	<classpathentry kind="lib" path="ext/jsc.jar"/>
 	<classpathentry kind="lib" path="ext/goose.jar"/>
 	<classpathentry kind="lib" path="ext/jnlp.jar"/>
+	<classpathentry kind="lib" path="ext/bytecode-1.9.2-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="ext/core-1.9.2-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="ext/gui-1.9.2-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
