@@ -6,7 +6,7 @@
 	
 	<!-- set the release version, unless making a snapshot -->
 	<target name="release_properties" unless="env.MAUVE_SNAPSHOT">
-		<property name="release.version" value="2.4.0_beta"/>
+		<property name="release.version" value="2.4.0"/>
 	</target>
 
 	<!-- deployment locations for production ASAP integration -->
@@ -207,6 +207,9 @@
 				<include name="COPYING" />
 				<include name="README" />
 				<include name="ChangeLog.html" />
+			</tarfileset>
+			<tarfileset dir="linux-x64" prefix="/mauve_${release.version}/" mode="755">
+				<include name="Mauve" />
 			</tarfileset>
 			<tarfileset dir="linux-x64" prefix="/mauve_${release.version}/linux-x64" mode="755">
 				<include name="mauveAligner" />
