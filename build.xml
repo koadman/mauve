@@ -101,7 +101,9 @@
 			destdir="${build}"
 			target="1.6"
 			source="1.6"
-		/>
+		>
+			<compilerarg value="-Xbootclasspath/p:${env.JAVA_6_RT_PATH}"/>
+		</javac>
 		<mkdir dir="${build}/images"/>
 		<copy todir="${build}/images">
 			<fileset dir="${src}/images"/>
