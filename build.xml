@@ -229,14 +229,14 @@
 <target name="dmg" depends="macdist" description="Create a DMG package for MacOSX (only works on MacOSX)">
     
     <!-- Set this property value to your application name -->
-    <property name="app.name" value="Mauve ${release.version}"/>
+    <property name="app.name" value="Mauve-${release.version}"/>
     
     <!-- Set this property value to a directory where you can
      mount temporarily your images, for example /tmp -->
     <property name="mountdir"  value="/tmp"/>
     
     <!-- Delete previously created DMG -->
-    <delete file="${app.name}.dmg" quiet="yes" failonerror="false"/>
+    <delete file="${dist}/${app.name}.dmg" quiet="yes" failonerror="false"/>
     
     <!-- Create a temporary Disk Image -->
     <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
@@ -246,7 +246,7 @@
         <arg value="-volname"/>
         <arg value="${app.name}"/>
         <arg value="-ov"/>
-        <arg value="${app.name}-tmp.dmg"/>
+        <arg value="${dist}/${app.name}-tmp.dmg"/>
         <arg value="-format"/>
         <arg value="UDRW"/>
     </exec>
@@ -254,7 +254,7 @@
     <!-- Attach the temporary image -->
     <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
         <arg value="attach"/>
-        <arg value="${app.name}-tmp.dmg"/>
+        <arg value="${dist}/${app.name}-tmp.dmg"/>
         <arg value="-mountroot"/>
         <arg value="${mountdir}/"/>
     </exec>
@@ -287,15 +287,15 @@
     <!-- Compress it to a new image -->
     <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
         <arg value="convert"/>
-        <arg value="${app.name}-tmp.dmg"/>
+        <arg value="${dist}/${app.name}-tmp.dmg"/>
         <arg value="-format"/>
         <arg value="UDZO"/>
         <arg value="-o"/>
-        <arg value="${app.name}.dmg"/>
+        <arg value="${dist}/${app.name}.dmg"/>
     </exec>
     
     <!-- Delete the temporary image -->
-    <delete file="${app.name}-tmp.dmg" quiet="yes" failonerror="false"/>
+    <delete file="${dist}/${app.name}-tmp.dmg" quiet="yes" failonerror="false"/>
 </target>
 
 
@@ -305,6 +305,8 @@
 		<mkdir dir="${dist}" />
 		<delete dir="${dist}/Mauve.app"/>
 
+        <!-- get the java home -->
+        <exec executable="/usr/libexec/java_home" os="Mac OS X" failonerror="true" outputproperty="osx.java.home"/>
 		<bundleapp outputdirectory="${dist}"
 			name="Mauve"
 			displayname="Mauve ${release.version}"
@@ -317,6 +319,7 @@
 			<classpath file="ext/*.jar" />
 			<librarypath file="osx/progressiveMauve" />
 			<librarypath file="osx/mauveAligner" />
+            <runtime dir="${osx.java.home}" />
             <option value="-Dapple.laf.useScreenMenuBar=false"/>
             <option value="-Xmx500m"/>
 		</bundleapp>
@@ -484,7 +487,7 @@
 	</target>
 
 	<!-- assumes that passwordless ssh authentication has been configured to the web server -->
-	<target name="deployMacOSX" depends="macdist">
+	<target name="deployMacOSX" depends="dmg">
 		<exec executable="scp">
 			<arg value="${dist}/Mauve-${release.version}.dmg" />
 			<arg value="${deploy.address}:${deploy.serverdir}" />
