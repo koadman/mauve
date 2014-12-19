@@ -326,10 +326,12 @@
 		
 		<!-- Create a staging directory for the Disk Image filesystem -->
 		<mkdir dir="staging"/>
+        <exec executable="ditto" failonerror="true">
+                <arg value="-v"/>
+                <arg value="${dist}/Mauve.app"/>
+                <arg value="staging/Mauve.app"/>
+        </exec>
 		<copy todir="staging">
-			<fileset dir="${dist}">
-				<include name="Mauve.app/**/*"/>
-			</fileset>
 			<fileset dir="${basedir}">
 				<include name="ChangeLog.html"/>
 			</fileset>
