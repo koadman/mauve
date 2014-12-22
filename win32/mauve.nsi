@@ -209,7 +209,7 @@ Quit
 
 InstallJava:
   SetOutPath $TEMP
-  File "win32\jre-6u6-windows-i586-p-iftw.exe"
+  File "win32\jre-8u25-windows-i586-iftw.exe"
   ExecWait "$TEMP\jre-6u2-windows-i586-p-iftw.exe"
   Delete /REBOOTOK "$TEMP\jre-6u2-windows-i586-p-iftw.exe"
   Goto FindJava
