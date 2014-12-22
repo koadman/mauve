@@ -21,7 +21,7 @@
 	<property name="deploy.address" value="darlini8@darlinglab.org" />
 	<property name="deploy.bareaddress" value="darlinglab.org" />
 	<property name="deploy.username" value="darlini8" />
-	<property name="deploy.win32.keyfile" value="C:\Documents and Settings\Administrator\My Documents\plonk.ppk" />
+	<property name="deploy.win32.keyfile" value="C:\Documents and Settings\koadman\plonk.ppk" />
 	<property name="deploy.serverdir" value="/home3/darlini8/www/mauve/downloads" />
 	<property name="key.alias" value="mauve" />
 	<property name="key.keystore" value="C:\Documents and Settings\koadman\My Documents\mauve-keystore" />
