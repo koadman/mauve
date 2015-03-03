@@ -265,7 +265,7 @@ public class ZoomHistogram implements Serializable {
 		// calculate the number of index levels
 		long level_one = seq_length / max_resolution;
 		long level_tmp = level_one;
-		levels = seq_length > min_index_values ? 1 : 0;
+		levels = seq_length > max_resolution ? 1 : 0;
 		while (level_tmp > min_index_values) {
 			level_tmp /= index_factor;
 			levels++;
