@@ -102,6 +102,7 @@ public class AlignFrame extends java.awt.Panel implements AlignmentProcessListen
 	    		return true;
 	    	}
 	    };
+	    fc.setMultiSelectionEnabled(true);
         this.mauve = mauve;
     }
     public void initComponents()
