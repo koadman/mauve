@@ -130,6 +130,7 @@ public class SnpExporter {
 		for (int i = 0; i < snps.length; i++){
 			output.write(snps[i].toString()+"\n");
 		}
+        output.flush(); // don't forget to flush!
 	}
 	
 	public static void exportGaps(XmfaViewerModel model, XMFAAlignment xmfa, BufferedWriter output) throws IOException {
@@ -139,6 +140,7 @@ public class SnpExporter {
 		for (Gap[] ar: gaps)
 			for (Gap g: ar)
 				output.write(g.toString()+"\n");
+        output.flush(); // don't forget to flush!
 	}
 	
 	public static SNP[] getSNPs(XmfaViewerModel model){
