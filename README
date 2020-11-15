@@ -1,5 +1,5 @@
 THIS FILE IS OUT OF DATE
-The current user guide resides online at http://gel.ahabs.wisc.edu/mauve/mauve-user-guide
+The current user guide resides online at darlinglab.org/mauve/user-guide/
 
 Mauve Overview
 ==============
@@ -60,4 +60,4 @@ You may need to adjust the java command line used by the script to execute Mauve
 
 Bugs
 =====
-Yes there are bugs.  Send reports to darling(at)cs.wisc.edu
+Yes there are bugs.  Send reports to aaron.darling(at)uts.edu.au
